@@ -1,0 +1,16 @@
+{
+  "name": "esquisse",
+  "owner": {
+    "name": "Esquisse contributors"
+  },
+  "description": "Claude-native distribution of the esquisse workflow",
+  "plugins": [
+    {
+      "name": "esq",
+      "version": "0.3.38",
+      "source": "./plugin",
+      "description": "A durable, evidence-driven workflow from ambiguity through planning, implementation, verification, and review",
+      "category": "productivity"
+    }
+  ]
+}

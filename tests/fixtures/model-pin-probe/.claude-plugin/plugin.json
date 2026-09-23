@@ -1,0 +1,8 @@
+{
+  "name": "model-pin-probe",
+  "description": "Throwaway fixture for scripts/probe-model-pins.mjs: two skills pinned haiku, used to measure which invocation paths honor a skill's model: pin. Not for installation.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Esquisse contributors"
+  }
+}

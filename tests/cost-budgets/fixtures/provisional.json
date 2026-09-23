@@ -1,0 +1,182 @@
+{
+ "files": [
+  "fixture"
+ ],
+ "window": {
+  "first": "2026-08-18T00:00:00.000Z",
+  "last": "2026-08-20T00:00:00.000Z"
+ },
+ "runs": 21,
+ "withoutUsage": 0,
+ "sampleThreshold": 5,
+ "byCommand": {
+  "esq:build": {
+   "runs": 3,
+   "provisional": true,
+   "tokens": {
+    "runs": 3,
+    "input": 1,
+    "output": 83556,
+    "cacheCreation": 0,
+    "cacheRead": 0,
+    "total": 83556,
+    "medianOutput": 27852
+   },
+   "toolCalls": {
+    "runs": 3,
+    "total": 30,
+    "median": 10
+   },
+   "durationMs": {
+    "runs": 3,
+    "total": 1258908,
+    "median": 419636
+   }
+  },
+  "esq:check": {
+   "runs": 3,
+   "provisional": true,
+   "tokens": {
+    "runs": 3,
+    "input": 1,
+    "output": 20223,
+    "cacheCreation": 0,
+    "cacheRead": 0,
+    "total": 20223,
+    "medianOutput": 6741
+   },
+   "toolCalls": {
+    "runs": 3,
+    "total": 30,
+    "median": 10
+   },
+   "durationMs": {
+    "runs": 3,
+    "total": 367788,
+    "median": 122596
+   }
+  },
+  "esq:fix": {
+   "runs": 3,
+   "provisional": true,
+   "tokens": {
+    "runs": 3,
+    "input": 1,
+    "output": 16488,
+    "cacheCreation": 0,
+    "cacheRead": 0,
+    "total": 16488,
+    "medianOutput": 5496
+   },
+   "toolCalls": {
+    "runs": 3,
+    "total": 30,
+    "median": 10
+   },
+   "durationMs": {
+    "runs": 3,
+    "total": 383988,
+    "median": 127996
+   }
+  },
+  "esq:review": {
+   "runs": 3,
+   "provisional": true,
+   "tokens": {
+    "runs": 3,
+    "input": 1,
+    "output": 40656,
+    "cacheCreation": 0,
+    "cacheRead": 0,
+    "total": 40656,
+    "medianOutput": 13552
+   },
+   "toolCalls": {
+    "runs": 3,
+    "total": 30,
+    "median": 10
+   },
+   "durationMs": {
+    "runs": 3,
+    "total": 612585,
+    "median": 204195
+   }
+  },
+  "esq:work": {
+   "runs": 3,
+   "provisional": true,
+   "tokens": {
+    "runs": 3,
+    "input": 1,
+    "output": 43206,
+    "cacheCreation": 0,
+    "cacheRead": 0,
+    "total": 43206,
+    "medianOutput": 14402
+   },
+   "toolCalls": {
+    "runs": 3,
+    "total": 30,
+    "median": 10
+   },
+   "durationMs": {
+    "runs": 3,
+    "total": 848040,
+    "median": 282680
+   }
+  },
+  "esq:roadmap": {
+   "runs": 3,
+   "provisional": true,
+   "tokens": {
+    "runs": 3,
+    "input": 1,
+    "output": 582,
+    "cacheCreation": 0,
+    "cacheRead": 0,
+    "total": 582,
+    "medianOutput": 194
+   },
+   "toolCalls": {
+    "runs": 3,
+    "total": 30,
+    "median": 10
+   },
+   "durationMs": {
+    "runs": 3,
+    "total": 16680,
+    "median": 5560
+   }
+  },
+  "unlabelled": {
+   "runs": 3,
+   "provisional": true,
+   "tokens": {
+    "runs": 3,
+    "input": 1,
+    "output": 354,
+    "cacheCreation": 0,
+    "cacheRead": 0,
+    "total": 354,
+    "medianOutput": 118
+   },
+   "toolCalls": {
+    "runs": 3,
+    "total": 30,
+    "median": 10
+   },
+   "durationMs": {
+    "runs": 3,
+    "total": 8784,
+    "median": 2928
+   }
+  }
+ },
+ "skipped": {
+  "historicalNoise": 0,
+  "malformed": 0,
+  "duplicates": 0,
+  "supersededFallbacks": 0,
+  "excluded": 0
+ }
+}
