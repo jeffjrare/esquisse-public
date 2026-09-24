@@ -1,82 +1,84 @@
 # Epic: esq decides implementation detail instead of asking
 
 <!-- Epic: a theme spanning multiple plans over time. Managed by /esq:epic. -->
-<!-- Join key: the slug below. It appears in BACKLOG.md's Epic column and as an -->
-<!-- **Epic:** <slug> line under the title of each plan that belongs to this epic. -->
+<!-- Join key: the slug below; used by BACKLOG.md Epic and plan **Epic:** headers. -->
 <!-- Slug: esq-decides-implementation-detail -->
 
 **Status:** Active
 **Started:** 2026-09-19
 
 ## Goal
-**esq's first objective is end-user value, shipped fast.** Everything else — assurance, ledgers,
-corrective loops — is instrumental and is judged by whether it moves that. Concretely: a run stops
-the user only for product, scope, architecture or UX authority, and the work between two of those
-stops keeps getting shorter rather than longer. Starting point; sharpen it as the plans land.
 
-Two measures, both stated by the user and neither instrumented today:
-- **Time to client value** — how long from a user-visible intent to the change being in their
-  hands. Not phases run, not commits, not checks green.
-- **Blocking rate** — how often a run hands back something the user did not need to decide.
-  The user's bar is absolute: *"si esq me fait bloquer, c'est mauvais"*.
+**esq's first objective is end-user value, shipped fast, with beautiful, thoughtful design.**
+Assurance, ledgers and corrective loops serve that result. A run asks only for missing user authority
+that materially changes the product, scope, major architecture, constraints or consequential cost/risk;
+implementation detail is delegated work. Keep total cost — tokens, calls, elapsed time, repeated work
+and interruptions — proportionate to the value shipped. Deterministic structure belongs in the CLI;
+judgment stays with the model, and guards must catch defects rather than police sentences.
+
+Preserve both user measures: **time to client value** and **blocking rate**. The user's bar remains
+*"si esq me fait bloquer, c'est mauvais"*. This reconciliation supplies no current quantitative outcome
+measurement; shipping a rule or passing a fixture is not proof of either improvement. Optional research
+and telemetry never become delivery gates.
 
 ## Scope
-- What a diagnosed stop does with its own diagnosis (the repair-attempt ceiling, resuming into a
-  known fix).
-- Whether esq holds a written, consultable standard for engineering/design defaults that a
-  🔴 can be arbitrated against before it reaches the user. Verified 2026-09-19: **no such referent
-  exists anywhere in `docs/` or `plugin/skills/`** — every implementation default is currently
-  either improvised per run or escalated to the user.
-- Whether role-scoped skills (front-end, back-end, design) reduce how often a run needs to guess
-  at implementation detail in the first place — the user's own hypothesis, weighed against the
-  standard-referent one rather than assumed.
-- **Whether the corrective loop is recursing instead of converging.** The user's words are
-  *"on s'enfonce, on overengineer, on perd de vue la priorité"*, and the specimen is a filename:
-  `…-fixes-2-fixes-fixes-2.brief.md` in a measured run is a fourth-generation corrective brief.
-  This repo runs depth 2 (`ask-only-missing-authority-fixes-fixes.md`,
-  `unclassifiable-do-never-handed-off-fixes-fixes.md`). Spend that goes into esq correcting esq is
-  the purest form of the failure this epic names, and it is not the same defect as a stop.
-- Out: this epic does not touch the ask rule's genuine-authority gate itself
-  (`D-a-question-needs-a-missing-authority`) — that gate is correct; the problem is what fires it
-  and what happens after it fires.
+
+- Apply a diagnosed in-scope fix rather than returning typing to the user, within the existing repair budget.
+- Arbitrate stated constraints before asking, using the shipped standards referent and project overrides.
+  The absence observed on 2026-09-19 is historical: `plugin/standards/STANDARDS.md`, `esq standards`,
+  consumers and `tests/cli/standards.test.mjs` now exist.
+- Make corrective work converge with a bounded, usable exit. A depth limit alone is insufficient:
+  B-179 still strands a safe plan/document correction when fix, another plan and abandonment all refuse.
+- Select specialist guidance from a concrete unmet front-end, back-end or design need. Standards Part 2
+  is deliberately empty; this does not justify a generic role framework, nor mean workers must ask whenever
+  no default is written. Use repository conventions and the existing mandate first.
+- Keep design quality observable, not merely asserted. B-076 is related delivery work, not evidence that
+  role skills C have shipped and not an automatic prerequisite for every autonomy change.
+- Out: weakening the genuine missing-authority rule, unbounded corrective generations, rewriting historical
+  verification to obtain a green gate, deployment, and mandatory research/telemetry campaigns.
 
 ## Order
-<!-- DURABLE — the user's call, 2026-09-19. Not generated; do not overwrite on refresh. -->
 
-Four levers, decided in this order by the user (product owner and architect):
+The user's 2026-09-19 order **A -> D -> B -> C**, with A and D in one original shipping unit, remains.
+The current queue repairs D's discovered gap before moving to C; it does not rebuild B or reverse that order.
 
-1. **A — the stop does the work.** A diagnosed failure that already names its exact fix applies it
-   instead of handing it back. The repair-attempt ceiling becomes a budget, not a wall. Touches
-   `build`, `fix`, `autopilot`, `advance` and the shared conclusion block. Closes the screenshot-2
-   and screenshot-3 specimens.
-2. **D — the corrective loop converges.** A bound on `-fixes-fixes` recursion depth, or a rule that
-   forces convergence. Nothing limits it today. **Shipped with A as one unit**: part of the depth
-   comes from A's stops handing back work that returns as a correction, so D alone would bound a
-   symptom whose source A removes.
-3. **B — a standards referent.** A durable document at `docs/SPEC.md` altitude for engineering and
-   design defaults, consulted *before* a 🔴 is raised. Closes the screenshot-1 specimen. Slower to
-   pay off — the standards have to be written before they can arbitrate anything.
-4. **C — role-scoped skills** (front-end, back-end, design). Additive and low-risk, done last so
-   A and B first reveal what a worker actually lacks rather than what we guess it lacks.
+1. **A — the stop does the work: delivered contract.** The 2026-09-19 plan replaced the single repair
+   ceiling with a budget of three edits for distinct causes. `build/SKILL.md` and
+   `build/references/failure-and-recovery.md` require applying an exact in-scope diagnosis while budget
+   remains. Do not read this as unlimited recovery or measured elimination of all interruptions.
+2. **D — the corrective loop converges: partial outcome.** `esq brief depth` and its consumers bound
+   generations at two. That mechanism shipped with A, but **B-179 remains Open**: fix cannot edit a plan
+   body, plan cannot open the exhausted generation, and `setAbandoned` refuses a completed plan.
+   Acceptance is a supported correction -> review -> land route with historical proof preserved.
+   B-180 precedes that correction in the roadmap because stale proof can hide a failed check; it is a
+   separate verification defect, not another epic lever or an invented hard dependency.
+3. **B — a standards referent: arbitration delivered.** The 2026-09-21 stem and both fixes plans are
+   complete. The plugin default, project precedence, `(hard)` limits, unreadable-referent behavior and
+   caller clauses exist. Tests cover filesystem resolution, including subdirectory invocation. Domain
+   defaults remain empty on purpose; do not equate this delivered mechanism with finished specialist competence.
+4. **C — specialist guidance: not implemented.** First select one observed need that A/B and repository
+   conventions do not settle. Add the smallest useful on-demand guidance/skill, with evidence of useful,
+   correct and well-designed output and a stated cost bound. If no need survives, leave this conditional;
+   closing or abandoning C later must record that evidence explicitly. No blanket abandonment in this pass.
 
 ## Plans
-<!-- GENERATED by /esq:epic — rebuilt by scanning docs/plans/ for **Epic:** esq-decides-implementation-detail. -->
-<!-- Do not hand-edit; your changes are overwritten on the next refresh. -->
-- docs/plans/2026-09-19-stop-applies-its-own-fix.md — A diagnosed stop applies its own fix, and the corrective loop converges — complete
+<!-- GENERATED from plans present in this public checkout. -->
+_No plans tag this epic in the public snapshot. Historical private plans are intentionally omitted; see [plan archive](../plans/README.md)._
 
 ## Backlog
-<!-- GENERATED by /esq:epic — rebuilt by scanning BACKLOG.md's Epic column. -->
-<!-- Do not hand-edit; your changes are overwritten on the next refresh. -->
-- B-169 — esq blocks on implementation-detail questions instead of deciding and shipping — Open
+<!-- GENERATED from BACKLOG.md Epic and Status cells; order shown follows the roadmap. -->
+- B-179 — Provide a bounded safe correction/disposition for a completed plan when corrective depth is exhausted — Open
+- B-169 — Autonomy epic: A and standards arbitration B delivered; finish D via B-179, then evidence-led specialist guidance C — Open
 
 ## Log
+
 - 2026-09-19 — Epic opened.
-- 2026-09-19 — Goal and Scope corrected after the user checked whether their framing had actually
-  landed. It had not, on three counts: the first objective is client value shipped fast (the Goal
-  was written in esq's internal vocabulary instead), the overengineering/recursion complaint was
-  missing entirely, and the velocity evidence in hand — 40 min, 9 commits, 2 of 6 phases, then a
-  stop for a fixture field — had not been recorded. The no-standard-referent claim was verified
-  rather than left asserted.
-- 2026-09-19 — Order decided by the user: A → D → B → C, with A and D as one shipping unit. See
-  `## Order`. The ordering itself was the epic's first judgment and is the user's to make; nothing
-  below that altitude was asked.
+- 2026-09-19 — Goal and Scope corrected after the user checked the framing: client value first;
+  overengineering/recursion retained; the 40 min, 9 commits, 2 of 6 phases stopped for a fixture edit
+  specimen recorded. The absent standards referent was verified at that date, before it shipped.
+- 2026-09-19 — User order recorded: A -> D -> B -> C, with A and D as one shipping unit.
+- 2026-09-24 — Reconciled against public snapshot d45188e and PRIORITY-REVIEW.md. Upstream history records four completed plans,
+  including the standards stem and its two corrections. They are not present in this snapshot; the generated Plans view correctly remains empty. A/B delivery is recognized;
+  D's mechanism does not settle B-179's missing exit. B-179 now carries this epic's join key.
+  B-169 stays Open and the epic Active because D/C outcomes remain. No corrective implementation,
+  new live model journey or claimed time/blocking-rate improvement accompanies this document update.
