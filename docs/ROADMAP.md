@@ -11,19 +11,13 @@ The sequence below is the execution proposal, not a claim that work has started.
 
 ## Now
 
-### bounded-correction-exit
-**covers:** B-179
-**why now:** Next because an exhausted corrective chain can strand a safe correction. This finishes the missing exit in B-169 lever D; it is a separate change from B-180, ordered after the B-180 correction now implemented and verified locally, rather than technically dependent on its patch.
-**acceptance:** Exercise a supported correction -> review -> land path without a third generation, abandoning a completed plan, or rewriting historical verification.
-**state:** <!-- GENERATED --> Open [hi]; conflicting fix/plan/abandon routes remain; no live journey claimed.
-
-## Next
-
 ### autonomy-remainder
 **covers:** B-169, epic:esq-decides-implementation-detail
-**why now:** Continue the user order A/D -> B -> C. A and standards arbitration B shipped; D has the earlier B-179 repair. For C, identify one concrete unmet specialist need before adding guidance or role skills, keeping beautiful design part of delivery.
+**why now:** Continue the user order A/D -> B -> C. A and standards arbitration B shipped; D now has the B-179 exit implemented and verified locally. For C, identify one concrete unmet specialist need before adding guidance or role skills, keeping beautiful design part of delivery.
 **acceptance:** A real selected case proceeds without an implementation-detail question, with evidence of correct behavior and design quality; guidance stays on demand and within a stated cost bound.
 **state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no tagged plans in this snapshot; upstream four-plan completion is historical context; domain defaults in standards Part 2 remain empty, C not implemented.
+
+## Next
 
 ### dependable-queue
 **covers:** B-129, B-079, B-172
@@ -99,8 +93,8 @@ The remaining ranked backlog work has no committed implementation position: B-01
 
 ## Shipped
 <!-- Implemented work, newest first, five retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-24 · bounded-correction-exit — B-179 (done locally; three real-Git scenarios and 7/7 product audit checks; no live model journey or release)
 - 2026-09-24 · verification-inputs — B-180 (done locally; eight regressions and 7/7 product audit checks; no release)
 - 2026-09-21 · standards-referent — lever B of B-169, including both corrective plans; arbitration delivered, epic still Active
 - 2026-09-21 · observation-path-before-manual — historical observation-path-before-manual-fixes, B-167 (done)
 - 2026-09-08 · telemetry-round-trips-part-two — B-071, B-044, B-072 (done)
-- 2026-09-07 · outcome-attribution-coverage — B-121 (done; historical instrument, not a current delivery gate)

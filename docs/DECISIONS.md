@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-bounded-correction-exit-preserves-proof | 2026-09-24 | func | corrective-loop | Exhaustion limits new plans; safe prospective fixes and explicit dispositions preserve proof and owe review | Active |
 | D-standards-resolves-or-refuses | 2026-09-21 | arch | standards | `esq standards` serves a partial referent with a finding, but refuses when neither file yields text | Active |
 | D-001 | 2026-06-19 | arch | esquisse | Phase grouping by file for DX improvements plan | Active |
 | D-002 | 2026-07-07 | arch | esquisse | Task backlog in docs/BACKLOG.md; DEFERRED.md folded in | Active |
@@ -5346,3 +5347,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: the property holds rather than the check passing. Accepted: the phase's recorded proof is weaker than its result — the step attests to less than was actually fixed, and nothing mechanical will notice if the next wrapped claim is missed.
 **Conséquences:** The phase's `(auto)` step stays as the plan wrote it — it is the durable guard's job to catch a reintroduction, not this step's — and the gap is named in the log so `/esq:check` reads the sweep's completeness against the property rather than against the grep. This is the wrapping half of the defect class Phase 3 writes into `/esq:plan`, whose clause as planned covers only the ambient-tool half.
 **Alternatives rejetées:** Leaving the wrapped occurrences for `/esq:check` — it defers a correction already in hand to a paid subagent round, and the plan's own `high` uncertainty axis is bought for claims phrased differently, not for ones the phase read and declined to fix. Rewriting the step to a wrap-insensitive command — an `(auto)` step is a check on a property, not the guard that holds it, and widening it here would substitute a different check for the one the plan named.
+
+## D-bounded-correction-exit-preserves-proof — A bounded exit preserves intent and historical evidence
+
+**Date:** 2026-09-24
+**Scope:** func
+**Topic:** corrective-loop
+**Statut:** Active
+**Fondement:** user — implement B-179 after B-180, providing a usable exhausted-loop exit without a new generation or rewriting historical evidence, preserving ESQ's first principles.
+
+**Contexte:** `fix` forbade plan-body edits; `plan` refused a third generation; the proposed abandon route refused completed plans. Filing remaining findings as Open also left landing blocked. Review excluded all plan paths, so merely allowing the edit would hide it from review.
+**Décision:** Safe corrections can amend a prospective plan/document while preserving the intended property, branch/origin, phase identities and historical log. A dated amendment explains the correction; new verification is executed once and appended through the existing writer. Depth does not force a user question for a safe fix. Named findings explicitly accepted by the user can be disposed through `fix --accept B-IDs`, recorded as Dropped with reason/resolution and retired from the brief; debt acceptance neither claims delivery nor waives a verification. Every cleared brief hands back to review, and all normal landing obligations remain.
+**Raison:** The model judges safety and authority; existing CLI writers retain structure. Review now includes changed prospective plan contracts and invalidates prior coverage for them, while proof-only appends remain bookkeeping.
+**Tradeoff:** Review pays two Git object reads per changed plan, plus a changed-path query. No new CLI verb, status, plan generation, mandatory model run or prose guard is introduced. A genuinely changed scope or failed same-cause correction is not promoted to safe to escape the bound.
+**Conséquences:** This replaces only the exhausted-exit option set of D-corrective-generations-bounded-at-two and the carriers described by D-one-shared-block-carries-the-corrective-refusal; their historical reasoning and the two-generation bound remain. Completed-plan abandonment remains refused. D-a-phase-buys-each-proof-once still prohibits rewriting obligations merely to obtain reuse.
+**Validation:** `tests/cli/corrective-exit.test.mjs` exercises completed depth-two units through correction, append-only proof, delta review and local merge, with both changed and unchanged command strings. A separate disposition case keeps a failing verification visible. These are real-Git deterministic scenarios, not live model journeys.

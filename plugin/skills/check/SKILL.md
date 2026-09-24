@@ -212,18 +212,16 @@ Compute **→ Next** as one of — always with the concrete path (`<brief-path>`
 **Then bound the loop before that line is written.** The corrective brief below is written either way — the findings are the record and are never lost — but the `→ Next` above may not open a round this unit has run out of.
 
 <!-- shared:corrective-bound:start -->
-**Two corrective generations, and the third is not yours to open.** Before anything opens another corrective round, run `esq brief depth <brief-path>` and route off its `verdict` alone — never off the filename, and never off a generation you counted yourself. `open` changes nothing. `exhausted` means this unit has already been corrected twice, and what is left is a budget call only the user holds — so hand back this 🔴, a decision in this exact shape, and nothing else:
+**Two corrective plan generations.** Run `esq brief depth <brief-path>` before offering another plan; route off `verdict`, never count suffixes. `open` changes nothing. At `exhausted`, create no third-generation plan and offer no generic abandon/re-plan escape:
 
-> **🔴 Third corrective round on `<stem>` — accept it or re-plan it**
-> - **Why yours:** two corrective rounds have already landed on this unit, and whether to keep spending on it is an authorization only you hold.
-> - **A · accept what stands** — the 🟢 items are applied and every finding left becomes a recorded backlog row, so the unit lands with its debt written down — do: `/esq:fix <brief-path>`
-> - **B · abandon and re-plan the stem** — this unit's unbuilt plans are retired and the work is planned again from `<stem>`, at the price of a fresh planning pass — do: `esq plan abandon <plan-path> --reason "third corrective round refused"`, then `/esq:plan <stem>`
-> - **Leaning:** **A** — the debt is recorded either way, and a third round costs more than it retires.
+- Subject to unresolved 🔴 precedence, remaining 🟢 items → `/esq:fix <brief-path>`, then `/esq:review <resolved-plan>`. A bounded safe correction, including a prospective plan/document correction, consumes no new plan generation and needs no extra budget decision. Fix revalidates safety; neither an empty brief nor a recorded backlog row promises landing.
+- Remaining 🟡/🔴 items → state the concrete unresolved outcome and the authority it needs. A failed check or missing proof is a diagnosis to investigate, not permission to weaken acceptance. Where accepting named debt is a real user tradeoff, offer `/esq:fix <brief-path> --accept <B-IDs>` only for existing rows matched to those findings, explaining what will stay unfixed. That choice records `Dropped`, never `Done`; it is not authorized by depth alone. Otherwise ask the actual scope/constraint decision, without promising an executable third plan.
+- Never abandon a completed plan. `esq plan abandon` applies only to an explicitly selected unfinished plan when the user has decided not to build it; it does not dispose of findings or backlog promises.
 
-No finding is lost to this refusal: the corrective brief stays on disk, so `unit.findings` keeps the landing blocked until option A's `do:` disposes of it.
+Preserve every unresolved finding in the brief. A remaining item still blocks landing until its correction or explicitly authorized disposition is recorded; a clean review and the normal landing gates remain owed.
 <!-- shared:corrective-bound:end -->
 
-At `exhausted` that 🔴 **is** the `→ Next`: it replaces the line computed above, and neither `/esq:fix <brief-path>` followed by a corrective plan nor `/esq:converge` is offered beside it.
+At `exhausted`, the applicable route above replaces the normal `→ Next`; do not offer a corrective plan or another converge cycle beside it.
 
 Offer `/esq:converge` on the 🟢 branch **only** — on a 🔴 it stops on the red you just reported, on a 🟡-only brief it has nothing to apply, and on an all-clear brief it has no fixes to apply; hand off to review directly.
 

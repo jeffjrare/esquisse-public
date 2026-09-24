@@ -10,6 +10,8 @@ Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first p
 
 Produce a compact, one-screen workflow snapshot. **Read-only:** no plan mode, file writes, code changes, commits or execution of recommended actions.
 
+Before recommending `/esq:plan` for a corrective brief, ask `esq brief depth <brief>`. At `exhausted`, route remaining 🟢 to `/esq:fix <brief>` followed by review; remaining 🟡/🔴 need their actual scope/constraint or explicitly accepted debt disposition, never a third corrective plan. `/esq:fix <brief> --accept <B-IDs>` can record the user's acceptance of matched findings; merely filing Open rows cannot clear landing. Never recommend abandoning a completed plan.
+
 ## CLI and read budget
 
 <!-- shared:resolve-cli:start -->

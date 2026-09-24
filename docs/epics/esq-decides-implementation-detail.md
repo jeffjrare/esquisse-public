@@ -28,7 +28,8 @@ and telemetry never become delivery gates.
   The absence observed on 2026-09-19 is historical: `plugin/standards/STANDARDS.md`, `esq standards`,
   consumers and `tests/cli/standards.test.mjs` now exist.
 - Make corrective work converge with a bounded, usable exit. A depth limit alone is insufficient:
-  B-179 still strands a safe plan/document correction when fix, another plan and abandonment all refuse.
+  B-179 now supports safe prospective corrections and explicit dispositions through fix -> review -> land,
+  preserving historical proofs and the two-generation bound.
 - Select specialist guidance from a concrete unmet front-end, back-end or design need. Standards Part 2
   is deliberately empty; this does not justify a generic role framework, nor mean workers must ask whenever
   no default is written. Use repository conventions and the existing mandate first.
@@ -40,18 +41,17 @@ and telemetry never become delivery gates.
 ## Order
 
 The user's 2026-09-19 order **A -> D -> B -> C**, with A and D in one original shipping unit, remains.
-The current queue repairs D's discovered gap before moving to C; it does not rebuild B or reverse that order.
+The current queue has repaired D's discovered gap and now moves to C; it does not rebuild B or reverse that order.
 
 1. **A — the stop does the work: delivered contract.** The 2026-09-19 plan replaced the single repair
    ceiling with a budget of three edits for distinct causes. `build/SKILL.md` and
    `build/references/failure-and-recovery.md` require applying an exact in-scope diagnosis while budget
    remains. Do not read this as unlimited recovery or measured elimination of all interruptions.
-2. **D — the corrective loop converges: partial outcome.** `esq brief depth` and its consumers bound
-   generations at two. That mechanism shipped with A, but **B-179 remains Open**: fix cannot edit a plan
-   body, plan cannot open the exhausted generation, and `setAbandoned` refuses a completed plan.
-   Acceptance is a supported correction -> review -> land route with historical proof preserved.
-   B-180 was corrected and verified locally before that correction because stale proof could hide a failed check; it is a
-   separate verification defect, not another epic lever or an invented hard dependency.
+2. **D — the corrective loop converges: supported exit delivered locally.** `esq brief depth` still bounds
+   plan generations at two. B-179 is Done: safe prospective corrections and explicit dispositions pass
+   through fix -> review -> land while preserving historical proof. Three real-Git scenarios verify
+   the deterministic path; no live model journey or measured improvement is claimed.
+   B-180 was corrected first because stale proof could hide a failed check; it remains a separate defect.
 3. **B — a standards referent: arbitration delivered.** The 2026-09-21 stem and both fixes plans are
    complete. The plugin default, project precedence, `(hard)` limits, unreadable-referent behavior and
    caller clauses exist. Tests cover filesystem resolution, including subdirectory invocation. Domain
@@ -67,7 +67,7 @@ _No plans tag this epic in the public snapshot. Historical private plans are int
 
 ## Backlog
 <!-- GENERATED from BACKLOG.md Epic and Status cells; order shown follows the roadmap. -->
-- B-179 — Provide a bounded safe correction/disposition for a completed plan when corrective depth is exhausted — Open
+- B-179 — Provide a bounded safe correction/disposition for a completed plan when corrective depth is exhausted — Done
 - B-169 — Autonomy epic: A and standards arbitration B delivered; finish D via B-179, then evidence-led specialist guidance C — Open
 
 ## Log
@@ -85,3 +85,7 @@ _No plans tag this epic in the public snapshot. Historical private plans are int
 
 - 2026-09-24 — B-180 implemented and verified in the public repository (7/7 product audit checks).
   This strengthens verification without closing B-169; B-179 is now the next delivery task.
+
+- 2026-09-24 — B-179 implemented locally: three real-Git correction/disposition scenarios and 7/7 product audit checks.
+  D now has its supported exit; no live model journey or measured blocking-rate gain is claimed.
+  B-169 remains Open and the epic Active for the conditional specialist-guidance outcome C.

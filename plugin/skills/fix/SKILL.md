@@ -1,7 +1,7 @@
 ---
 description: Apply the safe corrections from a fixes brief — commit and verify the green items, escalate the rest.
 name: fix
-argument-hint: "[target] [options]"
+argument-hint: "[target] [--accept B-NNN,...]"
 model: opus
 effort: medium
 ---
@@ -52,7 +52,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    - If the user provided a path, use it.
    - Else, use the most recently modified `*-fixes.brief.md` in `docs/plans/`.
    - If none exists, STOP. Tell the user: "No fixes brief found. Run `/esq:check` or `/esq:review` first — they produce the corrective brief I act on." (If the user instead described fixes inline, triage those into the three tiers yourself and treat the 🟢 set as the work — but the brief is the normal path.)
-2. Read the corrective brief in full. **Keep what `esq brief plan` answered** — `plan`, `range` and
+2. Read the corrective brief in full. Run `esq brief depth <brief-path>` and keep its verdict for every remaining-item handoff. **Keep what `esq brief plan` answered** — `plan`, `range` and
    `finder`. `→ Next` needs them on a route where the brief has been deleted by then, and none of the
    three is re-read.
 3. Read `CLAUDE.md` at project root if present, and — **when `plan` is a path**, in this same batch —
@@ -71,7 +71,9 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
    This is the free moment to be redirected — the target is on screen before anything has been spent on it.
 
-If the brief has zero 🟢 items, there's nothing to apply. Report the 🟡/🔴 items, point the user at `/esq:plan` (for 🟡) and surface the 🔴, and stop. Don't manufacture work.
+Before counting greens, a legacy 🟡 whose sole recorded reason is the former prohibition on plan-body edits may enter the safe pass only after every check in "Re-validate before you touch anything" succeeds. Report that narrow reclassification; an ambiguous reason, changed outcome or failed verification stays 🟡. This is the only upward reclassification allowed.
+
+If the brief has zero 🟢 items and no explicitly authorized `--accept` disposition, apply nothing and use the depth-aware remaining-item handoff below. Do not send an exhausted brief back to `/esq:plan`.
 
 <!-- shared:unattended-tasks:start -->
 **Unattended runs make no `TaskCreate`, `TaskUpdate` or `TaskList` calls anywhere in this procedure.** Attended runs use the available task tools for progress as described below.
@@ -110,6 +112,16 @@ A 🟢 tag is check/review's judgment, made without editing. Before applying eac
 
 If any of 1–3 fails — the fix turns out to be substantive, ambiguous, or its blast radius is larger than the brief assumed — **downgrade it to 🟡** and do not apply it. Note the downgrade and why — escalating a borderline item beats applying a fix you're unsure of.
 
+## Safe plan and document corrections
+
+A 🟢 may correct a document or the prospective part of an existing plan, including a completed plan. Use the same safety/verification bar as code. Editing a plan is not itself a reason to downgrade; a changed product outcome, scope, architecture choice or weakened acceptance still is.
+
+For a plan correction, keep the original text in memory and change only above `## Execution log`. Preserve `Branch`, `Origin`, phase identities, completion state and all historical log/proof bytes. Add a dated amendment beside the changed obligation naming the finding, old and new reference/wording, and why the same intended property is preserved. Never remove a required check, narrow its property, add a reads declaration merely to obtain reuse, or rewrite a historical PASS. Git retains the old prospective contract.
+
+Use the corrected plan's exact `(auto)` step for the recording decision, not the preflight copy of a step you just changed. Stage → capture tree → run once → judge the full corrected criterion → commit → `record-verification`. This appends new evidence; it never transfers an old PASS to a new command or criterion. Other affected obligations remain for `gate verify --unit` to assess normally. If the plan lacks an execution entry, record nothing and report that limitation.
+
+At exhausted depth, one attempt per 🟢 in this invocation; a failed or repeated same-cause correction becomes an unresolved item, never another automatic fix/converge cycle. Re-review checks the correction and its preserved intent.
+
 ## Apply the green items
 
 Announce: "Applying N safe fixes from <brief> — at most one commit each, M items escalated untouched."
@@ -121,7 +133,7 @@ Green items are independent corrections, so this loop is **resilient, not halt-o
 1. **Announce + start:** "Fixing: <description>". `TaskUpdate` → `in_progress`.
 2. **Read first, edit second.** View the lines before changing them.
 3. **Apply the fix.** Stay within CONVENTIONS.md. Make the smallest change that resolves the finding — no scope creep, no opportunistic refactors.
-4. **Pick the path before you verify, never after.** A recording item stages before it runs, so this choice cannot wait for the result without buying a second execution. If the item's verification **is** one of the plan's `(auto)` steps you kept in preflight — the same step, not a narrower command and not a substitute — it is a **recording item**, and its order is fixed: **stage → `git write-tree` → one verification run → judge the criterion → commit the fix → record and commit the proof**, exactly as "Record the proof you earned" below spells it out. Otherwise it is an ordinary item: verify here, then stage and commit.
+4. **Pick the path before you verify, never after.** A recording item stages before it runs, so this choice cannot wait for the result without buying a second execution. If the item's verification **is** one of the plan's current `(auto)` steps (use the corrected step after a prospective amendment) — the same step, not a narrower command and not a substitute — it is a **recording item**, and its order is fixed: **stage → `git write-tree` → one verification run → judge the criterion → commit the fix → record and commit the proof**, exactly as "Record the proof you earned" below spells it out. Otherwise it is an ordinary item: verify here, then stage and commit.
 5. **Verify before committing — once.** Run the item's verification (or the project test command for the touched area). On a recording item that single run is step 3 of "Record the proof you earned", staged and executed there; nothing re-runs it here or below.
    - **Passes** → commit atomically. Conventional-commit format (`fix(scope): subject`, imperative, lowercase, ≤72 chars; body explains why if non-obvious). Stage only the files for this fix — on a recording item they are staged already, and the commit is the head of the chained call that section prescribes. Report: "Fixed (<short-hash>): <one line>." `TaskUpdate` → `completed`.
    - **Fails, or no verification possible** → do NOT commit. Discard this item's edits with `git restore --staged --worktree <the touched files>` — never a bare `git restore` or `git checkout --`, which restore the worktree *from the index*: a recording item staged its files before it verified, so restoring from the index leaves the red change staged for the next item's commit to carry and for the next recording item's `git write-tree` to certify. Downgrade the item to 🟡 with the reason ("verification failed: <what you saw>" or "no runnable verification"). `TaskUpdate` → `failed`. **Continue to the next item** — one failure does not stop the run.
@@ -129,7 +141,7 @@ Green items are independent corrections, so this loop is **resilient, not halt-o
 
 ### Record the proof you earned
 
-**You verify before every commit and, unless you record it, that result dies with the commit that staled it.** The only provenance `esq gate verify` can read is the `**Verified:**` block `/esq:build` wrote for the phase, and your fix commit moves `HEAD` past it — so the landing gate re-runs a command this shipping unit has already proved green on the exact tree it is landing. Recording what you actually proved is what stops that, and it is the one thing this command writes into the plan file.
+**You verify before every commit and, unless you record it, that result dies with the commit that staled it.** The only provenance `esq gate verify` can read is the `**Verified:**` block `/esq:build` wrote for the phase, and your fix commit moves `HEAD` past it — so the landing gate re-runs a command this shipping unit has already proved green on the exact tree it is landing. Recording what you actually proved is what stops that, and it appends evidence separately from any prospective correction.
 
 **Only a step the plan itself writes, run verbatim, and only when its criterion was met in full.** This is the recording path the loop's step 4 selects, and it carries the item's **one** verification run — it never asks for a second. On a recording item, in this order, with the fix commit and everything after it in one chained call:
 
@@ -155,13 +167,19 @@ Green items are independent corrections, so this loop is **resilient, not halt-o
 
 **Route off the verb's exit code, never off its prose.** `refuse: true` and exit 1 is the refusal; anything else is a failure of the chain, which is the third issue above.
 
+## Explicitly accepted findings
+
+`--accept B-NNN,...` is a disposition of the named findings, not a request to implement their 🟡/🔴 changes. Honor it only when the invoking user or a recorded user choice explicitly accepts those exact outcomes staying unfixed. Depth, a recommendation, or a worker's own command is not authority.
+
+Match each ID to an existing backlog row and a remaining brief item. Missing, ambiguous or unauthorized IDs stay untouched; report the precise mismatch. Keep the matched row read for the bookkeeping tail; do not buy a second ledger read. For each authorized match, call `esq backlog set-status <ID> Dropped --reason <user authority and accepted consequence> --resolution <what remains unfixed>`. Never mark accepted debt Done, alter a verification obligation, or suppress a failing check. Only a successful disposition permits removing that item from the brief in the normal bookkeeping tail. Preserve its original text in Git and its consequence in the row. Keep unrelated findings and promises open. A disposition-only run still hands back to review and can still fail the normal landing gate.
+
 ## Update the corrective brief
 
 After the green pass, rewrite the corrective brief to reflect reality:
 
 1. Remove the 🟢 items you successfully fixed (they're done — the commits are the record) and the ones you dropped as polish (they're closed too — the reason is in your report).
 2. Keep any 🟢 items you downgraded, now listed under 🟡 with the downgrade reason.
-3. Keep all original 🟡 and 🔴 items untouched.
+3. Keep original 🟡 and 🔴 items unless their exact `--accept` disposition succeeded above. Do not re-escalate or recreate a disposed item.
    - Preserve the brief's header lines (`Source:`, `Reviewed at:`) verbatim — `/esq:review` uses the `Reviewed at:` stamp to scope delta re-reviews.
 4. If nothing remains (all greens fixed, no ambers or reds), delete the brief instead of leaving an empty file. You already hold its `Source:` and its resolved plan path from preflight step 2 — do not go looking for either after this.
 5. Stage it and hold: `git add <brief>` — or `git rm <brief>` if you deleted it — and do not commit yet. The escalation rows below are the other half of this same pass over this same brief, and `/esq:fix` owns both files at this moment, so its whole tail is **one** commit, made at the end of "Escalate to the backlog".
@@ -204,7 +222,7 @@ A detail section is a heading and prose (`What` / `Why it matters` / `Notes`) �
 3. Number each row from `esq backlog reserve-id`.
 4. **Commit the tail once, naming both halves:** `git add docs/BACKLOG.md && git commit -m "brief(fixes): update <slug> + escalate 🟡/🔴 items"`, over the brief staged above and these rows together. Reverting the escalation alone would restore rows for items whose brief already says they are escalated; reverting the brief alone would leave the ledger claiming items the brief still lists.
 
-**If all items were fixed** (brief deleted, nothing remains): there is nothing to escalate, so the tail is the staged brief deletion alone — `git commit -m "brief(fixes): clear <slug>, all fixes applied"`. Write no backlog row.
+**If nothing remains** (brief deleted): create no escalation row. Stage `docs/BACKLOG.md` too when a named disposition changed it, then commit the deletion and dispositions together. Use `brief(fixes): clear <slug>` and report fixed versus accepted counts separately; accepted debt was not fixed. With no ledger change, commit only the staged brief deletion.
 
 **If BACKLOG.md doesn't exist yet**, create it from the template in `/esq:backlog` — the header comments, the `ID | Date | Type | Pri | Summary | Source | Epic | Version | Status` table, and the `---` separator above the detail sections. The schema lives there and nowhere else. The status vocabulary is closed, so that header carries this line verbatim:
 
@@ -224,7 +242,7 @@ Run this after the escalation step, and **only for 🟢 items you actually appli
 
 ## Handing back a 🔴
 
-You never resolve a 🔴 — but you are the last agent to read both the brief and the code before the user does, so you are the one who makes sure the decision reaches them usable.
+You never choose a 🔴; an explicitly authorized `--accept` records a choice already made. For unresolved reds, you are the last agent to read both the brief and the code before the user does, so you are the one who makes sure the decision reaches them usable.
 
 <!-- decision-block:start -->
 **Every 🔴 is a user-owned decision with two or three distinct options:**
@@ -279,7 +297,8 @@ Every zone-3 line but `fixed` and `repo` disappears when it has nothing; none of
 
 `→ Next`, first match wins. **Every branch names a target its command actually accepts** — `plan` when
 `esq brief plan` answered one, `range` when it answered that instead:
-- 🟡 remain, **plan target** → `/clear` then `/esq:plan <brief-path>` (it picks up the updated brief and checks the backlog), then `/esq:build`.
+- 🟡/🔴 remain, **exhausted plan target** → name the unresolved outcome and the actual scope/constraint or debt-acceptance decision; never recommend another corrective plan or repeat the failed fix automatically. An acceptance option names only matched existing IDs: `/esq:fix <brief-path> --accept <B-IDs>`. No landing promise.
+- 🟡 remain, **open plan target** → `/clear` then `/esq:plan <brief-path>` (it picks up the updated brief and checks the backlog), then `/esq:build`.
 - 🟡 remain, **plan-less target** → `/clear` then `/esq:plan <a sentence naming the work>`, with the finding quoted. There is no plan for `/esq:plan` to correct, so hand it the work rather than a brief it would resolve to nothing.
 - Only 🔴 remain → `<N> decision(s) above — run the `do:` of the option you pick, then /esq:review <target>`. Never "answer the open questions": the options are already written above. `<target>` is the plan path on a plan target; on a plan-less one it is `<base>..HEAD`, written with the literal word `HEAD` and followed by *after running the action you picked* — git resolves it at review time, so the range contains whatever that action committed. Never the range you were given, which predates it.
 - Nothing remains, `finder` is `review`, **plan target** → **the fixes are resolved and independent review is next, on the plan this run already resolved** — `/clear`, then `/esq:review <that plan path>`. A review's verdict is what these fixes invalidated, so a review re-establishes it: **an empty brief is not a verdict, and the unit is not clean, not covered and not ready to land because you emptied one.**
@@ -296,10 +315,10 @@ If you hit something that isn't a per-item failure — the brief references file
 
 ## Constraints
 
-- Apply 🟢 items ONLY. Never apply a 🟡 or 🔴, and never reclassify upward (no promoting your own fix to "safe").
+- Implement 🟢 items ONLY. Explicit `--accept` records a disposition, never implements a 🟡 or 🔴, and allows no upward reclassification except the legacy writer-prohibition case in preflight.
 - **no subagents** — this command is the executor of a triage someone else already did; `/esq:converge` buys agents, and it buys this one as a subagent rather than the other way round.
 - Every applied fix gets its own atomic commit, verified before commit. No unverified commits — if you can't verify, escalate instead.
-- The only non-code files you touch are the corrective brief (update or delete) and `docs/BACKLOG.md` — escalations, and closing a row whose whole outcome a verified fix delivered. Never drop a row, and never close one whose outcome is only partly delivered. Don't edit the plan file, don't edit the execution log — **except the one `esq plan record-verification` call in "Record the proof you earned", which appends a provenance block below `## Execution log` and never edits an entry.** No other write to a plan file is yours, and a historical PASS is never amended.
+- Code and document corrections must be named 🟢 items; parsed ledger changes use their existing CLI writers. Prospective plan edits follow "Safe plan and document corrections"; the sole execution-log write remains `esq plan record-verification`. Historical entries and PASS records are never edited. The brief/backlog tail records verified fixes and explicitly accepted findings only; never delete a backlog row or close a partly delivered outcome as Done.
 - Make the minimal change per finding. No refactors, no cleanups the brief didn't sanction, no scope creep.
 - Honest reporting only. "Applied, verified" must mean you ran the verification and saw it pass. If you escalated something, say so plainly.
 - Resilient run: a failed item is downgraded and the run continues; it does not abort the whole pass.

@@ -166,7 +166,7 @@ contributor rules that apply this philosophy to changes in esq itself.
 | `/esq:plan <brief-or-task>` | Design the work and its verifiable phases | A plan committed on its shipping branch |
 | `/esq:build <plan>` | Implement and verify one phase, then stop | Task commits and an execution-log entry |
 | `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, correctness, security, UX and design | Review findings; a corrective brief when needed |
-| `/esq:fix <fixes-brief>` | Apply mechanical 🟢 fixes and route the rest | Verified fix commits and updated findings |
+| `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings |
 | `/esq:land <plan>` | Verify readiness and merge the unit into its recorded origin | A local merge or an explained refusal; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
 | `/esq:work [item-or-text] [route]` | Investigate one item; execute it if trivial, otherwise recommend its method | Capture if needed; code commit and backlog close for inline work |
@@ -188,6 +188,8 @@ These commands run in your project. They are not this repository's development
 audit scripts. In every example, use the actual paths reported by the preceding
 command. `review` and `check` require an explicit target and ask for one when
 omitted.
+
+The two-generation corrective bound limits new plans. Safe document or prospective plan corrections can still pass through `fix` → `review` → `land`, with historical execution evidence preserved and new proof appended. `fix --accept B-NNN,...` records only the user's explicit acceptance of those findings as `Dropped`, with what remains unfixed; it neither certifies delivery nor bypasses verification.
 
 ## Sessions and models
 

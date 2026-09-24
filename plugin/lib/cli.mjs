@@ -2725,6 +2725,20 @@ function provenanceHarmless(changed) {
   return PROVENANCE_HARMLESS.has(changed) || (changed.startsWith('docs/plans/') && changed.endsWith('.md'));
 }
 
+// Plans are bookkeeping for projections, but their prospective contracts are reviewable work.
+// Share the verification gate's boundary: log appends and the two lifecycle headers are harmless.
+function changedPlanContracts(repository, base, head = 'HEAD') {
+  const names = gitTry(repository, ['diff', '--name-only', '-z', '--no-renames', base, head, '--', 'docs/plans']);
+  if (names === null) return null;
+  return names.split('\0').flatMap((file) => {
+    if (!file.endsWith('.md') || /(?:\.brief|\.log)\.md$/.test(file) || path.basename(file) === 'README.md') return [];
+    const before = gitTry(repository, ['show', `${base}:${file}`]);
+    const after = gitTry(repository, ['show', `${head}:${file}`]);
+    return before === null || after === null || planSection(before) !== planSection(after)
+      ? [{ path: file, status: after === null ? 'D' : before === null ? 'A' : 'M' }] : [];
+  });
+}
+
 // `{ ok: true, changed }` — the paths outside the harmless list since `at` — or `{ ok: false, reason }`
 // when nothing can be proved. A short hash, a ref name, a commit this repository does not hold, or a
 // git that will not answer each fail to prove, and never read as fresh.
@@ -2822,6 +2836,9 @@ function reviewCoverage(repository, text) {
   if (!at) return { ...coverage, reason: 'the plan records no **Reviewed at:** — no clean review or converge completion has covered it' };
   const since = provenSince(repository, at);
   if (!since.ok) return { ...coverage, reason: `**Reviewed at:** ${since.reason}` };
+  const contracts = changedPlanContracts(repository, at);
+  if (contracts === null) return { ...coverage, reason: 'git could not compare prospective plan contracts' };
+  since.changed.push(...contracts.map((entry) => entry.path));
   if (since.changed.length > 0) {
     return { ...coverage, verdict: 'stale', changed: since.changed, reason: `${since.changed.length} path(s) changed since the review at ${at.slice(0, 7)} — ${since.changed.slice(0, 5).join(', ')}${since.changed.length > 5 ? ', …' : ''}` };
   }
@@ -3035,9 +3052,8 @@ export async function setAbandoned(root, planPath, rawReason) {
 // to `docs(`.
 const REVIEW_METADATA_SUBJECTS = ['plan:', 'plan(', 'brief', 'backlog:', 'decisions:', 'epic:', 'roadmap:', 'spec:', 'merge:', 'docs(claude):', 'docs(arch):'];
 
-// The three paths a review never reads: its own plan and brief output, and the two ledgers whose rows
-// are bookkeeping about the change rather than the change. Spelled as git pathspecs because they are
-// handed to git and printed back in the `diff` command the caller runs.
+// Exclude bookkeeping from the main diff. Changed prospective plan contracts are added separately
+// by reviewRangeFacts; briefs and historical proof appends alone still cost no review.
 const REVIEW_EXCLUDED = [':!docs/plans', ':!docs/BACKLOG.md', ':!docs/DECISIONS.md'];
 
 // A corrective brief's own header, and the comma is load-bearing: it ends the slug, so a
@@ -3282,17 +3298,21 @@ function reviewRangeFacts(repository, base, head, answer) {
     return { ...answer, base, reason: `git could not diff ${base.slice(0, 7)} against ${head.slice(0, 7)} — review the whole change and say so`, mode: 'unresolved' };
   }
   const pathspec = ['.', ...REVIEW_EXCLUDED.map(shellQuote)].join(' ');
+  const contracts = changedPlanContracts(repository, base, head);
+  if (contracts === null) return { ...answer, base, mode: 'unresolved', reason: 'git could not compare prospective plan contracts' };
+  const contractDiff = contracts.length === 0 ? ''
+    : ` && git diff ${base} ${head} -- ${contracts.map(({ path: file }) => shellQuote(`:(literal)${file}`)).join(' ')}`;
+
   return {
     ...answer,
     base,
     head,
     commits,
     excluded: listed.length - commits.length,
-    // The commit filter decides this and never the path list: a spec or architecture refresh changes
-    // files a review never reads, under a subject the filter drops.
-    bookkeepingOnly: commits.length === 0,
-    paths: reviewPaths(changed),
-    diff: `git diff ${base} ${head} -- ${pathspec}`,
+    // Metadata subjects cannot hide a changed plan contract; log-only bookkeeping stays cheap.
+    bookkeepingOnly: commits.length === 0 && contracts.length === 0,
+    paths: [...reviewPaths(changed), ...contracts],
+    diff: `git diff ${base} ${head} -- ${pathspec}${contractDiff}`,
   };
 }
 

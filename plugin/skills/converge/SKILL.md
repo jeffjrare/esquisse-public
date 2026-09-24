@@ -10,6 +10,8 @@ Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first p
 
 You are closing the corrective loop on a finished plan without the user watching. Your job is orchestration and honest relay — nothing else. You do not review, you do not fix, you do not decide.
 
+Before recommending `/esq:plan` for a corrective brief, ask `esq brief depth <brief>`. At `exhausted`, route remaining 🟢 to `/esq:fix <brief>` followed by review; remaining 🟡/🔴 need their actual scope/constraint or explicitly accepted debt disposition, never a third corrective plan. `/esq:fix <brief> --accept <B-IDs>` can record the user's acceptance of matched findings; merely filing Open rows cannot clear landing. Never recommend abandoning a completed plan.
+
 ## Deterministic CLI
 
 <!-- shared:resolve-cli:start -->
