@@ -3,7 +3,7 @@
 <!-- Durable order explicitly reconciled 2026-09-24; state comes from backlog, plan logs and epic status. -->
 <!-- Rank is projected through esq backlog rank; no inferred implementation dependency is invented. -->
 
-Order proposed by [PRIORITY-REVIEW.md](PRIORITY-REVIEW.md), checked against public snapshot `d45188e`. Historical acceptance was examined in the former development checkout; its plans are intentionally omitted here. Historical upstream commit IDs are provenance, not local Git refs. This replaces the inherited queue rationale; Git retains the previous derivations.
+Initial order proposed by [PRIORITY-REVIEW.md](PRIORITY-REVIEW.md), checked against public snapshot `d45188e`; the user selected B-172 first, then B-129, on 2026-09-24. Historical acceptance was examined in the former development checkout; its plans are intentionally omitted here. Historical upstream commit IDs are provenance, not local Git refs. This replaces the inherited queue rationale; Git retains the previous derivations.
 
 **Objective:** useful features shipped quickly, fewer unnecessary interruptions, reliable verification and beautiful, thoughtful design. Spend tokens, tool turns and elapsed time in proportion to that value. The CLI owns deterministic structure; the model owns judgment. A guard must detect a defect, resolve a reference or protect a parsed format. Optional telemetry and research never gate delivery. Deployment remains outside ESQ's scope.
 
@@ -11,19 +11,25 @@ The sequence below is the execution proposal, not a claim that work has started.
 
 ## Now
 
-### autonomy-remainder
-**covers:** B-169, epic:esq-decides-implementation-detail
-**why now:** Continue the user order A/D -> B -> C. A and standards arbitration B shipped; D now has the B-179 exit implemented and verified locally. For C, identify one concrete unmet specialist need before adding guidance or role skills, keeping beautiful design part of delivery.
-**acceptance:** A real selected case proceeds without an implementation-detail question, with evidence of correct behavior and design quality; guidance stays on demand and within a stated cost bound.
-**state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no tagged plans in this snapshot; upstream four-plan completion is historical context; domain defaults in standards Part 2 remain empty, C not implemented.
+### backlog-rank-lifecycle
+**covers:** B-172
+**why now:** User-selected next on 2026-09-24: a confirmed, recurring CLI defect with bounded local verification. Adding or reopening work must not require a manual ranking pass; closing and reranking must keep the ledger valid. The CLI maintains position without choosing priorities or changing the order already agreed.
+**acceptance:** New/reopened active rows receive a unique tail rank; closure and reranking leave no closed-row collision; existing relative order and priorities are preserved. Exercise add -> read -> close -> rerank -> reopen with the existing CLI and validate, including legacy/empty ledgers.
+**state:** <!-- GENERATED --> B-172 Open [lo?]; no plan or execution in flight in this checkout. Ready for /esq:work B-172; the backlog detail contains the standalone scope and acceptance. Position is user-selected; the existing suggested priority is unchanged.
 
 ## Next
 
 ### dependable-queue
-**covers:** B-129, B-079, B-172
-**why now:** After the blocking delivery defects and the autonomy slice, make the next-work recommendation trustworthy: preserve outstanding acceptance, aim the handoff at the entry, and rank newly added rows. These changes reduce repeated planning corrections.
-**acceptance:** A complete plan with unmet item acceptance stays open; single-entry roadmap handoff names its target; add leaves no active row unranked.
-**state:** <!-- GENERATED --> All Open; status already offers scoped advance, roadmap does not; addRow still writes a blank Rank.
+**covers:** B-129, B-079
+**why now:** Follow B-172 with truthful completion and a scoped handoff: do not project an unmet outcome as shipped, and aim the next command at the selected entry. These are separate outcomes; B-172 does not absorb their skill changes.
+**acceptance:** A complete plan with unmet item acceptance stays open; single-entry roadmap handoff names its target.
+**state:** <!-- GENERATED --> Both Open; status already offers scoped advance, roadmap does not; roadmap completion still permits a complete-plan rollup despite outstanding item acceptance.
+
+### autonomy-remainder
+**covers:** B-169, epic:esq-decides-implementation-detail
+**why now:** Resume after the concrete queue defects, on an observed specialist need. Within the epic, preserve A/D -> B -> C: A and standards arbitration B shipped, and B-179 delivered D's exit locally. For C, select one unmet need before adding guidance or role skills, keeping beautiful design part of delivery.
+**acceptance:** A real selected case proceeds without an implementation-detail question, with evidence of correct behavior and design quality; guidance stays on demand and within a stated cost bound.
+**state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no tagged plans in this snapshot; domain defaults in standards Part 2 remain empty, C not implemented. No concrete specialist case selected yet; no generic role framework commissioned.
 
 ### projection-standing
 **covers:** B-043, B-075

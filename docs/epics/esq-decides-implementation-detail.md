@@ -41,7 +41,7 @@ and telemetry never become delivery gates.
 ## Order
 
 The user's 2026-09-19 order **A -> D -> B -> C**, with A and D in one original shipping unit, remains.
-The current queue has repaired D's discovered gap and now moves to C; it does not rebuild B or reverse that order.
+D's discovered gap is repaired. The user-selected global queue now handles B-172, then B-129/B-079, before resuming C on a concrete unmet need; the epic's internal A/D -> B -> C order is preserved.
 
 1. **A — the stop does the work: delivered contract.** The 2026-09-19 plan replaced the single repair
    ceiling with a budget of three edits for distinct causes. `build/SKILL.md` and
@@ -89,3 +89,7 @@ _No plans tag this epic in the public snapshot. Historical private plans are int
 - 2026-09-24 — B-179 implemented locally: three real-Git correction/disposition scenarios and 7/7 product audit checks.
   D now has its supported exit; no live model journey or measured blocking-rate gain is claimed.
   B-169 remains Open and the epic Active for the conditional specialist-guidance outcome C.
+
+- 2026-09-24 — User selected B-172 as the next implementation, then B-129. The roadmap places
+  those concrete queue defects ahead of the conditional C slice. The epic remains Active; no specialist
+  work or evidence has been invented, and B-172 is not added to this epic.
