@@ -7,23 +7,17 @@ Initial order proposed by [PRIORITY-REVIEW.md](PRIORITY-REVIEW.md), checked agai
 
 **Objective:** useful features shipped quickly, fewer unnecessary interruptions, reliable verification and beautiful, thoughtful design. Spend tokens, tool turns and elapsed time in proportion to that value. The CLI owns deterministic structure; the model owns judgment. A guard must detect a defect, resolve a reference or protect a parsed format. Optional telemetry and research never gate delivery. Deployment remains outside ESQ's scope.
 
-The sequence below is the execution proposal, not a claim that work has started. Its order is positional unless a `needs:` edge is written; none is required here. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the whole sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
+The sequence below is the remaining execution proposal, not a claim that work has started. B-172 shipped locally on 2026-09-24; B-129 remains the user's next selection. Order is positional unless a `needs:` edge is written; none is required here. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the whole sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
 
 ## Now
-
-### backlog-rank-lifecycle
-**covers:** B-172
-**why now:** User-selected next on 2026-09-24: a confirmed, recurring CLI defect with bounded local verification. Adding or reopening work must not require a manual ranking pass; closing and reranking must keep the ledger valid. The CLI maintains position without choosing priorities or changing the order already agreed.
-**acceptance:** New/reopened active rows receive a unique tail rank; closure and reranking leave no closed-row collision; existing relative order and priorities are preserved. Exercise add -> read -> close -> rerank -> reopen with the existing CLI and validate, including legacy/empty ledgers.
-**state:** <!-- GENERATED --> B-172 Open [lo?]; no plan or execution in flight in this checkout. Ready for /esq:work B-172; the backlog detail contains the standalone scope and acceptance. Position is user-selected; the existing suggested priority is unchanged.
-
-## Next
 
 ### dependable-queue
 **covers:** B-129, B-079
 **why now:** Follow B-172 with truthful completion and a scoped handoff: do not project an unmet outcome as shipped, and aim the next command at the selected entry. These are separate outcomes; B-172 does not absorb their skill changes.
 **acceptance:** A complete plan with unmet item acceptance stays open; single-entry roadmap handoff names its target.
 **state:** <!-- GENERATED --> Both Open; status already offers scoped advance, roadmap does not; roadmap completion still permits a complete-plan rollup despite outstanding item acceptance.
+
+## Next
 
 ### autonomy-remainder
 **covers:** B-169, epic:esq-decides-implementation-detail
@@ -98,7 +92,8 @@ B-149 is Dropped in this public checkout: the historical briefs were intentional
 The remaining ranked backlog work has no committed implementation position: B-013 (verdict presentation), B-050 (bounded headless permissions), B-078 (one remaining SIGPIPE site), B-158 (a demonstrated dead reference before a new guard), B-141 (concrete contradictory decisions), B-130 (a needed minor/major release), B-096 (a repeated observable failure). Each keeps its individual current scope and earns selection through that trigger; they are not one project or a guard campaign.
 
 ## Shipped
-<!-- Implemented work, newest first, five retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+<!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-24 · backlog-rank-lifecycle — B-172 (done locally; 19 real CLI regressions and 7/7 product audit checks; capture/reopen at the active tail, closed-rank cleanup, legacy support and explicit placement preserved; no release)
 - 2026-09-24 · bounded-correction-exit — B-179 (done locally; three real-Git scenarios and 7/7 product audit checks; no live model journey or release)
 - 2026-09-24 · verification-inputs — B-180 (done locally; eight regressions and 7/7 product audit checks; no release)
 - 2026-09-21 · standards-referent — lever B of B-169, including both corrective plans; arbitration delivered, epic still Active

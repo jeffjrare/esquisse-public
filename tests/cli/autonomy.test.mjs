@@ -191,9 +191,9 @@ test('an observation filed outside the unit never blocks it; a defect filed agai
   const own = await addRow(root, file, { type: '🐛 bug', summary: 'the new guard misses the empty case', source: 'build: stem Phase 1' });
   assert.equal(own.id, 'B-002');
   assert.deepEqual((await branchCheck(root, 'docs/plans/2026-09-11-stem.md')).unit.open.map((row) => row.id), ['B-002']);
-  // Ten columns since every-open-item-is-ranked Phase 1: the Rank cell sits after Pri, blank until a
-  // rank verb assigns one, and a row filed with no stated priority carries the type's suggested `med?`.
-  assert.match(await readFile(file, 'utf8'), /\| B-001 \| \d{4}-\d{2}-\d{2} \| 🐛 bug \| med\? \|  \| a pre-existing wrap at 360 px \| observed: stem Phase 1 \|  \|  \| Open \|/);
+  // Capture writes the neutral tail after Pri; a row filed with no stated priority carries the
+  // type's suggested `med?`. Neither cell changes the Source classification the unit reads.
+  assert.match(await readFile(file, 'utf8'), /\| B-001 \| \d{4}-\d{2}-\d{2} \| 🐛 bug \| med\? \| 100 \| a pre-existing wrap at 360 px \| observed: stem Phase 1 \|  \|  \| Open \|/);
   await assert.rejects(addRow(root, file, { type: 'bug', summary: 'two\nlines', source: 'observed: stem' }), /line break/);
 });
 

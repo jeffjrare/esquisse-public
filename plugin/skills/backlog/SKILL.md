@@ -41,7 +41,7 @@ Actual table headers determine cell positions; never write a fixed-width row und
 - **Type:** 🐛 bug · ✨ improvement · ☑️ todo · 💡 idea · ⚠️ debt (deferred fix).
 - **Status:** `Open` actionable · `Needs-decision` blocked on a user call · `Planned` picked up by a plan · `Done` · `Dropped`.
 - **Pri:** confirmed `hi|med|lo`, suggested `hi?|med?|lo?`, or legacy blank. Every new/open item needs a level; never invent user confirmation.
-- **Rank:** sparse integer assigned only by `esq backlog rank`, projecting priority and roadmap edges. Blank means unplaced. The first rank/add call supplies a missing Rank column and pads existing rows.
+- **Rank:** sparse integer maintained by the CLI. Add/reopen assigns the active sequence's tail; Done/Dropped clears it. `esq backlog rank` records deliberate placement and validates roadmap edges. Blank active ranks are legacy unplaced work; these writers supply a missing Rank column without classifying it.
 - **Epic:** free-text slug joining `docs/epics/<slug>.md`; blank if none. Keep the actual slug, but capture requires no existence check.
 - **Version:** free text; blank until deployed. Filled means deployed/ready for UA; `Done` means UA passed.
 
@@ -57,7 +57,7 @@ Preserve `<!-- last-sweep: <hash> YYYY-MM-DD -->`; only `/esq:sweep` writes it. 
 
 1. Honor a case-insensitive type prefix, optional colon, and strip it: `bug`; `improvement|imp|enh`; `todo`; `idea`; `debt`. Otherwise infer: broken/fails/crashes/wrong/regression → bug; should/could/nicer/cleaner/refactor → improvement; maybe/what if/one day/could we → idea; other reminders → todo. When torn, choose the more actionable type and say which; don't ask.
 2. Set confirmed priority only from a user signal: trailing `!!` or urgent/critical → hi; `!` → med; explicit lo/low/someday → lo. Otherwise suggest med? for bug/todo/debt, lo? for improvement/idea; bump to hi? for crash, data loss, security, broken, regression, blocks, can't ship, production, everyone; drop to lo? for cosmetic, nit, typo, polish, nice to have, someday.
-3. Scan existing rows once for overlapping summaries and retain open rows' Pri/Rank for placement. A clear duplicate in Open or Needs-decision → name its ID and stop without adding. Done/Dropped do not block re-addition. No ID arithmetic during this scan.
+3. Scan existing rows once for overlapping summaries. A clear duplicate in Open or Needs-decision → name its ID and stop without adding. Done/Dropped do not block re-addition. No ID arithmetic during this scan.
 4. Extract `epic:<slug>` or `epic <slug>`, stripping it from the summary. No tag → blank. If the epic plainly isn't opened yet, mention `/esq:epic new …` without blocking capture.
 
 ### Append and place
@@ -72,17 +72,13 @@ Tighten the cleaned summary to one phrase, roughly ≤12 words, preserving the u
 
 `esq backlog add --type "<emoji + type>" --summary "<summary>" --source manual --pri "<level>" --epic "<slug or empty>" --status Open`
 
-The CLI writes today's Date, its allocated ID, blank Rank/Version and one cell per actual header. User-captured items start Open, never Needs-decision. Add a detail section only for multi-sentence context, reproduction notes or debt; one-line todos/ideas need only a row.
+The CLI writes today's Date, its allocated ID, a unique tail Rank, blank Version and one cell per actual header in one write. User-captured items start Open, never Needs-decision. Add a detail section only for multi-sentence context, reproduction notes or debt; one-line todos/ideas need only a row.
 
 With the ten-column header above, the resulting row is:
-`| B-NNN | <today> | <type emoji + word> | <pri> | | <summary> | manual | <epic slug or blank> | | Open |`
+`| B-NNN | <today> | <type emoji + word> | <pri> | <CLI rank> | <summary> | manual | <epic slug or blank> | | Open |`
 This illustrates the schema, not a fixed-width fallback: a missing column must never shift Status into Version.
 
-Before committing, place the new ID using the retained rows:
-
-- `esq backlog rank B-NNN --after B-MMM`: choose the last ranked open row at or above its priority level, putting it at its bucket's end.
-- None at/above → `--before <first ranked open row>`.
-- No ranked open row → `--last`.
+The default tail needs no second rank call. Only a deliberate placement calls `esq backlog rank B-NNN --after B-MMM`, `--before B-MMM` or `--last`; priority remains a separate judgment and the reader's primary sort key.
 
 For ranking, open work includes Open, Needs-decision and Planned. Never invent the integer. The result carries `rank`, `renumbered`, `written`, and possibly `promoted` suggested priorities or `contradictions` against confirmed ones. Report promotions with their edge; leave confirmed levels intact and name the conflicting pair and remedy (change the blocker's priority or roadmap edge). A refused call writes nothing; correct the argument, never bypass it.
 

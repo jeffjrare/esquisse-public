@@ -2242,11 +2242,11 @@ test('the first write into a nine-column backlog adds the Rank header and pads e
   assert.equal(lines[0], '| ID | Date | Type | Pri | Rank | Summary | Source | Epic | Version | Status |');
   // The pre-existing row keeps every value it had, shifted right of the new blank cell.
   assert.match(lines[2], /^\| B-001 \| 2026-08-17 \| 🐛 bug \| hi \|  \| first \| manual \|/);
-  assert.equal(added.row[4], '');
+  assert.equal(added.row[4], '100');
 
-  // And `esq state` reads the rank back, blank here because no verb has assigned one.
+  // Capture assigns only the new row's neutral tail; the legacy row stays unclassified.
   const rows = (await state(root)).backlog.rows;
-  assert.deepEqual(rows.map((row) => [row.id, row.pri, row.rank]), [['B-001', 'hi', ''], ['B-002', 'lo', '']]);
+  assert.deepEqual(rows.map((row) => [row.id, row.pri, row.rank]), [['B-001', 'hi', ''], ['B-002', 'lo', '100']]);
 });
 
 test('a backlog that already carries Rank round-trips the cell, and one without it reads blank', async () => {
@@ -2255,7 +2255,7 @@ test('a backlog that already carries Rank round-trips the cell, and one without 
   // A second write neither widens it again nor disturbs the stored number.
   await addRow(wide, path.join(wide, 'docs/BACKLOG.md'), { type: '💡 idea', summary: 'second', source: 'manual' });
   const rows = (await state(wide)).backlog.rows;
-  assert.deepEqual(rows.map((row) => [row.id, row.rank]), [['B-001', '100'], ['B-002', '']]);
+  assert.deepEqual(rows.map((row) => [row.id, row.rank]), [['B-001', '100'], ['B-002', '200']]);
   assert.equal((await readFile(path.join(wide, 'docs/BACKLOG.md'), 'utf8')).match(/Rank/g).length, 1);
 
   const narrow = await rankFixture(NINE, '| B-001 | 2026-08-17 | 🐛 bug | hi | first | manual | | | Open |');
@@ -2320,8 +2320,8 @@ test('validate reports a duplicate rank and an unprioritized open row, each on i
 
 
 // ── Phase 2 of every-open-item-is-ranked: the two verbs that write ───────────
-// `set-pri` writes the judgment, `rank` writes the order. Between them they are the only writers of
-// either cell, so what they refuse matters as much as what they write: a half-ranked ledger, a
+// `set-pri` writes the judgment, `rank` writes the explicit order (capture/reopening now supplies a
+// neutral tail). What they refuse matters as much as what they write: a half-ranked ledger, a
 // sequence naming an item twice, or an order the roadmap already contradicts would each be worse
 // than the unranked backlog they replace.
 

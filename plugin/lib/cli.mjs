@@ -192,8 +192,9 @@ function backlogTableFromText(text) {
 
 // The tenth field of the backlog row schema. A rank is a *projection* of two judgments — the row's
 // priority and the roadmap's edges — never a third thing to keep in sync, so nothing hand-edits this
-// cell and no skill writes it directly: `esq backlog rank` owns the integers and the renumbering, and
-// the `hi #2` a reader sees is computed from the bucket at render time rather than stored.
+// cell and no skill writes it directly: capture/reopening assigns the neutral tail, closure clears
+// it, and `esq backlog rank` owns explicit placement and renumbering. The `hi #2` a reader sees is
+// computed from the bucket at render time rather than stored.
 //
 // The column is added lazily, and that is deliberate rather than lazy: every esquisse project already
 // on disk has a nine-column backlog, and a reader that demanded a tenth would break all of them at
@@ -427,15 +428,17 @@ export async function setStatus(file, requestedId, status, { by = null, reason =
   if (by !== null && status !== 'Done') throw new Error('--by records who delivered the item, so it is accepted with Done only');
   if (reason !== null && status !== 'Dropped') throw new Error('--reason records why the item was dropped, so it is accepted with Dropped only');
   const id = normalizeId(requestedId);
-  const { lines, table, idColumn, statusColumn } = await backlogTable(file);
-  const matches = [];
-  table.rows.forEach((row, offset) => {
-    if (normalizeId(row[idColumn]) === id) matches.push({ row, line: table.start + 2 + offset });
-  });
+  const { lines, table: parsed, idColumn, statusColumn: parsedStatus } = await backlogTable(file);
+  const view = rankView(lines, parsed, idColumn, parsedStatus);
+  const { table } = view;
+  const statusColumn = table.header.indexOf('Status');
+  const matches = view.rows.filter((entry) => entry.id === id);
   if (matches.length !== 1) throw new Error(matches.length === 0 ? `${id} not found` : `${id} appears ${matches.length} times`);
   const match = matches[0];
   const previous = match.row[statusColumn];
+  if (!ROW_STATUSES.has(previous) && ROW_STATUSES.has(status)) match.row[view.rankColumn] = String(tailRank(view));
   match.row[statusColumn] = status;
+  match.status = status;
   const sourceColumn = table.header.indexOf('Source');
   const marker = by !== null ? ` · Done by ${cellText(by, '--by')}` : reason !== null ? ` · Dropped: ${cellText(reason, '--reason')}` : null;
   if (marker !== null) {
@@ -474,6 +477,7 @@ export async function setStatus(file, requestedId, status, { by = null, reason =
       resolutionWritten = 'written';
     }
   }
+  clearClosedRanks(view, lines);
   await atomicWrite(file, lines.join('\n'));
   return { id, previous, status, file, ...(marker !== null ? { provenance: marker.replace(/^ · /, '') } : {}), ...(resolutionWritten !== null ? { resolution: resolutionWritten } : {}) };
 }
@@ -539,6 +543,34 @@ function rankView(lines, parsed, idColumn, statusColumn) {
 
 const isOpenRow = (entry) => ROW_STATUSES.has(entry.status);
 const rankNumber = (entry) => (/^\d+$/.test(entry.rank) ? Number(entry.rank) : null);
+
+// Only stored active positions participate. Legacy unranked rows remain unclassified, and a
+// closed row's former position is never revived when it reopens.
+function tailRank(view) {
+  let tail = 0;
+  for (const entry of view.rows.filter(isOpenRow)) {
+    if (entry.rank === '') continue;
+    const rank = rankNumber(entry);
+    if (!Number.isSafeInteger(rank)) throw new Error(`${entry.id} carries an invalid rank: ${entry.rank}`);
+    tail = Math.max(tail, rank);
+  }
+  const next = tail + RANK_STEP;
+  if (!Number.isSafeInteger(next)) throw new Error('tail rank exceeds the safe integer range — rank the sequence with --order first');
+  return next;
+}
+
+// Repair retained closed positions in the same atomic write as the requested mutation. Run only
+// after refusals: even legacy collisions cannot authorize a partial write on failed input.
+function clearClosedRanks(view, lines) {
+  let written = 0;
+  for (const entry of view.rows) {
+    if (!['Done', 'Dropped'].includes(entry.status) || entry.rank === '') continue;
+    entry.row[view.rankColumn] = '';
+    lines[entry.line] = formatRow(entry.row);
+    written += 1;
+  }
+  return written;
+}
 
 // Writes the rows this call actually changed, and nothing else. A cell whose value is unchanged is
 // left byte-identical, which is what keeps a single placement out of every other row's history.
@@ -688,7 +720,8 @@ export async function rankOrder(file, requested) {
   assertRankEdges(roadmap, sequence);
   const promoted = promoteForEdges(view, roadmap, lines);
   const assignments = sequence.map((entry, index) => ({ entry: { ...entry, rankIndex: view.rankColumn }, rank: (index + 1) * RANK_STEP }));
-  const written = await writeRanks(file, lines, assignments);
+  const cleared = clearClosedRanks(view, lines);
+  const written = cleared + await writeRanks(file, lines, assignments);
   return { file, mode: 'order', ranked: assignments.map(({ entry, rank }) => ({ id: entry.id, rank })), written, ...promoted };
 }
 
@@ -734,7 +767,8 @@ export async function rankPlace(file, requestedId, { after = null, before = null
   const assignments = renumbered
     ? sequence.map((entry, offset) => ({ entry: { ...entry, rankIndex: view.rankColumn }, rank: (offset + 1) * RANK_STEP }))
     : [{ entry: { ...target, rankIndex: view.rankColumn }, rank: midpoint }];
-  const written = await writeRanks(file, lines, assignments);
+  const cleared = clearClosedRanks(view, lines);
+  const written = cleared + await writeRanks(file, lines, assignments);
   const placed = assignments.find(({ entry }) => entry.id === id).rank;
   return { file, mode: 'place', id, rank: placed, renumbered, written, ...promoted };
 }
@@ -766,12 +800,15 @@ export async function addRow(root, file, { type, summary, source, pri = '', epic
   if (epic !== '') cellText(epic, '--epic');
   const priority = pri !== '' ? pri.trim() : priForType(fields.type);
   const { id, block } = await reserveId(root, file);
-  const { lines, table: parsed } = await backlogTable(file);
+  const { lines, table: parsed, idColumn, statusColumn } = await backlogTable(file);
   // The widening happens before a value is written, so a backlog meeting the column for the first
   // time is padded once and the new row is formatted against the header it will actually live under.
-  const table = addRankColumn(lines, parsed);
-  const values = { ID: id, '#': id, Date: new Date().toISOString().slice(0, 10), Type: fields.type, Pri: priority, Priority: priority, [RANK_COLUMN]: '', Summary: fields.summary, Source: fields.source, Epic: epic, Version: '', Status: status };
+  const view = rankView(lines, parsed, idColumn, statusColumn);
+  const { table } = view;
+  const rank = ROW_STATUSES.has(status) ? String(tailRank(view)) : '';
+  const values = { ID: id, '#': id, Date: new Date().toISOString().slice(0, 10), Type: fields.type, Pri: priority, Priority: priority, [RANK_COLUMN]: rank, Summary: fields.summary, Source: fields.source, Epic: epic, Version: '', Status: status };
   const cells = table.header.map((column) => values[column] ?? '');
+  clearClosedRanks(view, lines);
   lines.splice(table.end, 0, formatRow(cells));
   await atomicWrite(file, lines.join('\n'));
   return { id, block, file, row: cells };
