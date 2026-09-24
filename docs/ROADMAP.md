@@ -11,15 +11,9 @@ The sequence below is the execution proposal, not a claim that work has started.
 
 ## Now
 
-### verification-inputs
-**covers:** B-180
-**why now:** First because reusable proof can currently hide a failing check. Fixing evidence validity protects every later landing without making verification a larger ritual.
-**acceptance:** Changed declared plan/ledger inputs force run; harmless bookkeeping still reuses proof; retain full commit and exact-command provenance.
-**state:** <!-- GENERATED --> Open; the priority review reproduced the failure, and the exemption-before-inputs path exists in d45188e.
-
 ### bounded-correction-exit
 **covers:** B-179
-**why now:** Second because an exhausted corrective chain can strand a safe correction. This finishes the missing exit in B-169 lever D; it is a separate change from B-180, ordered after trustworthy verification rather than technically dependent on its patch.
+**why now:** Next because an exhausted corrective chain can strand a safe correction. This finishes the missing exit in B-169 lever D; it is a separate change from B-180, ordered after the B-180 correction now implemented and verified locally, rather than technically dependent on its patch.
 **acceptance:** Exercise a supported correction -> review -> land path without a third generation, abandoning a completed plan, or rewriting historical verification.
 **state:** <!-- GENERATED --> Open [hi]; conflicting fix/plan/abandon routes remain; no live journey claimed.
 
@@ -104,9 +98,9 @@ B-149 is Dropped in this public checkout: the historical briefs were intentional
 The remaining ranked backlog work has no committed implementation position: B-013 (verdict presentation), B-050 (bounded headless permissions), B-078 (one remaining SIGPIPE site), B-158 (a demonstrated dead reference before a new guard), B-141 (concrete contradictory decisions), B-130 (a needed minor/major release), B-096 (a repeated observable failure). Each keeps its individual current scope and earns selection through that trigger; they are not one project or a guard campaign.
 
 ## Shipped
-<!-- Historical deliveries only, newest first, five retained. Individual new backlog dispositions are in BACKLOG.md. -->
+<!-- Implemented work, newest first, five retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-24 · verification-inputs — B-180 (done locally; eight regressions and 7/7 product audit checks; no release)
 - 2026-09-21 · standards-referent — lever B of B-169, including both corrective plans; arbitration delivered, epic still Active
 - 2026-09-21 · observation-path-before-manual — historical observation-path-before-manual-fixes, B-167 (done)
 - 2026-09-08 · telemetry-round-trips-part-two — B-071, B-044, B-072 (done)
 - 2026-09-07 · outcome-attribution-coverage — B-121 (done; historical instrument, not a current delivery gate)
-- 2026-09-05 · outcome-instrumentation — B-073 (done; historical delivery, instrument since retired)

@@ -2399,9 +2399,9 @@ export async function branchResolve(root, rawSlug) {
 // occurrence's phase, an `at` git resolves, the command present in that block's green list, and every
 // path changed since it harmless. Everything else is `run`, with the reason named.
 
-// Harmless is exactly the command-owned lifecycle landing gates 2, 3 and 5 already cover — an append
-// below `## Execution log` in the active plan, any other plan or brief, and the two ledgers. Not
-// `docs/ROADMAP.md`, not `docs/epics/`: those are read by the work, not written by its bookkeeping.
+// Command-owned lifecycle is harmless only when it is not a known command input: an append below
+// `## Execution log` in the active plan, another plan or brief, and the two ledgers. Plain operands
+// and valid `(reads)` declarations take precedence. ROADMAP.md and epics have no blanket exemption.
 const GATE_LEDGERS = new Set(['docs/BACKLOG.md', 'docs/DECISIONS.md']);
 
 // Two bookkeeping fields are left out of the comparison, and only two: the `**Reviewed at:**` header
@@ -2573,6 +2573,28 @@ export async function gateVerify(root, planPath, { workersMoved = false, phase =
     if (!gitTry(repository, ['rev-parse', '--verify', '--quiet', `${block.at}^{commit}`])) {
       return run(`${name}'s verified commit ${block.at.slice(0, 7)} is not in this repository`);
     }
+    // Resolve the input scope before exempting bookkeeping. A plan or ledger can itself be a
+    // command input: its lifecycle role cannot make a changed input harmless. Invalid declarations
+    // still cannot narrow the check; plain operands remain known inputs even without a declaration.
+    const inputs = commandInputs(command);
+    const declared = declaredInputs(occurrence.step);
+    let scope = null;
+    let ignored = null;
+    if (declared !== null) {
+      if (declared.malformed) {
+        ignored = `its \`(reads)\` declaration ${declared.malformed}`;
+      } else {
+        const uncovered = (inputs.operands ?? []).filter((operand) => !declaresPath(declared.paths, operand));
+        if (inputs.unsupported !== undefined) {
+          ignored = `its \`(reads)\` declaration cannot be checked against \`${inputs.unsupported}\`, a token this gate does not decompose`;
+        } else if (uncovered.length > 0) {
+          ignored = `its \`(reads)\` declaration does not cover \`${uncovered[0]}\`, a path the command itself names`;
+        } else {
+          scope = declared.paths;
+        }
+      }
+    }
+
     // `--no-renames`: a rename out of an invalidating path must report that path, not only the
     // harmless one it landed on.
     const diff = gitTry(repository, ['diff', '--name-only', '--no-renames', block.at, 'HEAD']);
@@ -2586,36 +2608,19 @@ export async function gateVerify(root, planPath, { workersMoved = false, phase =
         // proofs right here — which is why no declaration may narrow this case away.
         const before = gitTry(repository, ['show', `${block.at}:${occurrence.plan}`]);
         if (before === null || planSection(before) !== planSection(occurrence.text)) return run(`${occurrence.plan} changed above its ## Execution log since ${name} verified`);
+      }
+      const isInput = declaresPath(inputs.operands ?? [], changed)
+        || (scope !== null && declaresPath(scope, changed));
+      if (isInput) {
+        invalidating.push(changed);
         continue;
       }
+      if (changed === occurrence.plan) continue;
       if (changed.startsWith('docs/plans/') && changed.endsWith('.md')) continue;
       if (GATE_LEDGERS.has(changed)) continue;
       invalidating.push(changed);
     }
 
-    // What the step says this command reads, consulted last and only over the paths that already
-    // survived the lifecycle exemptions — so an honoured declaration can only ever shrink this set,
-    // never grow it, and no reuse that holds today can become a run. Absent, malformed, or failing
-    // to cover a path the command itself names: the declaration is ignored whole, the command runs,
-    // and the reason says which rail rejected it. Nothing here is inferred from the command string.
-    const declared = declaredInputs(occurrence.step);
-    let scope = null;
-    let ignored = null;
-    if (declared !== null) {
-      if (declared.malformed) {
-        ignored = `its \`(reads)\` declaration ${declared.malformed}`;
-      } else {
-        const inputs = commandInputs(command);
-        const uncovered = (inputs.operands ?? []).filter((operand) => !declaresPath(declared.paths, operand));
-        if (inputs.unsupported !== undefined) {
-          ignored = `its \`(reads)\` declaration cannot be checked against \`${inputs.unsupported}\`, a token this gate does not decompose`;
-        } else if (uncovered.length > 0) {
-          ignored = `its \`(reads)\` declaration does not cover \`${uncovered[0]}\`, a path the command itself names`;
-        } else {
-          scope = declared.paths;
-        }
-      }
-    }
     const counted = scope === null ? invalidating : invalidating.filter((changed) => declaresPath(scope, changed));
     if (counted.length === 0) {
       const how = scope === null

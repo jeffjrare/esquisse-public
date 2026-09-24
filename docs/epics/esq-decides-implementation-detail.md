@@ -50,7 +50,7 @@ The current queue repairs D's discovered gap before moving to C; it does not reb
    generations at two. That mechanism shipped with A, but **B-179 remains Open**: fix cannot edit a plan
    body, plan cannot open the exhausted generation, and `setAbandoned` refuses a completed plan.
    Acceptance is a supported correction -> review -> land route with historical proof preserved.
-   B-180 precedes that correction in the roadmap because stale proof can hide a failed check; it is a
+   B-180 was corrected and verified locally before that correction because stale proof could hide a failed check; it is a
    separate verification defect, not another epic lever or an invented hard dependency.
 3. **B — a standards referent: arbitration delivered.** The 2026-09-21 stem and both fixes plans are
    complete. The plugin default, project precedence, `(hard)` limits, unreadable-referent behavior and
@@ -82,3 +82,6 @@ _No plans tag this epic in the public snapshot. Historical private plans are int
   D's mechanism does not settle B-179's missing exit. B-179 now carries this epic's join key.
   B-169 stays Open and the epic Active because D/C outcomes remain. No corrective implementation,
   new live model journey or claimed time/blocking-rate improvement accompanies this document update.
+
+- 2026-09-24 — B-180 implemented and verified in the public repository (7/7 product audit checks).
+  This strengthens verification without closing B-169; B-179 is now the next delivery task.

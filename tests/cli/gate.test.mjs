@@ -358,6 +358,64 @@ test('the harmless set is exactly the command-owned lifecycle, and nothing else'
   }
 });
 
+
+// B-180: these are real checks over data whose location used to exempt every change. Prove both
+// halves: unrelated bookkeeping buys no rerun, but changing an input cannot hide a failing command.
+for (const [input, declaration] of [
+  ['docs/plans/input.md', 'docs/plans/input.md'],
+  ['docs/plans/inputs/input.md', 'docs/plans/inputs'],
+  ['docs/plans/p-fixes.brief.md', 'docs/plans/p-fixes.brief.md'],
+  ['docs/BACKLOG.md', 'docs/BACKLOG.md'],
+  ['docs/DECISIONS.md', 'docs/DECISIONS.md'],
+  ['docs/plans/input.md', null],
+  ['docs/BACKLOG.md', null],
+]) {
+  test(`changed ${input} invalidates ${declaration ? 'declared' : 'operand'} input proof`, async () => {
+    const root = await repo();
+    await mkdir(path.dirname(path.join(root, input)), { recursive: true });
+    await writeFile(path.join(root, input), '# Good input\n');
+    await writeFile(path.join(root, 'check.mjs'), [
+      "import assert from 'node:assert/strict';",
+      "import { readFileSync } from 'node:fs';",
+      `assert.equal(readFileSync(process.argv[2] ?? ${JSON.stringify(input)}, 'utf8'), ${JSON.stringify('# Good input\n')});`,
+    ].join('\n'));
+    const command = `node check.mjs${declaration ? '' : ` ${input}`}`;
+    const reads = declaration ? ` \`(reads)\` \`check.mjs\`, \`${declaration}\`` : '';
+    const file = await plan(root, [[`\`(auto)\` \`${command}\` — input is good${reads}`]]);
+    const args = ['check.mjs', ...(declaration ? [] : [input])];
+    execFileSync(process.execPath, args, { cwd: root, stdio: 'pipe' });
+    await logPhase(root, file, 1, [command]);
+    // Recording the proof itself, and an unrelated brief, remain reusable.
+    await writeFile(path.join(root, 'docs/plans/unrelated.brief.md'), '# Bookkeeping\n');
+    commit(root, 'docs: unrelated bookkeeping');
+    assert.equal((await gateVerify(root, file)).commands[0].decision, 'reuse');
+    await writeFile(path.join(root, input), '# Broken input\n');
+    commit(root, 'docs: change a verification input');
+    assert.throws(() => execFileSync(process.execPath, args, { cwd: root, stdio: 'pipe' }));
+    for (const unit of [false, true]) {
+      const [entry] = (await gateVerify(root, file, { unit })).commands;
+      assert.equal(entry.decision, 'run', entry.reason);
+      assert.ok(entry.reason.includes(`${input} changed`), entry.reason);
+    }
+  });
+}
+
+test('a declared read of the proof plan includes its execution log', async () => {
+  const root = await repo();
+  await writeFile(path.join(root, 'check.mjs'), [
+    "import assert from 'node:assert/strict';",
+    "import { readFileSync } from 'node:fs';",
+    "assert.ok(!readFileSync('docs/plans/p.md', 'utf8').includes('### Phase 1 — completed'));",
+  ].join('\n'));
+  const file = await plan(root, [['`(auto)` `node check.mjs` — no completed phase `(reads)` `check.mjs`, `docs/plans/p.md`']]);
+  execFileSync(process.execPath, ['check.mjs'], { cwd: root, stdio: 'pipe' });
+  await logPhase(root, file, 1, ['node check.mjs']);
+  assert.throws(() => execFileSync(process.execPath, ['check.mjs'], { cwd: root, stdio: 'pipe' }));
+  const [entry] = (await gateVerify(root, file)).commands;
+  assert.equal(entry.decision, 'run', entry.reason);
+  assert.match(entry.reason, /docs\/plans\/p.md changed/);
+});
+
 // A declared scope narrows one command's freshness and nothing else. Every case below is a case
 // where the gate must still run: that is the half worth the fixtures, because the economising half
 // only ever costs minutes and this half is what a landing rests on.

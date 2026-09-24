@@ -79,7 +79,7 @@ The gate covers all same-Branch plans, excluding abandoned unbuilt phases, and r
 
 Judge output against the returned **step text**, with its plan/phase, not exit 0 alone: a no-match grep can pass at exit 1. No retry, extra check, replacement command or inferred suite subsumption. A red stops landing; show the failing step, plan, phase and at most ten output lines.
 
-Reuse is the CLI's decision over recorded verified blocks, full commits, exact green commands and permitted changes, including any valid step-declared reads. Never recreate that algorithm. Review/abandonment bookkeeping does not invalidate proof; roadmap, epic and projection changes are not blanket harmless exemptions. Do not rewrite completed obligations to obtain reuse.
+Reuse is the CLI's decision over recorded verified blocks, full commits, exact green commands and permitted changes, including any valid step-declared reads. Never recreate that algorithm. Bookkeeping is harmless only when it does not change an input named by the command or covered by its valid reads declaration; this includes plan logs and review/abandonment fields when the command reads that plan. Roadmap, epic and projection changes are not blanket harmless exemptions. Do not rewrite completed obligations to obtain reuse.
 
 Before waiting on a slow command, print `⏳ <command> — expected <duration>, deadline <deadline>`. Expected duration comes from the plan/log; if absent, write expected unknown.
 
