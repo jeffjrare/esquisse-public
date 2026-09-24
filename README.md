@@ -284,7 +284,10 @@ Use `backlog` to capture or edit an item and `sweep` to reconcile delivery.
 roadmap, then falls back to backlog priority.
 
 `/esq:roadmap plan` derives the order; bare `/esq:roadmap` refreshes state without
-silently re-planning it. `/esq:advance` walks `Now`, or one named `Now` entry,
+silently re-planning it. A completed plan does not ship an open covered item:
+roadmap checks its acceptance before recommending reconciliation, and sweep
+closes it only with evidence of the whole outcome, including post-plan conditions.
+`/esq:advance` walks `Now`, or one named `Now` entry,
 respecting dependencies and existing plans. It uses one worker per eligible item,
 at most one new plan per entry, decision workers when needed and one final
 roadmap refresh. It stops before building and returns to the starting branch

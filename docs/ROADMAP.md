@@ -7,7 +7,7 @@ Initial order proposed by [PRIORITY-REVIEW.md](PRIORITY-REVIEW.md), checked agai
 
 **Objective:** useful features shipped quickly, fewer unnecessary interruptions, reliable verification and beautiful, thoughtful design. Spend tokens, tool turns and elapsed time in proportion to that value. The CLI owns deterministic structure; the model owns judgment. A guard must detect a defect, resolve a reference or protect a parsed format. Optional telemetry and research never gate delivery. Deployment remains outside ESQ's scope.
 
-The sequence below is the remaining execution proposal, not a claim that work has started. B-172 shipped locally on 2026-09-24; B-129 remains the user's next selection. Order is positional unless a `needs:` edge is written; none is required here. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the whole sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
+The sequence below is the remaining execution proposal, not a claim that work has started. B-172 and B-129 shipped locally on 2026-09-24; no further item was selected by this implementation. Order is positional unless a `needs:` edge is written; none is required here. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the active sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
 
 ## Now
 
@@ -15,7 +15,7 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 **covers:** B-129, B-079
 **why now:** Follow B-172 with truthful completion and a scoped handoff: do not project an unmet outcome as shipped, and aim the next command at the selected entry. These are separate outcomes; B-172 does not absorb their skill changes.
 **acceptance:** A complete plan with unmet item acceptance stays open; single-entry roadmap handoff names its target.
-**state:** <!-- GENERATED --> Both Open; status already offers scoped advance, roadmap does not; roadmap completion still permits a complete-plan rollup despite outstanding item acceptance.
+**state:** <!-- GENERATED --> B-129 Done locally: a complete plan cannot override outstanding item acceptance, and completion advice reads the item's conditions. B-079 remains Open: status already offers scoped advance, roadmap does not. This combined entry remains in Now for B-079; its implementation was not undertaken.
 
 ## Next
 
@@ -93,6 +93,7 @@ The remaining ranked backlog work has no committed implementation position: B-01
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-24 · roadmap-acceptance — B-129 (done locally; six CLI fixture checks, semantic reading of roadmap/sweep acceptance paths and 7/7 product audit checks; no paid model journey or release; dependable-queue remains open for B-079)
 - 2026-09-24 · backlog-rank-lifecycle — B-172 (done locally; 19 real CLI regressions and 7/7 product audit checks; capture/reopen at the active tail, closed-rank cleanup, legacy support and explicit placement preserved; no release)
 - 2026-09-24 · bounded-correction-exit — B-179 (done locally; three real-Git scenarios and 7/7 product audit checks; no live model journey or release)
 - 2026-09-24 · verification-inputs — B-180 (done locally; eight regressions and 7/7 product audit checks; no release)

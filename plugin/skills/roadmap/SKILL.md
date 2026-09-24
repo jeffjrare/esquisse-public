@@ -27,7 +27,7 @@ After resolving the mode, announce `Mode: <show & refresh | derive the order | a
 - **A — derive:** first token `plan` or `re-plan`, or a user invocation with no argument and no file.
 - **C — edit:** any other text.
 
-B reads the roadmap, backlog **table rows** (or `esq state`'s `backlog.rows`), `esq state`'s `inFlight`, cited plans and cited epic Status only. No code, backlog detail or plan sweep. C has the same budget, including the moved entry's and neighbour's covered rows. A adds only its Gather inputs below.
+B reads the roadmap, backlog **table rows** (or `esq state`'s `backlog.rows`), `esq state`'s `inFlight`, cited plans and cited epic Status. Before a completion recommendation, also read only the relevant open items' detail sections and their cited acceptance evidence already in those sources. No code, verification rerun or plan sweep. C has the same budget, including the moved entry's and neighbour's covered rows. A adds only its Gather inputs below.
 
 <!-- shared:read-once:start -->
 **Read each file once**, taking the needed slice on large files and retaining it for later steps. Re-read only if you have written to it since. A later reference to that file or a desire to double-check does not justify another read.
@@ -102,14 +102,16 @@ Report `✔ placed <M> open items · <k> levels assigned`, the order, and **one 
 Re-derive nothing. Resolve covers from retained sources:
 
 - **B-NNN:** lenient ID matching; take Status/Pri from the table. If `inFlight[].planned` includes it, use `Planned (on <branch>)` regardless of the local row. Missing row → report `⚠ B-NNN not found` and retain the entry.
-- **Plan path:** classify its own Execution log by the plan-state rule.
+- **Plan path:** reuse `esq state`'s `plans[].state`, or call `esq next-phase <path>` once if not supplied. Missing, invalid or phase-less is not complete; report it and retain the entry.
 - **epic:<slug>:** read that epic's Status.
 
 Generate rollups from the covered work:
-- **done:** everything covered is Done/Dropped, or its covered plans are complete.
+- **done:** every covered reference is settled: each backlog row is Done/Dropped, each plan is complete and each epic is Done/Dropped. A complete plan never overrides an open covered row or an active epic. Known outstanding item acceptance in the retained sources also prevents done, even when covers names only the plan. Missing/unreadable references cannot prove done.
 - **blocked:** any covered Needs-decision item, or a needs target still in Now/Next/Later that this same pass has not rolled up done.
 - **in flight:** any Planned item or in-progress plan.
 - **not started:** nothing covered has moved.
+
+**Plan completion is not item acceptance.** For an unclosed item (Open, Planned or Needs-decision) on a complete plan, compare its summary and detail (including any explicit post-plan completion condition) with the retained evidence before recommending a disposition. Read each relevant detail once; do not scan the detail tail or invent a new acceptance schema. Record `plan complete; acceptance unmet: <condition>` or `acceptance unproved: <missing evidence>` when appropriate. Keep the entry in its horizon, with its needs edges effective. Missing evidence is not a user decision and does not authorize a research run. If the whole outcome is evidenced, report `acceptance evidenced; backlog disposition pending` and offer `/esq:sweep` to reconcile it; the entry remains until the row is actually closed. Never present sweep as a closure formality merely because phases completed. These rules also apply in A/C.
 
 A needs target in Shipped does not block. Neither does an absent target: it may have aged out of the five-line tail or been dropped. Still report `⚠ needs: <slug> not found` and preserve the edge; never silently erase it.
 
@@ -161,13 +163,14 @@ Render Now/Next/Later, continuous positional numbers, slug, covers, state, why-n
 
 **Next action:**
 - Top Now entry blocked → target its blocker and name it: Needs-decision → `/esq:backlog` or `/esq:grill <question>`; unmet needs → the awaited entry's action.
+- Open item on a complete plan → use the acceptance assessment above before the generic plan routes. Known remaining implementation → `/esq:plan implement B-N: <remaining outcome>`; otherwise name its recorded evidence action or revisit condition, without inventing a measurement mandate. Whole outcome evidenced → `/esq:sweep`. Never route an unmet/unproved outcome to closure or back through completed phases; if no action is currently warranted, state the revisit condition instead of inventing an executable Next.
 - Top unblocked Now entry: Open → `/esq:work B-N`; Planned with a known plan → `/esq:build <plan-path>`; complete plan → `/esq:check <plan-path>`; epic → `/esq:epic <slug>`. Never guess a plan/review/check target.
 - At least two remaining plan phases → offer `→ Or: /esq:autopilot <plan-path>` (unattended until a user gate).
 - At least two still-Open items across Now → offer `→ Or: /esq:advance` (one subagent each, stops before build). One item → work alone.
 - Now empty, Next nonempty → `/esq:roadmap <head-of-Next> now`.
 - Roadmap empty → `Roadmap is empty — /esq:roadmap plan to derive one from the backlog.`
 
-The primary `→ Next` is executable as written and repeats the first executable ask when one exists. No preamble or closing observations.
+When an action is warranted, the primary `→ Next` is executable as written and repeats the first executable ask when one exists. No preamble or closing observations.
 
 ## Template
 

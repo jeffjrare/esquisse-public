@@ -62,17 +62,19 @@ Report every vocabulary defect in a compact Ledger defects block. Settled normal
 
 ## 3. Evidence, cheapest first
 
-For each candidate, stop gathering when the evidence settles it; group plan-linked candidates so each plan is read once.
+For each candidate, stop gathering when the evidence settles it; group plan-linked candidates so each plan is read once. Before any signal can settle a closure, read that candidate's summary and detail section once, including explicit post-plan completion conditions, and compare them with the evidence. A commit citation or completed plan does not bypass this read. Conditions stay in the existing detail prose; no new field or executable gate is required.
 
 1. **ID citation:** a commit subject/body names the ID and its actual change resolves the item. Exclude subjects beginning `plan:`, `plan(`, `brief`, `backlog:`, `decisions:`, `epic:`, `roadmap:`, `spec:`, `merge:`, `docs(claude):`, `docs(arch):`. A metadata close is not implementation evidence; a code citation is the strongest linkage, not automatic proof of completeness.
 2. **Plan:** Source's ` · Planned by <slug>` identifies the plan. Read its phases/log once, using `esq next-phase <plan>` for current classification. It shipped only if every declared phase has a completed entry. A paused `⏸`, missing entry or phase-less/unreadable plan does not prove completion. No separate manual-confirmation check: an unconfirmed manual gate leaves the phase paused.
 3. **Corrective brief:** establish that this item was a 🟢 in the relevant fixes brief, is now removed, and has a corresponding fix(...) commit in the window. Reuse known paths/history; mere absence of a brief or an unrelated fix commit proves nothing. Still listed → not applied by that signal.
-4. **File overlap:** only now open an unresolved candidate's detail for named file/module/screen and inspect matching changes. Overlap alone never settles it.
+4. **File overlap:** only now inspect matching changes for the file/module/screen named in an unresolved candidate's detail, reading that detail if not already retained. Overlap alone never settles it.
 5. **Direct end state:** only for a remaining candidate whose requested state is unambiguous and checkable with **one command against the committed tree**: removed file, removed dependency, absent symbol. If the exact requested state holds, it can settle the item without an ID citation or causal commit. Working-tree/untracked state is insufficient; a passing test proves this run, not necessarily the promised outcome. If interpretation remains, classify accordingly.
 
 ## 4. Classify
 
 **Settled:** an unambiguous work link and proof of the **whole** outcome, or the exact committed end state from signal 5. Examples: one cited defect plainly fixed; a completed plan covering the entire row; the linked corrective fix. Close without asking. A doubtful case never becomes settled merely because the unit/plan is complete.
+
+An explicitly unmet completion condition or missing proof leaves the row open, even on a complete plan. Classify it as untouched unless a specific unrecorded user judgment really remains; do not ask permission to call an unmet outcome delivered, rerun completed phases, or launch an optional measurement merely to close the row. Reuse the recorded evidence and any revisit condition.
 
 **Ambiguous:** evidence plus a specific remaining user judgment:
 - completed plan covers only part of the summary;
