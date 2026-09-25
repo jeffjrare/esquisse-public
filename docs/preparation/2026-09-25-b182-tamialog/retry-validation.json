@@ -1,0 +1,12 @@
+{
+  "ledger_command": "plugin/bin/esq validate",
+  "ledger_valid": true,
+  "findings": [],
+  "documentation_diff_check_exit": 0,
+  "full_diff_check_exit": 2,
+  "full_diff_check_finding": "Inherited trailing space after Tasks in exactly restored baseline SKILL.md:198; preserved to keep byte-identical restoration.",
+  "source_restored_exactly_from": "fd77d23",
+  "restored_source_sha256": "4f7ac168206e26a997b5ead5884f04752b5d0e2cfeacf316b1910b37bc692a88",
+  "candidate_proposal_sha256_matches": true,
+  "new_audit_or_model_run": false
+}

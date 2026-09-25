@@ -1,0 +1,51 @@
+{
+  "reference": "docs/preparation/2026-09-25-b181-tamialog/after-proposal.md",
+  "candidate": "retry-proposal.md",
+  "disposition": "reject candidate and restore plan sources from fd77d23; B-182 Open",
+  "comparison": {
+    "words": {
+      "reference": 1313,
+      "candidate": 1217,
+      "change_percent": -7.31
+    },
+    "elapsed_seconds": {
+      "reference": 162.93,
+      "candidate": 130.49,
+      "change_percent": -19.91
+    },
+    "reported_cost_usd": {
+      "reference": 1.1363492000000002,
+      "candidate": 1.0563188000000001,
+      "change_percent": -7.04
+    },
+    "returned_characters": {
+      "reference": 120541,
+      "candidate": 141751,
+      "change_percent": 17.6
+    }
+  },
+  "tool_calls": {
+    "reference": 41,
+    "candidate": 35
+  },
+  "output_tokens": {
+    "reference": 16580,
+    "candidate": 13230
+  },
+  "regressions": [
+    "English hero copy explicitly deferred to implementation",
+    "English accessible label not supplied",
+    "Powdered-formula specificity lost again",
+    "Required UI reference not read in trace"
+  ],
+  "gains": [
+    "Fixed quantity field replaced rather than retained",
+    "No invented Git state"
+  ],
+  "unchanged_failures": [
+    "Final output exceeds 900 words",
+    "Measurement -> threshold -> final proof sequencing remains implicit",
+    "run-tamialog observation recipe not read"
+  ],
+  "restored_source_sha256": "4f7ac168206e26a997b5ead5884f04752b5d0e2cfeacf316b1910b37bc692a88"
+}

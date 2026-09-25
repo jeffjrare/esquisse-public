@@ -1,0 +1,9 @@
+{
+  "authorization": "User: yes go, after explicit request for one retry outside sandbox under $3 / 180 seconds",
+  "same_482_files_as_initial_attempt": true,
+  "same_prompt_as_b181": true,
+  "source_manifest": "inputs.json",
+  "environment": "outside sandbox",
+  "source_formatting": "Isolated case retains tested bytes; final-formatting.json records whitespace-only cleanup in committed reference.",
+  "reference_rerun": false
+}
