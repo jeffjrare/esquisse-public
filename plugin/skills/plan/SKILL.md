@@ -165,12 +165,12 @@ If the work is genuinely invisible to users, state the condition that proves the
 work is now possible.
 
 ## Approaches considered
-2-3 candidate approaches, each with:
-- A name (one phrase)
-- One paragraph describing it
-- Tradeoffs — how it serves the user's result under the actual constraints, what it costs to build and operate, and which concrete limit would make it unsuitable. Compare the simplest viable use of existing code before adding infrastructure; do not invent scale or alternatives for structure's sake.
-
-If the task admits only one sensible approach, say so explicitly and justify in one sentence. Don't manufacture alternatives for structure's sake.
+Start with the simplest viable use of existing code. Add an alternative only when it
+could materially improve the user's result within the actual constraints. For each
+viable approach, name its user benefit, build/operating cost and decisive limitation
+briefly. An approach violating a known constraint is not a candidate; mention its
+rejection once only if that explains the choice. One viable approach is enough;
+there is no quota and no invented scale.
 
 ## Recommendation
 Which approach and why. Be direct. Reference the tradeoffs above. If the answer depends on something the user must decide, surface it as an open question instead of picking arbitrarily.

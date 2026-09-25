@@ -77,6 +77,10 @@ Phase 1 is a whole-codebase read and it is silent. The itinerary is what disting
 
    This is the free moment to be redirected — the target is on screen before anything has been spent on it.
 
+Retain each read and its evidence for the whole pass. Batch independent reads; load
+only missing facts afterwards. Reuse applicable verification already recorded; a
+refresh does not rerun a test or launch research merely to restate its result.
+
 ## The altitude test — apply it to every candidate line
 
 This is the rule that decides what these documents are. The command this replaced mined build logs for whatever past sessions happened to trip over, which produced a drawer of implementation trivia. The fix is not to mine more carefully — it's to ask one question of every line:
@@ -117,11 +121,23 @@ On a refresh, scope this by what changed: `git log --stat` since the freshness m
 
 The code says *what*. These say *why*, and a rule without its reason gets overruled by the next person who finds it inconvenient.
 
-**`docs/DECISIONS.md`** — entries scoped `arch`, `infra`, `deps`, and `ux`. Each is a rule with its rationale already written. This is the highest-value source in the repo for ARCHITECTURE.md; the reasoning is done, and your job is to place it where a designing session will meet it.
+**`docs/DECISIONS.md`** — locate entries for the concepts and changed areas found in
+Phase 1, then read only those details and any directly cited supersession. Relevant
+`arch`, `infra`, `deps`, and `ux` entries supply intent, not automatic authority:
+check applicability against the current mandate, code and cited `Fondement`.
+`Active` alone does not reinstate a retired rule. Preserve historical records;
+do not scan the whole detail tail or migrate unrelated metadata. A first projection
+uses the component map to select relevant entries, not every past decision.
 
-**Plan execution logs** (`docs/plans/*.md`, `## Execution log`) — read them *last* and treat them with suspicion. They record what individual sessions tripped over, which is where the old drawer of trivia came from. A log signal qualifies only if it passes the altitude test *and* generalizes beyond the file it was found in. Most don't. Taking nothing from the logs is a normal outcome, not a sign you read them wrong.
+**Plan execution logs** — read them last, only for a named boundary or invariant
+still unexplained by code and relevant decisions. Use the cited plan's retained
+evidence; no plan-directory sweep. A log signal must pass the altitude test and
+generalize beyond its original file. Taking nothing from logs is normal.
 
-**`docs/SPEC.md`** — read it only to check that CLAUDE.md's document map mentions it. Never copy feature descriptions here; features are the spec's job. If CLAUDE.md's map is missing `docs/SPEC.md`, `docs/DECISIONS.md`, `docs/BACKLOG.md`, or `docs/ARCHITECTURE.md`, adding the missing line is a candidate — a session that doesn't know a document exists will never read it.
+**`docs/SPEC.md`** — existence and its freshness marker suffice for the document-map
+and staleness advisory; do not read its body for that purpose. Never copy feature
+descriptions here. Add a missing pointer to SPEC, DECISIONS, BACKLOG or ARCHITECTURE
+when its absence would hide a document a future session needs.
 
 Never write `docs/SPEC.md`, and never invoke `/esq:spec`. You report; the user decides.
 
@@ -129,13 +145,18 @@ Never write `docs/SPEC.md`, and never invoke `/esq:spec`. You report; the user d
 
 **Do this before drafting anything new.** Every line already written is a claim about the codebase, and an unverified claim is worse than a blank page: it is confidently wrong, on every session, forever.
 
-For every existing line in CLAUDE.md, in any `.claude/skills/*/SKILL.md` you maintain, and in the sections of ARCHITECTURE.md covering areas that changed:
+On refresh, check claims affected by Phase 1's changes in CLAUDE.md, maintained
+project skills and ARCHITECTURE.md, including dependent boundaries and apparent
+contradictions. Reuse the unchanged projection's established evidence. On a first
+projection, cover the current component map. For each claim in that scope:
 
 - **Still true?** Check it against what you read in Phase 1. A module that moved, a rule that's now enforced elsewhere, a "never do X" for an X that no longer exists.
 - **Still architecture?** Entries left by the retired `sync` command are frequently implementation trivia. Apply the altitude test to what's already there, not only to what you're adding. This is how the drawer gets emptied.
 - **Still earning its place in CLAUDE.md?** A true line that changes nobody's decision belongs in ARCHITECTURE.md or nowhere. And a true line whose miss would be *loud* belongs in a skill — on a project whose CLAUDE.md predates the miss test, expect most of the file to move, not to be deleted.
 
-Propose deletions and relocations with the same weight as additions. **A run of this command that only adds is a run that skipped this phase.** Say explicitly how many lines you checked and how many you're proposing to cut; if the answer is zero cuts, say why the existing content held up.
+Judge deletions and relocations by the same evidence as additions. Zero cuts can be
+correct; never manufacture removals to demonstrate review. Report the checked scope
+and only consequential corrections, preserving silent or expensive safety rules.
 
 ## Phase 4 — Draft, and route every line to its home
 
@@ -238,86 +259,27 @@ Do not deliver an over-length file with a note apologizing for it — over the l
 5. `git commit -m "docs(arch): <first run | refresh YYYY-MM-DD> (<N> added, <M> cut, CLAUDE.md <L> lines)"` — the refresh's second commit when step 1 made one, and the only one otherwise.
 
 <!-- conclusion:start -->
-**Your conclusion is three zones, in this order, and nothing else.** The reader wants two facts — did it work, and does it need me — before any detail.
+6. **Conclude in three zones, using short bullets and links.**
+   - **Headline:** `✔|⚠|✖ arch — <changed scope> · <measured elapsed>`; include
+     `NEEDS YOU (n)` only for genuine unresolved user authority.
+   - **User needs, if any:** name the missing authority and its consequence. A
+     code/decision contradiction is first a diagnosis: use current intent and evidence
+     to settle its meaning. Ask only if a product choice or authorization remains;
+     never ask the user to guess whether code or history is wrong.
+   - **Result:** each consequential change states what changed, why it helps the next
+     implementation, and its file/section. Group related moves and deletions. Include
+     CLAUDE.md's final line count, verification reused/performed, unresolved limits,
+     the commit and undo command. Link the committed files/diff; do not paste the
+     whole draft, diff, or per-line inventory unless requested.
 
-**1 · The headline.** One line, first, no preamble above it:
-
-> `<glyph>  <command> — <your own counters> · <elapsed> · NEEDS YOU (<n>)`
-
-`✔` nothing needs the user · `⚠` something does · `✖` you could not do your job. Drop `NEEDS YOU` when nothing does, and never soften the glyph: one open gate makes the whole run `⚠`.
-
-**2 · What needs you.** Only what the user still has to settle — never a notice, and never work this command could do itself. One short ask per numbered line, action first, an executable one carrying its exact command in backticks. A genuine product choice takes the 🔴 option-set shape; a manual verification is copied verbatim with its starting state bracketed at the front. Absent whenever the headline is `✔`.
-
-**3 · What happened.** One line per fact, never a sentence: glyph, label, value, evidence in its own column.
-
-> ```
-> ✔ fixed       6 items            a1b2c3d..e4f5a6b
-> ○ still open  1 🟡               docs/plans/webhooks-fixes.brief.md
-> ○ not run     spec · CLAUDE.md refresh
-> ```
-
-`✔` happened · `○` did not, by design · `✖` failed. **A fact with nothing to report collapses or disappears** — never a line reading `None.`, and several unremarkable no-ops become one `○ clean  <what you checked>`. But a no-op the reader would assume happened keeps its line — `○ not run  <what, and why>` — because silence there claims everything ran.
-
-Then `→ Next`, last and alone: the first executable ask's exact command, or `pick an option in <n>, then <the command that resumes>`, or the one command that runs next.
-
-**Nothing outside the three zones.** No preamble, no closing observations, no invented heading.
+`→ Next` names the one warranted action, or says nothing is owed. Spec staleness is
+optional advice, not a user gate or reason to launch `/esq:spec`. Keep missing facts
+visible without inventing a question. Omit empty categories and repeated rationale.
 <!-- conclusion:end -->
 
-6. **Conclude** — three zones. Headline: `<glyph>  arch — CLAUDE.md <N> lines · <a> added · <c> cut · <elapsed> · NEEDS YOU (<n>)`. **Zone 2 is the two things this run cannot settle, and nothing else:** code contradicting a `DECISIONS.md` entry, and spec staleness (`last-spec` predates recent user-facing work). Report both; fix neither. **Zone 3 opens with one line per written file**, then the grouped report below, verbatim, **deletions and moves first** — those are worth arguing about — then `verified`/`cut` and the commit line, its evidence column carrying the undo. `→ Next` is `/esq:spec` when stale, else the contradiction's `do:`, else nothing is owed.
-
-```
-⚠  arch — CLAUDE.md 62 lines · 2 added · 1 cut · 11m30s · NEEDS YOU (2)
-
-  1  Resolve src/billing/ledger.ts appending out of order — contradicts D-ledger-append-only
-     A · code wrong — do: /esq:backlog ledger appends out of order, contradicts D-ledger-append-only
-     B · decision changed — do: DECISIONS.md › D-ledger-append-only → Statut: Superseded
-     Leaning: A
-  2  Refresh docs/SPEC.md — last-spec 2026-07-30, 3 user-facing phases since
-     do: /esq:spec
-
-  ✔ CLAUDE.md             62 lines (gate 80) · 3 moved · 1 cut · 2 added   e4f5a6b
-  ✔ docs/ARCHITECTURE.md  2 sections updated · 1 added                     e4f5a6b
-
-  [the grouped report — the block below, as is]
-
-  ✔ verified   41 kept · 4 cut
-  ✔ committed  docs(arch): refresh 2026-08-18 (…)   e4f5a6b · undo: git revert e4f5a6b, or name a line
-
-→ Next: /esq:spec
-```
-
-```
-CLAUDE.md — <N> lines after this change (gate: 80)
-
-docs/ARCHITECTURE.md — <new file | N sections updated, M added>
-  [show the diff, or the full draft on first run]
-
-.claude/skills/ — <N new, M updated>
-  [NEW] database/SKILL.md — 6 rules moved out of CLAUDE.md
-    description: "Prisma schema, migrations, and DB naming for <project> —
-    read before editing schema.prisma, writing a migration, or adding a model."
-
-CLAUDE.md
-  [MOVE → .claude/skills/database/]
-    - "Prisma models are snake_case in the database, camelCase in the client"
-      why: a miss is loud — the query fails immediately.
-
-  [DELETE — "### Conventions" bullet 3]
-    - "express.raw() must be applied per-route, not app-wide"
-      why: implementation detail — fails the altitude test.
-
-  [ADD — under "### Architecture"]
-    - **billing/** — subscriptions, invoices, Stripe integration. Owns every
-      write to the ledger.
-
-  [ADD — under the document map]
-    - Before changing anything that crosses a service boundary, read
-      `docs/ARCHITECTURE.md § Frontières à ne pas franchir`.
-
-  (Sources shown for your verification — never written to the files.)
-```
-
-The one thing you may still ask about: if a rule you're moving out of `CLAUDE.md` is one whose miss you judge **loud**, but breaking it would cost real money, data, or a production incident, name it and ask before moving — the miss test is about visibility, and a visible-but-catastrophic failure deserves the resident slot. At most one such question, and only when you mean it.
+A loud failure can still be expensive. Keep rules whose violation risks real money,
+data or a production incident in CLAUDE.md under the existing miss test; visibility
+alone does not justify moving them or asking the user to approve that move.
 
 ## Constraints
 

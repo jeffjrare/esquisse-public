@@ -71,6 +71,8 @@ through UX choices, architecture tradeoffs and a first usable delivery. Ordinary
 design omissions are resolved during planning, within the accepted constraints.
 Plans keep relevant decisions and verification, without migrating unrelated historical
 registry entries. Corrective procedures and decision-record formats load only when needed.
+One viable approach is enough; alternatives must improve the outcome within the constraints.
+Architecture refreshes use applicable decisions and report changes with short reasons and links.
 For an unfamiliar codebase, `/esq:status` or the `harvest`, `spec` and `arch`
 commands can help on demand; none is a mandatory setup sequence. A tiny edit
 that needs no workflow record can use ordinary Claude Code.
