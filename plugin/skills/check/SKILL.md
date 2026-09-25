@@ -181,7 +181,7 @@ No introductory or restating paragraph between these lines. If you cannot name d
 **🟢 means a gap with a mechanical fix — not a change that is merely safe to make.** Safety is what makes a gap green; it is never what makes something a finding. An observation that failed the bar is a zone-3 line or nothing.
 
 Compute **→ Next** as one of — always with the concrete path (`<brief-path>` is the corrective brief you write below; `<plan-path>` is the plan you checked), so the line is copy-pasteable. **🔴 outranks every other tier**: a red may be the question of whether the greens are worth applying at all, so it routes the whole brief even when greens are present — the same precedence `/esq:converge` honors when it runs this loop unattended.
-- 🔴 present → `"Run the `do:` of the option you pick on each 🔴 above, then: /esq:check <plan-path>"` — name the count (`1 decision`, `2 decisions`) so the user knows how many picks stand between them and the loop closing. Never `"answer the 🔴 items"` — the options are already written above.
+- 🔴 present → `"/clear, then run: /esq:converge <brief-path>"` — it puts each decision, applies the pick and strikes the answered 🔴 from the brief, which is what clears it for landing; running a `do:` by hand leaves the 🔴 standing. Name the count (`1 decision`, `2 decisions`) so the user knows how many picks stand between them and the loop closing. Never `"answer the 🔴 items"` — the options are already written above.
 - No 🔴, any 🟢 → `"/clear, then run: /esq:fix <brief-path>"`, and on a second line the unattended form, at what it actually buys: `"Or: /esq:converge <brief-path> — applies these and stops. One subagent."` **Say that it stops there**, because entering converge from a *check* brief runs the fix and no review: `/esq:check` records no review coverage and neither does that run, so the unit is still owed `/esq:review <plan-path>` afterwards. Name that command on the same line. Do not describe converge as re-reviewing anything — from this brief it does not.
 - No 🔴/🟢, any 🟡 → `"/clear, then run: /esq:plan <brief-path>"`
 - No 🔴/🟢/🟡, any incomplete phase (including a false-complete) → `"Run: /esq:build <plan-path>"`, naming what remains to build, observe or resolve. With other findings, route their prerequisite first and retain the owed phase resumption; never send a blocked phase back to meet the same unresolved cause.
@@ -201,7 +201,7 @@ Preserve every unresolved finding in the brief. A remaining item still blocks la
 
 At `exhausted`, the applicable route above replaces the normal `→ Next`; do not offer a corrective plan or another converge cycle beside it.
 
-Offer `/esq:converge` on the 🟢 branch **only** — on a 🔴 it stops on the red you just reported, on a 🟡-only brief it has nothing to apply, and on an all-clear brief it has no fixes to apply; hand off to review directly.
+Offer `/esq:converge` on the 🔴 and 🟢 branches only — on a 🟡-only brief it has nothing to apply, and on an all-clear brief it has no fixes to apply; hand off to review directly.
 
 ## Write the corrective brief
 
