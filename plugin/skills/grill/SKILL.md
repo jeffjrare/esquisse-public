@@ -180,6 +180,6 @@ After writing the brief file:
 - Do NOT spawn subagents — the interrogation is one reader holding the whole task in mind, and a fleet would each ask the user the same thing. The announced bound says **no subagents**.
 - Do NOT write a plan — no approaches, no phases, no architecture. That's `/esq:plan`'s job.
 - Do NOT ask the user anything you can answer by reading the codebase — or by looking up how it is done outside it. Investigate first, then research; see *Whose question is it*.
-- Do NOT pad the interrogation — see *The core discipline*.
+- Do NOT pad the interrogation — see *Propose, don't just ask*.
 - One brief file, single document. If a git repo isn't initialized, write the brief but skip commit; tell the user.
 - Leave the `<!-- comment -->` marker in the brief intact.

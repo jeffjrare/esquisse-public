@@ -41,9 +41,10 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
 ## Preflight
 
-1. **Read the two projection docs, if present.** They answer different questions and you need both:
+1. **Read the projection docs, if present.** They answer different questions:
    - `CLAUDE.md` at project root — *how* this codebase is built: conventions, architecture, gotchas.
-   - `docs/SPEC.md` — *what* the product does, feature by feature, in PO language. Read the affected **Fonctionnement** and **Règles métier**; reuse what they establish. If the task changes a documented behavior, name it in `## Context`. A contradiction needs a question only when the mandate does not authorize the change; an older placement comment cannot cancel an explicitly approved new order. An absent or stale feature description is an evidence gap: inspect its implementation and cite that source for the proposal, without inventing a product rule. Never edit SPEC here or make its refresh a prerequisite to already authorized work; `/esq:spec` remains a user-triggered follow-up. An actual unresolved product rule still follows **Resolve blocking decisions**.
+   - `docs/SPEC.md` — *what* the product does, feature by feature, in PO language. Read the affected **Fonctionnement** and **Règles métier**; reuse what they establish. If the task changes a documented behavior, name it in `## Context`. A contradiction needs a question only when the mandate does not authorize the change. An absent or stale feature description is an evidence gap: inspect its implementation and cite that source for the proposal, without inventing a product rule. Never edit SPEC here or make its refresh a prerequisite to already authorized work; `/esq:spec` remains a user-triggered follow-up. An actual unresolved product rule still follows **Resolve blocking decisions**.
+   - `docs/ARCHITECTURE.md` — *where* the change belongs: the components the task touches and its boundaries section. The Recommendation names the owning component and the boundary the change must not cross.
 2. **Resolve the planning input.** Use the user's task description when given. Otherwise run `esq brief pending` and read `selected` in full: its scope, decisions, constraints and deferred work are the input. Announce its path and the other `pending` briefs this run will not plan. Derive the slug by stripping `.brief.md` and the leading date.
    Never choose by disk mtime: the CLI excludes consumed briefs, accounts for abandoned plans, and selects corrective briefs only while 🟡 items remain. No task and no pending brief → STOP and ask what to plan, even if older briefs remain on disk.
 
@@ -53,7 +54,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 6. If the file exists, append `-2` (then `-3`, etc.) to slug until unique
 7. Ensure `docs/plans/` exists; create if missing
 8. Fetch `AskUserQuestion`: call `ToolSearch "select:AskUserQuestion"`. Needed for interactive decisions during planning. Skip silently if unavailable.
-9. **Check `docs/BACKLOG.md` if present.** Match `Open`/`Needs-decision` rows by the task's nouns in their Summary; read a detail section only after its row matches. Include only relevant items in `## Open questions` or `## Risks`; resolve blockers before planning proceeds. When writing the plan, use the CLI to mark picked-up rows `Planned`, appending ` · Planned by <this-plan-slug>` to Source. Update only the row; strip any legacy detail `**Status:**` rather than maintaining it. Commit these edits with the plan and decisions in the single tail commit.
+9. **Check `docs/BACKLOG.md` if present.** Match `Open`/`Needs-decision` rows by the task's nouns in their Summary; read a detail section only after its row matches. Include only relevant items in `## Open questions` or `## Risks`; resolve blockers before planning proceeds. When writing the plan, mark each picked-up row with `esq backlog set-status <B-NNN> Planned --by <this-plan-slug>`. Update only the row; strip any legacy detail `**Status:**` rather than maintaining it. Commit these edits with the plan and decisions in the single tail commit.
 10. **Check for an epic** when `docs/epics/` exists. Use the epic the user or brief names, or the single `Active` epic whose `## Scope` clearly covers the task. Otherwise omit it; never force a fit or create an epic here. For work exceeding one plan, mention `/esq:epic new <title>` if useful. Record the chosen slug in the plan header and fill blank Epic cells on the rows marked Planned in step 9, in the same edit.
 
 11. **Announce the resolved target** — the second line, once preflight has settled what the first one could not name:
@@ -170,7 +171,9 @@ could materially improve the user's result within the actual constraints. For ea
 viable approach, name its user benefit, build/operating cost and decisive limitation
 briefly. An approach violating a known constraint is not a candidate; mention its
 rejection once only if that explains the choice. One viable approach is enough;
-there is no quota and no invented scale.
+there is no quota and no invented scale. When the change introduces a data model, a
+trust boundary or a pattern others will repeat, name one structurally different
+alternative and why it loses.
 
 ## Recommendation
 Which approach and why. Be direct. Reference the tradeoffs above. If the answer depends on something the user must decide, surface it as an open question instead of picking arbitrarily.
@@ -229,7 +232,7 @@ Keep only what changes an implementation or product decision: the useful result,
 chosen approach and cost, concrete tasks, verification and unresolved risks. State
 each fact once and reference it elsewhere. Do not narrate the investigation, fill
 sections with generic advice, invent alternatives, or repeat the plan in the final
-response. Keep a written plan's required headings and parsed fields intact. For a response-only proposal, use the requested scope and length instead of reproducing the file template or an investigation report. Allocate the word budget to the outcome, concrete design/copy, delivery and verification; leave margin below the cap. Cut repeated rationale, not acceptance or implementation detail.
+response. Keep a written plan's required headings and parsed fields intact. Cut repeated rationale, not acceptance or implementation detail.
 
 ## Verification discipline
 
@@ -238,7 +241,7 @@ response. Keep a written plan's required headings and parsed fields intact. For 
 - **`(auto)` is the default:** anything executable with machine-readable output, including all backend checks, APIs, queries, logs, tests and builds. Write one command in one inline-code span, then an em dash and its artifact/property: `` `(auto)` `pnpm test src/api` — the API suite passes ``. Landing extracts the command for proof reuse and reads the sentence as its PASS criterion: a grep proving no matches can pass at exit 1. A prose command or multiple commands in one step cannot be resolved for reuse and must be rerun in full.
 - **`(manual)` is only for rendered screens and visual UX flows.** Every UI-touching phase needs at least one step observing the actual screen, not merely a component-mount test. Before authoring a UI phase or manual step, load `${CLAUDE_SKILL_DIR}/references/screens-and-manual-steps.md` for starting states, action-first wording, the browser-driver test and per-screen consolidation. Backend-only phases have no manual steps.
 - **Choose verification by what the phase changes.** Target its tests; require a whole-repo run in the last phase and any phase changing code imported outside its package. Each earlier phase still needs its own proof of its stated deliverable.
-- **Buy each proof once within a phase.** Inspect the actual work of each command, including nested builds and measurements. Reuse an already built artifact through the runner's supported no-build option when its inputs are unchanged; judge all relevant properties from one captured measurement instead of rerunning for another output format. Remove a narrower check when another covers its assertions under equivalent conditions. Keep genuinely distinct properties or environments, and name any uncertain overlap. A later phase's wide run does not replace an earlier phase's proof; do not split a feature from its required budget adjustment merely to create another verification phase. Deduplicate here, never by silently skipping an execution step or attributing another command's PASS. Build's explicit exceptions still govern unrunnable commands and overbroad inherited suites.
+- **Buy each proof once within a phase.** Inspect the actual work of each command, including nested builds and measurements. Reuse an already built artifact through the runner's supported no-build option when its inputs are unchanged; judge all relevant properties from one captured measurement instead of rerunning for another output format. Remove a narrower check when another covers its assertions under equivalent conditions. Keep genuinely distinct properties or environments, and name any uncertain overlap. A later phase's wide run does not replace an earlier phase's proof. Deduplicate here, never by silently skipping an execution step or attributing another command's PASS. Build's explicit exceptions still govern unrunnable commands and overbroad inherited suites.
 - **Resolve commands by reading, never by running planned verification.** Check the executable exists and is executable, and arguments match its Usage header, documented help or existing call sites, in that order. Cite the call site used when other documentation is absent. A file this plan's tasks create is a valid future referent. Always name the artifact and property after the command so execution can recover its intent if the command cannot run; an ambiguous bare command cannot be safely substituted.
 - **Use explicit `.mjs` files or quoted globs for `node --test`, never bare directories:** `node --test 'tests/cli/*.test.mjs'`.
 - **Make results independent of ambient tool variants.** Prefer explicit path operands to searching a root and filtering printed path prefixes. Account for wrapped text, locale-dependent sorting and differing tool flags; the same assertion must mean the same thing in an interactive shell and a script.
@@ -252,8 +255,7 @@ Cut work whose only justification is a future uncommitted use case: single-use
 abstractions, unused configuration, speculative extension points and restructuring
 that unblocks nothing in this plan. Keep a task only for a concrete requirement or
 risk. Never cut a trust boundary, necessary data semantics or usable design to make
-the plan look small. For UI, load `${CLAUDE_SKILL_DIR}/references/screens-and-manual-steps.md`
-if not already in hand; states belong in the phase exposing the action.
+the plan look small. For UI, states belong in the phase exposing the action.
 
 Read the written plan once and correct these yourself:
 
