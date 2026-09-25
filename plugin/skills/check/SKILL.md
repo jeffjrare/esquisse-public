@@ -101,9 +101,9 @@ Judge it against those conditions in *their* terms — not against the tasks, no
 
 Three outcomes:
 
-- **Yes** — zone 3's `answers` line says so, naming the condition and what in the code satisfies it. Say it explicitly even when obvious; an audit that never states this is the audit that let it slip.
+- **Yes** — the headline says the user result is satisfied; supporting evidence belongs in the factual rows. Say it explicitly even when obvious.
 - **Partly, and you can name the gap** — the plan built something the brief's conditions don't cover, or covers a condition only in the happy path. That's a finding at its own severity, not a note. Name which condition is unmet and what would meet it.
-- **Only the user can judge it** — the condition is about whether a person's problem is actually solved, the investigation above settled nothing, and no valid confirmation exists. Only then is it a 🔴, written in the shape below: the decision is *"does <the concrete screen or output> give you Y?"*, `Why yours` is that only looking settles it, and the two options are *it does* (→ `/esq:review <plan-path>`) and *it doesn't* (→ `/esq:plan <brief-path>`). Do not resolve it by assuming the plan was right; the plan is the thing under audit.
+- **Only the user can judge it** — the condition is about whether a person's problem is actually solved, the investigation above settled nothing, and no valid confirmation exists. Only then is it a 🔴, written in the shape below: *"does <the concrete screen or output> give you Y?"* The options settle that condition alone; their continuation must respect the other findings and incomplete phases under `→ Next`. Do not resolve it by assuming the plan was right, or turn missing machine-observable proof into a product choice.
 
 If the plan has no `## Done looks like` (written before this section existed), say so plainly in one line and fall back to `## Goal` — then note that the next plan for this work should carry the brief's conditions forward, because auditing a plan against itself is what this section exists to prevent.
 
@@ -116,7 +116,7 @@ Now cross-reference the plan against git history and current state. Call `TaskUp
 1. **Was it executed, and is it done?** Read its execution-log entry. `completed` means done; **`⏸` means paused and incomplete regardless of the following prose**. Surface every paused phase. Its `**Manual verification outstanding:**` and `**Blocked by:**` fields identify the manual steps or same-unit defects still owed.
 2. **Do the commits match?** The execution log lists commit short hashes. Verify they exist in the preflight commit list, then read each one's file list and shape out of the preflight `git log --stat` — that usually confirms or refutes the task↔commit match on its own, and it is already fetched. Open a full `git show <hash>` only when the stat looks off (unexpected files, surprising size) or the task can't be confirmed from file names alone. Never re-fetch a stat you already have, and do not full-diff every commit by default.
 3. **Were all tasks done?** For each task listed in the phase, find the corresponding commit. If a task has no matching commit, that's a gap.
-4. **Did verification actually pass — including the manual steps?** Re-run a sample `(auto)` step yourself if possible; if the log claimed ✅ but you can't reproduce it, flag it. For `(manual)` steps, accept observations in `**Verification:**` (normal build completion) or `**Manual verification:** confirmed …` (pause resolution). Open artifact links relative to the log and match the named route, viewport, theme, starting data/action and observed commit; assess only what the artifact covers. Reuse valid captures and dated, state-specific human confirmations; no extra image is required for the latter. Recover missing references or observe only uncovered conditions within the mandate. An absent, unreadable, wrong-state or stale artifact is missing proof, not a visual FAIL or proof that nobody observed the result. Report a visual defect only when the observed result is wrong. If manual steps were actually deferred, excused in prose ("deferred to live env"), or never observed despite a `completed` entry, that is a **false-complete** — flag it as prominently as a missing task.
+4. **Did verification actually pass — including the manual steps?** Reuse proof that meets the validity conditions above, including checks already run during the outcome analysis. Spot-check an `(auto)` claim only where coverage or validity remains uncertain; if the log claimed ✅ but you can't reproduce it, flag it. For `(manual)` steps, accept observations in `**Verification:**` (normal build completion) or `**Manual verification:** confirmed …` (pause resolution). Open artifact links relative to the log and match the named route, viewport, theme, starting data/action and observed commit; assess only what the artifact covers. Reuse valid captures and dated, state-specific human confirmations; no extra image is required for the latter. Recover missing references or observe only uncovered conditions within the mandate. An absent, unreadable, wrong-state or stale artifact is missing proof, not a visual FAIL or proof that nobody observed the result. Report a visual defect only when the observed result is wrong. If manual steps were actually deferred, excused in prose ("deferred to live env"), or never observed despite a `completed` entry, that is a **false-complete** — flag it as prominently as a missing task.
 5. **Did the divergences change the outcome?** For the tasks where the plan prescribed a specific approach, read those diffs (the ones already opened in step 2, plus any approach-critical ones). The question is not "did they follow the recipe" — it's whether the difference cost anything. A different route to the same result is a note. A divergence that changed behavior, dropped a requirement, or took on a constraint the plan explicitly ruled out is a finding.
 
 ### Cross-cutting analysis
@@ -141,7 +141,7 @@ Call `TaskUpdate` to set `"Per-phase analysis"` `completed` and `"Cross-cutting 
 <!-- conclusion:start -->
 **Conclude in three zones, then `→ Next`; nothing before or after them.**
 
-1. **Headline:** `<glyph>  <command> — <your own counters> · <elapsed> · NEEDS YOU (<n>)`. `✔` nothing needs the user; `⚠` something does; `✖` you could not do the job. Omit `NEEDS YOU` when empty. Any open gate makes the headline `⚠`.
+1. **Headline:** state the user result, then useful counters and elapsed time. An unmet `Done looks like` leads even when every task shipped; distinguish a demonstrated failure from a result still unproven. `✔` requires satisfied conditions, complete phases and no unresolved findings; `⚠` marks a gap, missing proof, incomplete phase or pending decision; `✖` means you could not do the check. `NEEDS YOU (<n>)`, when nonempty, counts the actions or decisions still owed, not the evidence rows.
 2. **What needs the user:** omit on `✔`. Number each ask, action first, with its exact runnable command. Product choices use the 🔴 option set; copy manual verifications verbatim with their starting state bracketed first. Do not ask for work this command can perform itself.
 3. **What happened:** one factual row per result — glyph, label, value, evidence. `✔` happened; `○` deliberately did not; `✖` failed. Collapse empty categories and unremarkable no-ops; never print `None.`. Explicitly name unperformed work the reader would otherwise assume happened.
 
@@ -150,7 +150,7 @@ Last line: `→ Next` with the first executable ask verbatim, or `pick an option
 
 ## Report
 
-Call `TaskUpdate` to set `"Cross-cutting analysis"` `completed` and `"Generate report"` `in_progress`. Output findings in this exact structure — **lead with verdict and action items so the user knows what to do before reading any detail**. Call `TaskUpdate` to set `"Generate report"` `completed` after writing.
+Call `TaskUpdate` to set `"Cross-cutting analysis"` `completed` and `"Generate report"` `in_progress`. Use the three zones above for one account of the result, gaps and next action; no additional verdict paragraph or second report for the caller. Include any requested brief path, commit and early-stop reason in the factual rows. The layout and labels are flexible. Call `TaskUpdate` to set `"Generate report"` `completed` after writing.
 
 Rank the action items by consequence, worst first.
 
@@ -174,32 +174,9 @@ No introductory or restating paragraph between these lines. If you cannot name d
 **Each `do:` settles only the present decision and runs as written.** Put deferred work in the consequence. Keeping existing state requires verifying it and recording acceptance against the specific decision entry, with the evidence named. A user-only command remains that command alone, never an equivalent edit or shell call. Give a justified leaning, or name why none is possible; the user chooses. Never apply an option while presenting it or present one as already decided.
 <!-- decision-block:end -->
 
-```
-⚠  check — <slug> · 5 phases · 4 findings · 4m · NEEDS YOU (4)
-
-  1  <the 🔴, option-set shape above — verb first, ≤10 words; options and leaning under it>
-
-  🟢 safe fixes (2) → /esq:fix
-     <finding> — `file:line` — fix: <one line> — verify: <runnable check>
-  🟡 needs planning (1) → /esq:plan
-     <finding> — `file:line` — why: <one line>
-  ⏸ paused (1) → /esq:build
-     Phase 4 — <what the entry owes: the `(manual)` steps to observe, or the same-unit rows blocking it>
-
-  ✔ phases      4/5 complete          Phases 1–3, 5 — tasks matched, auto + manual confirmed
-  ✖ Phase 4     🚩 false-complete     marked done, manual verification never observed
-     Task 4.2: ❌ no matching commit
-  ⚠ answers     `Done looks like` — 3 of 4 met
-     ⚠ <the unmet condition> — <what is missing>
-  ○ clean       no unplanned commits, no files outside plan, no surprises
-  ○ spec        stale — 2 feature(s) → /esq:spec
-
-→ Next: <computed — see below>
-```
-
-Zone 2 is all four tiers, worst first, and `NEEDS YOU (<n>)` counts every item across them — each one is a thing the user must run or settle. Omit a tier with zero items; all four empty means the headline is `✔` and zone 2 is gone entirely.
-
-Zone 3 aggregates clean phases in the `phases` count; expand only problem phases and their failing tasks. Combine clean cross-cutting categories in one `○ clean` line. **Always retain the separate `answers` line**, even on success: it states whether the delivered result satisfies `Done looks like`.
+- **Result:** give the conclusion once, in the headline. An unmet condition outranks plan conformity; name it and what is missing. With missing proof, say what remains unproven rather than declaring failure or success. If the outcome is satisfied but execution is incomplete, say both.
+- **Gaps and actions:** use 🔴 only for the user-owned decisions above, 🟢 for mechanical fixes, 🟡 for substantive corrections or missing verification, and ⏸ for incomplete phases to resume. Keep tasks never built, demonstrated false-completes and outcome-changing drift visible. Name the correction and verification needed, with evidence; an ordinary technical diagnosis is not a decision. Omit empty tiers and do not count one gap again just because it also explains an incomplete phase.
+- **Facts:** aggregate clean phases; expand only exceptions. Add evidence or coverage details without repeating the headline or action descriptions. Harmless drift is at most a note; significant drift names the changed outcome and its correction, never a generic choice to amend the plan. A clean result needs only its supporting proof, phase completeness and the review handoff; omit routine no-ops. Spec staleness remains advice.
 
 **🟢 means a gap with a mechanical fix — not a change that is merely safe to make.** Safety is what makes a gap green; it is never what makes something a finding. An observation that failed the bar is a zone-3 line or nothing.
 
@@ -207,7 +184,8 @@ Compute **→ Next** as one of — always with the concrete path (`<brief-path>`
 - 🔴 present → `"Run the `do:` of the option you pick on each 🔴 above, then: /esq:check <plan-path>"` — name the count (`1 decision`, `2 decisions`) so the user knows how many picks stand between them and the loop closing. Never `"answer the 🔴 items"` — the options are already written above.
 - No 🔴, any 🟢 → `"/clear, then run: /esq:fix <brief-path>"`, and on a second line the unattended form, at what it actually buys: `"Or: /esq:converge <brief-path> — applies these and stops. One subagent."` **Say that it stops there**, because entering converge from a *check* brief runs the fix and no review: `/esq:check` records no review coverage and neither does that run, so the unit is still owed `/esq:review <plan-path>` afterwards. Name that command on the same line. Do not describe converge as re-reviewing anything — from this brief it does not.
 - No 🔴/🟢, any 🟡 → `"/clear, then run: /esq:plan <brief-path>"`
-- All clear → `"Run: /esq:review <plan-path>"` — this command reconciled the plan against the implementation and recorded no coverage, so a review is still what a landing reads.
+- No 🔴/🟢/🟡, any incomplete phase (including a false-complete) → `"Run: /esq:build <plan-path>"`, naming what remains to build, observe or resolve. With other findings, route their prerequisite first and retain the owed phase resumption; never send a blocked phase back to meet the same unresolved cause.
+- All conditions proved, all phases complete, no unresolved findings → `"Run: /esq:review <plan-path>"` — this command reconciled the plan against the implementation and recorded no coverage, so a review is still what a landing reads. Harmless drift or spec staleness does not prevent this route.
 
 **Then bound the loop before that line is written.** The corrective brief below is written either way — the findings are the record and are never lost — but the `→ Next` above may not open a round this unit has run out of.
 
@@ -227,13 +205,13 @@ Offer `/esq:converge` on the 🟢 branch **only** — on a 🔴 it stops on the 
 
 ## Write the corrective brief
 
-If there are any 🟢 or 🟡 findings, emit a corrective brief so the loop can close — otherwise the findings die in this chat. The only other permitted write is the out-of-scope backlog capture below; neither changes code.
+If there are any 🟢, 🟡 or 🔴 findings, emit a corrective brief so the loop can close — otherwise the findings die in this chat. The only other permitted write is the out-of-scope backlog capture below; neither changes code.
 
 1. Path: `docs/plans/<YYYY-MM-DD>-<slug>-fixes.brief.md` — slug from the plan filename, today's date. If it exists, append `-2`, `-3`, … until unique.
 2. Write it in the corrective-brief format below.
 3. `git add` that file only — and do not commit yet. `/esq:check` writes both this brief and the backlog rows below in this one pass and owns both files while it does, so its whole tail is **one** commit, made at the end of "Out-of-scope observations → backlog". Stage nothing else — you changed no code.
 
-If everything is clean (no 🟢/🟡, at most informational 🔴), skip the brief and say so.
+With no findings, skip the brief; phases only awaiting resumption remain in the plan. A 🔴 is never informational.
 
 ```
 # Fixes brief: <plan title>
@@ -276,21 +254,13 @@ Match the table's **actual header row** rather than the literal cell count above
 <!-- shared:row-header:end -->
 - Dedup against existing rows first. Create the file from the template if it's missing.
 - **The tail is one commit, naming both halves:** `git add docs/BACKLOG.md && git commit -m "brief(fixes): <slug> + backlog observations from check"`, over the brief staged above and these rows together. Reverting one without the other would leave a brief citing observations that no longer exist, or rows citing a brief that does not. With nothing out of scope there is nothing to add here and the tail is the brief alone: `git commit -m "brief(fixes): <slug>"`.
-- List what you captured under a "Logged to backlog" note at the end. If nothing was out of scope, capture nothing and say nothing.
+- List captured rows among the report's facts. If nothing was out of scope, capture nothing and say nothing.
 
 Same bar as everything else: an out-of-scope observation still has to name a failure. The backlog is **not** where observations that didn't clear it go to be polite — those are dropped. A nit you file is a nit the user has to triage later, which is the same cost deferred. Gaps and drift go in the brief, not the backlog.
 
 ## Style
 
 Be specific, blunt, useful. Cite commit hashes and file paths. Don't pad with "great work overall" filler. A clean check should take 10 lines, not 100.
-
-Verdict options — the first outranks all the others, for the reason its own section above gives:
-- "Built as planned, but it doesn't answer the question: <the unmet condition from `Done looks like`>. <what's missing>."
-- "Implementation matches plan and satisfies `Done looks like`. Proceed to /esq:review <plan-path>."
-- "Implementation matches plan with minor drift: <summary>. Reasonable to proceed."
-- "Gaps found: <count>. Do not declare done until: <list>."
-- "Manual verification never done: phase(s) <list> marked complete but no user-facing behavior was observed. Re-run /esq:build before declaring done."
-- "Significant drift from plan — recommend: <amend plan / fix code to match plan>."
 
 ## Constraints
 

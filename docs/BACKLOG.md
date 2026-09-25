@@ -28,7 +28,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-010 | 2026-08-13 | 🐛 bug | med? |  | The announce-open boilerplate is duplicated in 16 command files and, unlike the other shared blocks, is not hash-compared | build: long-commands-announce-their-bound Phase 2 · Dropped: Retire hash comparison of announce prose. |  |  | Dropped |
 | B-011 | 2026-08-14 | 🐛 bug |  |  | README's /esq:work worked example still prints the pre-three-zone output format | build: command-set-cost-trim Phase 2 · Done inline · detail in 39fec30 |  |  | Done |
 | B-012 | 2026-08-15 | ✨ improvement | lo? |  | Trim commands/esq to the plan's 70,500 target — gap remeasured 2026-08-16 at 5,162 words, drifting ~2.5k/day unheld | manual · Planned by retire-legacy-rollback-path-fixes · Done by retire-legacy-rollback-path-fixes |  |  | Done |
-| B-013 | 2026-08-15 | ⚠️ debt | med? | 2400 | Reconcile check verdict wording with its three-zone report without losing outcome failure semantics. | check: command-set-cost-trim |  |  | Open |
+| B-013 | 2026-08-15 | ⚠️ debt | med? |  | Reconcile check verdict wording with its three-zone report without losing outcome failure semantics. | check: command-set-cost-trim · Done by b013-check-report |  |  | Done |
 | B-014 | 2026-08-15 | ⚠️ debt | med? |  | ui.md's brief template shares its shape with /esq:grill's output contract — parity must be verified before trimming | check: command-set-cost-trim · Dropped: Retire the legacy brief-template trim prerequisite. |  |  | Dropped |
 | B-015 | 2026-08-16 | ✨ improvement | hi |  | build.md probes for a project run/verify skill but no command ever proposes writing one, so every plan's first UI phase re-derives how to launch, seed and authenticate the app | manual (transcript audit of a 4-phase autopilot run) · Done by probe-reports-the-empty-slot · detail in 39fec30 |  |  | Done |
 | B-016 | 2026-08-16 | ✨ improvement | med |  | Under an orchestrator the phase agent's TaskCreate/TaskUpdate calls cost ~8% of all turns for a task list nobody is watching | manual (transcript audit) · Done by probe-reports-the-empty-slot · detail in 39fec30 |  |  | Done |
@@ -474,6 +474,8 @@ replace, and `/esq:check` loses its verdict.
 item at Phase 6 if still unresolved. It was unresolved — Phase 6 deliberately left the six sentences
 untouched — but logged `Backlog candidates: None.`, so the row was never written. The prerequisite is
 a decision, not a diff: does verdict wording live in the headline counters or stay freestanding?
+
+**Resolution:** 2026-09-25: Unified check outcome, gaps and next action in the existing report; preserved unmet acceptance precedence, missing-proof and false-complete distinctions, incomplete-phase resumption and genuine decisions. Two historical reports examined; editorial before/after and directed branch reading, not a new native model trial. Five product audit checks passed initially; only the two failed Node checks retried outside sandbox, both passed. Evidence: docs/preparation/2026-09-25-b013-check-report.md. Local only; no push or publication.
 
 ## B-014 — ui.md's brief template shares its shape with /esq:grill's output contract
 

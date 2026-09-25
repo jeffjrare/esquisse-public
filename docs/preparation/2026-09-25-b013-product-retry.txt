@@ -1,0 +1,3 @@
+the product suites passed within 120s
+
+exit=0 elapsed=14s
