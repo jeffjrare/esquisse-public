@@ -1,5 +1,5 @@
 ---
-description: Audit the app's UI/UX as built — read the screens, drive the running app, hand back a direction — or render two directions for a product with no UI yet.
+description: Audit the app's UI/UX as built — read the screens, drive the running app, hand back a direction — or render one for a product with no UI yet.
 name: ui
 argument-hint: "[target] [options]"
 disable-model-invocation: true
@@ -9,11 +9,11 @@ effort: high
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
 
-You make the visual direction of a product choosable by rendering it, in one of two modes. Bare, you are auditing the interface of an app that already exists, before anyone redesigns it. With `--greenfield`, there is no app yet: you render two directions for one named screen out of content someone actually wrote — see `## Greenfield mode`, which is the whole contract for that run. The output is the same either way: a brief `/esq:plan` consumes, plus a published page showing the proposed directions side by side — with what the app looks like today beside them whenever there is an app.
+You make the visual direction of a product choosable by rendering it, in one of two modes. Bare, you are auditing the interface of an app that already exists, before anyone redesigns it. With `--greenfield`, there is no app yet: you render the direction for one named screen out of content someone actually wrote — see `## Greenfield mode`, which is the whole contract for that run. The output is the same either way: a brief `/esq:plan` consumes, plus one comparison page showing the proposed direction(s) — with what the app looks like today beside them whenever there is an app. The page is published with the `Artifact` tool when the session has it, and is otherwise a standalone HTML file committed beside the brief; either is a finished deliverable.
 
-Do NOT toggle plan mode. The discipline is enforced by this prompt: read the code, drive the app, look at it, research outside, write ONE brief, publish ONE artifact, commit, stop. Plan mode would block the write.
+Do NOT toggle plan mode. The discipline is enforced by this prompt: read the code, drive the app, look at it, research outside, write ONE brief, produce ONE comparison page, commit, stop. Plan mode would block the write.
 
-**This is not `/esq:review`.** That command judges a diff against a bar — a state that renders blank, an action with no feedback. This one judges the *whole surface* against where the product should go, which is a direction, not a defect list. A direction is the user's call; you make it choosable by rendering it, not by describing it.
+**This is not `/esq:review`.** That command judges a diff against a bar — a state that renders blank, an action with no feedback. This one judges the *whole surface* against where the product should go, which is a direction, not a defect list. Where the direction is the user's call, you make it choosable by rendering it, not by describing it; where the mandate already fixed or delegated it, you render the one you recommend.
 
 **The failure mode this command exists to avoid: an audit that never looked at the app.** Reading CSS and writing "the spacing is inconsistent" is a code review wearing a designer's coat. Every finding here is anchored to something observable — a capture of the running app, or a computed number (a contrast ratio, a count of distinct greys, a token that four components each redefine). If you could not observe it, do not claim it.
 
@@ -49,7 +49,7 @@ If a pass would exceed it, stop at the bound and say what you did not cover. The
 
 ## Greenfield mode
 
-`/esq:ui --greenfield` audits nothing — there is no app yet. It renders two directions for a product whose UI has not been written, from content someone actually wrote, so the direction gets chosen from a picture instead of being decided by whatever the implementer types first. Everything below replaces the corresponding part of the redesign path; anything this section does not name runs exactly as written above and below it.
+`/esq:ui --greenfield` audits nothing — there is no app yet. It renders the direction for a product whose UI has not been written, from content someone actually wrote, so the direction gets chosen from a picture instead of being decided by whatever the implementer types first. Everything below replaces the corresponding part of the redesign path; anything this section does not name runs exactly as written above and below it.
 
 **Flag resolution.** The mode is on when `--greenfield` appears as `$0` or `$1`, and never otherwise. `--greenfield <path-or-description>` and `<path-or-description> --greenfield` both resolve, with the other positional as the content source. **Never infer the mode** — not from an empty-looking repo, not from a missing app, and not from a failed launch. A bare run that cannot launch the app stops and asks for access exactly as Pass 2 says; it does not fall through to here.
 
@@ -63,7 +63,7 @@ If a pass would exceed it, stop at the bound and say what you did not cover. The
 
 A named path that does not exist, and a brief carrying no `## User-facing flow`, are **not** a source — fall through to the next one in order rather than reading either as an empty source. Say on screen which source resolved and where in the order it came from.
 
-**Every string on the rendered screen traces to the source — whichever of the three resolved.** The rule does not change with the source: every label, heading, row, value and button word on the rendered screen traces to a string in the source that resolved, and anything that source does not name is rendered as a **visible placeholder** — `[title]`, `[3 rows of invoice data]`, `[error message]` — never as invented copy. A placeholder is a question the user can answer at a glance; invented copy is a claim that the content is settled when it is not, and it is the same failure the refusal below exists to prevent, committed one string at a time instead of all at once.
+**Every string on the rendered screen traces to the source — whichever of the three resolved.** The rule does not change with the source: every label, heading, row, value and button word on the rendered screen traces to a string in the source that resolved, Ordinary interface wording the source does not name — a button verb, an empty-state line, an error sentence — is yours to propose: write it, and list it in the brief under **Proposed copy** so it reads as a proposal, not a settled fact. Product facts, data, prices and promises the source does not name stay **visible placeholders** — `[3 rows of invoice data]`, `[plan price]` — never invented: a made-up fact claims the content is settled when it is not, the failure the refusal below exists to prevent.
 
 **The refusal.** If none of the three is present, **stop — before Pass 3, rendering nothing and publishing nothing.** Print what you need and end there: a brief path carrying a `## User-facing flow`, or a `docs/SPEC.md`, or the screen's real copy pasted into the invocation. Do not invent labels, rows or data to render against; a direction built on made-up copy hides exactly the thing the user is trying to see. Write no brief, publish no page, ask no direction question on this path.
 
@@ -83,33 +83,33 @@ A named path that does not exist, and a brief carrying no `## User-facing flow`,
 
 **The source-and-date form is mandatory here, not incidental.** Every load-bearing choice a direction rests on carries **at least one source with its date**, in the brief, in one line — and a choice you could not source says so in the same place. Elsewhere that line lets a reader tell a checked answer from a remembered one; here it is the only evidence the run has, because nothing was ever looked at.
 
-**The budget is reallocated, never raised.** Pass 2's captures are gone: this mode takes **at most 4 captures** — 2 directions × 2 themes, one per direction per theme — and Pass 2's share of the search allowance moves to Pass 3. Four is still a reallocation of Pass 2's own share and still well under the announced ceiling of 8; the announced bound at the top of this file does not go up.
+**The budget is reallocated, never raised.** Pass 2's captures are gone: this mode takes **at most 4 captures** — one per rendered direction per theme — and Pass 2's share of the search allowance moves to Pass 3. Four is still a reallocation of Pass 2's own share and still well under the announced ceiling of 8; the announced bound at the top of this file does not go up.
 
-**Pass 4 renders on the one screen the source names** — not the busiest, since nothing has traffic yet. Everything else about Pass 4 holds unchanged: exactly 2 directions, the tension named in one sentence before you build, the real labels and data shape from the source, tokens declared explicitly, a computed contrast check that a direction has to pass before you show it.
+**Pass 4 renders on the one screen the source names** — not the busiest, since nothing has traffic yet. Everything else about Pass 4 holds unchanged: its one-or-two direction rule, the tension named in one sentence when there are two, the real labels and data shape from the source, tokens declared explicitly, a computed contrast check that a direction has to pass before you show it.
 
-**Both themes ship, unconditionally.** Nothing in this mode is conditional on an app existing, so Pass 4's "if the app has them" does not apply here: each of the 2 directions is rendered in **light and dark**, and the published page shows all four. A direction with only one theme is not finished, whatever the stack turns out to be later.
+**Both themes ship, unconditionally.** Nothing in this mode is conditional on an app existing, so Pass 4's "if the app has them" does not apply here: each rendered direction is shown in **light and dark** on the comparison page. A direction with only one theme is not finished, whatever the stack turns out to be later.
 
-**Pass 4 sets up its own browser driver.** Pass 2 is skipped here, so there is no browser tooling to inherit and none is assumed: invoke the `run` skill (`Skill` with `run`) at Pass 4 and drive the rendered HTML files with what it hands back. Pass 4's "no browser driver is available" branch is reached **only** when that invocation actually fails — never by default because Pass 2 did not run. When it does fail, say so once and carry the absence through to the brief and the page.
+**Pass 4 sets up its own browser driver.** Pass 2 is skipped here, so there is no browser tooling to inherit and none is assumed: use the session's browser tooling at Pass 4 — the `run` skill when it is listed, otherwise a browser-driving MCP server or a headless browser the machine has — and drive the rendered HTML files with it. Pass 4's "no browser driver is available" branch is reached **only** when none of those works — never by default because Pass 2 did not run. When it does fail, say so once and carry the absence through to the brief and the page.
 
-**`artifact-design` is loaded before Pass 4 renders anything.** On the redesign path that skill arrives at publish time, once the directions already exist and an app's own visual language has constrained them. Here nothing pre-exists to constrain anything, so it is loaded too late to do its job: invoke it (`Skill` with `artifact-design`) at the *start* of Pass 4, before the first direction is built, and let it shape what gets rendered rather than only how the comparison page is packaged.
+**`artifact-design`, when the session lists it, is loaded before Pass 4 renders anything.** On the redesign path that skill arrives at publish time, once the directions already exist and an app's own visual language has constrained them. Here nothing pre-exists to constrain anything, so it is loaded too late to do its job: invoke it (`Skill` with `artifact-design`) at the *start* of Pass 4, before the first direction is built, and let it shape what gets rendered rather than only how the comparison page is packaged.
 
 **Five named items gate every direction, and a direction that fails one is fixed before it is shown.** Pass 4's computed contrast check is the first of five here, not the whole floor — with no app to compare against, nothing else would stop a direction that looks right in a screenshot and is unusable. Before a direction reaches the published page it passes all of:
 
 1. **Body text meets WCAG AA.** The ratio is computed from the direction's own declared tokens, for every body-text pair it uses — never eyeballed off the capture.
 2. **Every interactive element has a visible focus state.** Focus each focusable element in the driver session in turn and compare its computed `outline`, `box-shadow` and `border` against the same element's resting style; an element whose computed style does not change on focus does not have a focus state. A direction with no focusable elements passes this item with nothing to walk — that is a vacuous pass, not a failure.
 3. **Every touch target is at least 44 × 44 px.** Read each target's `getBoundingClientRect` on the rendered element in that session and compare both dimensions against 44 — never inferred from the padding you wrote.
-4. **At a ~400px viewport the screen has no horizontal scroll.** This item narrows the shared session, so its order is fixed: the four captures are taken first, then set that session's viewport to ~400px and read `document.documentElement.scrollWidth` against its `clientWidth`, then restore the session to the capture width before any other read or capture runs. Anything wider is horizontal scroll, and a direction that only holds at desktop width is half a direction.
+4. **At a ~400px viewport the screen has no horizontal scroll.** This item narrows the shared session, so its order is fixed: the captures are taken first, then set that session's viewport to ~400px and read `document.documentElement.scrollWidth` against its `clientWidth`, then restore the session to the capture width before any other read or capture runs. Anything wider is horizontal scroll, and a direction that only holds at desktop width is half a direction.
 5. **The screen's empty, loading and error states are present in the rendered direction.** Rendered, not described beside it — a direction that shows only the happy path leaves the states the implementer will otherwise invent unchosen.
 
-Items 2, 3 and 4 are **driver reads evaluated in the same driver session** as the four captures — a computed style per focusable element, a measured rectangle per target, one scroll width at ~400px. Each returns a value rather than a screenshot to judge, so none of them renders an image and the mode's spend stays exactly the 4 captures above, with the announced ceiling of 8 untouched. A direction failing any item is **fixed and re-checked before it is shown**, never published with the failure annotated: that would hand the user a choice between a direction and a defect. If the driver failed, or came up without a way to evaluate script and resize the page, and the absence was stated, items 2, 3 and 4 are stated unchecked for that run rather than silently dropped.
+Items 2, 3 and 4 are **driver reads evaluated in the same driver session** as the captures — a computed style per focusable element, a measured rectangle per target, one scroll width at ~400px. Each returns a value rather than a screenshot to judge, so none of them renders an image and the mode's spend stays exactly the 4 captures above, with the announced ceiling of 8 untouched. A direction failing any item is **fixed and re-checked before it is shown**, never published with the failure annotated: that would hand the user a choice between a direction and a defect. If the driver failed, or came up without a way to evaluate script and resize the page, and the absence was stated, items 2, 3 and 4 are stated unchecked for that run rather than silently dropped.
 
-**The published page carries the evidence, or it carries the absence — there is no third possibility.** The page's Direction A and Direction B sections have **four slots** between them — each direction in each theme — and every slot shows one of exactly two things: the **embedded capture** of that direction in that theme, or, in the place the capture would have occupied, the line `not rendered — no browser driver`. A slot showing neither is a page that invites the user to choose between two directions on nobody's word, which is the whole failure this mode exists to prevent. A run whose driver genuinely failed publishes four stated absences and that is a finished page, not a violation; a run that simply did not look is neither. The same verdict goes in the brief, **beside the no-live-read line** and in the same shape — which slots carry a capture and which state the absence — so the brief `/esq:plan` consumes says what was actually opened without opening the page.
+**The published page carries the evidence, or it carries the absence — there is no third possibility.** The page has one slot per rendered direction per theme, and every slot shows one of exactly two things: the **embedded capture** of that direction in that theme, or, in the place the capture would have occupied, the line `not rendered — no browser driver`. A slot showing neither is a page that invites the user to choose between two directions on nobody's word, which is the whole failure this mode exists to prevent. A run whose driver genuinely failed publishes stated absences and that is a finished page, not a violation; a run that simply did not look is neither. The same verdict goes in the brief, **beside the no-live-read line** and in the same shape — which slots carry a capture and which state the absence — so the brief `/esq:plan` consumes says what was actually opened without opening the page.
 
-**One brief, and where possible it is the one you consumed.** When the source was a grill brief, **enrich that brief in place** — never leave a second `.brief.md` on disk for the same task. Add the artifact URL and the `Direction:` line to its `## Resolved decisions`, and fill its `## Constraints & context` with what this run found. When the source was `docs/SPEC.md` or pasted copy, write a fresh brief in the standard shape below, at the standard path. Either way `## Constraints & context` keeps the same headings as the template and carries **one explicit line stating that no live read happened** — e.g. `- **No live read:** greenfield run — no app existed to capture, so nothing in this brief is anchored to a running screen.` Commit the enriched brief as `brief: <slug> — greenfield directions`, a fresh one as `brief: <slug>`.
+**One brief, and where possible it is the one you consumed.** When the source was a grill brief, **enrich that brief in place** — never leave a second `.brief.md` on disk for the same task. Add the comparison page's URL or path and the `Direction:` line to its `## Resolved decisions`, and fill its `## Constraints & context` with what this run found. When the source was `docs/SPEC.md` or pasted copy, write a fresh brief in the standard shape below, at the standard path. Either way `## Constraints & context` keeps the same headings as the template and carries **one explicit line stating that no live read happened** — e.g. `- **No live read:** greenfield run — no app existed to capture, so nothing in this brief is anchored to a running screen.` Commit the enriched brief as `brief: <slug> — greenfield directions`, a fresh one as `brief: <slug>`.
 
 ## Pass 1 — The static read
 
-Read the codebase for what the interface is *made of*. This pass is cheap and it sets up everything after it, so do it first. In `--greenfield` it is degraded rather than skipped — read whatever stack and token material exists, and say plainly when there is none; see `## Greenfield mode`.
+Read the codebase for what the interface is *made of*. This pass is cheap and it sets up everything after it, so do it first — its independent reads go out together in one turn (parallel `Read` calls, or one chained command), never one file per turn. In `--greenfield` it is degraded rather than skipped — read whatever stack and token material exists, and say plainly when there is none; see `## Greenfield mode`.
 
 - **The screens.** Routes, pages, layouts. List them and mark which ones a user actually reaches often — the spec and the router disagree about this more often than you'd think.
 - **The system, if there is one.** Where colors, spacing, radii, type scale, shadows and breakpoints are defined. Then the gap between the system and its use: hardcoded hex and px where a token exists, near-duplicate values (four greys within 3% of each other, three "primary" buttons), one-off breakpoints. **Count them** — "17 hardcoded hex values across 9 components, against a token file defining 6 colors" is a finding; "colors are inconsistent" is a mood.
@@ -121,7 +121,7 @@ Read the codebase for what the interface is *made of*. This pass is cheap and it
 
 In `--greenfield` this pass is skipped entirely — there is no running app to look at — and you say so on screen once; see `## Greenfield mode`. Otherwise:
 
-Now look at it. Invoke the `run` skill (`Skill` with `run`) — it finds this project's own launch path before falling back to generic patterns.
+Now look at it. Invoke the `run` skill (`Skill` with `run`) when it is listed — it finds this project's own launch path before falling back to generic patterns; otherwise use the project's own launch skill or documented start command and whatever browser tooling the session has.
 
 Capture the screens that matter, **at most 4 captures** — half the announced ceiling of 8, because the other half is reserved for Pass 4 and spending it here would leave the directions unrendered. Allocate those four deliberately: the highest-traffic screen first, then the densest one, then one that is mostly empty. Both themes if the app has them, one mobile width if it is responsive. Spend the budget on different *screens* before spending it on different *widths* — a second viewport of the same screen tells you less than a first look at another.
 
@@ -152,9 +152,9 @@ Every claim about current practice carries its source and its date in the brief,
 
 ## Pass 4 — Render the directions
 
-Describe nothing you can render. Build **exactly 2 directions**, on **exactly 1 screen** — the highest-traffic one from pass 2 — as standalone HTML in the scratchpad directory. In `--greenfield` that one screen is the one the content source names rather than the busiest, and its content comes from that source; see `## Greenfield mode`.
+Describe nothing you can render. Build **one direction — the one you recommend —** and a second **only when the direction is genuinely the user's**: the brief or mandate neither fixes nor delegates the visual identity, or the user asked to compare. Render on **exactly 1 screen** — the highest-traffic one from pass 2 — as standalone HTML in the scratchpad directory. In `--greenfield` that one screen is the one the content source names rather than the busiest, and its content comes from that source; see `## Greenfield mode`.
 
-The two must differ in a way the user can *choose between*: not "blue vs. teal", but two different answers to the question the audit raised. Conservative-and-systematic against a genuine departure, if that's the tension; density against calm, if that's it. Name the tension in one sentence before you build, so the reader knows what they are picking.
+When there are two, they must differ in a way the user can *choose between*: not "blue vs. teal", but two different answers to the question the audit raised. Conservative-and-systematic against a genuine departure, if that's the tension; density against calm, if that's it. Name the tension in one sentence before you build, so the reader knows what they are picking.
 
 Each direction:
 
@@ -163,20 +163,20 @@ Each direction:
 - Declares its tokens explicitly at the top (colors, spacing scale, type scale, radii) — those become the plan's raw material.
 - **Passes a computed contrast check.** Run the ratios; a direction that fails WCAG AA on body text is not a direction, it's a draft. Fix it before showing it.
 
-Then **render each one and look at it**, the same way as pass 2 — on Pass 4's own reserved share of **at most 4 captures**, one per direction per theme (2 directions × 2 themes, or 2 captures when the app has a single theme). That share is reserved rather than drawn from what Pass 2 left, so a Pass 2 that spent its full allowance never starves this step. Screenshot the file through the browser tooling pass 2 already set up — except in `--greenfield`, where pass 2 never ran and Pass 4 sets up its own driver instead; see `## Greenfield mode`. If no browser driver is available, say so explicitly in the brief and in the report — an unrendered direction is a guess, and the user needs to know which they're being handed.
+Then **render each one and look at it**, the same way as pass 2 — on Pass 4's own reserved share of **at most 4 captures**, one per rendered direction per theme. That share is reserved rather than drawn from what Pass 2 left, so a Pass 2 that spent its full allowance never starves this step. Screenshot the file through the browser tooling pass 2 already set up — except in `--greenfield`, where pass 2 never ran and Pass 4 sets up its own driver instead; see `## Greenfield mode`. If no browser driver is available, say so explicitly in the brief and in the report — an unrendered direction is a guess, and the user needs to know which they're being handed.
 
 ## Publish the artifact
 
-Load the `artifact-design` skill first, then build one page and publish it with the `Artifact` tool. In `--greenfield` that skill is already in hand — Pass 4 loaded it before it rendered anything, so it is not loaded a second time here — and the page has no **Today** section, pass 2 never ran, so it opens on the tension and the comparison starts at Direction A; see `## Greenfield mode`. Its job is comparison, in this order:
+Build one page. When the session has the `Artifact` tool, load the `artifact-design` skill first and publish it; otherwise write the same page as a standalone HTML file at `docs/plans/<YYYY-MM-DD>-<slug>.ui.html`, committed with the brief — never stop for a missing publisher. In `--greenfield` that skill is already in hand when it was listed — Pass 4 loaded it before it rendered anything, so it is not loaded a second time here — and the page has no **Today** section, pass 2 never ran, so it opens on the tension and the comparison starts at Direction A; see `## Greenfield mode`. Its job is comparison, in this order:
 
 1. **Today** — the captures from pass 2, with your one-line reading under each.
-2. **The tension** — the sentence naming what the two directions disagree about.
-3. **Direction A / Direction B**, side by side on the same screen, both themes, with their token sets and computed contrast ratios shown as numbers.
+2. **The tension** — with two directions, the sentence naming what they disagree about.
+3. **The direction(s)** — side by side when there are two — on the same screen, both themes, with their token sets and computed contrast ratios shown as numbers.
 4. **What is broken regardless of direction** — the findings from pass 1 that either direction inherits.
 
 Embed captures as `data:` URIs; downscale them so the page stays under 16 MB. If the budget is tight, drop *captures*, never findings.
 
-The page is private on publish. Record its URL — it goes in the brief.
+A published page is private on publish. Record its URL or file path — it goes in the brief.
 
 ## Write the brief and commit it — before you ask anything
 
@@ -208,7 +208,7 @@ update this sentence after the pick.
 
 ## Constraints & context
 The audit itself, and it is the section this brief exists for:
-- **Visual evidence:** <artifact URL> — captures of today, both directions side by side.
+- **Visual evidence:** <page URL or docs/plans/…ui.html> — captures of today and the rendered direction(s).
 - **What the interface is made of today:** the counted findings from pass 1.
 - **What the app looks like today:** the per-screen reading from pass 2.
 - **What the stack allows:** the styling layer, the component library, what a direction
@@ -234,7 +234,7 @@ will detect and consume this brief. Do not edit below this line. -->
 
 The `<!-- comment -->` is required — it marks the file as a consumable brief.
 
-Then: `git add docs/plans/<filename>` (only that file) and `git commit -m "brief: <slug>"`.
+Then: `git add docs/plans/<filename>` (plus the `.ui.html` page when it is local) and `git commit -m "brief: <slug>"`.
 
 ## Propose the leftovers into the backlog
 
@@ -242,10 +242,10 @@ Findings from pass 1 that are real but sit outside the redesign — a missing em
 
 ## Then ask for the direction
 
-Now, and only now, put the choice to the user with `AskUserQuestion`.
+**With one rendered direction there is no question:** the `Direction:` line records it with the mandate that fixed or delegated it, and you go to the report. With two, now and only now, put the choice to the user with `AskUserQuestion`.
 
 - The two options are the two directions you rendered, each labelled with the tension it resolves, each described in one line. **Lead with the one you'd pick**, marked `(Recommended)`, with the reason drawn from the audit — not from taste.
-- Point them at the artifact URL in the question itself. Choosing between two directions from prose defeats the whole pass.
+- Point them at the comparison page in the question itself. Choosing between two directions from prose defeats the whole pass.
 
 <!-- shared:escape-hatch:start -->
 **Always leave a way to answer in their own words.** Make the last option on every question an explicit free-text escape — label it `✍️ Something else — I'll explain`, with a description saying you'll ask for the details. If they pick it, collect their wording with a short plain-text follow-up before continuing; every *other* answer in the same batch still stands. Don't rely on the harness's built-in "Other" row — it doesn't render in every client.
@@ -263,7 +263,7 @@ Tell the user, in this order:
 
 1. Whether the audit ran complete or a pass was cut short, and which.
 2. The direction they picked, and the brief path.
-3. The artifact URL.
+3. The comparison page's URL or path.
 4. What still needs them: leftover findings worth a backlog entry, screens you could not reach.
 5. Elapsed time, and what it spent — captures taken, searches run, directions rendered.
 6. Next step: "Review the brief in your editor. When ready, `/clear` and run `/esq:plan` — it will pick up this brief automatically."
@@ -272,7 +272,7 @@ Then stop. Do not plan, do not write code, do not touch a stylesheet.
 
 ## Constraints
 
-- Do NOT make code changes. You write one brief and publish one page; the app's source is read-only here.
+- Do NOT make code changes. You write one brief and one comparison page; the app's source is read-only here.
 - Do NOT write a plan — no phases, no approaches. That's `/esq:plan`'s job.
 - Do NOT spawn subagents. This command does its own reading, and a fleet of specialists would each re-derive the same audit from scratch.
 - Do NOT claim a visual finding you did not observe — see the failure mode at the top. No capture and no rendered direction means you say so, in the brief and in the report.

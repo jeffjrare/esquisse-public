@@ -197,7 +197,7 @@ contributor rules that apply this philosophy to changes in esq itself.
 | `/esq:harvest` | Recover decisions from the code, history and discussion | `docs/DECISIONS.md` |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md` |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
-| `/esq:ui [--greenfield <brief-or-copy>]` | Inspect an existing interface, or explore one before implementation | Two rendered directions, a comparison page and a planning brief |
+| `/esq:ui [--greenfield <brief-or-copy>]` | Inspect an existing interface, or explore one before implementation | A rendered recommended direction (two when the choice is yours), a comparison page and a planning brief |
 
 These commands run in your project. They are not this repository's development
 audit scripts. In every example, use the actual paths reported by the preceding
