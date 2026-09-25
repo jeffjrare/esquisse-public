@@ -1,5 +1,5 @@
 ---
-description: Audit the app's UI/UX as built — read the screens, drive the running app, hand back a direction — or render one for a product with no UI yet.
+description: Audit the app's UI/UX as built — read the screens, drive the running app, hand back a direction — or render two for a product with no UI yet.
 name: ui
 argument-hint: "[target] [options]"
 disable-model-invocation: true
@@ -9,7 +9,7 @@ effort: high
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
 
-You make the visual direction of a product choosable by rendering it, in one of two modes. Bare, you are auditing the interface of an app that already exists, before anyone redesigns it. With `--greenfield`, there is no app yet: you render the direction for one named screen out of content someone actually wrote — see `## Greenfield mode`, which is the whole contract for that run. The output is the same either way: a brief `/esq:plan` consumes, plus one comparison page showing the proposed direction(s) — with what the app looks like today beside them whenever there is an app. The page is published with the `Artifact` tool when the session has it, and is otherwise a standalone HTML file committed beside the brief; either is a finished deliverable.
+You make the visual direction of a product choosable by rendering it, in one of two modes. Bare, you are auditing the interface of an app that already exists, before anyone redesigns it. With `--greenfield`, there is no app yet: you render two directions for one named screen out of content someone actually wrote — see `## Greenfield mode`, which is the whole contract for that run. The output is the same either way: a brief `/esq:plan` consumes, plus one comparison page showing the proposed direction(s) — with what the app looks like today beside them whenever there is an app. The page is published with the `Artifact` tool when the session has it, and is otherwise a standalone HTML file committed beside the brief; either is a finished deliverable.
 
 Do NOT toggle plan mode. The discipline is enforced by this prompt: read the code, drive the app, look at it, research outside, write ONE brief, produce ONE comparison page, commit, stop. Plan mode would block the write.
 
@@ -49,7 +49,7 @@ If a pass would exceed it, stop at the bound and say what you did not cover. The
 
 ## Greenfield mode
 
-`/esq:ui --greenfield` audits nothing — there is no app yet. It renders the direction for a product whose UI has not been written, from content someone actually wrote, so the direction gets chosen from a picture instead of being decided by whatever the implementer types first. Everything below replaces the corresponding part of the redesign path; anything this section does not name runs exactly as written above and below it.
+`/esq:ui --greenfield` audits nothing — there is no app yet. It renders **two directions, always**, for a product whose UI has not been written, from content someone actually wrote, so the direction gets chosen from a picture instead of being decided by whatever the implementer types first. Everything below replaces the corresponding part of the redesign path; anything this section does not name runs exactly as written above and below it.
 
 **Flag resolution.** The mode is on when `--greenfield` appears as `$0` or `$1`, and never otherwise. `--greenfield <path-or-description>` and `<path-or-description> --greenfield` both resolve, with the other positional as the content source. **Never infer the mode** — not from an empty-looking repo, not from a missing app, and not from a failed launch. A bare run that cannot launch the app stops and asks for access exactly as Pass 2 says; it does not fall through to here.
 
@@ -85,7 +85,7 @@ A named path that does not exist, and a brief carrying no `## User-facing flow`,
 
 **The budget is reallocated, never raised.** Pass 2's captures are gone: this mode takes **at most 4 captures** — one per rendered direction per theme — and Pass 2's share of the search allowance moves to Pass 3. Four is still a reallocation of Pass 2's own share and still well under the announced ceiling of 8; the announced bound at the top of this file does not go up.
 
-**Pass 4 renders on the one screen the source names** — not the busiest, since nothing has traffic yet. Everything else about Pass 4 holds unchanged: its one-or-two direction rule, the tension named in one sentence when there are two, the real labels and data shape from the source, tokens declared explicitly, a computed contrast check that a direction has to pass before you show it.
+**Pass 4 renders on the one screen the source names** — not the busiest, since nothing has traffic yet. Everything else about Pass 4 holds unchanged except the direction count: **exactly 2 directions, whatever the source fixes or delegates** — starting a product is the choice this mode exists to put on screen — the tension named in one sentence before you build, the real labels and data shape from the source, tokens declared explicitly, a computed contrast check that a direction has to pass before you show it.
 
 **Both themes ship, unconditionally.** Nothing in this mode is conditional on an app existing, so Pass 4's "if the app has them" does not apply here: each rendered direction is shown in **light and dark** on the comparison page. A direction with only one theme is not finished, whatever the stack turns out to be later.
 
