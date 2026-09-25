@@ -1,0 +1,108 @@
+{
+  "date": "2026-09-24",
+  "baseline_commit": "42fa9ee",
+  "candidate_commit": "68a4eaa",
+  "repository_inputs": "42fa9ee in both arms; after replaces only the changed plugin files from 68a4eaa",
+  "changed_plugin_files": {
+    "plugin/skills/build/references/decisions-and-backlog.md": {
+      "before_blob": "a75be33dad0c4c793249aca5c839d756a07a4990",
+      "after_blob": "514c75681c70b012ff486ae1b01c8f35a75463e3"
+    },
+    "plugin/skills/grill/SKILL.md": {
+      "before_blob": "a1ec178f3a63a9acf37ccc9a0ad4f2316e0df46e",
+      "after_blob": "fd6c15cd99c40ac7cf9d0ae382c635f8fef2f647"
+    },
+    "plugin/skills/harvest/SKILL.md": {
+      "before_blob": "af1d5580534cb71c4dc223560e5d415c5c8c453d",
+      "after_blob": "cf415aba93247ee42cbe269e1a81a6e1c7095eb7"
+    },
+    "plugin/skills/plan/SKILL.md": {
+      "before_blob": "3e9956caab62e2de6a703fb1c73a40f33e211b81",
+      "after_blob": "bc06ebe05079b1bb3c506000ac45df4b81f6f0c5"
+    },
+    "plugin/skills/plan/references/corrective-input.md": {
+      "before_blob": null,
+      "after_blob": "3fde161d68c1753da7269c8d8e47201924a51035"
+    },
+    "plugin/skills/plan/references/decisions.md": {
+      "before_blob": null,
+      "after_blob": "1c0e85c049eacaed3a14aa97b4dab4563ba2d879"
+    }
+  },
+  "claude_code_version": "2.1.282",
+  "configured_model": "opus",
+  "effort": "medium",
+  "max_budget_usd_per_arm": 3,
+  "timeout_seconds_per_arm": 180,
+  "tools": [
+    "Read",
+    "Grep",
+    "Glob",
+    "Skill"
+  ],
+  "permission_mode": "dontAsk",
+  "hooks_disabled": true,
+  "mcp_disabled": true,
+  "setting_sources": "",
+  "session_persistence": false,
+  "telemetry": "off",
+  "execution": "two concurrent native CLI processes in separate archive directories without .git",
+  "prompt_sha256": "3738026f95bcf8da168d6f24f18dd8dfbf73c60b6800876ce74aea86b116a0da",
+  "cost_basis": "Claude Code reported list-price estimate, not an actual bill",
+  "arms": {
+    "before": {
+      "exit": 0,
+      "timeout": false,
+      "elapsed_seconds": 114.28,
+      "estimated_cost_usd": 0.7304594,
+      "model": "claude-opus-5-5",
+      "esq_plugin_discovered": true,
+      "esq_plan_discovered": true,
+      "tool_calls": {
+        "Grep": 14,
+        "Glob": 1,
+        "Read": 7
+      },
+      "tool_result_characters": 63909,
+      "tool_errors": 0,
+      "permission_denials": 0,
+      "final_whitespace_words": 1253,
+      "final_sha256": "86898f7c334fd520cc7fe62eb2f6a868dfbcc8a2e64754aa7061b08a0424bbb9",
+      "usage": {
+        "input_tokens": 28,
+        "cache_creation_input_tokens": 50679,
+        "cache_read_input_tokens": 538477,
+        "output_tokens": 10861
+      },
+      "post_run_files_match_expected_blobs": true,
+      "files_checked": 177
+    },
+    "after": {
+      "exit": 0,
+      "timeout": false,
+      "elapsed_seconds": 90.57,
+      "estimated_cost_usd": 0.6109666,
+      "model": "claude-opus-5-5",
+      "esq_plugin_discovered": true,
+      "esq_plan_discovered": true,
+      "tool_calls": {
+        "Grep": 12,
+        "Glob": 1,
+        "Read": 7
+      },
+      "tool_result_characters": 64521,
+      "tool_errors": 0,
+      "permission_denials": 0,
+      "final_whitespace_words": 1377,
+      "final_sha256": "df99fe64bebf9088c926881ee4e1c5617696786d8a1c31f7464a7ec9b1479c59",
+      "usage": {
+        "input_tokens": 20,
+        "cache_creation_input_tokens": 45452,
+        "cache_read_input_tokens": 344553,
+        "output_tokens": 8918
+      },
+      "post_run_files_match_expected_blobs": true,
+      "files_checked": 179
+    }
+  }
+}
