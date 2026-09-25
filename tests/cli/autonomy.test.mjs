@@ -223,12 +223,15 @@ test('set-status records the disposition and its provenance in one write, and re
   assert.match(text, /\| B-010 \|.*\| manual · Planned by p · Done by p \|.*\| Done \|/);
   assert.match(text, /## B-010 — ten\n\nWhat it is\.\n\n\*\*Resolution:\*\* the export carries/);
 
+  // The plan that picks a row up stamps the marker `unit.promised` reads, through the CLI.
+  await setStatus(file, 'B-011', 'Planned', { by: 'next-plan' });
+  assert.match(await readFile(file, 'utf8'), /\| B-011 \|.*manual · Planned by next-plan \|.*\| Planned \|/);
   await setStatus(file, 'B-011', 'Dropped', { reason: 'duplicate of B-010' });
-  assert.match(await readFile(file, 'utf8'), /\| B-011 \|.*manual · Dropped: duplicate of B-010 \|.*\| Dropped \|/);
+  assert.match(await readFile(file, 'utf8'), /\| B-011 \|.*manual · Planned by next-plan · Dropped: duplicate of B-010 \|.*\| Dropped \|/);
 
   const before = await readFile(file, 'utf8');
   await assert.rejects(setStatus(file, 'B-011', 'Done', { by: 'a | b' }), /pipe/);
-  await assert.rejects(setStatus(file, 'B-011', 'Open', { by: 'p' }), /Done only/);
+  await assert.rejects(setStatus(file, 'B-011', 'Open', { by: 'p' }), /Done or Planned only/);
   await assert.rejects(setStatus(file, 'B-011', 'Done', { reason: 'x' }), /Dropped only/);
   assert.equal(await readFile(file, 'utf8'), before);
 

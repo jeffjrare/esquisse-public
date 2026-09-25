@@ -438,12 +438,12 @@ function cellText(value, name) {
 }
 
 // One atomic write: the Status cell, and — when the caller states them — the provenance marker in the
-// Source cell (` · Done by <by>`, ` · Dropped: <reason>`) and the detail section's `**Resolution:**`
+// Source cell (` · Done by <by>`, ` · Planned by <by>`, ` · Dropped: <reason>`) and the detail section's `**Resolution:**`
 // line. Structure only: the command that calls this decided the disposition from its own evidence,
 // and nothing here judges whether it was delivered.
 export async function setStatus(file, requestedId, status, { by = null, reason = null, resolution = null } = {}) {
   if (!STATUSES.has(status)) throw new Error(`invalid status: ${status}`);
-  if (by !== null && status !== 'Done') throw new Error('--by records who delivered the item, so it is accepted with Done only');
+  if (by !== null && status !== 'Done' && status !== 'Planned') throw new Error('--by records the plan that delivered or picked up the item, so it is accepted with Done or Planned only');
   if (reason !== null && status !== 'Dropped') throw new Error('--reason records why the item was dropped, so it is accepted with Dropped only');
   const id = normalizeId(requestedId);
   const { lines, table: parsed, idColumn, statusColumn: parsedStatus } = await backlogTable(file);
@@ -458,7 +458,7 @@ export async function setStatus(file, requestedId, status, { by = null, reason =
   match.row[statusColumn] = status;
   match.status = status;
   const sourceColumn = table.header.indexOf('Source');
-  const marker = by !== null ? ` · Done by ${cellText(by, '--by')}` : reason !== null ? ` · Dropped: ${cellText(reason, '--reason')}` : null;
+  const marker = by !== null ? ` · ${status} by ${cellText(by, '--by')}` : reason !== null ? ` · Dropped: ${cellText(reason, '--reason')}` : null;
   if (marker !== null) {
     if (sourceColumn < 0) throw new Error('backlog table has no Source column to record the provenance in');
     const source = match.row[sourceColumn] ?? '';
@@ -567,9 +567,10 @@ const rankNumber = (entry) => (/^\d+$/.test(entry.rank) ? Number(entry.rank) : n
 function tailRank(view) {
   let tail = 0;
   for (const entry of view.rows.filter(isOpenRow)) {
-    if (entry.rank === '') continue;
+    // A rank that is not an integer is unclassified like an empty one: `esq validate` is where a
+    // malformed cell is reported, never a refusal to capture or reopen a different row.
     const rank = rankNumber(entry);
-    if (!Number.isSafeInteger(rank)) throw new Error(`${entry.id} carries an invalid rank: ${entry.rank}`);
+    if (!Number.isSafeInteger(rank)) continue;
     tail = Math.max(tail, rank);
   }
   const next = tail + RANK_STEP;
@@ -2734,7 +2735,9 @@ export async function gateVerify(root, planPath, { workersMoved = false, phase =
         const before = gitTry(repository, ['show', `${block.at}:${occurrence.plan}`]);
         if (before === null || planSection(before) !== planSection(occurrence.text)) return run(`${occurrence.plan} changed above its ## Execution log since ${name} verified`);
       }
-      const isInput = declaresPath(inputs.operands ?? [], changed)
+      // The proof plan's own log append counts only when a `(reads)` declaration names it: a bare
+      // operand such as `make docs` would otherwise stale every proof on the commit that records it.
+      const isInput = (changed !== occurrence.plan && declaresPath(inputs.operands ?? [], changed))
         || (scope !== null && declaresPath(scope, changed));
       if (isInput) {
         invalidating.push(changed);
@@ -4745,7 +4748,8 @@ export async function validate(root) {
       if (!STATUSES.has(row[statusColumn])) findings.push(`invalid backlog status for ${id}: ${row[statusColumn]}`);
       if (rankColumn < 0) continue;
       const rank = (row[rankColumn] ?? '').trim();
-      if (rank !== '') {
+      if (rank !== '' && !/^\d+$/.test(rank)) findings.push(`invalid backlog rank for ${id}: ${rank}`);
+      else if (rank !== '') {
         const owner = ranks.get(rank);
         if (owner !== undefined) findings.push(`duplicate backlog rank ${rank}: ${owner} and ${id}`);
         else ranks.set(rank, id);

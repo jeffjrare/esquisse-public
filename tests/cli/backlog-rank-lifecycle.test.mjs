@@ -140,13 +140,19 @@ test('B-172: refused input and roadmap placement leave cleanup and migration ato
   assert.equal(await readFile(file, 'utf8'), broken);
 });
 
-test('B-172: an invalid or exhausted active tail refuses capture/reopening without writing', async (t) => {
-  const { file, cli, add } = await fixture(t, [row('B-001', 'invalid'), row('B-002', '100', 'Done')]);
-  for (const rank of ['invalid', String(Number.MAX_SAFE_INTEGER)]) {
-    const before = (await readFile(file, 'utf8')).replace('invalid', rank);
-    await writeFile(file, before);
-    await assert.rejects(add(), (error) => error.code === 2 && /rank/.test(error.stderr));
-    await assert.rejects(cli('backlog', 'set-status', 'B-002', 'Open'), (error) => error.code === 2 && /rank/.test(error.stderr));
-    assert.equal(await readFile(file, 'utf8'), before);
-  }
+test('B-172: a malformed rank on another row never blocks capture or reopening; validate names it', async (t) => {
+  const { cli, ledger, add } = await fixture(t, [row('B-001', 'invalid'), row('B-003', '300'), row('B-002', '100', 'Done')]);
+  const { id } = await add();
+  assert.equal((await ledger()).find((entry) => entry.ID === id).Rank, '400');
+  await cli('backlog', 'set-status', 'B-002', 'Open');
+  assert.equal((await ledger()).find((entry) => entry.ID === 'B-002').Rank, '500');
+  await assert.rejects(cli('validate'), (error) => error.code === 1 && /invalid backlog rank for B-001: invalid/.test(error.stdout));
+});
+
+test('B-172: an exhausted active tail refuses capture/reopening without writing', async (t) => {
+  const { file, cli, add } = await fixture(t, [row('B-001', String(Number.MAX_SAFE_INTEGER)), row('B-002', '100', 'Done')]);
+  const before = await readFile(file, 'utf8');
+  await assert.rejects(add(), (error) => error.code === 2 && /rank/.test(error.stderr));
+  await assert.rejects(cli('backlog', 'set-status', 'B-002', 'Open'), (error) => error.code === 2 && /rank/.test(error.stderr));
+  assert.equal(await readFile(file, 'utf8'), before);
 });

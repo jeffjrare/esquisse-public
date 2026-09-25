@@ -129,7 +129,7 @@ Apply the same change to every target; combine fields when requested:
 
 | Input | Mutation |
 |---|---|
-| done / close it; dropped; open / reopen; planned; needs-decision / block on me | `esq backlog set-status <id> <canonical status>`. Retain closed rows. For Done, append known ` · Done by <plan-or-fix-slug>` through `--by`; for Dropped, ` · Dropped: <reason>` through `--reason`, without duplicating existing provenance. For an existing detail section, pass `--resolution "<what closed it>"`. Never invent delivery evidence. |
+| done / close it; dropped; open / reopen; planned; needs-decision / block on me | `esq backlog set-status <id> <canonical status>`. Retain closed rows. For Done, append known ` · Done by <plan-or-fix-slug>` through `--by` (for Planned, `--by <plan-slug>` writes ` · Planned by`); for Dropped, ` · Dropped: <reason>` through `--reason`, without duplicating existing provenance. For an existing detail section, pass `--resolution "<what closed it>"`. Never invent delivery evidence. |
 | pri:hi/med/lo; bump to hi | `esq backlog set-pri <id> <bare level>`: an update confirms the user's level. Rank is unchanged; the priority sort moves buckets. |
 | confirm / confirm priority | Strip the current suggestion's `?` via `set-pri`. |
 | pri:none / drop priority | Refused by the CLI; ask which level instead. |

@@ -1529,3 +1529,16 @@ test('a commit recording nothing but a proof invalidates no proof, including its
   assert.equal(report.commands[0].verifiedAt, outcome.at);
   assert.deepEqual(executeGate(root, report), { executions: 0, failures: 0 });
 });
+
+// A bare operand naming a directory that holds the proof plan — `make docs`, `node check.mjs docs` —
+// must not stale the proof on the very commit that records it; a `(reads)` declaration still does.
+test('a bare directory operand does not stale the proof on its own log append', async () => {
+  const root = await repo();
+  await writeFile(path.join(root, 'check.mjs'), 'process.exit(0);\n');
+  commit(root, 'check');
+  const command = 'node check.mjs docs';
+  const file = await plan(root, [[`\`(auto)\` \`${command}\` — docs are good`]]);
+  execFileSync(process.execPath, ['check.mjs', 'docs'], { cwd: root, stdio: 'pipe' });
+  await logPhase(root, file, 1, [command]);
+  assert.equal((await gateVerify(root, file)).commands[0].decision, 'reuse');
+});
