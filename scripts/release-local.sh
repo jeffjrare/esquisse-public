@@ -105,6 +105,7 @@ ROOT="$PWD"
 
 CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 INSTALLED_MANIFEST="$CONFIG_DIR/plugins/installed_plugins.json"
+KNOWN_MARKETPLACES="$CONFIG_DIR/plugins/known_marketplaces.json"
 PLUGIN_MANIFEST="plugin/.claude-plugin/plugin.json"
 MARKET_MANIFEST=".claude-plugin/marketplace.json"
 PLUGIN_KEY="esq@esquisse"
@@ -135,6 +136,41 @@ step()   { printf '  → %s\n' "$1"; }
 good()   { printf '  ✓ %s\n' "$1"; }
 bad()    { printf '  ✗ %s\n' "$1" >&2; }
 refuse() { printf '\nrelease-local.sh refuses: %s\n' "$1" >&2; exit 1; }
+
+# A local release can only reach Claude if its marketplace uses this checkout.
+# Read Claude-owned state without changing it, before any version edit or commit.
+check_marketplace() {
+  node -e '
+    const fs = require("fs");
+    const [file, root] = process.argv.slice(1);
+    try {
+      const entry = JSON.parse(fs.readFileSync(file, "utf8")).esquisse;
+      if (!entry) throw new Error("no registered esquisse marketplace");
+      if (entry.source?.source !== "directory") {
+        throw new Error("esquisse uses a " + (entry.source?.source || "missing") + " source, not this local checkout");
+      }
+      const source = entry.source.path;
+      if (typeof source !== "string" || !source) throw new Error("esquisse has no readable source.path");
+      console.log("registered source: " + source);
+      if (fs.realpathSync(source) !== fs.realpathSync(root)) {
+        throw new Error("esquisse points to another checkout; expected " + root);
+      }
+      if (typeof entry.installLocation !== "string" || fs.realpathSync(entry.installLocation) !== fs.realpathSync(root)) {
+        throw new Error("esquisse installLocation does not resolve to " + root);
+      }
+    } catch (error) {
+      console.error("marketplace source mismatch or unreadable: " + error.message);
+      process.exitCode = 1;
+    }
+  ' "$KNOWN_MARKETPLACES" "$ROOT"
+}
+
+marketplace_repair_hint() {
+  say "Register this checkout through Claude, then retry the installation:"
+  printf '    claude --bare plugin marketplace add %q --scope user </dev/null\n' "$ROOT"
+  say "    claude --bare plugin update $PLUGIN_KEY --scope user --yes </dev/null"
+  say "    ./scripts/release-local.sh --check"
+}
 
 # Read both manifest versions through one node process. Refusing loudly on a
 # shape it cannot read is the point — two unreadable versions must never be
@@ -178,6 +214,13 @@ read_installed() {
 if [ "$MODE" = "check" ]; then
   say "release-local.sh --check — reports only; nothing here writes, commits or installs."
   say ""
+
+  if marketplace=$(check_marketplace 2>&1); then
+    say "  marketplace:       $marketplace — this checkout"
+  else
+    say "  marketplace:       $marketplace"
+    marketplace_repair_hint
+  fi
 
   if versions=$(read_versions 2>&1); then
     set -- $versions
@@ -290,6 +333,13 @@ if [ "$NEED" != "true" ]; then
   refuse "the version guard reached no verdict on whether a release is needed (releaseNeeded $NEED) — run scripts/check-release-version.sh . and fix what it names"
 fi
 good "plugin/ has moved since the $LAST_BUMP bump that released $SRC_VERSION"
+
+if ! marketplace=$(check_marketplace 2>&1); then
+  bad "$marketplace"
+  marketplace_repair_hint
+  refuse "Claude cannot install from this checkout — no version was changed and no release commit was made"
+fi
+good "$marketplace — this checkout"
 
 # ---------------------------------------------------------------------------
 # 3. Compute the next patch.
@@ -489,11 +539,12 @@ fi
 if [ ! -d "$INST_PATH" ]; then
   bad "the recorded installPath $INST_PATH is not a directory"
   proof_failed=1
-elif diff_out=$(diff -r "$ROOT/plugin" "$INST_PATH" 2>&1); then
+elif diff_out=$(diff -rq "$ROOT/plugin" "$INST_PATH" 2>&1); then
   good "the installed tree is byte-equal to plugin/"
 else
   bad "the installed tree differs from plugin/:"
   printf '%s\n' "$diff_out" | sed 's/^/      /' >&2
+  printf '  → Full diff: diff -r %q %q\n' "$ROOT/plugin" "$INST_PATH" >&2
   proof_failed=1
 fi
 

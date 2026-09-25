@@ -405,6 +405,7 @@ The router refuses a dirty tree or a branch other than `main`. It asks
 `check-release-version.sh` whether the plugin changed since its version bump:
 
 - **A release is needed:** `release-local.sh --patch` requires a primary checkout,
+  checks that Claude's `esquisse` marketplace resolves to this local checkout,
   bumps both manifests, proves that only their versions changed, commits the bump,
   then invokes the official Claude plugin updater. It verifies installed version,
   release commit and bytes. Restart Claude Code after success.
@@ -429,6 +430,17 @@ This report exits zero even when the installation differs or cannot be read; its
 exit code is not an installation certificate. If an install fails after a bump
 commit, that commit remains. Follow the updater's printed retry command rather
 than making another release to retry the same installation.
+
+If you move or clone the repository, Claude may still use the old directory.
+The release refuses before changing versions when that happens; `--check` also
+reports the registered source. From the intended checkout, reconnect it and
+install the version already committed:
+
+```bash
+claude --bare plugin marketplace add "$PWD" --scope user </dev/null
+claude --bare plugin update esq@esquisse --scope user --yes </dev/null
+./scripts/release-local.sh --check
+```
 
 ## Operations
 

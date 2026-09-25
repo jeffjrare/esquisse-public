@@ -140,6 +140,13 @@ fixture() { # $1 case name → sets $dir, and exports CLAUDE_CONFIG_DIR/STUB_REP
   fi
   export CLAUDE_CONFIG_DIR="$SCRATCH/$1-config"
   mkdir -p "$CLAUDE_CONFIG_DIR/plugins"
+  node -e '
+    const fs = require("fs");
+    const [file, root] = process.argv.slice(1);
+    fs.writeFileSync(file, JSON.stringify({ esquisse: {
+      source: { source: "directory", path: root }, installLocation: root
+    } }));
+  ' "$CLAUDE_CONFIG_DIR/plugins/known_marketplaces.json" "$dir"
   export STUB_REPO="$dir"
   unset STUB_UPDATE_RC STUB_STALE
 }
@@ -220,7 +227,7 @@ if fixture nothing; then
   else
     fail "an unchanged plugin/ was not refused (exit $rc): $out"
   fi
-  if [[ -z "$(ls -A "$CLAUDE_CONFIG_DIR/plugins" 2>/dev/null)" ]]; then
+  if [[ ! -e "$CLAUDE_CONFIG_DIR/plugins/installed_plugins.json" && ! -e "$CLAUDE_CONFIG_DIR/plugins/cache" ]]; then
     pass "and nothing was installed"
   else
     fail "the refused run installed something"
@@ -600,6 +607,57 @@ if fixture heldstdin; then
   # Release the write end: any `cat` still blocked on the fifo reads EOF and exits,
   # so this case leaves no process behind.
   exec 9>&-
+fi
+
+say $'\nCase 15: a wrong or unreadable marketplace refuses before the bump'
+for source_case in other missing malformed remote stale_location; do
+  if fixture "source-$source_case"; then
+    drift "$dir"
+    base=$(git -C "$dir" rev-parse HEAD)
+    node -e '
+      const fs = require("fs");
+      const [file, kind, other] = process.argv.slice(1);
+      const doc = JSON.parse(fs.readFileSync(file));
+      if (kind === "missing") { fs.unlinkSync(file); process.exit(); }
+      if (kind === "malformed") { fs.writeFileSync(file, "{"); process.exit(); }
+      if (kind === "other") doc.esquisse.source.path = other;
+      if (kind === "remote") doc.esquisse.source = { source: "github", repo: "example/esquisse" };
+      if (kind === "stale_location") doc.esquisse.installLocation = other;
+      fs.writeFileSync(file, JSON.stringify(doc));
+    ' "$CLAUDE_CONFIG_DIR/plugins/known_marketplaces.json" "$source_case" "$REPO_ROOT"
+    run --patch
+    if [[ $rc -eq 1 && "$out" == *"marketplace source mismatch or unreadable"* && "$out" == *"plugin marketplace add"* && "$(git -C "$dir" rev-parse HEAD)" == "$base" && -z "$(git -C "$dir" status --porcelain)" && ! -s "$STUB_LOG" ]]; then
+      pass "$source_case source refuses with a repair command, unchanged HEAD and manifests, and no Claude call"
+    else
+      fail "$source_case source did not refuse before mutation (exit $rc): $out"
+    fi
+    run --check
+    if [[ $rc -eq 0 && "$out" == *"marketplace source mismatch or unreadable"* && ! -s "$STUB_LOG" ]]; then
+      pass "--check reports $source_case without installing"
+    else
+      fail "--check did not report $source_case cleanly (exit $rc): $out"
+    fi
+  fi
+done
+
+say $'\nCase 16: a symlink to the same checkout is accepted'
+if fixture source_symlink; then
+  drift "$dir"
+  ln -s "$dir" "$SCRATCH/source alias"
+  node -e '
+    const fs = require("fs");
+    const [file, alias] = process.argv.slice(1);
+    const doc = JSON.parse(fs.readFileSync(file));
+    doc.esquisse.source.path = alias;
+    doc.esquisse.installLocation = alias;
+    fs.writeFileSync(file, JSON.stringify(doc));
+  ' "$CLAUDE_CONFIG_DIR/plugins/known_marketplaces.json" "$SCRATCH/source alias"
+  run --patch
+  if [[ $rc -eq 0 && "$(claude_calls 'plugin update')" -eq 1 ]]; then
+    pass "the same real directory through a symlink with spaces releases successfully"
+  else
+    fail "an alias to the correct source was refused (exit $rc): $out"
+  fi
 fi
 
 say ""
