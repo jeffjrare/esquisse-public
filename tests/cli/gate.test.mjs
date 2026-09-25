@@ -209,6 +209,77 @@ test('steps are collected from the verification list only, phase by phase', () =
   ]);
 });
 
+const whitespaceFixture = new URL('./fixtures/landing-command-whitespace.md', import.meta.url);
+
+test('real landing commands retain the exact strings in their historical proof', async () => {
+  const text = await readFile(whitespaceFixture, 'utf8');
+  const commands = autoSteps(text).map(({ step }) => extractAutoCommand(step));
+  assert.equal(commands.length, 8);
+  assert.deepEqual(commands, parseVerified(text).get(1)[0].commands);
+  assert.ok(commands[3].includes('"^  <'));
+});
+
+test('Markdown bullets and continuations preserve spaces and tabs inside commands', () => {
+  const command = 'printf "a  b\tc"';
+  const continued = 'grep -n "^  <" src/app.js';
+  const text = [
+    '### Phase 1 — whitespace',
+    '- **Verification:**',
+    `  - \`(auto)\` \`${command}\``,
+    '    — exact output,',
+    '    including spaces and tabs',
+    '  * `(auto)`',
+    '    `grep -n "^  <"',
+    '    src/app.js` — a wrapped command',
+    '',
+    '    prose after a blank line is not a continuation',
+    `  - (auto) \`${command}\` — another bullet`,
+    '  shallower prose is not a continuation',
+    '- **Notes:**',
+    '  - `(auto)` `ignored` — outside verification',
+  ].join('\n');
+  const steps = autoSteps(text);
+  assert.deepEqual(steps.map(({ step }) => extractAutoCommand(step)), [command, continued, command]);
+  assert.equal(steps[0].step, `\`(auto)\` \`${command}\` — exact output, including spaces and tabs`);
+  assert.equal(steps[1].step, `\`(auto)\` \`${continued}\` — a wrapped command`);
+  assert.equal(steps[2].step, `(auto) \`${command}\` — another bullet`);
+});
+
+test('gate reuse and deduplication distinguish significant whitespace, including proof recording', async () => {
+  // Only the proof commit is adapted to the disposable repository. No fixture command is run.
+  const text = await readFile(whitespaceFixture, 'utf8');
+  const steps = autoSteps(text).map(({ step }) => step);
+  const commands = parseVerified(text).get(1)[0].commands;
+  const exact = commands[3];
+  const different = exact.replace('^  <', '^ <');
+  const differentStep = steps[3].replace(exact, different);
+  const root = await repo();
+  const file = await plan(root, [[...steps, differentStep], [`${steps[3]} Again.`, differentStep]]);
+  await logPhase(root, file, 1, commands);
+  await logPhase(root, file, 2, [exact]);
+
+  const report = await gateVerify(root, file);
+  assert.equal(report.unresolved.length, 0);
+  assert.equal(report.commands.length, 9);
+  for (const command of commands) assert.equal(decisions(report)[command], 'reuse');
+  const original = report.commands.find(({ command }) => command === exact);
+  const variant = report.commands.find(({ command }) => command === different);
+  assert.deepEqual(original.phases, [1, 2]);
+  assert.deepEqual(variant.phases, [1, 2]);
+  assert.equal(variant.decision, 'run');
+  assert.match(variant.reason, /green list does not name this command/);
+
+  // A verbatim step with significant whitespace must also match record-verification.
+  // The same command has a distinct criterion in Phase 2, so this step is unambiguous.
+  const at = git(root, 'rev-parse', 'HEAD');
+  const recorded = await recordVerification(root, file, JSON.stringify({
+    by: 'whitespace regression', at, tree: git(root, 'rev-parse', 'HEAD^{tree}'), step: steps[3],
+  }));
+  assert.equal(recorded.refuse, false);
+  assert.equal(recorded.command, exact);
+  assert.deepEqual(parseVerified(await readFile(file, 'utf8')).get(1).at(-1).commands, [exact]);
+});
+
 test('unchanged final-tree evidence is reused, and a post-verification implementation commit forces the rerun', async () => {
   const root = await repo();
   const file = await plan(root, [['`(auto)` `pnpm test` — the suite is green']]);

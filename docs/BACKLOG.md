@@ -201,6 +201,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-182 | 2026-09-25 | ✨ improvement | hi | 3200 | Keep preparation focused on real outcomes and relevant decisions, with conditional guidance and concise output. | observed: adversarial preparation review 2026-09-24 |  |  | Open |
 | B-183 | 2026-09-25 | ✨ improvement | hi? |  | Correct architecture authority and reporting instructions; remove the planner alternative quota. | observed: adversarial preparation and architecture review 2026-09-24 · Done by architecture-preparation-review |  |  | Done |
 | B-184 | 2026-09-25 | 🐛 bug | med? |  | Reconcile duplicate tail ranks when independently captured backlog rows merge. | observed: B-003 retained-branch regression; independent rows both carry Rank 100 · Done by merge-rank-collisions |  |  | Done |
+| B-185 | 2026-09-25 | 🐛 bug | hi |  | Preserve significant whitespace in auto commands through Markdown extraction and landing proof reuse. | observed: events-tracker landing plan 2026-09-24-vitrine-fonctions-recentes-multi-membre, command line 232 and proof line 295 · Done by preserve-command-whitespace |  |  | Done |
 
 ---
 
@@ -1491,3 +1492,7 @@ same amendment.
 ## B-183 — Correct architecture authority and reporting instructions; remove the planner alternative quota.
 
 **Resolution:** Corrected source-level contradictions: plan no longer imposes an alternative quota; arch selects applicable intent, preserves historical records without treating Active as authority, scopes refresh reads and evidence reuse, permits zero cuts, and reports short reasons with links. Real relay-pin and standards records checked; 526 instruction words removed. One product audit passed 7/7 in 27.58 s. This closes the instruction defects only; native generated-quality and runtime-cost acceptance remain unproved under B-181/B-182. Review, official Anthropic sources and next-case handoff: docs/preparation/2026-09-24-architecture-preparation-review.md. No paid trial, push or publication.
+
+## B-185 — Preserve significant whitespace in auto commands through Markdown extraction and landing proof reuse.
+
+**Resolution:** Removed global whitespace compression from listItems; preserved Markdown list and continuation handling and exact proof strings. Three regressions cover the real eight-command excerpt, significant spaces/tabs, continuations, exact proof recording, deduplication and reuse versus a distinct single-space command. One final product audit passed 7/7 in 26.61 s. Evidence: docs/preparation/2026-09-25-b185-command-whitespace.md. Local source only; events-tracker read-only, no installation or publication.

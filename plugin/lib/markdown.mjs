@@ -353,12 +353,13 @@ function verificationItems(items) {
 
 // Markdown list items, one `{ indent, text }` each, continuation lines folded in. A more-indented
 // line that is not itself a bullet continues the item; a blank line, a shallower line or the next
-// bullet ends it.
+// bullet ends it. Fold only the Markdown line boundary below: whitespace inside a command
+// is executable content and must also keep its exact identity against the recorded proof.
 function listItems(lines) {
   const items = [];
   let current = null;
   const flush = () => {
-    if (current !== null) items.push({ indent: current.indent, text: current.text.replace(/\s+/g, ' ').trim() });
+    if (current !== null) items.push({ indent: current.indent, text: current.text.trim() });
     current = null;
   };
   for (const line of lines) {
