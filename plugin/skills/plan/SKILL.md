@@ -229,7 +229,7 @@ Keep only what changes an implementation or product decision: the useful result,
 chosen approach and cost, concrete tasks, verification and unresolved risks. State
 each fact once and reference it elsewhere. Do not narrate the investigation, fill
 sections with generic advice, invent alternatives, or repeat the plan in the final
-response. Keep the contract's required headings and parsed fields intact.
+response. Keep the contract's required headings and parsed fields intact. When the response itself is the requested deliverable, fit its stated length limit before sending; cut repeated rationale before cutting acceptance or implementation detail.
 
 ## Verification discipline
 
@@ -264,10 +264,17 @@ Read the written plan once and correct these yourself:
    from code completion. Preserve the user's actual acceptance condition.
 3. Name widened public schemas/data, existing consumers and any install/restart/release
    needed for the result to reach users; do not silently promise activation.
-4. Cover the relevant boundary/malformed inputs in tasks or verification.
-5. Resolve every auto command against its documented usage and property; remove duplicate
-   verification only when both coverage and conditions match. Correct an unrunnable
-   command at equal or greater strictness, never weaken the criterion.
+4. Try to falsify the recommendation with a legitimate existing case from the inspected
+   code or data, not just the defect it fixes. Trace the proposed rule through both;
+   correct it if it rejects valid behavior or changes the meaning of a source field.
+   Distinguish source facts, derived conclusions and unknowns. Put the useful
+   counterexample in the task's acceptance/test, not a separate review artifact.
+   Cover relevant boundary/malformed inputs without inventing a test matrix.
+5. Resolve every auto command against its documented usage and property. For each
+   required command, identify what it proves that the others do not; when the project's
+   final audit already runs the focused suite under the same conditions, keep the audit
+   alone. A sentence promising no duplicate runs does not remove a duplicate command
+   from the list. Correct unrunnable commands without weakening their criteria.
 
 Size by deliverable and session context, not a task-count cap. Each task is one atomic
 commit; unrelated changes are separate tasks. Leave working code after each phase.
