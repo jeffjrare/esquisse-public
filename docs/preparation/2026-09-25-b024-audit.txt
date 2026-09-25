@@ -1,0 +1,75 @@
+
+[1mStructure — every reference resolves[0m
+[32m  ✓ structure clean — section references, 21 commands, README coverage, every references/ path and every brief section resolve[0m
+
+[1mPackage — the plugin and its skills validate[0m
+[32m  ✓ plugin, embedded CLI, native hooks and 21 skills validate[0m
+
+[1mNo push — nothing in the shipped plugin runs or spells one[0m
+[32m  ✓ 44 file(s) read; nothing in the shipped plugin runs or spells a push[0m
+
+[1mConformance — the formats the code parses are intact[0m
+[32m  ✓ 4 behavioral scenarios, 7 observable clauses present[0m
+
+[1mVersion — the two manifests agree[0m
+[32m  ✓ release pending — both manifests read 0.3.43 and 2 file(s) changed since the 214072a bump that released it; ./scripts/update.sh publishes them[0m
+
+[1mBounded runner — a hang is a named red line, not a silent pass[0m
+[31m  ✗   [31m✗[0m the failing test's name did not survive the 45 passing lines printed after it. Got:[0m
+[31m  ✗       late-failure-case failed (exit 1)[0m
+[31m  ✗             not ok 1 - /tmp/tmp.7L6ze4kvM2/tests/late.test.mjs[0m
+[31m  ✗               ---[0m
+[31m  ✗               location: '/tmp/tmp.7L6ze4kvM2/tests/late.test.mjs:1:1'[0m
+[31m  ✗               failureType: 'testCodeFailure'[0m
+[31m  ✗               exitCode: 1[0m
+[31m  ✗               signal: ~[0m
+[31m  ✗               error: 'test failed'[0m
+[31m  ✗               code: 'ERR_TEST_FAILURE'[0m
+[31m  ✗               ...[0m
+[31m  ✗             # tests 1[0m
+[31m  ✗             # pass 0[0m
+[31m  ✗             # fail 1[0m
+[31m  ✗             # cancelled 0[0m
+[31m  ✗             # skipped 0[0m
+[31m  ✗             # todo 0[0m
+[31m  ✗ [31m1 failure(s) — the bounded runner is not doing its job.[0m[0m
+
+[1mProduct suites — CLI, hooks and corpus helper (bounded 120 s)[0m
+[31m  ✗ the product suites failed (exit 1)[0m
+[31m  ✗       not ok 2 - tests/cli/apply.test.mjs[0m
+[31m  ✗         ---[0m
+[31m  ✗         location: '/home/jeffgirard/projects/esquisse-public-ready/tests/cli/apply.test.mjs:1:1'[0m
+[31m  ✗         failureType: 'testCodeFailure'[0m
+[31m  ✗         exitCode: 1[0m
+[31m  ✗         signal: ~[0m
+[31m  ✗         error: 'test failed'[0m
+[31m  ✗         code: 'ERR_TEST_FAILURE'[0m
+[31m  ✗         ...[0m
+[31m  ✗       not ok 3 - tests/cli/autonomy.test.mjs[0m
+[31m  ✗         ---[0m
+[31m  ✗         location: '/home/jeffgirard/projects/esquisse-public-ready/tests/cli/autonomy.test.mjs:1:1'[0m
+[31m  ✗         failureType: 'testCodeFailure'[0m
+[31m  ✗         exitCode: 1[0m
+[31m  ✗         signal: ~[0m
+[31m  ✗         error: 'test failed'[0m
+[31m  ✗         code: 'ERR_TEST_FAILURE'[0m
+[31m  ✗         ...[0m
+[31m  ✗       not ok 4 - tests/cli/backlog-rank-lifecycle.test.mjs[0m
+[31m  ✗         ---[0m
+[31m  ✗         location: '/home/jeffgirard/projects/esquisse-public-ready/tests/cli/backlog-rank-lifecycle.test.mjs:1:1'[0m
+[31m  ✗         failureType: 'testCodeFailure'[0m
+[31m  ✗         exitCode: 1[0m
+[31m  ✗         signal: ~[0m
+[31m  ✗         error: 'test failed'[0m
+[31m  ✗         code: 'ERR_TEST_FAILURE'[0m
+[31m  ✗         ...[0m
+[31m  ✗       … 10 more failing test(s) in the captured output, not shown (13 failed in all)[0m
+[31m  ✗       # tests 16[0m
+[31m  ✗       # pass 3[0m
+[31m  ✗       # fail 12[0m
+[31m  ✗       # cancelled 1[0m
+[31m  ✗       # skipped 0[0m
+[31m  ✗       # todo 0[0m
+
+[1mSummary[0m
+[31m  2 of 7 checks failed (product).[0m

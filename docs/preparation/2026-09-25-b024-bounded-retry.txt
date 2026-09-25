@@ -1,0 +1,4 @@
+Command: scripts/test-bounded.sh --quiet
+Context: retry outside sandbox, unchanged product source
+Observed exit: 0
+stdout/stderr: empty (quiet success)

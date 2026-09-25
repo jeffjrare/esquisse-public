@@ -95,22 +95,28 @@ Compare the mined feature list against the existing spec. Four cases, and the th
 
 - **New features** (in codebase, not in spec): add them.
 - **Unchanged features**: leave them as-is. Don't rewrite what's already accurate.
-- **A documented `Règle métier` the code no longer honors** — do NOT absorb this as an update. A rule that changed is either a product decision nobody wrote down, or a regression nobody noticed, and **the two are indistinguishable from the code**. Absorbing it silently makes the spec agree with a bug and destroys the only record that the behavior ever differed. So: collect these, and put them to the user as a question before writing anything (see "Confirm before writing"). Intended → rewrite the rule and note it `<!-- modifié YYYY-MM-DD : <ancienne règle> → <nouvelle> -->`. Not intended → **leave the spec exactly as it was**, and report it as a regression to fix; the spec is right and the code is wrong.
+- **A documented `Règle métier` the code no longer honors** — do NOT absorb this as an update. Code alone cannot distinguish an intended change from a regression. Collect the disagreement and resolve its authority through "Confirm before writing" before changing that rule. Intended → rewrite the rule and note it `<!-- modifié YYYY-MM-DD : <ancienne règle> → <nouvelle> -->`. Not intended → **leave that rule exactly as it was**, and report the regression; do not undo unrelated settled work.
 - **Removed features** (in spec, no longer in codebase): same treatment — a feature that vanished is either a retirement or an accident. If confirmed retired, mark `**Statut:** Retiré — YYYY-MM-DD` rather than deleting, so the history survives.
 
 Non-rule changes — wording, a clearer `Fonctionnement`, a feature that gained a step — just update, with `<!-- mis à jour YYYY-MM-DD : <what changed> -->` above the section. The interrogation is for rules and disappearances only; asking about every prose tweak would drown the questions that matter in noise.
 
 ## Confirm before writing
 
-**Changed rules and vanished features come first, one question each.** Ask before showing the draft — the answers change what the draft says:
+**Changed rules and vanished features come first.** Reuse answers and applicable authority already in the mandate or cited decisions; a decision's Active label or the code alone is not authorization. Cite what settles this specific change. Only a missing product choice earns a question, before changing the affected text:
 
 > "`<Feature>` — la spec dit *<règle documentée>*. Le code fait *<ce qu'il fait maintenant>*. Voulu ?"
 
 Options: "Voulu — mets la spec à jour" · "Pas voulu — c'est une régression, laisse la spec et signale-le" · "Je ne sais pas — montre-moi où"
 
-Batch at most 4 per `AskUserQuestion` call. Never resolve one by assuming the code is right: the spec is what someone decided the product should do, and the code is only what it currently does. If `AskUserQuestion` is unavailable, ask in plain text and wait.
+Batch at most 4 per `AskUserQuestion` call. Neither the spec nor the code settles current intent by itself. If `AskUserQuestion` is unavailable, ask in plain text and wait for that choice; continue independent settled work.
 
-**Then write the file — do not ask permission for the rest.** Once the changed rules are settled, everything else in the spec is derived from the codebase you just read, and it is committed to git. Showing a full draft and waiting for "looks good" is a session spent on a question whose answer you already have.
+**After "Je ne sais pas — montre-moi où":**
+
+- Show the documented rule and the observed behavior with precise file/section or line links, the relevant input/output when available, and their concrete consequence for the user. Distinguish an executed observation from a source reading; name what neither establishes. Reuse the evidence already collected; investigate only the missing fact within the announced bound.
+- Evidence is not consent. If existing authority settles intent, cite it and proceed without asking again. Otherwise ask only the remaining choice, in user terms: adopt the observed rule or retain the documented rule and report the regression. Offer deferral when the user still cannot decide; do not repeat "Voulu ?" or the same evidence loop.
+- Still unknown, deferred, or unanswered → keep the disputed text unchanged, label the item **unresolved**, and name the missing intent or evidence and the exact choice needed to resume. Never infer retirement, approval or a regression from uncertainty. Preserve settled answers and edits; on resume, revisit only this item and facts changed since the cited evidence.
+
+**Write settled, independent changes — do not ask permission for the rest.** An unresolved item holds only edits that depend on it. Keep its rule and the existing freshness marker unchanged; report a partial refresh and what remains unexamined. With no settled edits, make no write or empty commit. A full refresh marker is earned only after all disagreements are settled and the announced scope covers the document.
 
 Write it, commit it, and report — the steps are below. A correction after the fact costs the user exactly what answering would have, minus the wait.
 
@@ -118,9 +124,9 @@ Write it, commit it, and report — the steps are below. A correction after the 
 
 1. Ensure `docs/` exists.
 2. Write `docs/SPEC.md` with the confirmed content.
-3. Set the marker on the second line to today's date and the commit preflight read: `<!-- last-spec: YYYY-MM-DD @ <full commit> -->`. Never skip it, and never shorten the commit — without the date, `/esq:arch` and `/esq:status` can't tell whether the spec has fallen behind the code; without the full commit, `esq projections` cannot prove the spec still describes `HEAD`, and `/esq:land` reports it as not fresh. Freshness survives exactly the bookkeeping a refresh or a landing makes — this file, `CLAUDE.md`, `docs/ARCHITECTURE.md`, Markdown under `docs/plans/`, `docs/BACKLOG.md` — so a same-day `/esq:arch` before or after this run leaves both fresh.
+3. For a complete refresh only, set the marker on the second line to today's date and the commit preflight read: `<!-- last-spec: YYYY-MM-DD @ <full commit> -->`. Never shorten the commit. A partial refresh preserves the existing marker and document-wide update date (or leaves them absent on a first run); date its settled section edits only. Without a complete marker, `esq projections` cannot certify freshness. Freshness survives exactly the bookkeeping a refresh or a landing makes — this file, `CLAUDE.md`, `docs/ARCHITECTURE.md`, Markdown under `docs/plans/`, `docs/BACKLOG.md` — so a same-day `/esq:arch` before or after this run leaves both fresh.
 4. `git add docs/SPEC.md`
-5. `git commit -m "spec: <first run | refresh YYYY-MM-DD> (<N> features)"`
+5. `git commit -m "spec: <first run | refresh YYYY-MM-DD | partial refresh YYYY-MM-DD> (<N> features)"`
 
 <!-- conclusion:start -->
 **Your conclusion is three zones, in this order, and nothing else.** The reader wants two facts — did it work, and does it need me — before any detail.
@@ -129,7 +135,7 @@ Write it, commit it, and report — the steps are below. A correction after the 
 
 > `<glyph>  <command> — <your own counters> · <elapsed> · NEEDS YOU (<n>)`
 
-`✔` nothing needs the user · `⚠` something does · `✖` you could not do your job. Drop `NEEDS YOU` when nothing does, and never soften the glyph: one open gate makes the whole run `⚠`.
+`✔` refresh complete, nothing needs the user · `⚠` partial or unresolved · `✖` you could not do your job. Drop `NEEDS YOU` when nothing does, and never soften the glyph: one open gate makes the whole run `⚠`.
 
 **2 · What needs you.** Only what the user still has to settle — never a notice, and never work this command could do itself. One short ask per numbered line, action first, an executable one carrying its exact command in backticks. A genuine product choice takes the 🔴 option-set shape; a manual verification is copied verbatim with its starting state bracketed at the front. Absent whenever the headline is `✔`.
 
@@ -150,11 +156,11 @@ Then `→ Next`, last and alone: the first executable ask's exact command, or `p
 
 ## Conclude
 
-**Headline:** `<glyph>  spec — <first run | refresh> · <N> features · <elapsed> · NEEDS YOU (<n>)` — `⚠` on any "pas voulu" answer, `✔` otherwise.
+**Headline:** `<glyph>  spec — <first run | refresh | partial refresh> · <N> features · <elapsed> · NEEDS YOU (<n>)` — `⚠` on any regression or unresolved item; never announce a complete success while one remains. An evidence gap is reported as a diagnosis, not counted as a user choice.
 
-**Zone 2 is the "pas voulu" regressions, and nothing else** — numbered and action first: capture the regression, the rule it breaks, where, and one `do:` that runs as written (`/esq:backlog`, or `/esq:plan` when substantial). The spec was left untouched for each — a change nobody decided. Do not fix them here.
+**Zone 2:** the remaining product choices and confirmed regressions. For an unresolved choice, name the rule, link the evidence and ask only what remains undecided, including deferral; no executable `do:` may pretend it is settled. For a confirmed regression, capture the rule it breaks, where, and one `do:` that runs as written (`/esq:backlog`, or `/esq:plan` when substantial). Do not fix regressions here.
 
-**Zone 3:** `added`, `updated` (with what changed), `retired` — an empty one disappears — then the commit line, its evidence column carrying the undo.
+**Zone 3:** `added`, `updated` (with what changed), `retired` — an empty one disappears — then the commit line, its evidence column carrying the undo. A partial run also names unresolved evidence gaps, retained rules/marker and uncovered scope; never label them verified or retired.
 
 ```
 ⚠  spec — refresh · 14 features · 4m02s · NEEDS YOU (1)
@@ -169,7 +175,7 @@ Then `→ Next`, last and alone: the first executable ask's exact command, or `p
 → Next: /esq:backlog Cart TTL no longer enforced — spec says 30 min
 ```
 
-`→ Next` is the `/esq:backlog` capture when regressions exist; otherwise `/esq:spec` again — they control the cadence.
+`→ Next` resumes the first unresolved choice with its retained evidence, or names the missing evidence to obtain; otherwise it is the `/esq:backlog` capture when regressions exist, or `/esq:spec` again. A deferred item waits for new intent/evidence, not a fresh round of the same questions.
 
 ## Constraints
 

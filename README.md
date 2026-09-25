@@ -74,7 +74,10 @@ registry entries. Corrective procedures and decision-record formats load only wh
 One viable approach is enough; alternatives must improve the outcome within the constraints.
 Architecture refreshes use applicable decisions and report changes with short reasons and links.
 For an unfamiliar codebase, `/esq:status` or the `harvest`, `spec` and `arch`
-commands can help on demand; none is a mandatory setup sequence. A tiny edit
+commands can help on demand; none is a mandatory setup sequence. In `spec`,
+« Je ne sais pas — montre-moi où » shows the documented rule, observed behavior
+and user consequence, then asks only the missing choice. Unresolved rules remain
+unchanged; settled edits survive without certifying a complete refresh. A tiny edit
 that needs no workflow record can use ordinary Claude Code.
 
 ### Small changes without a plan

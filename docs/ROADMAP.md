@@ -39,12 +39,6 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ## Later
 
-### spec-unresolved-answer
-**covers:** B-024
-**why now:** A concrete unanswered-result contract outranks speculative guard work, but its live failure has not been reproduced and it does not conceal a red verification.
-**acceptance:** Showing the evidence after Je ne sais pas cannot authorize a spec change; an unresolved product rule stays visibly unresolved.
-**state:** <!-- GENERATED --> Open; the answer is still offered with no explicit post-show continuation.
-
 ### background-acceptance
 **covers:** B-085, B-087
 **why now:** Conditional follow-up, not another implementation of the shipped collection protocol. Preserve B-085 confirmed hi, but defer its unproved savings and harness-registration claim: the 2026-09-08 owner choice explicitly left both open after shipping process cleanup.
@@ -81,6 +75,7 @@ The remaining ranked backlog work has no committed implementation position: B-01
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-25 · spec-unresolved-answer — B-024 Done locally: explicit evidence/remaining-choice continuation, preserved unresolved rules and settled work, honest partial refresh. Real stale model-routing CLI observation plus directed instruction reading; no native model dialogue. Five audit checks passed initially; only two failed Node checks retried outside sandbox, both passed. Evidence: `docs/preparation/2026-09-25-b024-spec-continuation.md`. No queue promotion or publication.
 - 2026-09-24 · dependable-queue — B-129 and B-079 Done locally. Roadmap/status offer the discussed Now entry's scoped advance and preserve an explicit global walk. Targeted/global semantic reading and one 7/7 product audit; no native model journey. Evidence: `docs/preparation/2026-09-24-b079-scoped-handoff.md`.
 - 2026-09-24 · architecture-preparation instructions — B-183 done locally: relevant current authority, scoped reads, concise linked reports and no planner alternative quota. Real historical/current decision counterexample and 7/7 product audit; 526 source words removed, no runtime saving claimed. B-181/B-182 remain Open; review and proposed next case in `docs/preparation/2026-09-24-architecture-preparation-review.md`.
 - 2026-09-24 · projection-standing — B-043 already Done; B-075 done locally: status/backlog/roadmap distinguish explicit parking with reason and restart condition; state retains existing acceptance text. Real B-001/B-006/B-085/B-087 observation and one 7/7 product audit; details in `docs/preparation/2026-09-24-b075-parked-work.md`. No native model trial or publication; other entries keep their order.
