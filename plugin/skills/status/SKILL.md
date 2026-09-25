@@ -28,7 +28,7 @@ Run `esq state`, `esq brief pending` and `esq validate` once, batching these ind
 | `backlog.counts` | Open, Needs-decision, Planned, Done, Dropped |
 | `backlog.rows` | Open/Needs-decision/Planned rows: id, pri, rank, summary, status, epic, source |
 | `roadmap.head` | Top Now entry: slug, covers, whyNow, needs, unblocks, state (projected text; GENERATED marker stripped) |
-| `roadmap.entries[]` | Now/Next/Later in projected order, same fields plus horizon and live[]: explicit covered ID, current backlog status (including Done/Dropped), or null with error |
+| `roadmap.entries[]` | Now/Next/Later in projected order, same fields plus acceptance (text or null), horizon and live[]: explicit covered ID, current backlog status (including Done/Dropped), or null with error |
 | `roadmap.freshness` | unassessed for free-form projected text; unknown on read error; never a claim that closed membership makes an entry stale |
 | `epics[]` | file, slug, rows[] with projected line/status and live status; mismatch true/false/null per row; stale compares these Backlog bullets only, not the whole epic |
 | `landing` | For the CLI's settled complete plan: file, branch, origin, landed, coverage, unit |
@@ -80,7 +80,9 @@ Use selected for the newest planning candidate, with unresolved corrective work 
 
 Show Open total and hi count from pri, Needs-decision separately, and Planned separately. Closed items contribute counts only. Missing file → `No BACKLOG.md found.` On backlog.error, render `✖ backlog <error as given>`, counts unknown, and skip closure candidates and count-based backlog advice.
 
-For Planned rows, retain Source's ` · Planned by <slug>` marker; skip rows without it. Group by slug and match the named plan in the retained plan list, reading `docs/plans/<slug>.md` only if not already cached and classification is still needed. Missing → `plan file not found`, no hunt. Invalid → `plan unreadable`, not a candidate. Complete plan → **candidate to close**, never proof that the individual item shipped. Show its ID; never edit or assert Done. Omit an empty candidate block.
+For Planned rows, retain Source's ` · Planned by <slug>` marker; skip rows without it. Group by slug and match the named plan in the retained plan list, reading `docs/plans/<slug>.md` only if not already cached and classification is still needed. Missing → `plan file not found`, no hunt. Invalid → `plan unreadable`, not a candidate. Before suggesting closure on a complete plan, read only the item's detail and cited acceptance evidence not already retained. Whole outcome evidenced → candidate for reconciliation; otherwise show `plan complete; acceptance unmet/unproved: <condition>`, never a closure candidate or a reason to rerun completed phases. Show its ID; never edit or assert Done. Omit an empty candidate block.
+
+Show explicitly deferred work as `○ <ID> <canonical status> · parked — <reason>; resume when <condition>`, using summaries and roadmap whyNow/state/acceptance, then only relevant detail if facts are missing. Unknown reason/condition stays unspecified, without a question or investigation. Planned, priority, Later and activePlan recency never prove execution or parking. Keep plan association, phase state and item acceptance distinct; label the settled plan as latest, not executing without unfinished log evidence. A parked item does not park other work on its plan or entry.
 
 Display the head as **projected order/text**, followed by its entry's **live backlog statuses**, including closed IDs. Use live facts for routing. Keep the queue's order: Done/Dropped membership does not make an entry stale or authorize removing it. Free-form `state` has unassessed freshness; flag a contradiction only when the text unambiguously claims a different status for the same ID. A mixed Done/Open entry can be correct. Missing roadmap → omit; empty Now → say Now is empty; read error → show it without interpreting the queue as empty.
 
@@ -104,7 +106,7 @@ These are advisories; neither blocks landing or changes the primary next action.
 
 ## 6. Choose exactly one → Next
 
-First matching rule wins. Plan rules use the settled healthy, non-abandoned plan; no usable plan falls through to briefs. An unreadable file is a user-needs item, never a build target.
+First matching rule wins. Plan rules use the settled healthy, non-abandoned plan; no usable plan falls through to briefs. An unreadable file is a user-needs item, never a build target. Before routing, exclude explicitly parked work from automatic work/build/closure advice and retain its reason/restart condition. Do not bypass its dependency obligations or silently skip a parked roadmap head; if no action is warranted, Next states the condition. An explicit selection can satisfy a selection condition, never an unproved external prerequisite. Parking does not clear a shipping-unit obligation.
 
 1. **Paused phase** → `/esq:build <plan-path>`; note Phase N and the actual cause (manual verification and/or named same-unit defects).
 2. **Interrupted attempt** → `/esq:build <plan-path>`; give unlogged count and explain that build verifies the phase's auto steps and reconciles its log before implementing more. `git show <hash>` is optional, never a prerequisite.
@@ -138,7 +140,7 @@ Three zones, no preamble or closing observations:
 
 1. **Headline:** `<glyph> status — <slug/current phase> · <backlog counters> · <measured elapsed> · NEEDS YOU (<n>)`. ✔ no user needs; ⚠ any user gate/unreadable ledger; ✖ unable to produce the snapshot. Omit NEEDS YOU when empty.
 2. **User needs:** numbered action-first asks, exact commands where executable. Include outstanding manual steps (verbatim, bracketed starting state), blockedBy rows, Needs-decision items and unresolved gates. Retain genuine product decisions' 🔴 option sets; never ask for technical work this command can settle.
-3. **Snapshot:** glyph, label, value, evidence/path. ✔ happened, ○ deliberately not, ✖ failed. Show settled plan and epic rollup, indented phases with their own pause clauses, unlogged commits, closure candidates, pending briefs, backlog, roadmap head and staleness. Collapse empty categories; no `None.` lines. Name work the reader would otherwise assume ran.
+3. **Snapshot:** glyph, label, value, evidence/path. ✔ happened, ○ deliberately not, ✖ failed. Show settled plan and epic rollup, indented phases with their own pause clauses, unlogged commits, closure candidates, pending briefs, backlog, parked work (group shared reasons/conditions), roadmap head and staleness. Collapse empty categories; no `None.` lines. Name work the reader would otherwise assume ran.
 
 Finish with `→ Next` and only the allowed Or/Also lines. If a user decision must precede an executable action, say which option to pick and the resume command.
 <!-- conclusion:end -->

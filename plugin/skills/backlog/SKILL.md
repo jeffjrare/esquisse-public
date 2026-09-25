@@ -39,7 +39,7 @@ Actual table headers determine cell positions; never write a fixed-width row und
 
 - **ID:** permanent, monotonic `B-001` citation; never renumber or reuse.
 - **Type:** 🐛 bug · ✨ improvement · ☑️ todo · 💡 idea · ⚠️ debt (deferred fix).
-- **Status:** `Open` actionable · `Needs-decision` blocked on a user call · `Planned` picked up by a plan · `Done` · `Dropped`.
+- **Status:** `Open` unresolved · `Needs-decision` blocked on a user call · `Planned` picked up by a plan · `Done` · `Dropped`. Open/Planned do not prove execution.
 - **Pri:** confirmed `hi|med|lo`, suggested `hi?|med?|lo?`, or legacy blank. Every new/open item needs a level; never invent user confirmation.
 - **Rank:** sparse integer maintained by the CLI. Add/reopen assigns the active sequence's tail; Done/Dropped clears it. `esq backlog rank` records deliberate placement and validates roadmap edges. Blank active ranks are legacy unplaced work; these writers supply a missing Rank column without classifying it.
 - **Epic:** free-text slug joining `docs/epics/<slug>.md`; blank if none. Keep the actual slug, but capture requires no existence check.
@@ -99,6 +99,8 @@ Sort by `hi → hi? → med → med? → lo → lo? → blank`, then Rank ascend
 
 Show ID, type, summary, source, priority with `?` intact, and `«epic-slug»` after the summary when present. Show Planned separately; lift Needs-decision into the user-needs zone. Cap the closed summary at about five IDs and omit empty groups. Explain suggested versus confirmed priority with `/esq:backlog B-NNN pri:hi` or `… confirm`; `/esq:epic <slug>` gives the tagged theme's full view.
 
+For explicitly deferred rows, show `parked — <reason>; resume when <condition>` alongside their canonical status, using retained prose or only that item's detail if needed. Preserve those facts in detail prose when capturing/updating deferred work; no new status or column. Unknown conditions stay unspecified. Exclude these rows from automatic work advice until their condition is met; priority/rank alone never resumes them.
+
 If any open row is unranked, report `○ <n> of <m> open items carry no position yet`. Empty/missing file → `Backlog is empty — add with /esq:backlog <text>.`
 
 **Next, first match:**
@@ -106,7 +108,7 @@ If any open row is unranked, report `○ <n> of <m> open items carry no position
 1. Needs-decision → resolve the 🔴 items: give the answer for an update or use `/esq:grill`.
 2. Any ranked Open row → `/esq:work <first item of the rendered sequence>`, naming its bucket/ordinal.
 3. Nothing ranked → if a roadmap exists, use its top Now entry's first still-Open covered item; otherwise a hi Open item; otherwise any Open item. Recommend `/esq:work B-NNN`, which chooses the method.
-4. No actionable item → `Backlog clear.`
+4. No actionable item → if open rows remain, name their recorded restart conditions or missing facts; otherwise `Backlog clear.`
 
 If any open item is unranked, append only this alternative: `→ Or: /esq:roadmap plan (<n> of <m> open items carry no position — place them all)`.
 

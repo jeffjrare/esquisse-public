@@ -1774,17 +1774,17 @@ async function roadmapState(repository, lookup) {
     if (!horizon) continue;
     const heading = line.match(/^### (.+?)\s*$/);
     if (heading) {
-      entry = { horizon, slug: heading[1], covers: null, whyNow: null, needs: null, unblocks: null, state: null };
+      entry = { horizon, slug: heading[1], covers: null, whyNow: null, needs: null, unblocks: null, state: null, acceptance: null };
       entries.push(entry);
       continue;
     }
-    const field = line.match(/^\*\*(covers|why now|needs|unblocks|state):\*\*\s*(.*)$/);
+    const field = line.match(/^\*\*(covers|why now|needs|unblocks|state|acceptance):\*\*\s*(.*)$/);
     if (!entry || !field) continue;
     const key = field[1] === 'why now' ? 'whyNow' : field[1];
     entry[key] = field[2].replace(/<!--.*?-->/g, '').trim();
   }
   const first = entries.find((item) => item.horizon === 'Now');
-  const head = first ? Object.fromEntries(Object.entries(first).filter(([key]) => key !== 'horizon')) : null;
+  const head = first ? Object.fromEntries(Object.entries(first).filter(([key]) => !['horizon', 'acceptance'].includes(key))) : null;
   for (const item of entries) {
     const ids = [...new Set(item.covers?.match(/\bB-\d+\b/g) ?? [])];
     item.live = ids.map(lookup);

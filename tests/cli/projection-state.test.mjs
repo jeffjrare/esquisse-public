@@ -84,6 +84,58 @@ test('epic compares only explicit projected status cells and excludes historical
   assert.equal(result.stale, false);
 });
 
+test('state retains real parked-work restart conditions without changing canonical statuses or the legacy head', async (t) => {
+  const root = await fixture(t);
+  const backlog = ledger + '| B-001 | Parked Sheets integration | Open |\n'
+    + '| B-006 | Parked Codex port | Planned |\n'
+    + '| B-085 | Collection protocol delivered; operational acceptance unproved | Planned |\n'
+    + '| B-087 | Process teardown delivered; late notification unresolved | Planned |\n';
+  // Existing public-checkout witnesses; the historical plans are intentionally absent.
+  const queue = `## Now
+### sheets-option
+**covers:** B-001
+**state:** <!-- GENERATED --> Open; historically parked, not executing.
+**acceptance:** Revalidate both the need and connector capability at selection time; the historical missing-connector claim is not a current market finding.
+## Later
+### codex-option
+**covers:** B-006
+**state:** <!-- GENERATED --> Historically Planned; private adapter plan omitted, parked and not executing here.
+**acceptance:** A selected cross-host use case and current capability contract justify the smallest useful port.
+### background-acceptance
+**covers:** B-085, B-087
+**state:** <!-- GENERATED --> Both historically Planned; upstream background-task-lifecycle completed four phases but explicitly left their acceptance open. No plan or active execution here; neither row is Done.
+**acceptance:** Only a concrete recurrence or relevant harness capability change earns new work; distinguish process teardown, delayed delivery and actual revival, retaining the original operational acceptance as unproved.
+### unknown-condition
+**covers:** B-079
+## Shipped
+### old
+**acceptance:** This must not leak into the previous entry.
+`;
+  await Promise.all([
+    writeFile(path.join(root, 'docs/BACKLOG.md'), backlog),
+    writeFile(path.join(root, 'docs/ROADMAP.md'), queue),
+  ]);
+  const result = await state(root);
+  const entries = result.roadmap.entries;
+  assert.deepEqual(entries.map(({ acceptance }) => acceptance), [
+    'Revalidate both the need and connector capability at selection time; the historical missing-connector claim is not a current market finding.',
+    'A selected cross-host use case and current capability contract justify the smallest useful port.',
+    'Only a concrete recurrence or relevant harness capability change earns new work; distinguish process teardown, delayed delivery and actual revival, retaining the original operational acceptance as unproved.',
+    null,
+  ]);
+  assert.deepEqual(entries.map(({ live }) => live), [
+    [{ id: 'B-001', status: 'Open' }], [{ id: 'B-006', status: 'Planned' }],
+    [{ id: 'B-085', status: 'Planned' }, { id: 'B-087', status: 'Planned' }],
+    [{ id: 'B-079', status: 'Open' }],
+  ]);
+  assert.equal(Object.hasOwn(result.roadmap.head, 'acceptance'), false);
+  assert.equal(result.roadmap.head.state, 'Open; historically parked, not executing.');
+  assert.deepEqual(result.plans, []);
+  assert.equal(result.roadmap.freshness, 'unassessed');
+  assert.equal(await readFile(path.join(root, 'docs/BACKLOG.md'), 'utf8'), backlog);
+  assert.equal(await readFile(path.join(root, 'docs/ROADMAP.md'), 'utf8'), queue);
+});
+
 test('missing and malformed backlogs leave projections visible with unknown live statuses', async (t) => {
   const root = await fixture(t);
   for (const content of [null, '# no table', '| ID | Summary |\n|---|---|\n| B-129 | missing status |']) {

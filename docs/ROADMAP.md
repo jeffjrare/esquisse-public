@@ -25,12 +25,6 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 **acceptance:** A real selected case proceeds without an implementation-detail question, with evidence of correct behavior and design quality; guidance stays on demand and within a stated cost bound.
 **state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no tagged plans in this snapshot; domain defaults in standards Part 2 remain empty, C not implemented. No concrete specialist case selected yet; no generic role framework commissioned.
 
-### projection-standing
-**covers:** B-043, B-075
-**why now:** Follow the small queue fixes so their actual remainder determines the reporting change. This pass corrects projections once; it does not prevent the next stale status or distinguish parked work for every reader.
-**acceptance:** Expose live versus projected facts, reason for parking and restart condition without a second ledger writer; use existing status vocabulary unless a concrete reader gap requires more.
-**state:** <!-- GENERATED --> Both Open; no Parked status or new schema introduced by this reconciliation.
-
 ### worktree-integrity
 **covers:** B-003, B-005
 **why now:** Then address the retained-branch ID collision and its precise merge-path coverage. The allocator still lacks a retained-branch witness, but this pass has not reproduced the collision, so its impact must be checked against actual worktree use before widening the scan.
@@ -93,6 +87,7 @@ The remaining ranked backlog work has no committed implementation position: B-01
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-24 · projection-standing — B-043 already Done; B-075 done locally: status/backlog/roadmap distinguish explicit parking with reason and restart condition; state retains existing acceptance text. Real B-001/B-006/B-085/B-087 observation and one 7/7 product audit; details in `docs/preparation/2026-09-24-b075-parked-work.md`. No native model trial or publication; other entries keep their order.
 - 2026-09-24 · feature-preparation instructions — B-181 **reopened after user review**: the instruction changes and 7/7 audit remain historical facts, but the invented invoice-export case did not prove improved preparation. This entry records the source change, not delivered item acceptance. B-182 handles the subsequent focused cost/instruction correction; B-169/C remains Open.
 - 2026-09-24 · preparation comparison — two authorized B-043 proposals are retained in `docs/preparation/2026-09-24-b043-comparison/`. The candidate was cheaper in this pair but longer and falsely flagged the valid mixed B-129/B-079 entry as stale. Improved quality is not demonstrated; B-181/B-182 remain Open, with no B-043 implementation or change to this queue.
 - 2026-09-24 · roadmap-acceptance — B-129 (done locally; six CLI fixture checks, semantic reading of roadmap/sweep acceptance paths and 7/7 product audit checks; no paid model journey or release; dependable-queue remains open for B-079)

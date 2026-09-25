@@ -292,6 +292,9 @@ roadmap, then falls back to backlog priority.
 silently re-planning it. A completed plan does not ship an open covered item:
 roadmap checks its acceptance before recommending reconciliation, and sweep
 closes it only with evidence of the whole outcome, including post-plan conditions.
+Status, backlog and roadmap distinguish explicitly parked work from execution,
+showing its reason and restart condition beside the unchanged canonical status.
+Planned means associated with a plan; it does not mean work is running.
 `/esq:advance` walks `Now`, or one named `Now` entry,
 respecting dependencies and existing plans. It uses one worker per eligible item,
 at most one new plan per entry, decision workers when needed and one final
@@ -346,7 +349,9 @@ takes a positional plan, range or commit, not `--range` or `--commit` flags.
 
 `state` keeps the roadmap's projected order/text separate from `roadmap.entries[].live`
 backlog statuses, including Done/Dropped. A mixed closed/open entry is valid; free-form
-roadmap freshness is unassessed. `epics[].rows` compares explicit projected Backlog
+roadmap freshness is unassessed. Each entry also returns its existing `acceptance`
+text (or null), so orientation retains restart conditions without another read.
+`epics[].rows` compares explicit projected Backlog
 status bullets with the same live ledger and reports mismatches or unknowns. These
 reads never refresh projections; no Git-history lookup or model call is added.
 
