@@ -274,7 +274,7 @@ Append an entry at the **end of the execution-log span** — after the newest en
 
 **What got built:** Brief 1-2 sentence summary of what's now in the codebase that wasn't before.
 
-**Verification:** For each verification step, the result with evidence in one line.
+**Verification:** For each verification step, the result with evidence in one line. For observed UI, retain the named state, observation provenance and durable Markdown reference established by the manual-verification procedure; preserve a human confirmation even without an image.
 
 **Surprises / decisions made during execution:**
 - <Anything you decided that diverged from the plan, with a brief why>
@@ -328,7 +328,7 @@ Any key not shown is listed by `esq plan append-log --help`, which reads no file
 
 The `⏸` entry means the next build run goes through "Resolve a paused phase" before anything else. Do not write a hand-off note for the next phase from a paused entry — the next phase doesn't start until this one is confirmed.
 
-Then commit the plan file alone, chained in one call: `git add <plan-file-path> && git commit -m "plan(<slug>): log phase N execution"` (slug from the plan filename) — or `"plan(<slug>): pause phase N for manual verification"`, or `"plan(<slug>): pause phase N on an open same-unit defect"`, for the two paused headings.
+Then commit the plan file together with any newly preserved UI evidence it links, chained in one call: `git add <plan-file-path> <new-evidence-paths> && git commit -m "plan(<slug>): log phase N execution"` (omit the evidence operands when none; slug from the plan filename) — or `"plan(<slug>): pause phase N for manual verification"`, or `"plan(<slug>): pause phase N on an open same-unit defect"`, for the two paused headings. Stage only those files, so the log never commits a link to an untracked capture.
 
 Once the outcome is known, read `${CLAUDE_SKILL_DIR}/references/reporting-and-stops.md` and follow exactly the matching success or pause branch. A failure never arrives here — it is reported from "On failure" below.
 

@@ -1,0 +1,530 @@
+[
+ {
+  "path": "/",
+  "width": 1280,
+  "scheme": "light",
+  "errors": [],
+  "h1": "Vos événements récurrents, suivis au même endroit.",
+  "subhead": "Le biberon, le médicament du soir, la pile du détecteur de fumée, le vermifuge du chat : à plusieurs, chacun note d’un geste, et tout le monde voit ce que les autres ont fait. Quand un rythme se dessine, ou quand vous fixez les dates vous-même, Tamialog annonce la suite.",
+  "h2": [
+   "Tous vos suivis, réunis dans une seule app.",
+   "Partez d’un modèle, faites-le vôtre.",
+   "Comment ça marche",
+   "Une prévision qui sait ce qu’elle vaut",
+   "Toute la maisonnée, au même endroit",
+   "Tout ce qui est noté se relit",
+   "Ce que l’app fait aussi"
+  ],
+  "tildeBottom": 228.875,
+  "blocks": [
+   {
+    "n": "heading",
+    "top": 3133,
+    "left": 80,
+    "right": 432,
+    "bottom": 3208
+   },
+   {
+    "n": "lead",
+    "top": 3232,
+    "left": 80,
+    "right": 432,
+    "bottom": 3344
+   },
+   {
+    "n": "spacing",
+    "top": 3460,
+    "left": 96,
+    "right": 416,
+    "bottom": 3684
+   },
+   {
+    "n": "points",
+    "top": 3133,
+    "left": 464,
+    "right": 816,
+    "bottom": 3325
+   },
+   {
+    "n": "switcher",
+    "top": 3225,
+    "left": 864,
+    "right": 1184,
+    "bottom": 3398
+   }
+  ],
+  "spacingLabel": "Le tiroir de saisie du bouton Dose : un avis ambré dit que Camille a consigné Dose il y a 2 h, alors qu’il faut au moins 6 h entre deux saisies, et le bouton sous l’avis dit Enregistrer quand même.",
+  "spacingText": "💊\nDose\n\nCamille a consigné « Dose » il y a 2 h — au moins 6 h entre deux saisies.\n\nEnregistrer quand même",
+  "notice": {
+   "text": "Camille a consigné « Dose » il y a 2 h — au moins 6 h entre deux saisies.",
+   "clipped": false,
+   "width": 264,
+   "color": "rgb(147, 95, 6)",
+   "bg": "oklab(0.723056 0.0506525 0.145699 / 0.1)",
+   "border": "oklab(0.723056 0.0506525 0.145699 / 0.4)"
+  },
+  "action": {
+   "text": "💊DoseCamille a consigné « Dose » il y a 2 h — au moins 6 h entre deux saisies.Enregistrer quand même",
+   "bg": "rgb(255, 255, 255)",
+   "height": 192
+  },
+  "chips": [
+   {
+    "t": "0,5",
+    "pressed": false
+   },
+   {
+    "t": "1",
+    "pressed": true
+   },
+   {
+    "t": "2",
+    "pressed": false
+   }
+  ],
+  "step2Index": 3,
+  "lookingBackSecond": "La période, c’est vous qui la choisissez — 24 h, 7 j, 30 j, ou deux dates — et vous pouvez n’en garder qu’un bouton, puis une seule réponse : seulement les biberons en poudre, et leurs ml. La liste et les chiffres suivent ensemble.",
+  "hOverflow": false,
+  "docHeight": 5421
+ },
+ {
+  "path": "/en/",
+  "width": 1280,
+  "scheme": "dark",
+  "errors": [],
+  "h1": "Your recurring events, tracked in one place.",
+  "subhead": "The bottle, the evening pill, the smoke detector’s battery, the cat’s dewormer: everyone logs with one gesture, and everyone sees what the others did. Once a rhythm shows, or once you set the dates yourself, Tamialog tells you what comes next.",
+  "h2": [
+   "All your tracking, brought into one app.",
+   "Start from a template, make it yours.",
+   "How it works",
+   "A forecast that knows what it is worth",
+   "The whole household, in one place",
+   "Everything logged reads back",
+   "What else the app does"
+  ],
+  "tildeBottom": 228.875,
+  "blocks": [
+   {
+    "n": "heading",
+    "top": 3117,
+    "left": 80,
+    "right": 432,
+    "bottom": 3192
+   },
+   {
+    "n": "lead",
+    "top": 3216,
+    "left": 80,
+    "right": 432,
+    "bottom": 3328
+   },
+   {
+    "n": "spacing",
+    "top": 3444,
+    "left": 96,
+    "right": 416,
+    "bottom": 3648
+   },
+   {
+    "n": "points",
+    "top": 3117,
+    "left": 464,
+    "right": 816,
+    "bottom": 3309
+   },
+   {
+    "n": "switcher",
+    "top": 3189,
+    "left": 864,
+    "right": 1184,
+    "bottom": 3362
+   }
+  ],
+  "spacingLabel": "The log drawer of the Dose button: an amber notice says Camille logged Dose 2 h ago, when two entries need at least 6 h between them, and the button under the notice reads Save anyway.",
+  "spacingText": "💊\nDose\n\nCamille logged “Dose” 2 h ago — at least 6 h between two entries.\n\nSave anyway",
+  "notice": {
+   "text": "Camille logged “Dose” 2 h ago — at least 6 h between two entries.",
+   "clipped": false,
+   "width": 264,
+   "color": "rgb(236, 164, 39)",
+   "bg": "oklab(0.769885 0.0395425 0.147138 / 0.1)",
+   "border": "oklab(0.769885 0.0395425 0.147138 / 0.4)"
+  },
+  "action": {
+   "text": "💊DoseCamille logged “Dose” 2 h ago — at least 6 h between two entries.Save anyway",
+   "bg": "rgb(32, 27, 24)",
+   "height": 172
+  },
+  "chips": [
+   {
+    "t": "0.5",
+    "pressed": false
+   },
+   {
+    "t": "1",
+    "pressed": true
+   },
+   {
+    "t": "2",
+    "pressed": false
+   }
+  ],
+  "step2Index": 3,
+  "lookingBackSecond": "You choose the period — 24 h, 7 d, 30 d, or two dates — and you can keep a single button, then a single answer: only the powdered-formula bottles, and their ml. The list and the figures follow together.",
+  "hOverflow": false,
+  "docHeight": 5340
+ },
+ {
+  "path": "/",
+  "width": 360,
+  "scheme": "light",
+  "errors": [],
+  "h1": "Vos événements récurrents, suivis au même endroit.",
+  "subhead": "Le biberon, le médicament du soir, la pile du détecteur de fumée, le vermifuge du chat : à plusieurs, chacun note d’un geste, et tout le monde voit ce que les autres ont fait. Quand un rythme se dessine, ou quand vous fixez les dates vous-même, Tamialog annonce la suite.",
+  "h2": [
+   "Tous vos suivis, réunis dans une seule app.",
+   "Partez d’un modèle, faites-le vôtre.",
+   "Comment ça marche",
+   "Une prévision qui sait ce qu’elle vaut",
+   "Toute la maisonnée, au même endroit",
+   "Tout ce qui est noté se relit",
+   "Ce que l’app fait aussi"
+  ],
+  "tildeBottom": 978.5625,
+  "blocks": [
+   {
+    "n": "heading",
+    "top": 7034,
+    "left": 16,
+    "right": 344,
+    "bottom": 7094
+   },
+   {
+    "n": "lead",
+    "top": 7118,
+    "left": 16,
+    "right": 344,
+    "bottom": 7230
+   },
+   {
+    "n": "spacing",
+    "top": 7346,
+    "left": 32,
+    "right": 328,
+    "bottom": 7570
+   },
+   {
+    "n": "points",
+    "top": 7610,
+    "left": 16,
+    "right": 344,
+    "bottom": 7802
+   },
+   {
+    "n": "switcher",
+    "top": 7918,
+    "left": 32,
+    "right": 328,
+    "bottom": 8091
+   }
+  ],
+  "spacingLabel": "Le tiroir de saisie du bouton Dose : un avis ambré dit que Camille a consigné Dose il y a 2 h, alors qu’il faut au moins 6 h entre deux saisies, et le bouton sous l’avis dit Enregistrer quand même.",
+  "spacingText": "💊\nDose\n\nCamille a consigné « Dose » il y a 2 h — au moins 6 h entre deux saisies.\n\nEnregistrer quand même",
+  "notice": {
+   "text": "Camille a consigné « Dose » il y a 2 h — au moins 6 h entre deux saisies.",
+   "clipped": false,
+   "width": 240,
+   "color": "rgb(147, 95, 6)",
+   "bg": "oklab(0.723056 0.0506525 0.145699 / 0.1)",
+   "border": "oklab(0.723056 0.0506525 0.145699 / 0.4)"
+  },
+  "action": {
+   "text": "💊DoseCamille a consigné « Dose » il y a 2 h — au moins 6 h entre deux saisies.Enregistrer quand même",
+   "bg": "rgb(255, 255, 255)",
+   "height": 192
+  },
+  "chips": [
+   {
+    "t": "0,5",
+    "pressed": false
+   },
+   {
+    "t": "1",
+    "pressed": true
+   },
+   {
+    "t": "2",
+    "pressed": false
+   }
+  ],
+  "step2Index": 3,
+  "lookingBackSecond": "La période, c’est vous qui la choisissez — 24 h, 7 j, 30 j, ou deux dates — et vous pouvez n’en garder qu’un bouton, puis une seule réponse : seulement les biberons en poudre, et leurs ml. La liste et les chiffres suivent ensemble.",
+  "hOverflow": false,
+  "docHeight": 11969
+ },
+ {
+  "path": "/",
+  "width": 360,
+  "scheme": "dark",
+  "errors": [],
+  "h1": "Vos événements récurrents, suivis au même endroit.",
+  "subhead": "Le biberon, le médicament du soir, la pile du détecteur de fumée, le vermifuge du chat : à plusieurs, chacun note d’un geste, et tout le monde voit ce que les autres ont fait. Quand un rythme se dessine, ou quand vous fixez les dates vous-même, Tamialog annonce la suite.",
+  "h2": [
+   "Tous vos suivis, réunis dans une seule app.",
+   "Partez d’un modèle, faites-le vôtre.",
+   "Comment ça marche",
+   "Une prévision qui sait ce qu’elle vaut",
+   "Toute la maisonnée, au même endroit",
+   "Tout ce qui est noté se relit",
+   "Ce que l’app fait aussi"
+  ],
+  "tildeBottom": 978.5625,
+  "blocks": [
+   {
+    "n": "heading",
+    "top": 7034,
+    "left": 16,
+    "right": 344,
+    "bottom": 7094
+   },
+   {
+    "n": "lead",
+    "top": 7118,
+    "left": 16,
+    "right": 344,
+    "bottom": 7230
+   },
+   {
+    "n": "spacing",
+    "top": 7346,
+    "left": 32,
+    "right": 328,
+    "bottom": 7570
+   },
+   {
+    "n": "points",
+    "top": 7610,
+    "left": 16,
+    "right": 344,
+    "bottom": 7802
+   },
+   {
+    "n": "switcher",
+    "top": 7918,
+    "left": 32,
+    "right": 328,
+    "bottom": 8091
+   }
+  ],
+  "spacingLabel": "Le tiroir de saisie du bouton Dose : un avis ambré dit que Camille a consigné Dose il y a 2 h, alors qu’il faut au moins 6 h entre deux saisies, et le bouton sous l’avis dit Enregistrer quand même.",
+  "spacingText": "💊\nDose\n\nCamille a consigné « Dose » il y a 2 h — au moins 6 h entre deux saisies.\n\nEnregistrer quand même",
+  "notice": {
+   "text": "Camille a consigné « Dose » il y a 2 h — au moins 6 h entre deux saisies.",
+   "clipped": false,
+   "width": 240,
+   "color": "rgb(236, 164, 39)",
+   "bg": "oklab(0.769885 0.0395425 0.147138 / 0.1)",
+   "border": "oklab(0.769885 0.0395425 0.147138 / 0.4)"
+  },
+  "action": {
+   "text": "💊DoseCamille a consigné « Dose » il y a 2 h — au moins 6 h entre deux saisies.Enregistrer quand même",
+   "bg": "rgb(32, 27, 24)",
+   "height": 192
+  },
+  "chips": [
+   {
+    "t": "0,5",
+    "pressed": false
+   },
+   {
+    "t": "1",
+    "pressed": true
+   },
+   {
+    "t": "2",
+    "pressed": false
+   }
+  ],
+  "step2Index": 3,
+  "lookingBackSecond": "La période, c’est vous qui la choisissez — 24 h, 7 j, 30 j, ou deux dates — et vous pouvez n’en garder qu’un bouton, puis une seule réponse : seulement les biberons en poudre, et leurs ml. La liste et les chiffres suivent ensemble.",
+  "hOverflow": false,
+  "docHeight": 11969
+ },
+ {
+  "path": "/en/",
+  "width": 360,
+  "scheme": "light",
+  "errors": [],
+  "h1": "Your recurring events, tracked in one place.",
+  "subhead": "The bottle, the evening pill, the smoke detector’s battery, the cat’s dewormer: everyone logs with one gesture, and everyone sees what the others did. Once a rhythm shows, or once you set the dates yourself, Tamialog tells you what comes next.",
+  "h2": [
+   "All your tracking, brought into one app.",
+   "Start from a template, make it yours.",
+   "How it works",
+   "A forecast that knows what it is worth",
+   "The whole household, in one place",
+   "Everything logged reads back",
+   "What else the app does"
+  ],
+  "tildeBottom": 870.5625,
+  "blocks": [
+   {
+    "n": "heading",
+    "top": 6758,
+    "left": 16,
+    "right": 344,
+    "bottom": 6818
+   },
+   {
+    "n": "lead",
+    "top": 6842,
+    "left": 16,
+    "right": 344,
+    "bottom": 6954
+   },
+   {
+    "n": "spacing",
+    "top": 7070,
+    "left": 32,
+    "right": 328,
+    "bottom": 7294
+   },
+   {
+    "n": "points",
+    "top": 7334,
+    "left": 16,
+    "right": 344,
+    "bottom": 7526
+   },
+   {
+    "n": "switcher",
+    "top": 7642,
+    "left": 32,
+    "right": 328,
+    "bottom": 7815
+   }
+  ],
+  "spacingLabel": "The log drawer of the Dose button: an amber notice says Camille logged Dose 2 h ago, when two entries need at least 6 h between them, and the button under the notice reads Save anyway.",
+  "spacingText": "💊\nDose\n\nCamille logged “Dose” 2 h ago — at least 6 h between two entries.\n\nSave anyway",
+  "notice": {
+   "text": "Camille logged “Dose” 2 h ago — at least 6 h between two entries.",
+   "clipped": false,
+   "width": 240,
+   "color": "rgb(147, 95, 6)",
+   "bg": "oklab(0.723056 0.0506525 0.145699 / 0.1)",
+   "border": "oklab(0.723056 0.0506525 0.145699 / 0.4)"
+  },
+  "action": {
+   "text": "💊DoseCamille logged “Dose” 2 h ago — at least 6 h between two entries.Save anyway",
+   "bg": "rgb(255, 255, 255)",
+   "height": 192
+  },
+  "chips": [
+   {
+    "t": "0.5",
+    "pressed": false
+   },
+   {
+    "t": "1",
+    "pressed": true
+   },
+   {
+    "t": "2",
+    "pressed": false
+   }
+  ],
+  "step2Index": 3,
+  "lookingBackSecond": "You choose the period — 24 h, 7 d, 30 d, or two dates — and you can keep a single button, then a single answer: only the powdered-formula bottles, and their ml. The list and the figures follow together.",
+  "hOverflow": false,
+  "docHeight": 11655
+ },
+ {
+  "path": "/en/",
+  "width": 360,
+  "scheme": "dark",
+  "errors": [],
+  "h1": "Your recurring events, tracked in one place.",
+  "subhead": "The bottle, the evening pill, the smoke detector’s battery, the cat’s dewormer: everyone logs with one gesture, and everyone sees what the others did. Once a rhythm shows, or once you set the dates yourself, Tamialog tells you what comes next.",
+  "h2": [
+   "All your tracking, brought into one app.",
+   "Start from a template, make it yours.",
+   "How it works",
+   "A forecast that knows what it is worth",
+   "The whole household, in one place",
+   "Everything logged reads back",
+   "What else the app does"
+  ],
+  "tildeBottom": 870.5625,
+  "blocks": [
+   {
+    "n": "heading",
+    "top": 6758,
+    "left": 16,
+    "right": 344,
+    "bottom": 6818
+   },
+   {
+    "n": "lead",
+    "top": 6842,
+    "left": 16,
+    "right": 344,
+    "bottom": 6954
+   },
+   {
+    "n": "spacing",
+    "top": 7070,
+    "left": 32,
+    "right": 328,
+    "bottom": 7294
+   },
+   {
+    "n": "points",
+    "top": 7334,
+    "left": 16,
+    "right": 344,
+    "bottom": 7526
+   },
+   {
+    "n": "switcher",
+    "top": 7642,
+    "left": 32,
+    "right": 328,
+    "bottom": 7815
+   }
+  ],
+  "spacingLabel": "The log drawer of the Dose button: an amber notice says Camille logged Dose 2 h ago, when two entries need at least 6 h between them, and the button under the notice reads Save anyway.",
+  "spacingText": "💊\nDose\n\nCamille logged “Dose” 2 h ago — at least 6 h between two entries.\n\nSave anyway",
+  "notice": {
+   "text": "Camille logged “Dose” 2 h ago — at least 6 h between two entries.",
+   "clipped": false,
+   "width": 240,
+   "color": "rgb(236, 164, 39)",
+   "bg": "oklab(0.769885 0.0395425 0.147138 / 0.1)",
+   "border": "oklab(0.769885 0.0395425 0.147138 / 0.4)"
+  },
+  "action": {
+   "text": "💊DoseCamille logged “Dose” 2 h ago — at least 6 h between two entries.Save anyway",
+   "bg": "rgb(32, 27, 24)",
+   "height": 192
+  },
+  "chips": [
+   {
+    "t": "0.5",
+    "pressed": false
+   },
+   {
+    "t": "1",
+    "pressed": true
+   },
+   {
+    "t": "2",
+    "pressed": false
+   }
+  ],
+  "step2Index": 3,
+  "lookingBackSecond": "You choose the period — 24 h, 7 d, 30 d, or two dates — and you can keep a single button, then a single answer: only the powdered-formula bottles, and their ml. The list and the figures follow together.",
+  "hOverflow": false,
+  "docHeight": 11655
+ }
+]

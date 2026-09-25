@@ -29,7 +29,7 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 **covers:** B-076
 **why now:** Preserve inspectable design evidence across sessions using existing log capabilities. Move this ahead of worktree work when the next selected feature is UI delivery; it is product quality, not a generic capture platform.
 **acceptance:** Each named UI state has a durable artifact/reference a later reviewer can inspect, including what was observed.
-**state:** <!-- GENERATED --> Open; manual verification records evidence lines, but durable captures are not guaranteed.
+**state:** <!-- GENERATED --> B-076 Done locally: existing log fields now retain inspectable UI-state references; build commits local evidence with the log, and check/review distinguish missing proof from a wrong visual result while preserving human confirmation without another image. Ten reused captures, both recording paths and a fresh-clone read verified; one product audit passed 7/7. Evidence and coverage limits: docs/preparation/2026-09-25-b076-ui-evidence.md. No live model compliance claim or publication.
 
 ### verification-commands
 **covers:** B-107, B-163

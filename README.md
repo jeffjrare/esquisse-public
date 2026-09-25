@@ -51,6 +51,11 @@ Repeat `build` in fresh sessions for the remaining phases, or use
 verification. A plan records its `Branch` and `Origin`; work is built on that
 branch and later lands where it started.
 
+For observed UI states, build keeps reusable captures or rendered excerpts linked
+from the execution log so review can reopen them later. Human confirmations remain
+valid without an extra screenshot; missing evidence is reported separately from a
+visually incorrect result.
+
 After implementation:
 
 ```text
