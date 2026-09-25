@@ -1,0 +1,20 @@
+{
+  "base_commit": "fd77d23725aaf38c0b1a6d7d6fa7610b40c88836",
+  "reference": "docs/preparation/2026-09-25-b181-tamialog/after-proposal.md",
+  "reference_sha256": "b06ffd72ed3222daf2241ae2324840ac28a52157cb725183a5c5315228fedb6a",
+  "prior_archive_verified": true,
+  "unchanged_input_manifest": "docs/preparation/2026-09-25-b181-tamialog/inputs.json",
+  "prior_correction": "docs/preparation/2026-09-25-b181-tamialog/correction.json",
+  "changed_files": {
+    "plugin/skills/plan/SKILL.md": {
+      "before_sha256": "4f7ac168206e26a997b5ead5884f04752b5d0e2cfeacf316b1910b37bc692a88",
+      "after_sha256": "f3564cb3d15abcfc7dea4af8597b7ce3bb239c5cad40cd8c5c32db0771dc612a"
+    },
+    "plugin/skills/plan/references/record-contract.md": {
+      "before_sha256": null,
+      "after_sha256": "a4eef46846a98fc86d7ba216f4951d352c581cc650c43855d0db625c0bcff23d"
+    }
+  },
+  "source_files": 437,
+  "plugin_files": 45
+}

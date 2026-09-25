@@ -1,0 +1,6 @@
+{
+  "command": "plugin/bin/esq validate",
+  "valid": true,
+  "findings": [],
+  "git_diff_check_exit": 0
+}

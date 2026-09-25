@@ -1,0 +1,82 @@
+[
+  {
+    "type": "system",
+    "subtype": "api_retry",
+    "error": "unknown",
+    "attempt": 1,
+    "max_retries": 10,
+    "retry_delay_ms": 610
+  },
+  {
+    "type": "system",
+    "subtype": "api_retry",
+    "error": "unknown",
+    "attempt": 2,
+    "max_retries": 10,
+    "retry_delay_ms": 1011
+  },
+  {
+    "type": "system",
+    "subtype": "api_retry",
+    "error": "unknown",
+    "attempt": 3,
+    "max_retries": 10,
+    "retry_delay_ms": 2470
+  },
+  {
+    "type": "system",
+    "subtype": "api_retry",
+    "error": "unknown",
+    "attempt": 4,
+    "max_retries": 10,
+    "retry_delay_ms": 4488
+  },
+  {
+    "type": "system",
+    "subtype": "api_retry",
+    "error": "unknown",
+    "attempt": 5,
+    "max_retries": 10,
+    "retry_delay_ms": 9907
+  },
+  {
+    "type": "system",
+    "subtype": "api_retry",
+    "error": "unknown",
+    "attempt": 6,
+    "max_retries": 10,
+    "retry_delay_ms": 17277
+  },
+  {
+    "type": "system",
+    "subtype": "api_retry",
+    "error": "unknown",
+    "attempt": 7,
+    "max_retries": 10,
+    "retry_delay_ms": 37448
+  },
+  {
+    "type": "system",
+    "subtype": "api_retry",
+    "error": "unknown",
+    "attempt": 8,
+    "max_retries": 10,
+    "retry_delay_ms": 36467
+  },
+  {
+    "type": "system",
+    "subtype": "api_retry",
+    "error": "unknown",
+    "attempt": 9,
+    "max_retries": 10,
+    "retry_delay_ms": 37984
+  },
+  {
+    "type": "system",
+    "subtype": "api_retry",
+    "error": "unknown",
+    "attempt": 10,
+    "max_retries": 10,
+    "retry_delay_ms": 34600
+  }
+]

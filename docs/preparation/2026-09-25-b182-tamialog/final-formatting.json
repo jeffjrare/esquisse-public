@@ -1,0 +1,6 @@
+{
+  "file": "plugin/skills/plan/references/record-contract.md",
+  "change": "Remove inherited trailing space after Tasks and extra blank line at EOF; no semantic change; audit not rerun.",
+  "tested_sha256": "a4eef46846a98fc86d7ba216f4951d352c581cc650c43855d0db625c0bcff23d",
+  "final_sha256": "129488b187538fb01ccd2f1dec6dcdbc782e86b47609953c6df9e902374395bc"
+}

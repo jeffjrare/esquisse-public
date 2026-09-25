@@ -1,0 +1,39 @@
+{
+  "environment": "outside sandbox; ESQ_TELEMETRY unset",
+  "outer_bound_seconds": 160,
+  "results": [
+    {
+      "control": "bounded",
+      "command": [
+        "scripts/test-bounded.sh",
+        "--quiet"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "elapsed_seconds": 9.04
+    },
+    {
+      "control": "product",
+      "command": [
+        "scripts/check-bounded.sh",
+        "120",
+        "the product suites",
+        "--",
+        "node",
+        "--test",
+        "--test-timeout=30000",
+        "tests/cli/*.test.mjs",
+        "tests/hooks/*.test.mjs",
+        "tests/audit/*.test.mjs"
+      ],
+      "exit": 0,
+      "timeout": false,
+      "elapsed_seconds": 15.3
+    }
+  ],
+  "elapsed_seconds": 24.34,
+  "product_sha256": {
+    "plugin/skills/plan/SKILL.md": "f3564cb3d15abcfc7dea4af8597b7ce3bb239c5cad40cd8c5c32db0771dc612a",
+    "plugin/skills/plan/references/record-contract.md": "a4eef46846a98fc86d7ba216f4951d352c581cc650c43855d0db625c0bcff23d"
+  }
+}

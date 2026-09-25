@@ -1,0 +1,1 @@
+No candidate proposal received. Process killed at the 180-second bound after ten API retries reporting `unknown`; no assistant message, tool call, result or final cost was returned. See candidate-metrics.json and runtime-events.json.

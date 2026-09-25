@@ -1,0 +1,12 @@
+{
+  "command": "env -u ESQ_TELEMETRY ./scripts/audit.sh",
+  "timeout_seconds": 180,
+  "timeout": false,
+  "elapsed_seconds": 41.82,
+  "exit": 1,
+  "telemetry_variable_removed": false,
+  "product_sha256": {
+    "plugin/skills/plan/SKILL.md": "f3564cb3d15abcfc7dea4af8597b7ce3bb239c5cad40cd8c5c32db0771dc612a",
+    "plugin/skills/plan/references/record-contract.md": "a4eef46846a98fc86d7ba216f4951d352c581cc650c43855d0db625c0bcff23d"
+  }
+}

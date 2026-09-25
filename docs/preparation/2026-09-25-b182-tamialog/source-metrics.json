@@ -1,0 +1,12 @@
+{
+  "plugin/skills/plan/SKILL.md": {
+    "before_words": 4874,
+    "after_words": 3365,
+    "sha256": "f3564cb3d15abcfc7dea4af8597b7ce3bb239c5cad40cd8c5c32db0771dc612a"
+  },
+  "plugin/skills/plan/references/record-contract.md": {
+    "before_words": 0,
+    "after_words": 1432,
+    "sha256": "a4eef46846a98fc86d7ba216f4951d352c581cc650c43855d0db625c0bcff23d"
+  }
+}
