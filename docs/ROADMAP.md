@@ -93,7 +93,7 @@ The remaining ranked backlog work has no committed implementation position: B-01
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
-- 2026-09-24 · feature-preparation — B-181 (bounded instruction correction: user outcome through grill → plan, architecture tradeoffs and delegated UX; inspected invoice-export preparation in docs/preparation/2026-09-24-invoice-export.md; 7/7 product audit checks outside sandbox; no live model comparison, measured delivery gain or B-169/C acceptance; no release)
+- 2026-09-24 · feature-preparation instructions — B-181 **reopened after user review**: the instruction changes and 7/7 audit remain historical facts, but the invented invoice-export case did not prove improved preparation. This entry records the source change, not delivered item acceptance. B-182 handles the subsequent focused cost/instruction correction; B-169/C remains Open.
 - 2026-09-24 · roadmap-acceptance — B-129 (done locally; six CLI fixture checks, semantic reading of roadmap/sweep acceptance paths and 7/7 product audit checks; no paid model journey or release; dependable-queue remains open for B-079)
 - 2026-09-24 · backlog-rank-lifecycle — B-172 (done locally; 19 real CLI regressions and 7/7 product audit checks; capture/reopen at the active tail, closed-rank cleanup, legacy support and explicit placement preserved; no release)
 - 2026-09-24 · bounded-correction-exit — B-179 (done locally; three real-Git scenarios and 7/7 product audit checks; no live model journey or release)

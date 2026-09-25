@@ -56,13 +56,7 @@ After the execution-log commit — step 6 of `/esq:build`'s "Append to execution
 ---
 ```
 
-2. **Backfill missing topics — only when something is actually missing.** This is a one-time migration for pre-`Topic` registries, not per-phase work. Gate it with two cheap counts before reading anything:
-
-   ```bash
-   grep -c '^## D-' docs/DECISIONS.md; grep -c '^\*\*Topic:\*\*' docs/DECISIONS.md
-   ```
-
-   Equal counts → every entry already has a topic. **Skip this step entirely** — do not scan, do not read the entries. Only when the topic count is lower do you scan for the `## D-` entries missing `**Topic:**`, infer a topic for each from its title and content (free-form domain tag — e.g. "auth", "subscription", "seo", "checkout", "payments"), add `**Topic:** <inferred>` after the `**Scope:**` line, fill in the topic column in the corresponding table row, and include those changes in the same commit.
+2. **Keep the lookup relevant.** Search existing decision headings/index for this choice and open only matching entries. Add Topic to the new entry. Do not count, scan or migrate unrelated historical metadata as part of shipping the phase; that cleanup is not its deliverable.
 3. **Derive the ID from the title — it is a slug, never a number.** 3–5 lowercase words from the decision title, hyphen-joined (same convention as plan/brief/epic slugs), giving `D-<slug>`. If a `## D-<slug>` heading already exists, append `-2`, `-3`, … until unique. Numbered `D-NNN` entries predating this convention stay exactly as they are — never migrated, never renumbered.
 4. For each decision, add a table row and a full entry:
 

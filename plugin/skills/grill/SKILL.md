@@ -68,7 +68,7 @@ Build a question set that covers the decision tree for this task. Aim for breadt
 - **Done.** What does "finished" look like? How will the user verify it themselves?
 - **Non-goals.** What might someone assume is included that explicitly isn't?
 
-**The core discipline — propose, don't just ask.** For every question, first try to answer it yourself from the codebase or sensible defaults. When you put a question to the user via `AskUserQuestion`, lead with your inferred answer as the first option, marked `(Recommended)`, with a one-line rationale drawn from what you read. Only make the user think when you genuinely can't infer. A grill where you've pre-answered 80% of your own questions and the user just confirms is a *good* grill — it means you did the reading.
+**Propose, don't just ask.** Resolve what the mandate, repository and reasonable defaults settle; do not ask the user to confirm those answers. For a genuinely missing authority, lead with your recommendation and the product tradeoff. An idea earns its place by removing a concrete user difficulty within the constraints, not by adding options or infrastructure. Distinguish observed needs, user statements and hypotheses; an invented example is not evidence that the product needs or benefits from a feature.
 
 ### Whose question is it
 
@@ -94,7 +94,7 @@ Run the interrogation in rounds:
    <!-- shared:escape-hatch:end -->
 2. After each round, fold the answers into your understanding. New answers often open new branches — ask those in the next round.
 3. Keep going until the remaining unknowns are *planning* decisions (approach, architecture) rather than *scoping* decisions. Those belong to `/esq:plan`, not here.
-4. Stop when you can write the task statement with no hand-waving. Don't pad rounds to seem thorough; don't cut short while real ambiguity remains. Most tasks settle in 2-4 rounds.
+4. Write the brief as soon as the useful outcome and scope are clear. Zero questions is a valid result; no minimum number of rounds or confirmation of delegated choices. Keep genuinely missing product authority visible.
 
 If `AskUserQuestion` is unavailable, present each round as a numbered list in plain text with your recommended answer for each, and wait for the user's replies before continuing.
 

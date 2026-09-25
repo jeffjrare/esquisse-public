@@ -99,3 +99,7 @@ _No plans tag this epic in the public snapshot. Historical private plans are int
   worked proposal makes scope, recovery, architecture and delivery cost inspectable. This is a general
   preparation correction, not delivery of C's selected specialist outcome; no live model comparison
   or time/blocking-rate gain was measured. B-169 remains Open and this epic Active.
+
+- 2026-09-24 — User review rejected the invented invoice case as evidence of actual improvement.
+  B-181 is reopened; its source changes and mechanical proof remain historical facts. B-182 is
+  a separate focused preparation/cost change, not evidence that specialist guidance C shipped.

@@ -179,7 +179,7 @@ Proposed additions to docs/DECISIONS.md:
 ## Phase 4 — Write and commit
 
 1. Read `docs/DECISIONS.md` (create it if it doesn't exist, using the standard header below).
-2. **Backfill missing topics:** Scan any existing `## D-` entries for a missing `**Topic:**` field. For each one, infer the topic from the entry title and content, add `**Topic:** <inferred>` after `**Scope:**`, and fill in the topic column in the corresponding table row.
+2. **Scope registry edits to harvested decisions.** Add Topic to each new entry and consult relevant existing entries for conflicts or duplicates. Do not migrate unrelated historical entries merely because this run appends decisions.
 3. **Derive the ID from the title — it is a slug, never a number.** 3–5 lowercase words from the decision title, hyphen-joined (same convention as plan/brief/epic slugs), giving `D-<slug>`. If a `## D-<slug>` heading already exists, append `-2`, `-3`, … until unique. Numbered `D-NNN` entries predating this convention stay exactly as they are — never migrated, never renumbered.
 4. Write all confirmed entries: add rows to the table, append full entries below the `---` separator.
 5. `git add docs/DECISIONS.md`

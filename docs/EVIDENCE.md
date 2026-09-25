@@ -22,9 +22,10 @@ never judgment.
   `docs/evidence/` that no row names, so that gap is visible rather than silent.
 
 **What the columns mean.** `Claim` is what the measurement is evidence *of*, and one claim may
-accumulate many measurements over time. `Governs` is the closed set of behaviors a claim is allowed to
-gate — today only `model-routing`, which is the one claim a relay orchestrator refuses to spawn workers
-against when it is not `fresh`; every other claim is status-only in every state and blocks nothing.
+accumulate many measurements over time. `Governs` retains the historical classification
+(`model-routing`) for compatibility with recorded measurements. Since 2026-09-22 no evidence
+reading gates a product command or worker spawn: all verdicts are informational. The historical
+rows below remain unchanged; they do not authorize reinstating the retired model preflight.
 `Capture` is a repo-relative path to the records themselves, and **every row whose `State` is anything
 other than `never-measured` names one**: a measured row with an empty cell is a finding, and it leaves
 its claim `unknown`, because a `Version` cell is worth exactly the artifact underneath it. That cell must

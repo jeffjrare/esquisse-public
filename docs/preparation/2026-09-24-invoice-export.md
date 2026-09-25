@@ -1,5 +1,11 @@
 # Invoice export — bounded preparation comparison
 
+> **Correction after user review (2026-09-24):** B-181 is reopened. This invented
+> example did not demonstrate improved esq preparation on a real task. The prior
+> acceptance/disposition statements below are retained as history, not current proof.
+> The source correction and mechanical audit remain real; the claimed quality outcome
+> remains unproved.
+
 ## Provenance and limits
 
 This is a worked preparation exercise by the editing model in the 2026-09-24 session,

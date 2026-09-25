@@ -1,0 +1,36 @@
+Command: ./scripts/audit.sh
+Exit: 0 (outside managed sandbox)
+Audited plugin source Git blob IDs:
+514c75681c70b012ff486ae1b01c8f35a75463e3  plugin/skills/build/references/decisions-and-backlog.md
+fd6c15cd99c40ac7cf9d0ae382c635f8fef2f647  plugin/skills/grill/SKILL.md
+cf415aba93247ee42cbe269e1a81a6e1c7095eb7  plugin/skills/harvest/SKILL.md
+bc06ebe05079b1bb3c506000ac45df4b81f6f0c5  plugin/skills/plan/SKILL.md
+3fde161d68c1753da7269c8d8e47201924a51035  plugin/skills/plan/references/corrective-input.md
+1c0e85c049eacaed3a14aa97b4dab4563ba2d879  plugin/skills/plan/references/decisions.md
+3f1f561493a5cfcdd685fcefde071e5a221b12b7  plugin/skills/plan/references/reads-declaration.md
+225b7f48bfef07afa9657b2ad9968129d156cfe3  plugin/skills/plan/references/screens-and-manual-steps.md
+
+Structure — every reference resolves
+  ✓ structure clean — section references, 21 commands, README coverage, every references/ path and every brief section resolve
+
+Package — the plugin and its skills validate
+  ✓ plugin, embedded CLI, native hooks and 21 skills validate
+
+No push — nothing in the shipped plugin runs or spells one
+  ✓ 44 file(s) read; nothing in the shipped plugin runs or spells a push
+
+Conformance — the formats the code parses are intact
+  ✓ 4 behavioral scenarios, 7 observable clauses present
+
+Version — the two manifests agree
+  ✓ release pending — both manifests read 0.3.40 and 3 file(s) changed since the d9b1e3f bump that released it; ./scripts/update.sh publishes them
+
+Bounded runner — a hang is a named red line, not a silent pass
+  ✓ clean
+
+Product suites — CLI, hooks and corpus helper (bounded 120 s)
+  ✓ the product suites passed within 120s
+
+Summary
+  Clean — 7 checks (product).
+

@@ -75,17 +75,11 @@ There are two brief shapes, both ending in `.brief.md`:
 
 - **Corrective brief** (`*-fixes.brief.md`, from `/esq:check` or `/esq:review`): has `## 🟢 Fix now`, `## 🟡 Needs a plan`, `## 🔴 Needs your decision`. Plan the **🟡 items** — those are why you're here. Ignore the 🟢 items (they're `/esq:fix`'s job; if any remain, mention that the user should run `/esq:fix` rather than plan them). Treat 🔴 items as open questions / blocking decisions — if one blocks the plan, resolve it via `AskUserQuestion` before writing. The plan's `## Context` should note it's a corrective plan addressing review/check findings on `<original-plan-slug>`.
 
-<!-- shared:corrective-bound:start -->
-**Two corrective plan generations.** Run `esq brief depth <brief-path>` before offering another plan; route off `verdict`, never count suffixes. `open` changes nothing. At `exhausted`, create no third-generation plan and offer no generic abandon/re-plan escape:
-
-- Subject to unresolved 🔴 precedence, remaining 🟢 items → `/esq:fix <brief-path>`, then `/esq:review <resolved-plan>`. A bounded safe correction, including a prospective plan/document correction, consumes no new plan generation and needs no extra budget decision. Fix revalidates safety; neither an empty brief nor a recorded backlog row promises landing.
-- Remaining 🟡/🔴 items → state the concrete unresolved outcome and the authority it needs. A failed check or missing proof is a diagnosis to investigate, not permission to weaken acceptance. Where accepting named debt is a real user tradeoff, offer `/esq:fix <brief-path> --accept <B-IDs>` only for existing rows matched to those findings, explaining what will stay unfixed. That choice records `Dropped`, never `Done`; it is not authorized by depth alone. Otherwise ask the actual scope/constraint decision, without promising an executable third plan.
-- Never abandon a completed plan. `esq plan abandon` applies only to an explicitly selected unfinished plan when the user has decided not to build it; it does not dispose of findings or backlog promises.
-
-Preserve every unresolved finding in the brief. A remaining item still blocks landing until its correction or explicitly authorized disposition is recorded; a clean review and the normal landing gates remain owed.
-<!-- shared:corrective-bound:end -->
-
-For `/esq:plan` answer here, before investigation. At `exhausted`, write no plan, create no branch and flip no backlog row; hand back the applicable correction/disposition route above. Resolve a plan target through `esq brief plan <brief-path>` when needed; never guess it.
+**Corrective input only:** before investigation, load
+`${CLAUDE_SKILL_DIR}/references/corrective-input.md`, which obtains `esq brief depth <brief-path>` once.
+An `exhausted` verdict creates no plan or branch and flips no backlog status; the
+reference gives the bounded correction/disposition route. Ordinary feature planning
+loads none of this reference.
 
 ## Investigation
 
@@ -94,6 +88,8 @@ Read the codebase to understand context. Use `view`, `grep`, `glob`, follow impo
 Investigate proportionally. A small bug fix needs 2-3 files. A refactor needs the touched module plus boundaries. A feature might span more. Don't read everything; read what informs the plan.
 
 For a feature, carry the brief's user, present friction and intended result into Context/Goal; with direct task input, infer them from the request and product evidence here. Distinguish assumptions from established facts. Use that result to choose an approach: a working mechanism that leaves the user's original work undone is not a useful slice. Resolve ordinary omissions within the mandate; ask only for the missing authority defined below, not for a second framing session by default.
+
+For an improvement, anchor the recommendation in the actual behavior or artifact that falls short. Compare the proposed result on that same need and constraints; a hypothetical example can explain a design but cannot prove an improvement. Plan the smallest observation that can settle the claimed outcome. A format check proves format, not feature usefulness or model behavior; leave any unobserved outcome explicitly unproved rather than buying a general evaluation campaign.
 
 If the task description is too vague to plan ("improve the codebase"), use `AskUserQuestion` to ask the user to scope it — offer 2–3 plausible interpretations you can infer from the codebase, plus the free-text escape (see *Resolve open questions*). If `AskUserQuestion` is unavailable, STOP and ask in plain text.
 
@@ -123,34 +119,18 @@ Use this exact structure. The `## Execution log` section MUST be present (initia
 
 **If any phase will render UI or owe a `(manual)` step, load `${CLAUDE_SKILL_DIR}/references/screens-and-manual-steps.md` before you write the phases** — including when investigation has only just widened the scope into a screen.
 
-**Record the branch, in the header.** Two fields, and they are the whole shipping unit.
-`**Origin:**` is the branch you were standing on when this plan was written — `git branch
---show-current`, read once, at the moment you commit the plan (step 1 of "Commit and stop"), not
-earlier — and it is where this unit's work lands when it is done. `**Branch:**` is the branch its
-phases commit to: `esq/<slug>`, cut from that origin with `git switch -c esq/<slug>` so the plan
-file's own commit is the first thing on it and the origin is left exactly as you found it. Both go
-beside `**Epic:**`, above the first `##` heading, which is the only place `esq branch check` and
-`esq merge land` read them from. They are this command's fields and no other's — no later command rewrites them.
+**Shipping-unit headers are this command's responsibility.** At the commit step, read
+`git branch --show-current` once for `**Origin:**`, then create `esq/<slug>` for
+`**Branch:**`. Put both above the first `##` heading. Detached HEAD or no repository:
+omit both, create no branch, and report legacy behavior (build may run; land cannot).
 
-The slug is already three to five lowercase hyphen-joined words (preflight step 4); `esq/`-prefix
-it and hand it to git as an argument, never through a shell. Four cases leave that straight path:
-
-- **A corrective plan** — slug `<stem>-fixes`, and so is a correction of a correction, since
-  `-fixes-2`, `-fixes-fixes` and `-fixes-2-fixes` all canonicalize to the same stem — never picks its
-  branch by hand — and preflight has already answered `esq brief depth <brief-path>` `open` for it, so on
-  `exhausted` this bullet is never reached. **Run `esq branch resolve <slug>` and route off its `mode`:** `reuse` (the stem's
-  unit is still in flight) copies the returned `branch` and `origin` into the header and creates
-  nothing; `new` (the stem has landed or was retired) cuts `esq/<slug>` from the returned `origin`,
-  the stem's own destination and never wherever the finder left you. Anything else is `new` with a reason.
-- **`esq/<slug>` already exists** — stop the command and say so, naming the branch. Never attach to
-  it and never uniquify around it: the collision means the work already has a shipping unit, and
-  which of the two the user meant is theirs to say rather than yours to guess.
-- **Detached HEAD, or outside a git repository** — **omit both lines entirely** rather than
-  inventing a name, create no branch, and say which condition omitted them in the closing summary.
-  A plan with no `**Branch:**` is the `unrecorded` verdict, which refuses nothing; a plan with no
-  `**Origin:**` is legacy, so it still builds and it never lands.
-- **A dirty tree is not a refusal.** `git switch -c` carries uncommitted work onto the new branch,
-  which is where the user was heading anyway. Stage the plan file and nothing else.
+For corrective input, use `esq branch resolve <slug>` instead of choosing a branch:
+`reuse` copies its branch/origin without creating anything; `new` cuts from the stem's
+returned origin. Never derive correction identity from suffixes yourself. At exhausted
+depth none of these mutations is reached. For a new unit, an existing target branch is an ambiguity:
+stop and name it, never attach or uniquify around it; an explicit `reuse` is different.
+Pass refs as quoted Git arguments. A dirty tree alone is not a
+refusal; preserve it and stage only this command's own writes at the commit step.
 
 ```
 # <Title in plain English, not a slug>
@@ -245,12 +225,11 @@ The `<!-- comment -->` after `## Execution log` is required — it signals to `/
 
 ## Style for the plan content
 
-- Direct, opinionated, prose-led
-- Bullets only where genuinely list-shaped
-- Recommendations stated plainly
-- Uncertainty surfaced as open questions, not papered over
-- Tone: senior engineer reviewing a junior's design
-- No filler ("consider potentially evaluating")
+Keep only what changes an implementation or product decision: the useful result,
+chosen approach and cost, concrete tasks, verification and unresolved risks. State
+each fact once and reference it elsewhere. Do not narrate the investigation, fill
+sections with generic advice, invent alternatives, or repeat the plan in the final
+response. Keep the contract's required headings and parsed fields intact.
 
 ## Verification discipline
 
@@ -268,126 +247,61 @@ The `<!-- comment -->` after `## Execution log` is required — it signals to `/
 
 ## Right-size, then read it once
 
-Two passes over the plan you have just written, both in the context you already hold — no subagent, no
-extra artifact, no re-read of a file this run has read.
+Use the context already held: no subagent, new artifact or unchanged-file reread.
+Cut work whose only justification is a future uncommitted use case: single-use
+abstractions, unused configuration, speculative extension points and restructuring
+that unblocks nothing in this plan. Keep a task only for a concrete requirement or
+risk. Never cut a trust boundary, necessary data semantics or usable design to make
+the plan look small. For UI, load `${CLAUDE_SKILL_DIR}/references/screens-and-manual-steps.md`
+if not already in hand; states belong in the phase exposing the action.
 
-**First, right-size what it proposes to build.** Take every task and ask: **what breaks today if this
-isn't there?** If the answer is "nothing yet, but we'll want it when…", cut it. Specifically:
+Read the written plan once and correct these yourself:
 
-- An abstraction, interface, or base class with exactly one implementation and no second one anywhere in this plan.
-- Configuration, feature flags, or extension points that nothing in this plan sets.
-- A generalization justified by a use case the project hasn't committed to.
-- A phase whose whole deliverable is restructuring code that works, unless something else in this plan is blocked by its current shape.
+1. Remove lifecycle work another command already owns (briefs, closing rows, repeated
+   checks); name that owner where needed.
+2. Keep acceptance, scope, phases and risks consistent. A measurement only possible
+   after shipping belongs among the outstanding observations, not a promised green
+   from code completion. Preserve the user's actual acceptance condition.
+3. Name widened public schemas/data, existing consumers and any install/restart/release
+   needed for the result to reach users; do not silently promise activation.
+4. Cover the relevant boundary/malformed inputs in tasks or verification.
+5. Resolve every auto command against its documented usage and property; remove duplicate
+   verification only when both coverage and conditions match. Correct an unrunnable
+   command at equal or greater strictness, never weaken the criterion.
 
-Cutting is the default; keeping needs a reason you can state in one line. Anything cut that still feels
-worth doing is a backlog item (`/esq:backlog`), not a phase.
+Size by deliverable and session context, not a task-count cap. Each task is one atomic
+commit; unrelated changes are separate tasks. Leave working code after each phase.
+Prefer a usable result; identify a necessary technical prerequisite and when its user
+outcome arrives. Split if a phase alone needs roughly 50K+ tokens of context.
 
-**The opposite failure is just as real, and this pass does not excuse it.** A plan is **under**-built,
-not lean, when it skips a trust boundary, ships a screen with no error state, or picks a data model a
-requirement already on the table will break. **Trim generality, never design.** A UI phase's states are
-tasks, not polish — load `${CLAUDE_SKILL_DIR}/references/screens-and-manual-steps.md` if it is not
-already in hand, and check that phase against it.
-
-**Then read the plan once, as written, for the five things a reader would catch and a writer misses.**
-Each names what fixing it yourself means; none of them is a question to the user:
-
-1. **No lifecycle step another command already owns.** A phase that has the builder write a fixes brief, close a backlog row a later command closes, or re-run a check that command runs anyway, duplicates someone else's lifecycle. *Fix it yourself:* delete the task and name the owning command in one line where the phase described it.
-2. **`## Done looks like`, the scope exclusions, the phases and `## Risks` do not contradict each other**, and every done-bullet is readable off the tree alone — a bullet only a number collected after the ship can confirm belongs in `## Context` or `## Risks` as the reading to take later. *Fix it yourself:* change whichever of the four is wrong, usually the exclusion list, written before the phases were.
-3. **Any widening of a public schema or data surface is explicit**, and so is any activation a change needs before a user gets it — an install, a release, a restart. *Fix it yourself:* say so in the task that widens it, name the consumers that must keep parsing the old shape, and put the activation in `## Risks` naming whose call it is.
-4. **Boundary values and malformed input are covered by a phase.** Empty, absent, zero, one, the maximum, the wrong type, the file that will not parse. *Fix it yourself:* add them to that phase's verification, or as a task where the handling does not exist yet.
-5. **Every `(auto)` command was resolved against its own script's documented usage**, and no phase's mandatory verification buys one proof twice. Read the script — its path, its flags, its exit codes — rather than assuming them: a step that cannot run as written breaks the next `/esq:build`. *Fix it yourself:* correct the command, or replace it with one checking the same property at the same or greater strictness, never a narrower one; and delete a narrower step a broader one already covers.
-
-**Phases are sized by what they deliver, not by a task count.** There is no cap: a phase with six
-mechanical edits to one file is one commit's worth of work, and splitting it buys a second session for
-nothing. Size against these instead:
-
-- **Each task = one atomic commit's worth.** A task description with "and" connecting two unrelated changes is two tasks.
-- **Each phase leaves working code and names its deliverable.** Prefer a usable user outcome; a necessary technical prerequisite names what it unblocks and when the usable path arrives. Deployable code alone does not demonstrate the feature's value.
-- **Phase fits a fresh session.** If one phase alone needs 50K+ tokens of context, split it.
-- **Verification is runnable.** "The function exists" is not verification. "Calling X with Y produces Z" is.
-
-**Then escalate almost nothing.** An ordinary omission is corrected in place and mentioned in one line
-in your report — "the read added the malformed-input case to Phase 2 and dropped Task 3.2, which
-`/esq:check` already owns". Only a choice the ask-altitude block marks **theirs** becomes an
-`AskUserQuestion`, and it rides the batch "Resolve open questions" is about to send rather than buying
-a round trip of its own. A question you could have answered by reading the code, the scripts or the
-projection docs is not theirs — it is the omission, still unfixed.
+Ordinary omissions are yours to fix. Report only consequential adjustments, briefly.
+Only a missing authority under **Resolve blocking decisions** earns a user question;
+batch it with any other real open questions rather than adding an approval round.
 
 ## Resolve open questions
 
-After writing the initial plan file, review `## Open questions` and `## Risks` for items the user can decide now — questions where the answer would refine or change the plan, not just risks to watch during execution.
+Review Open questions and Risks for missing user authority, using **Resolve blocking
+decisions**. Settle engineering details yourself. Skip this step when nothing needs
+the user; execution-time watchpoints do not earn a question.
 
-Run every candidate through *Resolve blocking decisions* above before it goes in a batch. An open question about tooling, dependencies, versions or file layout is one you owe an answer to — resolve it by research and fold the answer into the plan, rather than spending one of the four slots on it.
-
-For each resolvable item, prepare an `AskUserQuestion` entry:
-- The question should be clear and actionable
-- Offer up to 3 concrete resolution options, with tradeoffs as the description
+Ask at most four related questions per call, with a recommendation and up to three
+concrete options explaining their tradeoffs.
 
 <!-- shared:escape-hatch:start -->
 **Always leave a way to answer in their own words.** Make the last option on every question an explicit free-text escape — label it `✍️ Something else — I'll explain`, with a description saying you'll ask for the details. If they pick it, collect their wording with a short plain-text follow-up before continuing; every *other* answer in the same batch still stands. Don't rely on the harness's built-in "Other" row — it doesn't render in every client.
 <!-- shared:escape-hatch:end -->
 
-Present at most 4 questions per call. After receiving answers, check if more resolvable questions remain — if so, present the next batch. Repeat until all actionable open questions are resolved.
-
-After all rounds, edit the plan file to reflect the decisions:
-- Fold resolved open questions into the relevant phase, approach, or a brief note — remove them from `## Open questions`
-- Annotate resolved risks with the chosen mitigation
-- Leave only genuine unknowns (things that truly cannot be decided yet) in `## Open questions`
-
-If `AskUserQuestion` is unavailable, ask the questions in plain text and wait for the user's responses before updating the plan.
-
-**Skip entirely** if `## Open questions` is empty and `## Risks` contains only execution-time watchpoints with nothing for the user to decide now.
+Fold answers into the affected scope, approach, phase or risk; remove resolved
+questions. Ask another round only for newly exposed missing authority. If the question
+tool is unavailable, ask in plain text and wait for the answer; never infer approval.
 
 ## Write decisions to registry
 
-After writing the plan file, capture any significant decisions made during planning in `docs/DECISIONS.md`.
-
-**What to capture:**
-- The approach chosen in `## Recommendation` — if there were at least 2 real alternatives considered
-- Any blocking decisions resolved via `AskUserQuestion` during "Resolve blocking decisions"
-
-**Skip this step if** you stated "only one sensible approach" and there was genuinely no real choice. A decision requires alternatives.
-
-**How:**
-
-1. If `docs/DECISIONS.md` does not exist, create it:
-
-```markdown
-# Decisions
-
-<!-- Registry of architectural, product, and functional decisions. Managed by /esq:plan and /esq:build. -->
-<!-- An ID is a permanent citation key: never renumbered, never reused. Code, plans and commit messages may cite it. -->
-
-| # | Date | Scope | Topic | Décision | Statut |
-|---|------|-------|-------|----------|--------|
-
----
-```
-
-2. **Backfill missing topics:** Before adding new entries, scan existing `## D-` entries for any missing `**Topic:**` field. For each one, infer a topic from the entry title and content (free-form domain tag — e.g. "auth", "subscription", "seo", "checkout", "payments"). Add `**Topic:** <inferred>` after the `**Scope:**` line, and fill in the topic column in the corresponding table row. Include these changes in the same commit.
-3. **Derive the ID from the title — it is a slug, never a number.** 3–5 lowercase words from the decision title, hyphen-joined (same convention as plan/brief/epic slugs), giving `D-<slug>`. If a `## D-<slug>` heading already exists, append `-2`, `-3`, … until unique. Numbered `D-NNN` entries predating this convention stay exactly as they are — never migrated, never renumbered.
-4. For each decision, add a row to the table and a full entry below the `---`:
-
-```markdown
-## D-<slug> — <Title>
-
-**Scope:** <arch | prod | func | ux | infra | deps>
-**Topic:** <free-form domain tag — e.g. "auth", "subscription", "seo", "checkout", "payments">
-**Date:** YYYY-MM-DD
-**Statut:** Active
-**Fondement:** <optional — mandate — the plan clause, CLAUDE.md rule or accepted frame that covers this choice | user — where and when the user authorized this change: the brief's ## Resolved decisions, the answered question, the approved plan>
-
-**Contexte:** Why this decision was needed — 1-2 sentences.
-**Décision:** What was decided — 1 sentence.
-**Raison:** The key tradeoff or reason — 2-3 sentences.
-**Tradeoff:** What was gained and what was accepted as cost — 1 sentence each.
-**Conséquences:** What this implies for future work — 1-2 sentences.
-**Alternatives rejetées:** Other options and why they were not chosen.
-```
-
-**Fondement — what the authority rests on, never what was done.** Write `mandate — <the clause>` when the plan, `CLAUDE.md` or the accepted frame already delegated this choice — a worker records its own technical calls this way without asking anyone — and `user — <where and when>` for a change to an explicit constraint, a promised capability or a major commitment. **The citation after the em dash is the field:** a form with nothing behind it authorizes nothing, and neither do `Statut: Active`, the entry's date, or when its commit landed. Write no field at all when the entry only records an outcome. It is optional and purely additive — never backfill an existing entry, add no migration, and every consumer keeps reading an entry that carries none: the three states are `mandate`, `user` and absent.
-
-**Scope values:** `arch` (architecture/stack/patterns), `prod` (product scope/features/priorities), `func` (functional behavior/business rules), `ux` (UX/design/interactions), `infra` (deployment/CI/CD), `deps` (libraries/versions)
+Only significant choices belong in `docs/DECISIONS.md`: a recommendation between real
+alternatives or a resolved user decision. If there is no such choice, skip this step.
+Otherwise load `${CLAUDE_SKILL_DIR}/references/decisions.md` for the record format.
+Search only relevant existing decisions; never turn feature planning into a historical
+registry migration.
 
 ## Commit and stop
 
