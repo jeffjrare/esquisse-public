@@ -197,6 +197,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-178 | 2026-09-21 | ⚠️ debt | hi |  | Two `Done looks like` bullets assert plugin/skills/plan/SKILL.md is byte-unchanged from 2ac72b6 (docs/plans/2026-09-18-observation-path-before-manual-fixes.md:92 and docs/plans/2026-09-18-observation-path-before-manual.md:100), which is false at HEAD: main's own 44c291e and 78ce894 edit that file. The claim the bullets were written to make — this unit never touched the plan entrypoint — is true only against main, the reference the unit actually lands on; re-base both bullets there with the same amendment named | fix: observation-path-before-manual-fixes-fixes · Planned by observation-path-before-manual-fixes-fixes · Done by observation-path-before-manual-fixes-fixes |  |  | Done |
 | B-179 | 2026-09-21 | debt | hi |  | Provide a bounded safe correction/disposition for a completed plan when corrective depth is exhausted. | observed: /esq:converge on observation-path-before-manual-fixes-fixes, 2026-09-21 | esq-decides-implementation-detail |  | Done |
 | B-180 | 2026-09-21 | debt | hi? |  | Invalidate reused verification when declared plan or ledger inputs change, retaining harmless bookkeeping reuse. | review: observation-path-before-manual-fixes-fixes · Done by verification-inputs-before-lifecycle |  |  | Done |
+| B-181 | 2026-09-25 | ✨ improvement | hi |  | Carry the user outcome through feature framing, UX defaults and architecture tradeoffs without an unnecessary re-grill. | observed: grill-plan preparation review 2026-09-24 |  |  | Done |
 
 ---
 
@@ -1152,6 +1153,8 @@ by `/esq:sweep`, since both propose closure — rather than to one command's out
 
 **Notes:** A measured run stopped after two of six phases despite having the exact fixture edit needed to continue. Repeated corrective briefs show the same pattern: ESQ can spend more work repairing its own process than delivering the user's requested change. The correction is to execute a diagnosed action within the mandate, use durable implementation standards for delegated defaults, and load specialist guidance when needed. These are three ordered initiatives, not an app-specific requirement.
 
+**Preparation follow-up (2026-09-24):** B-181 separately addresses outcome continuity and a contradictory UI re-grill instruction in the existing preparation path. Its bounded worked example is not a live specialist-guidance acceptance for C; B-169 remains Open.
+
 ## B-170 — Le backlog n'a aucun rang d'ordonnancement : 40 des 51 items ouverts n'ont aucune priorité et 3 seulement en portent une confirmée, donc « c'est quoi le prochain » n'a de réponse que pour les 16 blocs groupés de la roadmap. Voulu : chaque item porte en tout temps une priorité ET un rang à l'intérieur de cette priorité, assignés automatiquement, dans chaque projet — un ordre total, pas trois seaux
 
 **Resolution:** Every open row now carries a priority and a position end to end: the Rank column and the never-blank priority default (Phase 1, 1c2e0f4-era CLI suite), the two verbs that write them (Phase 2), /esq:backlog placing what it captures and printing one ordered sequence (Phase 3), and /esq:roadmap plan placing every open item including those that earn no entry (Phase 4, 48ac82a). Pinned by conformance scenario P-12 and proved by ./scripts/audit.sh at 2391707 — 60 checks clean.
@@ -1427,3 +1430,7 @@ same amendment.
 ## B-149 — Historical consumed-brief cleanup is outside this public snapshot.
 
 **Resolution:** 2026-09-24: docs/plans/README.md records intentional omission of private plans/briefs; no corrective brief is present here. Drop only this historical cleanup task, not a claim that its fixes shipped or that brief consumption implies no unit findings. B-179 retains the generic supported-disposition problem.
+
+## B-181 — Carry the user outcome through feature framing, UX defaults and architecture tradeoffs without an unnecessary re-grill.
+
+**Resolution:** Bounded preparation correction delivered: grill retains user/friction/outcome; plan compares architecture against that result and preserves a usable slice; the existing on-demand UI reference resolves delegated omissions instead of automatically returning to grill. Acceptance and the same-input invoice-export brief/recommendation are in docs/preparation/2026-09-24-invoice-export.md. Source-path reading and ./scripts/audit.sh passed (7/7, outside the sandbox after child-process failures inside it). This accepts the instruction correction and inspected worked proposal, not measured runtime quality, time-to-value or blocking-rate gains. No live model journey or invoice application was run; B-169/C remains Open.

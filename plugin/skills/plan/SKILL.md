@@ -93,6 +93,8 @@ Read the codebase to understand context. Use `view`, `grep`, `glob`, follow impo
 
 Investigate proportionally. A small bug fix needs 2-3 files. A refactor needs the touched module plus boundaries. A feature might span more. Don't read everything; read what informs the plan.
 
+For a feature, carry the brief's user, present friction and intended result into Context/Goal; with direct task input, infer them from the request and product evidence here. Distinguish assumptions from established facts. Use that result to choose an approach: a working mechanism that leaves the user's original work undone is not a useful slice. Resolve ordinary omissions within the mandate; ask only for the missing authority defined below, not for a second framing session by default.
+
 If the task description is too vague to plan ("improve the codebase"), use `AskUserQuestion` to ask the user to scope it — offer 2–3 plausible interpretations you can infer from the codebase, plus the free-text escape (see *Resolve open questions*). If `AskUserQuestion` is unavailable, STOP and ask in plain text.
 
 If you find during investigation that the task is much smaller than expected — a one-line fix, a trivial rename — say so. Suggest doing it directly without the plan-file overhead.
@@ -186,7 +188,7 @@ work is now possible.
 2-3 candidate approaches, each with:
 - A name (one phrase)
 - One paragraph describing it
-- Tradeoffs — what it gains, what it costs
+- Tradeoffs — how it serves the user's result under the actual constraints, what it costs to build and operate, and which concrete limit would make it unsuitable. Compare the simplest viable use of existing code before adding infrastructure; do not invent scale or alternatives for structure's sake.
 
 If the task admits only one sensible approach, say so explicitly and justify in one sentence. Don't manufacture alternatives for structure's sake.
 
@@ -204,7 +206,11 @@ validated and where, what must never be logged or returned. One short paragraph,
 
 ## Phases
 
-Sequential, atomic, each shippable independently. Each phase fits in one fresh execution session.
+Sequential and sized for one fresh execution session each. Prefer a first usable path
+through the feature, including its necessary UX states, over separate data/API/UI
+phases. If a technical prerequisite really needs its own phase, name the dependency
+and the later phase where the user gets the result; do not call that prerequisite a
+shipped feature. Keep the promised outcome intact when splitting the work.
 
 ### Phase 1 — <name>
 - **Goal:** one sentence
@@ -252,7 +258,7 @@ The `<!-- comment -->` after `## Execution log` is required — it signals to `/
 
 - **`(auto)` is the default:** anything executable with machine-readable output, including all backend checks, APIs, queries, logs, tests and builds. Write one command in one inline-code span, then an em dash and its artifact/property: `` `(auto)` `pnpm test src/api` — the API suite passes ``. Landing extracts the command for proof reuse and reads the sentence as its PASS criterion: a grep proving no matches can pass at exit 1. A prose command or multiple commands in one step cannot be resolved for reuse and must be rerun in full.
 - **`(manual)` is only for rendered screens and visual UX flows.** Every UI-touching phase needs at least one step observing the actual screen, not merely a component-mount test. Before authoring a UI phase or manual step, load `${CLAUDE_SKILL_DIR}/references/screens-and-manual-steps.md` for starting states, action-first wording, the browser-driver test and per-screen consolidation. Backend-only phases have no manual steps.
-- **Choose verification by what the phase changes.** Target its tests; require a whole-repo run in the last phase and any phase changing code imported outside its package. Each earlier phase still needs its own proof to be independently shippable.
+- **Choose verification by what the phase changes.** Target its tests; require a whole-repo run in the last phase and any phase changing code imported outside its package. Each earlier phase still needs its own proof of its stated deliverable.
 - **Buy each proof once within a phase.** Read the scripts, selected paths, runner config, environment and assertions of every required command. Remove a narrower step only when another required step covers both its tests and PASS criterion under equivalent conditions. Keep distinct typechecks, builds, lint, negative controls, tree assertions, environments or flags. Names such as "full" prove nothing. If inclusion is uncertain, keep both. A later phase's wide run does not replace an earlier phase's targeted proof. Deduplicate the plan here; never instruct executors to silently skip steps or reuse a broader command's PASS for a different command string. Build's explicit execution exceptions still govern an unrunnable command or an overbroad inherited suite.
 - **Resolve commands by reading, never by running planned verification.** Check the executable exists and is executable, and arguments match its Usage header, documented help or existing call sites, in that order. Cite the call site used when other documentation is absent. A file this plan's tasks create is a valid future referent. Always name the artifact and property after the command so execution can recover its intent if the command cannot run; an ambiguous bare command cannot be safely substituted.
 - **Use explicit `.mjs` files or quoted globs for `node --test`, never bare directories:** `node --test 'tests/cli/*.test.mjs'`.
@@ -296,7 +302,7 @@ mechanical edits to one file is one commit's worth of work, and splitting it buy
 nothing. Size against these instead:
 
 - **Each task = one atomic commit's worth.** A task description with "and" connecting two unrelated changes is two tasks.
-- **Each phase shippable independently.** After phase N completes, the codebase is in a working, deployable state.
+- **Each phase leaves working code and names its deliverable.** Prefer a usable user outcome; a necessary technical prerequisite names what it unblocks and when the usable path arrives. Deployable code alone does not demonstrate the feature's value.
 - **Phase fits a fresh session.** If one phase alone needs 50K+ tokens of context, split it.
 - **Verification is runnable.** "The function exists" is not verification. "Calling X with Y produces Z" is.
 

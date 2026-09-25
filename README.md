@@ -66,6 +66,9 @@ or settle a decision that needs your authority. Once the unit is ready:
 ```
 
 For uncertain scope, run `/esq:grill <idea>` first and pass its brief to `plan`.
+Grill proposes a useful outcome from the user's present friction; plan carries it
+through UX choices, architecture tradeoffs and a first usable delivery. Ordinary
+design omissions are resolved during planning, within the accepted constraints.
 For an unfamiliar codebase, `/esq:status` or the `harvest`, `spec` and `arch`
 commands can help on demand; none is a mandatory setup sequence. A tiny edit
 that needs no workflow record can use ordinary Claude Code.

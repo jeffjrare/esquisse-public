@@ -16,15 +16,15 @@ whose every phase is backend and whose every step is `(auto)` never reads this f
 
 UI work is feature work — the same budget line as the logic behind it, never a polish line item that a later phase absorbs. The right-sizing audit trims generality; it never trims design. A feature nobody can figure out did not ship, and the implementer's default — a bare form, a spinner, an alert box — is what you get for every decision the plan leaves unmade.
 
-So every phase that renders UI must answer these in its goal or its tasks. Read the codebase for the answers first; ask the user only what the code can't tell you:
+So every phase that renders UI must answer the relevant points in its goal or tasks. Read the codebase first, then decide ordinary design details within the accepted outcome and constraints:
 
 - **The system this screen belongs to.** Name the existing tokens, components, spacing scale, and typography it reuses — by their real names, from this codebase. A new one-off color, radius, shadow, or breakpoint needs a line saying why the existing one didn't fit. Consistency is most of what "designed" means: a screen that doesn't match the one beside it reads as broken, not as fresh.
 - **Every state the screen can be in.** Empty (first-run and after-filtering are different screens), loading, error, partial, and the success moment — with what the user does *next* from each. "Loading" is a state that gets designed, not a hole where a spinner goes. The empty state is usually the most-seen screen in a new feature and the one most often left blank.
-- **The feedback for every action.** For anything asynchronous or destructive: what the user sees immediately, how they know it worked, how they undo it. Silence after a click is a defect no test catches.
+- **The feedback for every action.** For anything asynchronous or destructive: what the user sees immediately, how they know it worked, how they recover or undo it where applicable. For an action on a filtered, selected or paginated set, make its scope visible before it starts, keep that scope stable during the request, and preserve the user's work on failure. Choose the data boundary and retry behavior to support that interaction; a success message must not promise more than the response proves.
 - **Reachable by everyone.** Keyboard path and visible focus, labels on controls, contrast that survives a bright room, touch targets a thumb can hit, and text that reflows. These are tasks in the phase that ships the screen — the separate accessibility pass later is the one that never happens.
 - **What "good" looks like here**, in one line a `(manual)` step can be written against. "The list feels responsive" isn't checkable. "Results narrow within a frame of the keystroke, with no layout shift as rows drop out" is.
 
-If a screen can't be answered for, the gap is scope ambiguity — send it back to `/esq:grill` rather than forward into the build, where it becomes whatever the implementer typed first.
+An unspecified label, layout, pending state or retry is design work to finish here, not an automatic return to `/esq:grill`. Propose the coherent flow, reuse existing components and carry the decisions into the tasks and observation steps. Only an unresolved choice that the entrypoint's **Resolve blocking decisions** rule assigns to the user earns a question; name the missing authority and its consequence. Missing code or an observation resource is investigated or planned, never passed off as a product preference.
 
 ### The shape a `(manual)` step takes
 

@@ -48,6 +48,8 @@ Read the codebase to understand context before you ask anything. Use `view`, `gr
 
 The point of investigation is to **answer your own questions wherever the codebase already answers them.** Investigate proportionally — enough to know which of your questions are genuinely open.
 
+For a feature idea, establish who is trying to do what, what gets in their way today, and what useful result would remove that friction. Use the request and existing product evidence; distinguish an inferred need from a confirmed one. When the suggested feature adds work for the user or misses that result, recommend the smallest complete improvement and explain the gain over today's path. Offer a different idea only when it materially improves that outcome within the constraints; do not manufacture an ideation round. Carry this reasoning in the brief's Task and scope, not a separate artifact. A choice that changes an accepted outcome still needs the authority described below.
+
 If you discover the task is trivial — a one-line fix, a rename, something with no real ambiguity — say so and suggest skipping straight to the work (or `/esq:plan` if they still want a plan). Don't manufacture an interrogation for a task that doesn't need one.
 
 ## The interrogation
@@ -104,8 +106,9 @@ Once the ambiguity is gone, write the brief. Use this exact structure:
 # Brief: <Title in plain English, not a slug>
 
 ## Task
-One tight paragraph stating exactly what to build, in terms anyone could verify from the
-outside. No hedging, no "maybe." This is the sentence the planner expands.
+One tight paragraph naming the user, their present friction, and exactly what they can
+accomplish after this change. Ground the proposed feature in that result, not just a
+requested control or mechanism. This is the sentence the planner expands.
 
 ## In scope
 - Bullet list of what this task explicitly includes.

@@ -93,3 +93,9 @@ _No plans tag this epic in the public snapshot. Historical private plans are int
 - 2026-09-24 — User selected B-172 as the next implementation, then B-129. The roadmap places
   those concrete queue defects ahead of the conditional C slice. The epic remains Active; no specialist
   work or evidence has been invented, and B-172 is not added to this epic.
+
+- 2026-09-24 — B-181 separately corrects the existing grill → plan preparation path, including
+  a loaded UI reference that referred delegated design omissions back to grill. Its invoice-export
+  worked proposal makes scope, recovery, architecture and delivery cost inspectable. This is a general
+  preparation correction, not delivery of C's selected specialist outcome; no live model comparison
+  or time/blocking-rate gain was measured. B-169 remains Open and this epic Active.
