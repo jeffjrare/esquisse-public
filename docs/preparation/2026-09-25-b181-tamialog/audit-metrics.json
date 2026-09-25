@@ -1,0 +1,16 @@
+{
+  "command": "./scripts/audit.sh",
+  "exit": 1,
+  "timeout": false,
+  "bound_seconds": 180,
+  "elapsed_seconds": 26.66,
+  "source_sha256": {
+    "plugin/skills/plan/SKILL.md": "4f7ac168206e26a997b5ead5884f04752b5d0e2cfeacf316b1910b37bc692a88",
+    "plugin/skills/plan/references/screens-and-manual-steps.md": "535fb739d11415ea4f827283210e83fe2f510a5d1742377c626bfd1423b5c279"
+  },
+  "environment_overrides": {
+    "CLAUDE_CONFIG_DIR": "<isolated-audit-config>",
+    "ESQ_TELEMETRY": "off"
+  },
+  "diagnosis": "The caller mistakenly carried trial telemetry opt-out into product tests. Six audit checks passed; five telemetry cases required an environment-only recovery."
+}

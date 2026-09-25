@@ -1,0 +1,14 @@
+{
+  "plugin/skills/plan/SKILL.md": {
+    "before_sha256": "5ab5dde7fa534a6a46f15bc324d8a97e4de4d621e4cbbf4a0f9759414d5b5396",
+    "after_sha256": "4f7ac168206e26a997b5ead5884f04752b5d0e2cfeacf316b1910b37bc692a88",
+    "before_words": 4841,
+    "after_words": 4874
+  },
+  "plugin/skills/plan/references/screens-and-manual-steps.md": {
+    "before_sha256": "1a30a0eef6d3b7af93547f4e0a14cb257ca538e28fcaaf87570d75869e75d87b",
+    "after_sha256": "535fb739d11415ea4f827283210e83fe2f510a5d1742377c626bfd1423b5c279",
+    "before_words": 1225,
+    "after_words": 1235
+  }
+}

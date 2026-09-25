@@ -1,0 +1,15 @@
+{
+  "args": [
+    "node",
+    "--test",
+    "--test-timeout=30000",
+    "--test-name-pattern",
+    "^(summarizeTelemetry reads session-runs\\.jsonl into direct|renderTelemetrySummary prints the header block|hook entrypoints read the harness payload|telemetry opt-out: ESQ_TELEMETRY off-values|session writer: the Stop entrypoint reads)",
+    "tests/cli/esq.test.mjs",
+    "tests/hooks/hooks.test.mjs"
+  ],
+  "environment_correction": "remove ESQ_TELEMETRY=off mistakenly added by audit caller",
+  "bound_seconds": 60,
+  "exit": 0,
+  "elapsed_seconds": 0.57
+}

@@ -1,0 +1,78 @@
+
+Structure — every reference resolves
+  ✓ structure clean — section references, 21 commands, README coverage, every references/ path and every brief section resolve
+
+Package — the plugin and its skills validate
+  ✓ plugin, embedded CLI, native hooks and 21 skills validate
+
+No push — nothing in the shipped plugin runs or spells one
+  ✓ 44 file(s) read; nothing in the shipped plugin runs or spells a push
+
+Conformance — the formats the code parses are intact
+  ✓ 4 behavioral scenarios, 7 observable clauses present
+
+Version — the two manifests agree
+  ✓ release version clean — both manifests read 0.3.48 and plugin/ is unchanged since the 930b3b5 bump that released it
+
+Bounded runner — a hang is a named red line, not a silent pass
+  ✓ clean
+
+Product suites — CLI, hooks and corpus helper (bounded 120 s)
+  ✗ the product suites failed (exit 1)
+  ✗       not ok 113 - summarizeTelemetry reads session-runs.jsonl into direct — last cumulative row per (sessionId, segment), open and superseded counts, via, the same provisional rule — and never into the subagent tables
+  ✗         ---
+  ✗         location: '/home/jeffgirard/projects/esquisse-public-ready/tests/cli/esq.test.mjs:1055:1'
+  ✗         failureType: 'testCodeFailure'
+  ✗         error: |-
+  ✗           The expression evaluated to a falsy value:
+  ✗
+  ✗             assert.ok(!summary.notes.includes(TELEMETRY_OPT_OUT_NOTE))
+  ✗
+  ✗         code: 'ERR_ASSERTION'
+  ✗         name: 'AssertionError'
+  ✗         expected: true
+  ✗         actual: false
+  ✗         operator: '=='
+  ✗         stack: |-
+  ✗           TestContext.<anonymous> (file:///home/jeffgirard/projects/esquisse-public-ready/tests/cli/esq.test.mjs:1094:10)
+  ✗         … diagnostic truncated at 16 lines
+  ✗       not ok 120 - renderTelemetrySummary prints the header block and five tables, humanised, with the B-036 line and the direct section
+  ✗         ---
+  ✗         location: '/home/jeffgirard/projects/esquisse-public-ready/tests/cli/esq.test.mjs:1355:1'
+  ✗         failureType: 'testCodeFailure'
+  ✗         error: |-
+  ✗           The expression evaluated to a falsy value:
+  ✗
+  ✗             assert.ok(!direct.includes(TELEMETRY_OPT_OUT_NOTE))
+  ✗
+  ✗         code: 'ERR_ASSERTION'
+  ✗         name: 'AssertionError'
+  ✗         expected: true
+  ✗         actual: false
+  ✗         operator: '=='
+  ✗         stack: |-
+  ✗           TestContext.<anonymous> (file:///home/jeffgirard/projects/esquisse-public-ready/tests/cli/esq.test.mjs:1420:10)
+  ✗         … diagnostic truncated at 16 lines
+  ✗       not ok 354 - hook entrypoints read the harness payload from stdin end to end
+  ✗         ---
+  ✗         location: '/home/jeffgirard/projects/esquisse-public-ready/tests/hooks/hooks.test.mjs:93:1'
+  ✗         failureType: 'testCodeFailure'
+  ✗         error: "ENOENT: no such file or directory, open '/tmp/esq-data-A1aVvC/telemetry/agent-runs.jsonl'"
+  ✗         code: 'ENOENT'
+  ✗         stack: |-
+  ✗           async open (node:internal/fs/promises:639:25)
+  ✗           async readFile (node:internal/fs/promises:1249:14)
+  ✗           async TestContext.<anonymous> (file:///home/jeffgirard/projects/esquisse-public-ready/tests/hooks/hooks.test.mjs:125:19)
+  ✗           async Test.run (node:internal/test_runner/test:1054:7)
+  ✗           async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ✗         ...
+  ✗       … 2 more failing test(s) in the captured output, not shown (5 failed in all)
+  ✗       # tests 392
+  ✗       # pass 387
+  ✗       # fail 5
+  ✗       # cancelled 0
+  ✗       # skipped 0
+  ✗       # todo 0
+
+Summary
+  1 of 7 checks failed (product).

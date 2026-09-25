@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: summarizeTelemetry reads session-runs.jsonl into direct — last cumulative row per (sessionId, segment), open and superseded counts, via, the same provisional rule — and never into the subagent tables
+ok 1 - summarizeTelemetry reads session-runs.jsonl into direct — last cumulative row per (sessionId, segment), open and superseded counts, via, the same provisional rule — and never into the subagent tables
+  ---
+  duration_ms: 27.035005
+  type: 'test'
+  ...
+# Subtest: renderTelemetrySummary prints the header block and five tables, humanised, with the B-036 line and the direct section
+ok 2 - renderTelemetrySummary prints the header block and five tables, humanised, with the B-036 line and the direct section
+  ---
+  duration_ms: 21.335506
+  type: 'test'
+  ...
+# Subtest: hook entrypoints read the harness payload from stdin end to end
+ok 3 - hook entrypoints read the harness payload from stdin end to end
+  ---
+  duration_ms: 300.787151
+  type: 'test'
+  ...
+# Subtest: telemetry opt-out: ESQ_TELEMETRY off-values and DO_NOT_TRACK on-values silence both writers
+ok 4 - telemetry opt-out: ESQ_TELEMETRY off-values and DO_NOT_TRACK on-values silence both writers
+  ---
+  duration_ms: 24.879772
+  type: 'test'
+  ...
+# Subtest: session writer: the Stop entrypoint reads the harness payload from stdin, prints nothing, writes the row
+ok 5 - session writer: the Stop entrypoint reads the harness payload from stdin, prints nothing, writes the row
+  ---
+  duration_ms: 109.264592
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 524.393547
