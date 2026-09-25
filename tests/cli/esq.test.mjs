@@ -79,7 +79,7 @@ test('state returns the roadmap head from the first `## Now` entry, and null whe
   // Labels copied verbatim from plugin/skills/roadmap/SKILL.md's template; three entries so the head is the first one only.
   await writeFile(file, `# Roadmap\n\n<!-- GENERATED: every \`state:\` line -->\n\n## Now\n\n### dev-only-bumps\n**covers:** B-018, B-020\n**why now:** near-zero risk and it carries the whole dev-only share\n**unblocks:** redis-queue-trio\n**state:** <!-- GENERATED --> B-018 Open · B-020 Open — not started\n\n### second-entry\n**covers:** B-021\n**why now:** second\n**needs:** dev-only-bumps\n**state:** <!-- GENERATED --> B-021 Open — blocked (needs dev-only-bumps)\n\n## Next\n\n### third-entry\n**covers:** B-022\n**why now:** third\n**state:** <!-- GENERATED --> B-022 Open — not started\n\n## Later\n\n## Shipped\n`);
   const result = await state(root);
-  assert.deepEqual(result.roadmap, {
+  assert.deepEqual({ file: result.roadmap.file, head: result.roadmap.head }, {
     file: 'docs/ROADMAP.md',
     head: {
       slug: 'dev-only-bumps',
@@ -92,7 +92,9 @@ test('state returns the roadmap head from the first `## Now` entry, and null whe
   });
   // An empty `## Now` (Next still populated) → the file is known but there is no head.
   await writeFile(file, `# Roadmap\n\n## Now\n\n## Next\n\n### third-entry\n**covers:** B-022\n**why now:** third\n**state:** <!-- GENERATED --> B-022 Open — not started\n\n## Later\n`);
-  assert.deepEqual((await state(root)).roadmap, { file: 'docs/ROADMAP.md', head: null });
+  const emptyNow = (await state(root)).roadmap;
+  assert.equal(emptyNow.head, null);
+  assert.deepEqual(emptyNow.entries.map((entry) => [entry.horizon, entry.slug]), [['Next', 'third-entry']]);
 });
 
 test('state lists a plan whose execution log duplicates a phase entry as invalid, with the message validate gives it', async () => {

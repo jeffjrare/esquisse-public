@@ -1,0 +1,218 @@
+{
+  "baseline": "0c612adc45b6f1137a2416e100706a4ad4ad7a14",
+  "command": "plugin/bin/esq state",
+  "sourceBlobsBeforeLedgerClosure": {
+    "docs/BACKLOG.md": "e2520c3d205a06cd7ee4c62427c85cec28b0b2d9",
+    "docs/ROADMAP.md": "bcbdbfba45b2325f0ed40ac1e3696cf2836764ee",
+    "docs/epics/aug-18-improv.md": "b173c6d61b8856a07597c8621839cb55c79f500b",
+    "docs/epics/esq-decides-implementation-detail.md": "ca00c1e3c4c5e0c92713002c5af3dd5b2d8ddc7b"
+  },
+  "auditedBlobs": {
+    "plugin/lib/cli.mjs": "571a08ef34087856e49a08f2d325b448ece68c47",
+    "plugin/skills/status/SKILL.md": "661cc6984cfaf28a998d0f857db01111b64684ff",
+    "tests/cli/esq.test.mjs": "da236a5094b9ad641d8454139613fd264bfd219c",
+    "tests/cli/projection-state.test.mjs": "5e96be609643f348a21686210c40b04ba2c80ac2",
+    "README.md": "50b4764adb8f018ddeff44d1d0cb306cfbb3839a"
+  },
+  "before": {
+    "roadmap": {
+      "file": "docs/ROADMAP.md",
+      "head": {
+        "slug": "dependable-queue",
+        "covers": "B-129, B-079",
+        "whyNow": "Follow B-172 with truthful completion and a scoped handoff: do not project an unmet outcome as shipped, and aim the next command at the selected entry. These are separate outcomes; B-172 does not absorb their skill changes.",
+        "needs": null,
+        "unblocks": null,
+        "state": "B-129 Done locally: a complete plan cannot override outstanding item acceptance, and completion advice reads the item's conditions. B-079 remains Open: status already offers scoped advance, roadmap does not. This combined entry remains in Now for B-079; its implementation was not undertaken."
+      }
+    },
+    "B129InActiveRows": [],
+    "epicsFieldPresent": false
+  },
+  "after": {
+    "roadmapHeadUnchanged": true,
+    "roadmapFreshness": "unassessed",
+    "orderedEntries": [
+      {
+        "horizon": "Now",
+        "slug": "dependable-queue",
+        "live": [
+          {
+            "id": "B-129",
+            "status": "Done"
+          },
+          {
+            "id": "B-079",
+            "status": "Open"
+          }
+        ]
+      },
+      {
+        "horizon": "Next",
+        "slug": "autonomy-remainder",
+        "live": [
+          {
+            "id": "B-169",
+            "status": "Open"
+          }
+        ]
+      },
+      {
+        "horizon": "Next",
+        "slug": "projection-standing",
+        "live": [
+          {
+            "id": "B-043",
+            "status": "Open"
+          },
+          {
+            "id": "B-075",
+            "status": "Open"
+          }
+        ]
+      },
+      {
+        "horizon": "Next",
+        "slug": "worktree-integrity",
+        "live": [
+          {
+            "id": "B-003",
+            "status": "Open"
+          },
+          {
+            "id": "B-005",
+            "status": "Open"
+          }
+        ]
+      },
+      {
+        "horizon": "Next",
+        "slug": "durable-ui-evidence",
+        "live": [
+          {
+            "id": "B-076",
+            "status": "Open"
+          }
+        ]
+      },
+      {
+        "horizon": "Next",
+        "slug": "verification-commands",
+        "live": [
+          {
+            "id": "B-107",
+            "status": "Open"
+          },
+          {
+            "id": "B-163",
+            "status": "Open"
+          }
+        ]
+      },
+      {
+        "horizon": "Later",
+        "slug": "spec-unresolved-answer",
+        "live": [
+          {
+            "id": "B-024",
+            "status": "Open"
+          }
+        ]
+      },
+      {
+        "horizon": "Later",
+        "slug": "background-acceptance",
+        "live": [
+          {
+            "id": "B-085",
+            "status": "Planned"
+          },
+          {
+            "id": "B-087",
+            "status": "Planned"
+          }
+        ]
+      },
+      {
+        "horizon": "Later",
+        "slug": "reread-cost",
+        "live": [
+          {
+            "id": "B-070",
+            "status": "Planned"
+          }
+        ]
+      },
+      {
+        "horizon": "Later",
+        "slug": "conditional-lab",
+        "live": [
+          {
+            "id": "B-094",
+            "status": "Open"
+          },
+          {
+            "id": "B-133",
+            "status": "Open"
+          },
+          {
+            "id": "B-095",
+            "status": "Open"
+          },
+          {
+            "id": "B-118",
+            "status": "Open"
+          },
+          {
+            "id": "B-047",
+            "status": "Open"
+          }
+        ]
+      },
+      {
+        "horizon": "Later",
+        "slug": "codex-option",
+        "live": [
+          {
+            "id": "B-006",
+            "status": "Planned"
+          }
+        ]
+      },
+      {
+        "horizon": "Later",
+        "slug": "sheets-option",
+        "live": [
+          {
+            "id": "B-001",
+            "status": "Open"
+          }
+        ]
+      }
+    ],
+    "epicWitnesses": [
+      {
+        "id": "B-044",
+        "status": "Done",
+        "projected": "- B-044 — Workflow transaction efficiency, measured — batch workflow-state updates per phase, atomic commits kept — Open",
+        "projectedStatus": "Open",
+        "mismatch": true
+      },
+      {
+        "id": "B-071",
+        "status": "Done",
+        "projected": "- B-071 — esq agents batch at 1.068 tool calls per turn against 1.243 for non-esq agents on the same machine — Open",
+        "projectedStatus": "Open",
+        "mismatch": true
+      },
+      {
+        "id": "B-072",
+        "status": "Done",
+        "projected": "- B-072 — SPEC and README under-describe the telemetry summary's columns by two (`trips med`, `calls/trip`) — Open",
+        "projectedStatus": "Open",
+        "mismatch": true
+      }
+    ]
+  },
+  "assertions": "All above assertions passed; backlog, roadmap and all epic bytes matched baseline before ledger closure."
+}

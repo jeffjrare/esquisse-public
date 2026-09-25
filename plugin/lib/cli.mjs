@@ -1729,39 +1729,100 @@ async function planFiles(root) {
   return (await planEntries(root)).plans;
 }
 
-// Reads docs/ROADMAP.md's `## Now` section and returns its first `### <slug>` entry with the bold labels
-// /esq:roadmap's template writes (`covers`, `why now`, `needs`, `unblocks`, `state`), the GENERATED marker
-// stripped from `state`. Never writes: /esq:roadmap is the only writer of `state:` lines.
-async function roadmapHead(repository) {
-  const file = path.join(repository, 'docs/ROADMAP.md');
-  let text;
-  try {
-    text = await readText(file);
-  } catch (error) {
-    if (error.code === 'ENOENT') return null;
-    throw error;
+// Join only explicit IDs to the already-read ledger, including closed rows. Unknown and
+// ambiguous facts stay unknown; none of these readers interprets a narrative status.
+function projectionLookup(parsed, backlog) {
+  const rows = new Map();
+  if (parsed) {
+    for (const row of parsed.table.rows) {
+      const id = row[parsed.idColumn];
+      const statuses = rows.get(id) ?? [];
+      statuses.push(row[parsed.statusColumn]);
+      rows.set(id, statuses);
+    }
   }
-  const relative = path.relative(repository, file);
-  const lines = text.split('\n');
-  const nowIndex = lines.findIndex((line) => /^## Now\s*$/.test(line));
-  if (nowIndex === -1) return { file: relative, head: null };
-  let head = null;
-  for (let index = nowIndex + 1; index < lines.length; index += 1) {
-    const line = lines[index];
-    if (/^## /.test(line)) break;
-    const heading = line.match(/^### (.+?)\s*$/);
-    if (heading) {
-      if (head) break;
-      head = { slug: heading[1], covers: null, whyNow: null, needs: null, unblocks: null, state: null };
+  return (id) => {
+    const unknown = (error) => ({ id, status: null, error });
+    if (!parsed) return unknown(backlog?.error ?? 'docs/BACKLOG.md not found');
+    const statuses = rows.get(id);
+    if (!statuses) return unknown('ID not found in docs/BACKLOG.md');
+    if (statuses.length !== 1) return unknown('duplicate ID in docs/BACKLOG.md');
+    if (!STATUSES.has(statuses[0])) return unknown(`invalid backlog status: ${statuses[0] ?? ''}`);
+    return { id, status: statuses[0] };
+  };
+}
+
+// Preserve queue order and the legacy head shape. Free-form state is projected text,
+// never a freshness predicate: a closed item may legitimately share an active entry.
+async function roadmapState(repository, lookup) {
+  const file = 'docs/ROADMAP.md';
+  let text;
+  try { text = await readText(path.join(repository, file)); }
+  catch (error) {
+    if (error.code === 'ENOENT') return null;
+    return { file, head: null, entries: [], freshness: 'unknown', error: error.message };
+  }
+  const entries = [];
+  let horizon = null;
+  let entry = null;
+  for (const line of text.split('\n')) {
+    if (/^## /.test(line)) {
+      horizon = line.match(/^## (Now|Next|Later)\s*$/)?.[1] ?? null;
+      entry = null;
       continue;
     }
-    if (!head) continue;
+    if (!horizon) continue;
+    const heading = line.match(/^### (.+?)\s*$/);
+    if (heading) {
+      entry = { horizon, slug: heading[1], covers: null, whyNow: null, needs: null, unblocks: null, state: null };
+      entries.push(entry);
+      continue;
+    }
     const field = line.match(/^\*\*(covers|why now|needs|unblocks|state):\*\*\s*(.*)$/);
-    if (!field) continue;
+    if (!entry || !field) continue;
     const key = field[1] === 'why now' ? 'whyNow' : field[1];
-    head[key] = field[2].replace(/<!--\s*GENERATED\s*-->/g, '').replace(/<!--.*?-->/g, '').trim();
+    entry[key] = field[2].replace(/<!--.*?-->/g, '').trim();
   }
-  return { file: relative, head };
+  const first = entries.find((item) => item.horizon === 'Now');
+  const head = first ? Object.fromEntries(Object.entries(first).filter(([key]) => key !== 'horizon')) : null;
+  for (const item of entries) {
+    const ids = [...new Set(item.covers?.match(/\bB-\d+\b/g) ?? [])];
+    item.live = ids.map(lookup);
+  }
+  return { file, head, entries, freshness: 'unassessed' };
+}
+
+// Epic's generated Backlog bullets have an explicit final status cell. Compare only
+// that format, keeping the entire projected line for anything we cannot classify.
+async function epicState(repository, lookup) {
+  const directory = path.join(repository, 'docs/epics');
+  let files;
+  try { files = (await readdir(directory)).filter((file) => file.endsWith('.md')).sort(); }
+  catch (error) {
+    return error.code === 'ENOENT' ? [] : [{ file: 'docs/epics', error: error.message, stale: null }];
+  }
+  return Promise.all(files.map(async (name) => {
+    const file = `docs/epics/${name}`;
+    try {
+      const text = await readText(path.join(repository, file));
+      const rows = [];
+      let inBacklog = false;
+      for (const line of text.split('\n')) {
+        if (/^## /.test(line)) { inBacklog = /^## Backlog\s*$/.test(line); continue; }
+        if (!inBacklog) continue;
+        const match = line.match(/^- (B-\d+)\b(.*)$/);
+        if (!match) continue;
+        const projected = match[2].match(/^ — .+ — ([^—]+)$/)?.[1] ?? null;
+        const projectedStatus = STATUSES.has(projected) ? projected : null;
+        const live = lookup(match[1]);
+        rows.push({ ...live, projected: line, projectedStatus,
+          mismatch: projectedStatus !== null && live.status !== null ? projectedStatus !== live.status : null });
+      }
+      const stale = rows.some((row) => row.mismatch === true) ? true
+        : rows.length && rows.every((row) => row.mismatch === false) ? false : null;
+      return { file, slug: name.slice(0, -3), rows, stale };
+    } catch (error) { return { file, rows: [], stale: null, error: error.message }; }
+  }));
 }
 
 export async function state(root) {
@@ -1796,18 +1857,21 @@ export async function state(root) {
   plans.sort((a, b) => (when(a) === when(b) ? b.file.localeCompare(a.file) : (when(a) < when(b) ? 1 : -1)));
   const activePlan = plans[0]?.file ?? null;
   let backlog = null;
+  let parsedBacklog = null;
   try {
     const parsed = await backlogTable(path.join(repository, 'docs/BACKLOG.md'));
     const { table, statusColumn } = parsed;
     const counts = Object.fromEntries([...STATUSES].map((status) => [status, table.rows.filter((row) => row[statusColumn] === status).length]));
     backlog = { counts, rows: backlogRows(parsed) };
+    parsedBacklog = parsed;
   } catch (error) {
     // A table backlogTable() cannot locate or shape (no ID header, no Status column) is reported beside the
     // plan and roadmap facts, never thrown: `{ error }` with no counts/rows keys, so a reader cannot take
     // an absent count for zero open items. A malformed row inside a sound table is validate()'s finding.
     if (error.code !== 'ENOENT') backlog = { error: error.message };
   }
-  const roadmap = await roadmapHead(repository);
+  const lookup = projectionLookup(parsedBacklog, backlog);
+  const [roadmap, epics] = await Promise.all([roadmapState(repository, lookup), epicState(repository, lookup)]);
   // The landing facts of the newest healthy plan, and only once it is complete — the plan
   // /esq:status routes its next action off. The same three facts `esq branch check` carries, read
   // from the text this loop already holds: whether it landed (a deleted branch included), whether a
@@ -1832,7 +1896,7 @@ export async function state(root) {
       };
     }
   }
-  return { root: repository, branch: git(repository, ['branch', '--show-current']), dirty: git(repository, ['status', '--porcelain']) !== '', activePlan, plans, backlog, roadmap, landing, idBlock: await idBlock(repository), inFlight: await inFlightUnits(repository) };
+  return { root: repository, branch: git(repository, ['branch', '--show-current']), dirty: git(repository, ['status', '--porcelain']) !== '', activePlan, plans, backlog, roadmap, epics, landing, idBlock: await idBlock(repository), inFlight: await inFlightUnits(repository) };
 }
 
 // ── Shipping units that live on other branches ───────────────────────────────

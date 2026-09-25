@@ -344,6 +344,12 @@ takes a positional plan, range or commit, not `--range` or `--commit` flags.
 `brief plan` resolves `plan`, `range` and `finder` from the brief's provenance;
 `brief depth` separately answers the corrective generation and its bound.
 
+`state` keeps the roadmap's projected order/text separate from `roadmap.entries[].live`
+backlog statuses, including Done/Dropped. A mixed closed/open entry is valid; free-form
+roadmap freshness is unassessed. `epics[].rows` compares explicit projected Backlog
+status bullets with the same live ledger and reports mismatches or unknowns. These
+reads never refresh projections; no Git-history lookup or model call is added.
+
 The CLI owns ledger IDs, status cells, plan logs, branch checks and merge safety.
 Most results are JSON; `telemetry summary` defaults to a human-readable report
 and also accepts `--json`.

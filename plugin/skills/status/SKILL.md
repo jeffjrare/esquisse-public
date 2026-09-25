@@ -27,11 +27,14 @@ Run `esq state`, `esq brief pending` and `esq validate` once, batching these ind
 | `plans[]` | Already newest-first: file, mtime, state (ready/paused/complete/no-phases/invalid), phase, paused entry; optional abandoned date/reason; invalid entries carry error |
 | `backlog.counts` | Open, Needs-decision, Planned, Done, Dropped |
 | `backlog.rows` | Open/Needs-decision/Planned rows: id, pri, rank, summary, status, epic, source |
-| `roadmap.head` | Top Now entry: slug, covers, whyNow, needs, unblocks, state (GENERATED marker stripped) |
+| `roadmap.head` | Top Now entry: slug, covers, whyNow, needs, unblocks, state (projected text; GENERATED marker stripped) |
+| `roadmap.entries[]` | Now/Next/Later in projected order, same fields plus horizon and live[]: explicit covered ID, current backlog status (including Done/Dropped), or null with error |
+| `roadmap.freshness` | unassessed for free-form projected text; unknown on read error; never a claim that closed membership makes an entry stale |
+| `epics[]` | file, slug, rows[] with projected line/status and live status; mismatch true/false/null per row; stale compares these Backlog bullets only, not the whole epic |
 | `landing` | For the CLI's settled complete plan: file, branch, origin, landed, coverage, unit |
 | `brief pending` | pending/consumed lists, selected path, file, slug, kind, mtime; corrective yellow count and consumption reason |
 
-A missing backlog/roadmap is `null`; an empty Now is `roadmap.head: null`. Check `backlog.error` **before** counts/rows: malformed tables return that field alone. Counts are unknown, never zero. An invalid plan's error is likewise a fact beside healthy results, not a reason to reconstruct the ledger by hand.
+A missing backlog/roadmap is `null`; an empty Now is `roadmap.head: null`. Projection read errors remain beside healthy facts. A null live status is unknown, never Open or Done. Epic stale is true for a proven row mismatch, false only when every returned row is comparable and agrees, otherwise null; missing epics return an empty list. Check `backlog.error` **before** counts/rows: malformed tables return that field alone. Counts are unknown, never zero. An invalid plan's error is likewise a fact beside healthy results, not a reason to reconstruct the ledger by hand.
 
 Read only facts absent from those answers: healthy plan headings/Epic/log details, unresolved brief content, epic metadata and arch/spec markers. Cache each plan's phase headings, Epic, log dates, hashes and work description on its first read. All subsequent steps reuse that cache; never re-read an unchanged file. Batch independent reads. Announce the read-only scope before a long pass and report measured elapsed.
 
@@ -79,9 +82,11 @@ Show Open total and hi count from pri, Needs-decision separately, and Planned se
 
 For Planned rows, retain Source's ` · Planned by <slug>` marker; skip rows without it. Group by slug and match the named plan in the retained plan list, reading `docs/plans/<slug>.md` only if not already cached and classification is still needed. Missing → `plan file not found`, no hunt. Invalid → `plan unreadable`, not a candidate. Complete plan → **candidate to close**, never proof that the individual item shipped. Show its ID; never edit or assert Done. Omit an empty candidate block.
 
-Display `roadmap.head` as written, including covers/state. Never refresh it: only `/esq:roadmap` writes generated state. If it disagrees with known backlog facts, append `(state may be stale — /esq:roadmap to refresh)`. Missing roadmap → omit its line, without urging creation; empty Now → say Now is empty.
+Display the head as **projected order/text**, followed by its entry's **live backlog statuses**, including closed IDs. Use live facts for routing. Keep the queue's order: Done/Dropped membership does not make an entry stale or authorize removing it. Free-form `state` has unassessed freshness; flag a contradiction only when the text unambiguously claims a different status for the same ID. A mixed Done/Open entry can be correct. Missing roadmap → omit; empty Now → say Now is empty; read error → show it without interpreting the queue as empty.
 
-The head reader supplies only one entry, not the full queue or a total Now count. Use its proven covered rows for routing. If a blocker or promotion target cannot be resolved from returned facts, recommend `/esq:roadmap` to expose it rather than guessing a command target or parsing the file as a second reader.
+Surface epic rows with `mismatch: true` as `projected <status> → backlog <status>` and retain unknown/error facts where relevant. Do not treat `stale: false` as proof that the epic's goals, plan list or narrative are current. Neither reader refreshes a file: `/esq:roadmap` and `/esq:epic` remain their writers, and refreshing is optional advice, never a prerequisite to using live facts.
+
+Use `roadmap.entries` to resolve covered rows and known queue targets without another file read. A missing ID, invalid ledger or unresolved blocker stays unknown; do not invent an actionable target.
 
 ## 5. Architecture/spec advisories
 

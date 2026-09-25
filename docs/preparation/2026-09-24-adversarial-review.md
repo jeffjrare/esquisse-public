@@ -152,3 +152,15 @@ identifiers and opaque provider signatures are not part of the retained evidence
 No product source changed after the previously recorded 7/7 audit. This evidence-only
 follow-up reuses that result; ledger validation and diff checks cover its documentation
 changes without buying the same product suites again.
+
+
+## Subsequent product correction — B-043
+
+The authorized implementation now exposes live backlog statuses beside ordered
+roadmap text and compares explicit epic Backlog status bullets. On the unchanged
+real inputs, the mixed B-129 Done/B-079 Open head remains valid, and B-044/B-071/B-072
+are reported as projected Open versus live Done. B-043 is completed locally.
+[Implementation, limits and verification](2026-09-24-b043-state.md) retain the real
+before/after evidence and one 7/7 product audit. This is a demonstrated CLI result,
+not a new model-preparation comparison: B-181/B-182 remain Open and the prior
+quality verdict and proposals above stand unchanged.
