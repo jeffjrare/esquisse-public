@@ -13,7 +13,7 @@ Maintain `docs/BACKLOG.md`: bugs, improvements, todos, ideas and deferred work, 
 ## CLI and working rules
 
 <!-- shared:resolve-cli:start -->
-`esq` comes from the plugin's `PATH`. If `PATH` does not resolve it, run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
+`esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
 The CLI owns IDs, Status, Pri and Rank mutations: `esq backlog add` / `reserve-id`, `set-status <B-NNN> <status>`, `set-pri <B-NNN> <pri>`, and `rank`. You judge type, priority, duplicates, epic, ordering, summary, resolution and whether work is done. Never hand-edit a rank or calculate an ID.

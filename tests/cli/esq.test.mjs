@@ -558,7 +558,7 @@ test('next-phase --context is additive, decodes to the source text, and refuses 
   assert.equal(context.sections[1].text, '### Phase 2 — ⏸ blocked on an open same-unit defect 2026-09-02\n\n**Plan committed at:** bbb2222\n\n**Blocked by:** B-900 (bug, Open) — the defect that paused it\n');
   assert.equal(context.sections[3].text, '## Appendix — the table the phases cite\n\n### Phase 9 — a heading that looks like an entry\n\nappendix body');
 
-  await assert.rejects(run(bin, ['next-phase', plan, '--ctx'], { cwd: root }), /usage: esq next-phase <plan> \[--context\]/);
+  await assert.rejects(run(bin, ['next-phase', plan, '--ctx'], { cwd: root }), /usage: esq next-phase <plan> \[--context\|--preflight\]/);
 
   // Ambiguous and unsupported plans are refused identically with the flag and without it — nothing
   // declares completion in their place.
@@ -2467,4 +2467,36 @@ test('a backlog with no roadmap beside it ranks with no edges at all', async () 
   assert.equal(result.promoted, undefined);
   assert.equal(result.contradictions, undefined);
   assert.deepEqual(await ranksOf(file), { 'B-001': '200', 'B-002': '100' });
+});
+
+// `--preflight` folds build's three dependent preflight calls — branch check, continuity anchor,
+// plan context — into one subprocess, and a refusal delivers no plan text.
+test('next-phase --preflight answers branch, anchor and context in one call, and nothing past a refusal', async () => {
+  const run = (file, args, options = {}) => promisify(execFile)(file, args, { timeout: 10_000, ...options });
+  const bin = fileURLToPath(new URL('../../plugin/bin/esq', import.meta.url));
+  const env = { ...process.env, NODE_ENV: '', ESQ_TEST_GIT_ROOT: '' };
+  const root = await mkdtemp(path.join(os.tmpdir(), 'esq-cli-preflight-'));
+  const git = (...args) => run('git', ['-C', root, ...args], { env });
+  await git('init', '-q', '-b', 'main');
+  await git('config', 'user.email', 'test@example.invalid');
+  await git('config', 'user.name', 'Test');
+  await mkdir(path.join(root, 'docs/plans'), { recursive: true });
+  const target = 'docs/plans/work.md';
+  const header = (branch) => CONTEXT_PLAN.replace('# A plan\n', `# A plan\n\n**Branch:** ${branch}\n\n**Origin:** main\n`);
+  await writeFile(path.join(root, target), header('main'));
+  await git('add', '-A');
+  await git('commit', '-q', '-m', 'plan');
+  const anchor = (await git('log', '-1', '--format=%h', '--', target)).stdout.trim();
+
+  const preflight = JSON.parse((await run(bin, ['next-phase', target, '--preflight'], { cwd: root, env })).stdout);
+  const context = JSON.parse((await run(bin, ['next-phase', target, '--context'], { cwd: root, env })).stdout);
+  assert.equal(preflight.branch.refuse, false);
+  assert.equal(preflight.anchor, anchor);
+  assert.deepEqual({ ...preflight, branch: undefined, anchor: undefined }, { ...context, branch: undefined, anchor: undefined });
+
+  await writeFile(path.join(root, target), header('elsewhere'));
+  await git('commit', '-q', '-am', 'plan: another branch');
+  const refused = JSON.parse((await run(bin, ['next-phase', target, '--preflight'], { cwd: root, env })).stdout);
+  assert.equal(refused.branch.refuse, true);
+  assert.deepEqual(Object.keys(refused).sort(), ['branch', 'file']);
 });

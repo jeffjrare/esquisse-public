@@ -13,7 +13,7 @@ You are working the top of `docs/ROADMAP.md` without the user watching. Your job
 ## Deterministic CLI
 
 <!-- shared:resolve-cli:start -->
-`esq` comes from the plugin's `PATH`. If `PATH` does not resolve it, run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
+`esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
 Do NOT use plan mode.

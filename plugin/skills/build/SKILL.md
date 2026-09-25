@@ -15,10 +15,10 @@ You are executing one phase of a plan, then stopping. Each fresh `/esq:build` in
 ## Deterministic CLI
 
 <!-- shared:resolve-cli:start -->
-`esq` comes from the plugin's `PATH`. If `PATH` does not resolve it, run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
+`esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Use `esq branch check "$0"` for the branch-ownership verdict, `esq next-phase "$0" --context` for the phase classification and the plan text and log slices this command reads, and `esq validate` for invariants. Append a new entry only through `esq plan append-log "$0" '<json>'`; never hand-edit a new log entry. Use `esq backlog reserve-id` before adding a backlog row. The CLI parses and mutates structure; architecture, scope, verification quality, risk, and UX remain your decisions.
+Use `esq next-phase "$0" --preflight` for the branch-ownership verdict, the continuity anchor, the phase classification and the plan text and log slices this command reads, and `esq validate` for invariants. Append a new entry only through `esq plan append-log "$0" '<json>'`; never hand-edit a new log entry. Use `esq backlog reserve-id` before adding a backlog row. The CLI parses and mutates structure; architecture, scope, verification quality, risk, and UX remain your decisions.
 
 Do NOT use plan mode. You need to write code.
 
@@ -38,20 +38,18 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    - If user provided a path argument, use it
    - Else, use the most recently modified `*.md` in `docs/plans/` excluding `*.log.md` and `*.brief.md` (a `.brief.md` is grill output, not a plan)
 2. If no plan file is found or path is invalid, STOP and tell the user how to invoke `/esq:build` properly
-3. **Check the branch owns this plan — before the read, before any edit.** Run `esq branch check <plan-path>`, once, here. It is the only thing that decides branch ownership: it compares the current branch against the plan's recorded `**Branch:**` and every other shipping unit's recorded branch, and returns one JSON verdict, reading only. Route off `refuse`, never off the prose:
+3. **One preflight call: `esq next-phase <plan-path> --preflight`, in the same turn as step 6's read.** It answers the branch-ownership verdict first, then the continuity anchor and the plan context — three facts, one subprocess. `branch` is the only thing that decides ownership: it compares the current branch against the plan's recorded `**Branch:**` and every other shipping unit's recorded branch. Route off `branch.refuse`, never off the prose:
    - **`refuse: false`** → carry the verdict into the announce line in step 9 — `branch <name>` for `ok`, and `branch unrecorded — legacy plan` for a plan written before the field existed — and continue unchanged. Nothing else in this command reads it.
-   - **`refuse: true`** → STOP here, before the plan file is read and before a byte is written. Put the refusal to the user as the option set in "Refuse a branch this plan does not own" below. Do not read the plan's phases, do not edit the plan header, and never switch a branch yourself.
+   - **`refuse: true`** → the response carries no plan text, by design. STOP here, before a byte is written. Put the refusal to the user as the option set in "Refuse a branch this plan does not own" below. Do not read the plan's phases, do not edit the plan header, and never switch a branch yourself.
      It is an **authority** stop and that option set is the only shape it takes. In the plugin the section is `${CLAUDE_SKILL_DIR}/references/refuse-a-branch.md`: you MUST load it before you write the refusal, and it is loaded on this branch and on no other — a `refuse: false` run never reads it.
-
-   The order is the point: the refusal costs one subprocess and zero file reads, which is cheaper than the read it prevents.
-4. **Read the plan through `esq next-phase <plan-path> --context`, once.** Wait for the branch verdict; never batch these calls. Keep the returned `state`, `phase`, `entry` and `context` for phase selection and announcement.
+4. **The plan context is that same response.** Keep the returned `state`, `phase`, `entry` and `context` for phase selection and announcement.
 
    `context.phases` gives each phase's heading/status; `context.completed` supplies the completed count. `context.log` gives the log's `line`, `end` and `appendix` boundary. `context.sections` supplies verbatim source, in document order with `kind` and 1-based `from`/`to`:
    - `plan`: the whole plan through `## Execution log` and its reserved append comment when present. Without that heading, the whole file.
    - `entry`: the newest log entry and, when distinct, the paused entry selected by the response's `entry` key, including its heading, continuity field and handoff. `roles` identifies each; lines are not duplicated.
    - `appendix`: all plan material following the log span.
 
-   Use these slices without a second classification call, skeleton grep or reread. This snapshot does not replace later reads explicitly required after mutation: keep the continuity anchor from step 5, recompute `unit.open` before logging, and reread files this run changes when needed.
+   Use these slices without a second classification call, skeleton grep or reread. This snapshot does not replace later reads explicitly required after mutation: recompute `unit.open` before logging, and reread files this run changes when needed.
 
    The CLI owns the slicing. The following definition is retained for orchestrators that read a skeleton directly; it is not another build preflight:
 
@@ -65,10 +63,10 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    - `**Plan committed at:**` and `**Commits:**` are an entry's first two field lines — the continuity anchor the entry was written against, and that phase's commit short hashes.
    <!-- shared:log-skeleton:end -->
 
-5. **Compute the continuity anchor** — run `git log -1 --format=%h -- <plan-path>` now, once, before this invocation commits anything. That short hash is the `**Plan committed at:**` field every execution-log entry this run writes carries, verbatim and unrecomputed: a run that resolves a pause and continues into the next phase writes the same hash into both entries, because the confirm commit in between touched only the log. Empty output means no commit has ever touched this plan file — write `unversioned` and note it in the entry's Surprises.
-6. Read `CLAUDE.md` at project root if present
-7. Fetch tools: call `ToolSearch "select:TaskCreate,TaskUpdate,TaskList,PushNotification"`. Continue without any that are unavailable.
-8. Call `TaskList`. If any tasks are in `pending` or `in_progress` state (stale from a previous aborted run), call `TaskUpdate` on each to set them `completed` before creating fresh tasks for this phase. Skip if TaskList is unavailable.
+5. **The continuity anchor is the response's `anchor`** — the plan file's last commit, taken before this invocation commits anything. It is the `**Plan committed at:**` field every execution-log entry this run writes carries, verbatim and unrecomputed: a run that resolves a pause and continues into the next phase writes the same hash into both entries, because the confirm commit in between touched only the log. `unversioned` means no commit has ever touched this plan file — write it and note it in the entry's Surprises.
+6. Read `CLAUDE.md` at project root if present — in step 3's turn, since neither waits on the other.
+7. **Attended runs only:** fetch `ToolSearch "select:TaskCreate,TaskUpdate,TaskList"`. Continue without any that are unavailable. A stop that sends a `PushNotification` fetches it then, in the turn that sends it.
+8. **Attended runs only:** call `TaskList`. If any tasks are in `pending` or `in_progress` state (stale from a previous aborted run), call `TaskUpdate` on each to set them `completed` before creating fresh tasks for this phase. Skip if TaskList is unavailable.
 9. **Announce the resolved target** — the second line, once preflight has settled what the first one could not name:
    <!-- announce:start -->
    > `Plan <slug> — <N> phases, <M> logged complete; next up is Phase <k>. Branch: <the step-3 verdict — the branch name, or `unrecorded — legacy plan`>.`
@@ -92,7 +90,7 @@ Keep one atomic, independently revertible implementation commit per task. Batchi
 
 ## Identify the next phase
 
-Use preflight's `esq next-phase <plan-path> --context` response; no second query or file read. `context.phases[].status` is `completed` only for a completed entry, `paused` for any `⏸` heading regardless of its clause, and `null` when no entry exists. Unlogged does not prove unexecuted; reconciliation below checks that.
+Use preflight's `esq next-phase <plan-path> --preflight` response; no second query or file read. `context.phases[].status` is `completed` only for a completed entry, `paused` for any `⏸` heading regardless of its clause, and `null` when no entry exists. Unlogged does not prove unexecuted; reconciliation below checks that.
 
 1. **Paused phase takes priority.** If any phase has a `⏸` entry, do NOT start a new phase. Resolve it first, and which resolution depends on the clause:
    - `⏸ awaiting manual verification` → go to "Resolve a paused phase" below.
@@ -149,10 +147,12 @@ Announce: "Executing Phase N: <name>. Tasks: <count>. One commit each; the suite
 
 Call `TaskCreate` for each task in the phase (title: `"Task N.M — <description>"`, status: `pending`) plus one titled `"Verification"` (status: `pending`). Note each returned `id` — required for `TaskUpdate` calls below. Skip silently if TaskCreate is unavailable.
 
+**Read the phase's working set in one turn, before the first task.** Every file the phase's tasks name, and the tests covering them, go out together as parallel `Read` calls or one chained `sed -n`/`cat` — never one file per turn. Take a slice of a large file, not all of it. A later task reads only what an edit revealed and this set lacked; a search that locates code (`grep -n`) is chained with the slice it leads to in the same call.
+
 For each task in the phase, in order:
 
 1. **Announce + start:** "Starting Task N.M: <task description>". Call `TaskUpdate` to set that task `in_progress`.
-2. **Read first, write second.** View the relevant files before editing.
+2. **Read first, write second.** Edit from the working set; view a file it lacks before editing it.
 3. **Implement** the change. Stay within CONVENTIONS.md and the plan's stated approach. If the task renders anything a person looks at, apply "Building UI" above before you write it.
 4. **Self-check:** Does this task's work, on its own, advance the phase's goal? If not, you've drifted — correct it under the Drift clause of the recovery contract ("On failure").
 5. **Test the change — at the narrowest scope that would still catch a break.** Run the test file(s) covering what you just touched (`vitest run <file>`, `pytest <file>::<test>`, `go test ./<pkg>/...`, `jest -t <name>`), not the whole suite. The full suite runs **once**, at the end of the phase, as `(auto)` verification. If tests fail, apply the recovery contract's task route ("On failure" below); a test still red is a failure.

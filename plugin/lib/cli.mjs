@@ -4871,8 +4871,20 @@ export async function main(args) {
     // and the flagged one is that object with `context` beside it. One `readText`, one `parsePlan`,
     // and the same `nextPhase` throw on every ambiguous plan the parser already refuses — a
     // duplicate entry, an entry for an unknown phase, a plan with no phases — flag or no flag.
-    if (rest.length > 1 || (rest.length === 1 && rest[0] !== '--context')) {
-      throw new Error('usage: esq next-phase <plan> [--context]');
+    if (rest.length > 1 || (rest.length === 1 && rest[0] !== '--context' && rest[0] !== '--preflight')) {
+      throw new Error('usage: esq next-phase <plan> [--context|--preflight]');
+    }
+    // `--preflight` is `/esq:build`'s whole preflight in one subprocess: the branch verdict first —
+    // a refusal returns before any plan text is delivered — then the continuity anchor, taken before
+    // the run commits anything, then exactly what `--context` answers. Three dependent round trips
+    // were one model turn each; none of them was a judgment.
+    if (rest[0] === '--preflight') {
+      const branch = await branchCheck(root, action);
+      if (branch.refuse) return output({ file: action, branch });
+      const anchor = gitTry(root, ['log', '-1', '--format=%h', '--', action]) || 'unversioned';
+      const plan = parsePlan(await readText(action));
+      const verdict = nextPhase(plan);
+      return output({ file: action, branch, anchor, ...verdict, context: planContext(plan, verdict) });
     }
     const plan = parsePlan(await readText(action));
     const verdict = nextPhase(plan);
@@ -5180,5 +5192,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state|next-phase <plan> [--context]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--json] [--rows] [file…]>');
 }

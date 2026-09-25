@@ -13,7 +13,7 @@ You are running a plan's remaining phases without the user watching. Your job is
 ## Deterministic CLI
 
 <!-- shared:resolve-cli:start -->
-`esq` comes from the plugin's `PATH`. If `PATH` does not resolve it, run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
+`esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
 Classify the plan with `esq next-phase "$0"` and validate its structure with `esq validate`; do not reproduce the log parser. The CLI reports state only — gates,

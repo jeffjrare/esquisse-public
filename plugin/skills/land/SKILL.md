@@ -23,7 +23,7 @@ Before any tool call, announce and continue in the same response:
 Stop at the bound and report anything not covered.
 
 <!-- shared:resolve-cli:start -->
-`esq` comes from the plugin's `PATH`. If `PATH` does not resolve it, run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
+`esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
 The CLI owns branch/unit/coverage/destination facts, ledger validity, projection freshness and verification reuse. You judge delivery evidence and whether actual output meets a verification step's PASS criterion. No manual landing fallback.
