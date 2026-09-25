@@ -1,0 +1,21 @@
+{
+  "command": "./scripts/audit.sh",
+  "environment": "outside sandbox; ESQ_TELEMETRY unset; disposable CLAUDE_CONFIG_DIR removed",
+  "bound_seconds": 180,
+  "exit": 0,
+  "timeout": false,
+  "elapsed_seconds": 26.96,
+  "additional_model_trials": 0,
+  "claude_version": "2.1.282",
+  "bash_syntax": "PASS (bash -n, no execution)",
+  "local_links_and_anchors_checked": 9,
+  "B-181_B-182": "backlog rows and detail sections unchanged; historical evidence unchanged",
+  "product_scripts_tests": "unchanged",
+  "ledger_validation": {
+    "valid": true,
+    "root": "/home/jeffgirard/projects/esquisse-public-ready",
+    "findings": []
+  },
+  "diff_check": "PASS",
+  "model_trial_cost": "no additional model trial; historical timeout cost unknown"
+}
