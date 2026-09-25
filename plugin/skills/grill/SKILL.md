@@ -4,6 +4,7 @@ name: grill
 argument-hint: "[target] [options]"
 disable-model-invocation: true
 model: opus
+allowed-tools: Bash(esq *)
 effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
@@ -68,7 +69,7 @@ Build a question set that covers the decision tree for this task. Aim for breadt
 - **Done.** What does "finished" look like? How will the user verify it themselves?
 - **Non-goals.** What might someone assume is included that explicitly isn't?
 
-**Propose, don't just ask.** Resolve what the mandate, repository and reasonable defaults settle; do not ask the user to confirm those answers. For a genuinely missing authority, lead with your recommendation and the product tradeoff. An idea earns its place by removing a concrete user difficulty within the constraints, not by adding options or infrastructure. Distinguish observed needs, user statements and hypotheses; an invented example is not evidence that the product needs or benefits from a feature.
+**Propose, don't just ask.** Resolve what the mandate, repository and reasonable defaults settle; do not ask the user to confirm those answers. For a genuinely missing authority, lead with your recommendation and the product tradeoff. An idea earns its place by removing a concrete user difficulty within the constraints, not by adding options or infrastructure. Before the first round, ask yourself once what would make the request twice as useful — or unnecessary — at the same cost; propose that version only when it beats the literal one, in one line. Distinguish observed needs, user statements and hypotheses; an invented example is not evidence that the product needs or benefits from a feature.
 
 ### Whose question is it
 

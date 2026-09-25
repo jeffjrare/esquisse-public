@@ -4,6 +4,7 @@ name: advance
 argument-hint: "[target] [options]"
 disable-model-invocation: true
 model: inherit
+allowed-tools: Bash(esq *)
 effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.

@@ -3,6 +3,7 @@ description: Produce a structured plan file from the codebase — the durable co
 name: plan
 argument-hint: "[target] [options]"
 model: opus
+allowed-tools: Bash(esq *)
 effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
@@ -216,6 +217,7 @@ shipped feature. Keep the promised outcome intact when splitting the work.
 
 ## Risks
 What could go wrong specifically with THIS plan. Not generic risk theater. What you'd watch for during execution.
+Lead with the pre-mortem: the likeliest reason a person does not use this once shipped, and the task that answers it.
 
 ## Open questions
 Things you couldn't decide without more input. Be specific about what would resolve each one.

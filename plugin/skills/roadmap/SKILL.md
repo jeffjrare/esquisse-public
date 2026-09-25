@@ -3,6 +3,7 @@ description: The order of the work and why that order — an ordered queue acros
 name: roadmap
 argument-hint: "[target] [options]"
 model: opus
+allowed-tools: Bash(esq *)
 effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.

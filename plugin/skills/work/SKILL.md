@@ -3,6 +3,7 @@ description: Route a backlog item to the right entry point — and execute it in
 name: work
 argument-hint: "[target] [options]"
 model: opus
+allowed-tools: Bash(esq *)
 effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
