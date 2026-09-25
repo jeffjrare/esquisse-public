@@ -164,13 +164,14 @@ Number user-owned asks, action first with exact commands; omit on ✔. Preserve 
 Render Now/Next/Later, continuous positional numbers, slug, covers, state, why-now and applicable dependency lines; show recent shipped entries. NEEDS YOU counts entries blocked on a user call. Show confirmed priority in brackets only when it disagrees with placement (e.g. hi in Later). Use relative paths.
 
 **Next action:**
-- Before the generic routes, exclude explicitly parked work from automatic work/build/closure advice; state its reason and restart condition. Keep its position and dependency obligations. If the head has no eligible action, report that condition without silently advancing the queue. An explicit user selection can satisfy a selection condition; an external prerequisite still needs evidence.
-- Top Now entry blocked → target its blocker and name it: Needs-decision → `/esq:backlog` or `/esq:grill <question>`; unmet needs → the awaited entry's action.
+- Use the entry the user is discussing (argument or conversation, resolved by slug or covered reference); otherwise use the top Now entry. An explicit request to walk all Now keeps the global route. Apply the following entry rules to that focus without changing the queue's order or promoting it.
+- Before the generic routes, exclude explicitly parked work from automatic work/build/closure advice; state its reason and restart condition. Keep its position and dependency obligations. If the focused entry has no eligible action, report that condition without silently advancing the queue. An explicit user selection can satisfy a selection condition; an external prerequisite still needs evidence.
+- Focused entry blocked → target its blocker and name it: Needs-decision → `/esq:backlog` or `/esq:grill <question>`; unmet needs → the awaited entry's action.
 - Open item on a complete plan → use the acceptance assessment above before the generic plan routes. Known remaining implementation → `/esq:plan implement B-N: <remaining outcome>`; otherwise name its recorded evidence action or revisit condition, without inventing a measurement mandate. Whole outcome evidenced → `/esq:sweep`. Never route an unmet/unproved outcome to closure or back through completed phases; if no action is currently warranted, state the revisit condition instead of inventing an executable Next.
-- Top unblocked Now entry: Open → `/esq:work B-N`; Planned with a known plan → `/esq:build <plan-path>`; complete plan → `/esq:check <plan-path>`; epic → `/esq:epic <slug>`. Never guess a plan/review/check target.
+- Unblocked focused entry: Open → `/esq:work B-N`; Planned with a known plan → `/esq:build <plan-path>`; complete plan → `/esq:check <plan-path>`; epic → `/esq:epic <slug>`. Never guess a plan/review/check target.
 - At least two remaining plan phases → offer `→ Or: /esq:autopilot <plan-path>` (unattended until a user gate).
-- At least two still-Open items across Now → offer `→ Or: /esq:advance` (one subagent each, stops before build). One item → work alone.
-- Now empty, Next nonempty → `/esq:roadmap <head-of-Next> now`.
+- When discussing one Now entry with eligible Open work, offer `→ Or: /esq:advance <slug>` (only that entry, stops before build), even for one item. Resolve the slug from retained sources; never offer advance for an unknown target or an entry outside Now. With no particular entry selected, at least two still-Open items across Now → offer `→ Or: /esq:advance`; an explicit whole-Now request also keeps this bare command. Never substitute it for a failed targeted lookup. Advance retains its existing dependency and plan checks.
+- No particular entry selected, Now empty, Next nonempty → `/esq:roadmap <head-of-Next> now`.
 - Roadmap empty → `Roadmap is empty — /esq:roadmap plan to derive one from the backlog.`
 
 When an action is warranted, the primary `→ Next` is executable as written and repeats the first executable ask when one exists. No preamble or closing observations.

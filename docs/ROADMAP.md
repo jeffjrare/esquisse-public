@@ -7,15 +7,9 @@ Initial order proposed by [PRIORITY-REVIEW.md](PRIORITY-REVIEW.md), checked agai
 
 **Objective:** useful features shipped quickly, fewer unnecessary interruptions, reliable verification and beautiful, thoughtful design. Spend tokens, tool turns and elapsed time in proportion to that value. The CLI owns deterministic structure; the model owns judgment. A guard must detect a defect, resolve a reference or protect a parsed format. Optional telemetry and research never gate delivery. Deployment remains outside ESQ's scope.
 
-The sequence below is the remaining execution proposal, not a claim that work has started. B-172 and B-129 shipped locally on 2026-09-24; no further item was selected by this implementation. Order is positional unless a `needs:` edge is written; none is required here. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the active sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
+The sequence below is the remaining execution proposal, not a claim that work has started. B-172, B-129 and B-079 shipped locally on 2026-09-24; Now is empty after dependable-queue's completion, with no automatic promotion. Order is positional unless a `needs:` edge is written; none is required here. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the active sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
 
 ## Now
-
-### dependable-queue
-**covers:** B-129, B-079
-**why now:** Follow B-172 with truthful completion and a scoped handoff: do not project an unmet outcome as shipped, and aim the next command at the selected entry. These are separate outcomes; B-172 does not absorb their skill changes.
-**acceptance:** A complete plan with unmet item acceptance stays open; single-entry roadmap handoff names its target.
-**state:** <!-- GENERATED --> B-129 Done locally: a complete plan cannot override outstanding item acceptance, and completion advice reads the item's conditions. B-079 remains Open: status already offers scoped advance, roadmap does not. This combined entry remains in Now for B-079; its implementation was not undertaken.
 
 ## Next
 
@@ -29,7 +23,7 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 **covers:** B-003, B-005
 **why now:** The user selected B-003 on 2026-09-24. Its retained-branch collision is reproduced and fixed locally. The remaining B-005 merge-path fixture is separate work; no broader merge correction was commissioned.
 **acceptance:** Scratch worktree removal preserves the unmerged branch without allowing duplicate IDs; the marker-free ancestor-present merge yields one correct row.
-**state:** <!-- GENERATED --> B-003 Done locally: retained local branch IDs prevent block reuse, with removal/reopening/allocation/merge regressions. B-005 Open: its marker-free ancestor-present fixture remains unproved. A distinct duplicate-tail-rank finding is recorded as B-184, Open; full merge-ledger validity is not claimed.
+**state:** <!-- GENERATED --> B-003 Done locally: retained local branch IDs prevent block reuse, with removal/reopening/allocation/merge regressions. B-005 Open: its marker-free ancestor-present fixture remains unproved. B-184 Done locally: merge sealing reconciles independent equal ranks while preserving IDs, priorities and stored ordering edits; incompatible placements require resolution. Its recorded real-Git regressions and 7/7 product audit do not establish B-005's separate acceptance.
 
 ### durable-ui-evidence
 **covers:** B-076
@@ -87,6 +81,7 @@ The remaining ranked backlog work has no committed implementation position: B-01
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-24 · dependable-queue — B-129 and B-079 Done locally. Roadmap/status offer the discussed Now entry's scoped advance and preserve an explicit global walk. Targeted/global semantic reading and one 7/7 product audit; no native model journey. Evidence: `docs/preparation/2026-09-24-b079-scoped-handoff.md`.
 - 2026-09-24 · architecture-preparation instructions — B-183 done locally: relevant current authority, scoped reads, concise linked reports and no planner alternative quota. Real historical/current decision counterexample and 7/7 product audit; 526 source words removed, no runtime saving claimed. B-181/B-182 remain Open; review and proposed next case in `docs/preparation/2026-09-24-architecture-preparation-review.md`.
 - 2026-09-24 · projection-standing — B-043 already Done; B-075 done locally: status/backlog/roadmap distinguish explicit parking with reason and restart condition; state retains existing acceptance text. Real B-001/B-006/B-085/B-087 observation and one 7/7 product audit; details in `docs/preparation/2026-09-24-b075-parked-work.md`. No native model trial or publication; other entries keep their order.
 - 2026-09-24 · feature-preparation instructions — B-181 **reopened after user review**: the instruction changes and 7/7 audit remain historical facts, but the invented invoice-export case did not prove improved preparation. This entry records the source change, not delivered item acceptance. B-182 handles the subsequent focused cost/instruction correction; B-169/C remains Open.

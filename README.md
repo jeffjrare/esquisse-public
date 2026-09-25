@@ -297,6 +297,8 @@ closes it only with evidence of the whole outcome, including post-plan condition
 Status, backlog and roadmap distinguish explicitly parked work from execution,
 showing its reason and restart condition beside the unchanged canonical status.
 Planned means associated with a plan; it does not mean work is running.
+When discussing one entry, roadmap and status offer `/esq:advance <slug>` for
+eligible work in that Now entry; an explicit whole-Now request keeps `/esq:advance`.
 `/esq:advance` walks `Now`, or one named `Now` entry,
 respecting dependencies and existing plans. It uses one worker per eligible item,
 at most one new plan per entry, decision workers when needed and one final
