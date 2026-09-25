@@ -33,9 +33,9 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ### verification-commands
 **covers:** B-107, B-163
-**why now:** After proof invalidation and correction disposal, address the narrower false-refusal paths together at the command/criterion boundary. Land still forbids a substitution build can use, and the extractor still accepts a lone document path.
-**acceptance:** Reproduce each current defect separately; keep criterion strictness for unrunnable commands and distinguish document paths from legitimate executable paths.
-**state:** <!-- GENERATED --> Both Open; landing moved from converge to land, not proof the mismatch disappeared.
+**why now:** B-163 is delivered: lone document references remain unresolved and cannot silently complete a paused phase. B-107 remains the distinct command/criterion mismatch: land still forbids a substitution build can use.
+**acceptance:** B-163 has focused extraction/consumer regressions. For B-107, reproduce the current mismatch separately and preserve criterion strictness for unrunnable commands.
+**state:** <!-- GENERATED --> B-163 Done locally (one 7/7 product audit; `docs/preparation/2026-09-25-b163-auto-command.md`); B-107 Open. The entry stays here; no substitution-policy change or queue promotion.
 
 ## Later
 

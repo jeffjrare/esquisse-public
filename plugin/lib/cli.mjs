@@ -1463,6 +1463,12 @@ export async function resolveBlock(root, planPath, confirmJson = null) {
   const owed = verify.commands.filter((command) => command.decision === 'run');
   const reused = verify.commands.filter((command) => command.decision === 'reuse');
 
+  // No command identity means no proof this payload can attribute to the step. In particular,
+  // an empty `owed` list must not let a document-only step disappear when a pause is confirmed.
+  if (verify.unresolved.length > 0) {
+    return decline('command-unresolved', `Phase ${phase} stays paused: ${verify.unresolved.length} (auto) step(s) resolve to no single executable command. Resolve the command in each listed step without weakening its criterion before confirming; neither a document path nor an unrelated green command verifies it. The plan file is unchanged.`, { phase, verify: { commands: verify.commands, unresolved: verify.unresolved }, owed: owed.map((command) => command.command) });
+  }
+
   if (!payload) {
     const settled = clause === 'blocked'
       ? 'Every blocker is disposed of'
@@ -1481,9 +1487,9 @@ export async function resolveBlock(root, planPath, confirmJson = null) {
       manualOutstanding: outstanding,
       verify: { commands: verify.commands, unresolved: verify.unresolved },
       owed: owed.map((command) => command.command),
-      reason: owed.length === 0 && verify.unresolved.length === 0
+      reason: owed.length === 0
         ? `${settled}, and git proves Phase ${phase}'s (auto) verification still describes HEAD — nothing is owed. ${confirmWith}`
-        : `${settled}. Run each command in \`owed\` and each entry in \`verify.unresolved\` exactly once, judge it against its own step text, then confirm with every one it PASSes in \`verified\`.`,
+        : `${settled}. Run each command in \`owed\` exactly once, judge it against its own step text, then confirm with every one it PASSes in \`verified\`.`,
     };
   }
 

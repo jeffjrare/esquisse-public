@@ -498,6 +498,35 @@ test('no observation, a partial one, or one naming a step nobody was owed: the p
   assert.equal(await readFile(fixture.file, 'utf8'), before);
 });
 
+test('an unresolved document step cannot disappear when either kind of pause is confirmed', async () => {
+  for (const clause of ['blocked', 'manual']) {
+    const fixture = await unit(clause === 'blocked'
+      ? [['B-201', '🐛 bug', 'build: stem-fixes Phase 1', 'Done']] : [], { command: 'docs/SPEC.md' });
+    const manual = [{ step: '[in the app] inspect the result', observed: 'the expected result appeared' }];
+    if (clause === 'blocked') await pauseOn(fixture, ['B-201']); // Includes an old, invalid document proof.
+    else await pauseForManual(fixture, [manual[0].step], { verified: false });
+    const before = await readFile(fixture.file, 'utf8');
+    const answer = await read(fixture);
+    assert.equal(answer.refuse, true);
+    assert.equal(answer.code, 'command-unresolved');
+    assert.deepEqual(answer.owed, []);
+    assert.equal(answer.verify.unresolved[0].step, '(auto) `docs/SPEC.md` — passes');
+    assert.equal(answer.verify.unresolved[0].phase, 1);
+    // No proof, the document itself, and unrelated green commands all leave the pause intact.
+    for (const commands of [null, ['docs/SPEC.md'], ['./scripts/audit.sh']]) {
+      const result = await confirm(fixture, { phase: 1,
+        ...(clause === 'manual' ? { manual } : {}),
+        ...(commands ? { verified: { at: git(fixture.root, 'rev-parse', 'HEAD'), commands } } : {}) });
+      assert.equal(result.refuse, true);
+      assert.equal(result.code, 'command-unresolved');
+      assert.deepEqual(result.verify.unresolved, answer.verify.unresolved);
+      assert.equal(await readFile(fixture.file, 'utf8'), before);
+      assert.equal(nextPhase(parsePlan(before)).state, 'paused');
+    }
+    assert.equal((await gateVerify(fixture.root, fixture.relative)).commands.length, 0);
+  }
+});
+
 test('a phase naming no (auto) command completes on its observation alone, with no provenance invented', async () => {
   const fixture = await unit([], { command: null });
   await pauseForManual(fixture, ['[on /x] look → expect: it renders']);

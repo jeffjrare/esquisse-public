@@ -210,7 +210,7 @@ export function parseAbandoned(text) {
 // `` `(auto)` `pnpm test` — the suite is green `` yields `pnpm test` and never the literal `(auto)`.
 //
 // `null` is the honest answer, not a dropped step: a step with no span after the marker, a second
-// candidate span before the em dash, or prose this rule cannot resolve returns null, and the caller
+// candidate span before the em dash, a lone Markdown path, or prose this rule cannot resolve returns null, and the caller
 // turns that into an **unresolved** occurrence it runs conservatively through the complete-step path.
 const AUTO_MARKER = '(auto)';
 
@@ -232,7 +232,13 @@ export function extractAutoCommand(step) {
   const reads = readsMarker(step, spans, markerEnd);
   const limit = Math.min(dash < 0 ? step.length : dash, reads ? reads.start : step.length);
   const candidates = spans.filter((span) => span.start >= markerEnd && span.end <= limit && span.text !== '');
-  return candidates.length === 1 ? candidates[0].text : null;
+  if (candidates.length !== 1) return null;
+  const command = candidates[0].text;
+  // A lone Markdown reference is not an executable command. Only this whole-span shape is
+  // excluded: paths to scripts and commands taking documents as arguments remain exact strings.
+  // No filesystem lookup, executable-bit check or general shell validation belongs in extraction.
+  const documentPath = /^(?:[^\s"'|&;<>()`$\\]+\.md|"[^"$`\\\r\n]+\.md"|'[^'\r\n]+\.md')$/i;
+  return documentPath.test(command) ? null : command;
 }
 
 // ── The `(reads)` declaration ────────────────────────────────────────────────

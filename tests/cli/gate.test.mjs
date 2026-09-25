@@ -97,6 +97,21 @@ test('an unresolvable step is null, never a guess', () => {
   assert.equal(extractAutoCommand(undefined), null);
 });
 
+test('a lone Markdown path is unresolved, but executable paths and document arguments survive', () => {
+  for (const candidate of ['docs/SPEC.md', './docs/SPEC.md', 'README.md', '/repo/docs/SPEC.md',
+    '"docs/Product spec.md"', "'docs/SPEC.md'"]) {
+    for (const marker of ['(auto)', '`(auto)`']) {
+      assert.equal(extractAutoCommand(`${marker} \`${candidate}\` — the rule is documented`), null, candidate);
+    }
+  }
+  for (const command of ['./scripts/audit.sh', './docs/check', '../tools/check', '/opt/tools/check',
+    'node scripts/check.mjs docs/SPEC.md', 'cat docs/SPEC.md', './scripts/audit.sh docs/SPEC.md',
+    './scripts/audit.sh && test -f docs/SPEC.md']) {
+    assert.equal(extractAutoCommand(`(auto) \`${command}\` — criterion`), command);
+  }
+  assert.equal(extractAutoCommand('(auto) `docs/SPEC.md` `(reads)` `docs/`'), null);
+});
+
 // The declaration contract, fixture by fixture. What a step says its command reads is the only
 // thing that can narrow a landing gate's freshness, so every shape this parser cannot read cleanly
 // has to come back as `malformed` — ignored by the caller and run — rather than as a shorter list.
@@ -232,6 +247,48 @@ test('a command three phases name is one entry, and unresolved occurrences are n
     assert.equal(entry.decision, 'run');
     assert.equal(entry.step, '`(auto)` `pnpm build` and `pnpm lint` — both clean');
   }
+});
+
+test('document-only steps stay visible in every gate scope and cannot acquire a proof', async () => {
+  const root = await repo();
+  const document = '(auto) `docs/SPEC.md` — the product rule is documented';
+  const commands = ['./scripts/audit.sh', 'node scripts/check.mjs docs/SPEC.md'];
+  const file = await plan(root, [[document, ...commands.map((command) => `(auto) \`${command}\` — passes`)], [document]]);
+  // Historical metadata may claim the document itself passed; it must not become reusable proof.
+  await logPhase(root, file, 1, ['docs/SPEC.md', ...commands]);
+  await logPhase(root, file, 2, ['docs/SPEC.md']);
+  for (const options of [{}, { unit: true }, { phase: 2 }]) {
+    const report = await gateVerify(root, file, options);
+    assert.deepEqual(report.commands.map((entry) => entry.command), options.phase ? [] : commands);
+    assert.ok(report.commands.every((entry) => entry.decision === 'reuse'));
+    assert.deepEqual(report.unresolved.map((entry) => entry.phase), options.phase ? [2] : [1, 2]);
+    for (const entry of report.unresolved) {
+      assert.equal(entry.step, document);
+      assert.equal(entry.resolved, false);
+      assert.equal(entry.decision, 'run');
+      assert.equal(entry.plan, path.relative(root, file));
+      assert.equal(entry.verifiedAt, undefined);
+    }
+  }
+  // A distinct single occurrence reaches command extraction, rather than the duplicate-step refusal.
+  const other = await plan(root, [[document]], 'document.md');
+  const refused = await byteIdentical(other, () => record(root, other, proofFor(root, document)));
+  assert.equal(refused.refuse, true);
+  assert.equal(refused.code, 'command-unresolved');
+  assert.equal(parseVerified(await readFile(other, 'utf8')).size, 0);
+});
+
+test('logging a pause with a document-only step invents no command provenance', async () => {
+  const root = await repo();
+  const step = '(auto) `docs/SPEC.md` — the rule is documented';
+  const file = await plan(root, [[step]]);
+  await appendLog(file, JSON.stringify({ phase: 1, status: 'paused', commits: ['abc1234'],
+    whatBuilt: 'the implementation', verification: ['Document step remains unresolved'],
+    manualOutstanding: ['[in the app] inspect the result'] }));
+  const text = await readFile(file, 'utf8');
+  assert.equal(nextPhase(parsePlan(text)).state, 'paused');
+  assert.equal(parseVerified(text).size, 0);
+  assert.deepEqual((await gateVerify(root, file)).unresolved.map((entry) => entry.step), [step]);
 });
 
 test('absent, malformed and unresolvable provenance each force the rerun', async () => {

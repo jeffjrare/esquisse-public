@@ -77,7 +77,7 @@ Call `esq gate verify --unit <plan>`, without `--workers-moved`, in the **invoki
 The gate covers all same-Branch plans, excluding abandoned unbuilt phases, and returns `commands`, `unresolved` and unit plans. Follow its decisions:
 - `reuse`: use the existing PASS; never rerun for reassurance.
 - `run`: execute each distinct returned command exactly once, even if several phases/plans named it.
-- `resolved: false`: perform each full step; never skip or deduplicate it.
+- `resolved: false`: inspect and perform each full step; never skip or deduplicate it, or execute a lone document path as a command. If its action cannot be resolved, report the original step as unverified and stop landing; absence from `commands` is not a PASS.
 
 Judge output against the returned **step text**, with its plan/phase, not exit 0 alone: a no-match grep can pass at exit 1. No retry, extra check, replacement command or inferred suite subsumption. A red stops landing; show the failing step, plan, phase and at most ten output lines.
 
