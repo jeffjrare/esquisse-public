@@ -1,0 +1,24 @@
+
+[1mStructure — every reference resolves[0m
+[32m  ✓ structure clean — section references, 21 commands, README coverage, every references/ path and every brief section resolve[0m
+
+[1mPackage — the plugin and its skills validate[0m
+[32m  ✓ plugin, embedded CLI, native hooks and 21 skills validate[0m
+
+[1mNo push — nothing in the shipped plugin runs or spells one[0m
+[32m  ✓ 44 file(s) read; nothing in the shipped plugin runs or spells a push[0m
+
+[1mConformance — the formats the code parses are intact[0m
+[32m  ✓ 4 behavioral scenarios, 7 observable clauses present[0m
+
+[1mVersion — the two manifests agree[0m
+[32m  ✓ release version clean — both manifests read 0.3.48 and plugin/ is unchanged since the 930b3b5 bump that released it[0m
+
+[1mBounded runner — a hang is a named red line, not a silent pass[0m
+[32m  ✓ clean[0m
+
+[1mProduct suites — CLI, hooks and corpus helper (bounded 120 s)[0m
+[32m  ✓ the product suites passed within 120s[0m
+
+[1mSummary[0m
+[32m  Clean — 7 checks (product).[0m

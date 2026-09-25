@@ -228,6 +228,86 @@ test('scan classifies a duplicate present at the base as one item, two edits', a
   assert.match(scanned.reason, /0 of them absent at the merge base/);
 });
 
+test('B-005: a clean Git merge reconciles an ancestor-present ID through the attended path', async (t) => {
+  // Both valid branches move the same existing row to different places and edit different cells.
+  // Git shares the deletion and accepts both distant insertions, without a conflict hunk.
+  const anchors = Array.from({ length: 10 }, (_, index) => `B-${String(index + 2).padStart(3, '0')} | med | Open | anchor ${index + 2}`);
+  const file = 'docs/BACKLOG.md';
+  const seed = backlog(...anchors.slice(0, 5), 'B-001 | med | Open | shared', ...anchors.slice(5));
+  const ours = backlog('B-001 | med | Planned | shared', ...anchors);
+  const theirs = backlog(...anchors, 'B-001 | hi | Open | shared');
+  const root = await forked({
+    seed: { [file]: seed },
+    onMain: { [file]: ours },
+    onBranch: { [file]: theirs },
+  });
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const before = snapshot(root);
+  const base = git(root, 'merge-base', 'main', 'featB');
+  // Prove validity at all three inputs, not just unique IDs in an invented merged fixture.
+  for (const ref of [base, 'featB', 'main']) {
+    git(root, 'switch', '-q', '--detach', ref);
+    assert.equal((await validate(root)).valid, true, ref);
+    assert.equal((await readFile(path.join(root, file), 'utf8')).match(/^\| B-001 /gm).length, 1);
+  }
+  git(root, 'switch', '-q', 'main');
+  assert.equal(git(root, 'show', `${base}:${file}`), seed.trim());
+
+  const held = mergeBegin(root, 'featB');
+  assert.equal(held.verdict, 'held');
+  assert.equal(held.clean, true);
+  assert.equal(held.mergeBase, base);
+  assert.deepEqual(held.conflicts.ledger, []);
+  assert.deepEqual(held.conflicts.other, []);
+  assert.equal(mergeHead(root), before.featB);
+  assert.equal(git(root, 'ls-files', '-u'), '');
+  // No write after begin: these duplicate bytes come solely from the real Git merge.
+  const merged = await readFile(path.join(root, file), 'utf8');
+  assert.doesNotMatch(merged, /^(?:<{7}|={7}|>{7}|\|{7})(?: |$)/m);
+  assert.equal(merged, backlog('B-001 | med | Planned | shared', ...anchors, 'B-001 | hi | Open | shared'));
+  const scanned = await mergeScan(root);
+  assert.equal(scanned.clean, false);
+  assert.equal(scanned.mergeBase, base);
+  assert.deepEqual(scanned.duplicates, [
+    { file, kind: 'row', id: 'B-001', count: 2, classification: 'present-at-base' },
+  ]);
+  assert.deepEqual(scanned.rows, [{ file, id: 'B-001', cells: [
+    { column: 'Pri', ours: 'med', theirs: 'hi', base: 'med', verdict: 'derived', value: 'hi', rule: 'one-side-unchanged' },
+    { column: 'Status', ours: 'Planned', theirs: 'Open', base: 'Open', verdict: 'derived', value: 'Planned', rule: 'one-side-unchanged' },
+  ] }]);
+  assert.equal(await readFile(path.join(root, file), 'utf8'), merged);
+
+  // /esq:worktree merge step 3: clean copies are collapsed by the attended caller, using the
+  // returned values. This does not teach seal new precedence or assume automatic reconciliation.
+  const columns = ['ID', 'Pri', 'Status', 'Summary'];
+  let retained = false;
+  const reconciled = merged.replace(/^\| B-001 .*\n/gm, (line) => {
+    if (retained) return '';
+    retained = true;
+    const values = line.trim().slice(1, -1).split('|').map((cell) => cell.trim());
+    for (const cell of scanned.rows[0].cells) {
+      assert.equal(cell.verdict, 'derived');
+      values[columns.indexOf(cell.column)] = cell.value;
+    }
+    return `| ${values.join(' | ')} |\n`;
+  });
+  await write(root, file, reconciled);
+  const rescanned = await mergeScan(root);
+  assert.equal(rescanned.clean, true);
+  assert.deepEqual(rescanned.duplicates, []);
+  assert.equal((await validate(root)).valid, true);
+  const sealed = await mergeSeal(root);
+  assert.equal(sealed.verdict, 'sealed');
+  assert.deepEqual(sealed.applied, []); // The attended caller already applied the reported cells.
+  assert.equal(await readFile(path.join(root, file), 'utf8'), backlog('B-001 | hi | Planned | shared', ...anchors));
+  assert.equal((await validate(root)).valid, true);
+  assert.equal(mergeHead(root), null);
+  assert.equal(git(root, 'status', '--porcelain'), '');
+  assert.equal(git(root, 'rev-parse', 'featB'), before.featB);
+  assert.equal(git(root, 'rev-parse', 'HEAD^1'), before.head);
+  assert.equal(git(root, 'rev-parse', 'HEAD^2'), before.featB);
+});
+
 test('scan classifies a duplicate absent at the base as a genuine collision', async () => {
   // Each side mints a *different* item under B-020, and a different decision under one slug. Neither
   // ID existed at the fork point: this is the case that must never seal.

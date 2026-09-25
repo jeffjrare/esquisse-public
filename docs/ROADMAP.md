@@ -19,12 +19,6 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 **acceptance:** A real selected case proceeds without an implementation-detail question, with evidence of correct behavior and design quality; guidance stays on demand and within a stated cost bound.
 **state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no tagged plans in this snapshot; domain defaults in standards Part 2 remain empty, C not implemented. No concrete specialist case selected yet; no generic role framework commissioned.
 
-### worktree-integrity
-**covers:** B-003, B-005
-**why now:** The user selected B-003 on 2026-09-24. Its retained-branch collision is reproduced and fixed locally. The remaining B-005 merge-path fixture is separate work; no broader merge correction was commissioned.
-**acceptance:** Scratch worktree removal preserves the unmerged branch without allowing duplicate IDs; the marker-free ancestor-present merge yields one correct row.
-**state:** <!-- GENERATED --> B-003 Done locally: retained local branch IDs prevent block reuse, with removal/reopening/allocation/merge regressions. B-005 Open: its marker-free ancestor-present fixture remains unproved. B-184 Done locally: merge sealing reconciles independent equal ranks while preserving IDs, priorities and stored ordering edits; incompatible placements require resolution. Its recorded real-Git regressions and 7/7 product audit do not establish B-005's separate acceptance.
-
 ### durable-ui-evidence
 **covers:** B-076
 **why now:** Preserve inspectable design evidence across sessions using existing log capabilities. Move this ahead of worktree work when the next selected feature is UI delivery; it is product quality, not a generic capture platform.
@@ -75,6 +69,7 @@ The remaining ranked backlog work has no committed implementation position: B-05
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-25 · worktree-integrity — B-003 and B-005 Done locally. B-003's retained-branch reservation proof is reused. B-005 now has a real marker-free Git merge producing an ancestor-present duplicate, followed by the documented attended reconciliation into one entry preserving both compatible edits. No runtime change; one 7/7 product audit, no paid model trial. Evidence: `docs/preparation/2026-09-25-b005-clean-merge.md`. No queue promotion or publication; other entries and historical evidence retained.
 - 2026-09-25 · b013-check-report — B-013 Done locally: one user outcome, gaps with evidence and the next action; acceptance precedence, missing proof, incomplete phases and genuine decisions retained. Two historical reports and directed instruction reading, including a brief clean handoff to review; no new native model trial. Five audit checks passed initially; only the two failed Node checks retried outside sandbox, both passed. Evidence: `docs/preparation/2026-09-25-b013-check-report.md`. No publication.
 - 2026-09-25 · spec-unresolved-answer — B-024 Done locally: explicit evidence/remaining-choice continuation, preserved unresolved rules and settled work, honest partial refresh. Real stale model-routing CLI observation plus directed instruction reading; no native model dialogue. Five audit checks passed initially; only two failed Node checks retried outside sandbox, both passed. Evidence: `docs/preparation/2026-09-25-b024-spec-continuation.md`. No queue promotion or publication.
 - 2026-09-24 · dependable-queue — B-129 and B-079 Done locally. Roadmap/status offer the discussed Now entry's scoped advance and preserve an explicit global walk. Targeted/global semantic reading and one 7/7 product audit; no native model journey. Evidence: `docs/preparation/2026-09-24-b079-scoped-handoff.md`.

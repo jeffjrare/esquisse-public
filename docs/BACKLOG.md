@@ -20,7 +20,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-002 | 2026-08-09 | 🐛 bug |  |  | spec.md's `Décisions liées: D-XXX` placeholder cites an ID format no longer allocated | build: prevent-ledger-id-collisions Phase 2 · Done inline |  |  | Done |
 | B-003 | 2026-08-09 | 🐛 bug | med? |  | Reproduce ID-block reuse when an unmerged branch survives removal of its worktree; prevent duplicate allocation. | build: prevent-ledger-id-collisions Phase 3 · Done by retained-branch-id-witnesses |  |  | Done |
 | B-004 | 2026-08-09 | 🐛 bug | med? |  | The citation-key invariant is replicated in 12 places but audit.sh check 10 guards only the 5 inside the id-allocation markers | build: prevent-ledger-id-collisions Phase 4 · Dropped: Retire literal citation-key parity guards; preserve ID integrity in B-003/B-005. |  |  | Dropped |
-| B-005 | 2026-08-10 | ⚠️ debt | med? | 900 | Cover the exact clean-auto-merge, ancestor-present ledger reconciliation path. | fix: prevent-ledger-id-collisions-fixes |  |  | Open |
+| B-005 | 2026-08-10 | ⚠️ debt | med? |  | Cover the exact clean-auto-merge, ancestor-present ledger reconciliation path. | fix: prevent-ledger-id-collisions-fixes · Done by b005-clean-merge-regression |  |  | Done |
 | B-006 | 2026-08-13 | 💡 idea | hi | 2200 | Parked Codex port; restart from current host needs and contracts when cross-host delivery is selected. | manual · Planned by harness-port-adapter-layer |  |  | Planned |
 | B-007 | 2026-08-13 | ✨ improvement | med? |  | Any command that runs >1min must announce its itinerary and bound, agents or not | manual · Planned by long-commands-announce-their-bound · Done by long-commands-announce-their-bound · detail in 39fec30 |  |  | Done |
 | B-008 | 2026-08-13 | ⚠️ debt | lo |  | Six commands conclude in their own shape, not the shared three-zone block — repriced 2026-08-16, only spec/arch earn it | plan: long-commands-announce-their-bound (cost pass) · Planned by three-zone-conclusion-spec-arch · detail in 39fec30 |  |  | Done |
@@ -293,6 +293,8 @@ detail sections that never overlap textually — then walk step 4 and confirm th
 branch reconciles into a single row and re-runs the four predicates clean. Deferred from the fix pass
 because building it is plan-shaped work, not a mechanical correction, and `/esq:fix` applies only what
 a brief sanctioned as safe.
+
+**Resolution:** 2026-09-25: Real-Git regression in tests/cli/merge.test.mjs proves a marker-free merge of two individually valid branches produces two copies of ancestor-present B-001. Scan classifies present-at-base and derives hi plus Planned; the documented attended caller collapses the copies using those values, rescans clean, validates and seals one entry with both edits and unchanged IDs/source history. No product defect reproduced; no runtime change or automatic-reconciliation claim. One audit bounded to 180 seconds passed 7/7 outside the already documented Node sandbox restriction; no extra Node suite or paid trial. Evidence: docs/preparation/2026-09-25-b005-clean-merge.md.
 
 ## B-006 — Port esquisse to other agentic harnesses via an install-time adapter layer
 
