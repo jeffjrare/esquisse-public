@@ -33,9 +33,9 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ### verification-commands
 **covers:** B-107, B-163
-**why now:** B-163 is delivered: lone document references remain unresolved and cannot silently complete a paused phase. B-107 remains the distinct command/criterion mismatch: land still forbids a substitution build can use.
+**why now:** B-163 addressed unresolved document references; B-107 addressed the distinct build/proof/land mismatch for unrunnable commands. Both outcomes retain criterion strictness.
 **acceptance:** B-163 has focused extraction/consumer regressions. For B-107, reproduce the current mismatch separately and preserve criterion strictness for unrunnable commands.
-**state:** <!-- GENERATED --> B-163 Done locally (one 7/7 product audit; `docs/preparation/2026-09-25-b163-auto-command.md`); B-107 Open. The entry stays here; no substitution-policy change or queue promotion.
+**state:** <!-- GENERATED --> B-163 and B-107 Done locally. B-107: current mismatch reproduced; prospective command repair in build, exact-command land unchanged; 3 focused tests passed, B-163/B-185 evidence reused, no new general audit (`docs/preparation/2026-09-25-b107-command-repair.md`). Entry retained in place; no queue promotion or publication.
 
 ## Later
 

@@ -158,7 +158,8 @@
 | D-a-precondition-is-read-not-re-run | 2026-09-02 | arch | safe-shipping | `/esq:worktree merge` states `esq merge begin`'s refusal verdicts and reads them, rather than re-checking the clean tree, the branch's existence and the self-merge by hand before calling it — the verb answers all three against the refs, and a hand pre-check buys three round trips per merge for an answer the next call already gives | Active |
 | D-a-collision-is-reported-before-a-question | 2026-09-02 | func | safe-shipping | `esq merge land` runs the duplicate-ID scan ahead of its `ask` check, so two items minted under one number are reported as a collision naming the ID rather than as a free-text question about the cells they happen to differ in | Active |
 | D-a-refused-landing-is-a-truthful-no-op | 2026-09-02 | prod | safe-shipping | Every way `/esq:converge` does not land is a no-op, never a failure: nothing is written, the source branch and every commit on it are untouched, and the run reports `○ not landed — <reason>` with the exact `/esq:worktree merge` line a human would run — a bare reason with no command is a defect, and a trunk-mode plan or an already-merged branch is reported as a no-op rather than as an error | Superseded |
-| D-an-unrunnable-auto-step-substitutes-once | 2026-09-02 | arch | verification | An `(auto)` step's referent is resolved by reading at plan time; build substitutes once on unambiguous prose and logs it, halts otherwise | Active |
+| D-an-unrunnable-auto-step-substitutes-once | 2026-09-02 | arch | verification | An `(auto)` step's referent is resolved by reading at plan time; build substitutes once on unambiguous prose and logs it, halts otherwise | Superseded |
+| D-repair-command-before-proof | 2026-09-25 | func | verification | Repair an unrunnable prospective command and prove its exact tree; land never substitutes | Active |
 | D-unknown-harness-evidence-is-treated-as-stale | 2026-09-02 | func | harness-evidence | Unreadable, missing, malformed or never-measured model-routing evidence is handled exactly as stale — a relay warns once on Opus and stops before its first spawn on anything else; evidence that does not govern model-routing is status-only in every state and never blocks a relay | Active |
 | D-a-capture-is-claimed-before-it-is-billed | 2026-09-02 | arch | harness-evidence | A billed capture's destination is claimed exclusively (`wx`) before the first spawn and appended to row by row through `capture-schema.mjs`'s own writer, so a collision refuses at zero billed runs, an interruption keeps every completed row, and no temp or sibling file is ever placed | Active |
 | D-the-current-measurement-is-a-cell-not-a-date | 2026-09-02 | arch | harness-evidence | `docs/EVIDENCE.md` is append-only and a claim's current measurement is the single row whose `State` cell is `current`, never the newest date or the last line; zero or two such rows is ambiguity and resolves to `unknown` | Active |
@@ -2867,7 +2868,9 @@ push would re-derive at full cost.
 **Scope:** arch
 **Topic:** verification
 **Date:** 2026-09-02
-**Statut:** Active
+**Statut:** Superseded
+
+**Superseded by:** D-repair-command-before-proof (2026-09-25). Plan-time reading remains; build's command substitution becomes a bounded prospective repair with fresh proof.
 
 **Contexte:** Three `(auto)` verification steps in one plan named commands that could not run as written — the scripts existed and were executable, and the defect was in the argument shape. The build agent recognised two of them, ran the check the step's prose described, and recorded the substitution in the execution log, correctly and under no license at all (B-106).
 **Décision:** The defect is caught where the plan is authored — `/esq:plan` resolves every `(auto)` command's referent **by reading** before writing the step, never by running it — and `/esq:build` keeps a licensed fallback as a **second** named exception to executing a step exactly as written: when the command cannot run and the step's own sentence names the artifact and the property being checked, it runs that check at the same or greater strictness and logs command-run / command-named / why; when the prose is ambiguous it halts as a failure.
@@ -5362,3 +5365,19 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Review pays two Git object reads per changed plan, plus a changed-path query. No new CLI verb, status, plan generation, mandatory model run or prose guard is introduced. A genuinely changed scope or failed same-cause correction is not promoted to safe to escape the bound.
 **Conséquences:** This replaces only the exhausted-exit option set of D-corrective-generations-bounded-at-two and the carriers described by D-one-shared-block-carries-the-corrective-refusal; their historical reasoning and the two-generation bound remain. Completed-plan abandonment remains refused. D-a-phase-buys-each-proof-once still prohibits rewriting obligations merely to obtain reuse.
 **Validation:** `tests/cli/corrective-exit.test.mjs` exercises completed depth-two units through correction, append-only proof, delta review and local merge, with both changed and unchanged command strings. A separate disposition case keeps a failing verification visible. These are real-Git deterministic scenarios, not live model journeys.
+
+
+## D-repair-command-before-proof — Repair the command before claiming its proof
+
+**Date:** 2026-09-25
+**Scope:** func
+**Topic:** verification
+**Statut:** Active
+**Fondement:** user — B-107 mandate of 2026-09-25: reproduce build/proof/land mismatch, make the smallest coherent correction without presupposing landing substitutions, preserve criterion, actual command, provenance and freshness.
+
+**Contexte:** The current CLI reproduction records a legitimate replacement PASS, then land's gate requests the missing original command. Evidence: docs/preparation/2026-09-25-b107-command-repair.md.
+**Décision:** Keep plan-time referent reading. Replace build's unrunnable-command substitution with a prospective correction under its existing three-repair/distinct-cause budget. Preserve the criterion, artifact/property, reads declarations, Branch/Origin, phase identity and historical proof. Record a dated amendment and the original/actual command, diagnosis, criterion and amendment commit in the execution evidence. Stage and capture the tree, run once, judge, commit only on PASS and attribute only to that tree. Land keeps exact commands and normal freshness; completed historical cases use check/review → fix with new proof.
+**Raison:** Fix the durable obligation at its authoring side instead of making land infer equivalence from prose. The current append-log, record-verification and gate contracts already carry the required evidence; no schema or runtime change is needed.
+**Tradeoff:** One bounded plan repair and its commit replace a substitution that leaves the next invocation blocked. Ambiguous intent, an unproved tree and red output cannot authorize proof. The unrelated phase-suite narrowing exception remains, including its existing exact-command landing behavior.
+**Conséquences:** Supersedes D-an-unrunnable-auto-step-substitutes-once while retaining plan-time reading. Historical PASS blocks stay untouched and cannot transfer to an amended obligation. The model judges intent and criteria; the CLI enforces identity and freshness, not truthful execution claims.
+**Alternatives rejetées:** Permit equivalent substitutions in land — broadens its mandate and adds semantic reuse rules. Reject every recoverable typo — leaves a known repair for another session. Rewrite old proof or normalize commands — loses execution identity or freshness.

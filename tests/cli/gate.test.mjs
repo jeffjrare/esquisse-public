@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -70,6 +70,115 @@ async function logPhase(root, file, phase, commands) {
 }
 
 const decisions = (report) => Object.fromEntries(report.commands.map((entry) => [entry.command, entry.decision]));
+
+const unrunnable = './scripts/missing-check src/report.txt';
+const reportCheck = 'grep -n "TODO" src/report.txt';
+const reportCriterion = 'src/report.txt contains no TODO';
+const reportStep = (command) => `(auto) \`${command}\` — ${reportCriterion}`;
+
+// The model owns the criterion judgment. This fixture has one explicit criterion: no TODO.
+// Exit 1 with empty output proves it; exit 0 with matches disproves it; errors prove nothing.
+function checkReport(root) {
+  const result = spawnSync('/bin/sh', ['-c', reportCheck], { cwd: root, encoding: 'utf8' });
+  return { exit: result.status, pass: result.status === 1 && result.stdout === '' && result.stderr === '' };
+}
+
+async function amendReport(file) {
+  const before = await readFile(file, 'utf8');
+  const [prospective, history] = before.split('## Execution log');
+  const amendment = `\nAmendment 2026-09-25: \`${unrunnable}\` is absent; use \`${reportCheck}\` to check the same artifact for absence of TODO.\n`;
+  await writeFile(file, prospective.replace(reportStep(unrunnable), reportStep(reportCheck)) + amendment + '## Execution log' + history);
+  assert.equal((await readFile(file, 'utf8')).split('## Execution log')[1], history);
+  assert.deepEqual(autoSteps(await readFile(file, 'utf8')).map(({ step }) => step), [reportStep(reportCheck)]);
+}
+
+test('B-107: build proves the corrected obligation on its committed tree; stale and red stay unproved', async (t) => {
+  const root = await repo();
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await writeFile(path.join(root, 'src/report.txt'), 'ready\n');
+  const file = await plan(root, [[reportStep(unrunnable)]]);
+  await amendReport(file);
+  git(root, 'add', file);
+  const tree = git(root, 'write-tree');
+  assert.deepEqual(checkReport(root), { exit: 1, pass: true });
+  const at = commit(root, 'fix(plan): correct the unrunnable command');
+  assert.equal(git(root, 'rev-parse', 'HEAD^{tree}'), tree);
+  assert.equal(git(root, 'status', '--porcelain'), '');
+  await appendLog(file, JSON.stringify({ phase: 1, status: 'completed', commits: [at], whatBuilt: 'report',
+    verification: [`Original: ${unrunnable}; actual: ${reportCheck}; criterion: ${reportCriterion}; missing script; amended at ${at}; no matches, PASS at exit 1`],
+    verified: { at, commands: [reportCheck] } }));
+  commit(root, 'plan: record actual verification');
+  const proof = parseVerified(await readFile(file, 'utf8')).get(1);
+  assert.equal(proof[0].at, at);
+  assert.deepEqual(proof[0].commands, [reportCheck]);
+  const fresh = await gateVerify(root, file, { unit: true });
+  assert.equal(fresh.commands[0].decision, 'reuse');
+  assert.equal(fresh.commands[0].verifiedAt, at);
+  assert.equal(fresh.commands[0].step, reportStep(reportCheck));
+
+  await writeFile(path.join(root, 'src/report.txt'), 'TODO\n');
+  commit(root, 'change: invalidate the proved artifact');
+  const stale = await gateVerify(root, file, { unit: true });
+  assert.equal(stale.commands[0].decision, 'run');
+  assert.match(stale.commands[0].reason, /src\/report.txt changed/);
+  assert.deepEqual(checkReport(root), { exit: 0, pass: false });
+  // A red is never submitted to either proof writer. The old block is history, not a PASS now.
+  assert.deepEqual(parseVerified(await readFile(file, 'utf8')).get(1), proof);
+  assert.equal((await gateVerify(root, file, { unit: true })).commands[0].decision, 'run');
+});
+
+test('B-107: a historical substitution cannot transfer PASS through a prospective amendment', async (t) => {
+  const root = await repo();
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await writeFile(path.join(root, 'src/report.txt'), 'ready\n');
+  const file = await plan(root, [[reportStep(unrunnable)]]);
+  // Historical data from the pre-change reproduction, not another execution of that check.
+  const oldAt = await logPhase(root, file, 1, [reportCheck]);
+  const before = await gateVerify(root, file, { unit: true });
+  assert.equal(before.commands[0].command, unrunnable);
+  assert.equal(before.commands[0].decision, 'run');
+  assert.match(before.commands[0].reason, /green list does not name/);
+  await amendReport(file);
+  git(root, 'add', file);
+  const tree = git(root, 'write-tree');
+  const history = (await readFile(file, 'utf8')).split('## Execution log')[1];
+  // This exercises fix's existing stage → tree → run → commit → record sequence.
+  assert.deepEqual(checkReport(root), { exit: 1, pass: true });
+  const at = commit(root, 'fix(plan): amend the historical obligation');
+  const amended = await gateVerify(root, file, { unit: true });
+  assert.equal(amended.commands[0].command, reportCheck);
+  assert.equal(amended.commands[0].decision, 'run');
+  assert.match(amended.commands[0].reason, /changed above its ## Execution log/);
+  const recorded = await recordVerification(root, file, JSON.stringify({ by: 'B-107 fixture', at, tree, step: reportStep(reportCheck) }));
+  assert.equal(recorded.refuse, false);
+  commit(root, 'plan: append new proof');
+  const text = await readFile(file, 'utf8');
+  assert.ok(text.split('## Execution log')[1].startsWith(history));
+  assert.deepEqual(parseVerified(text).get(1).map((block) => block.at), [oldAt, at]);
+  const fresh = await gateVerify(root, file, { unit: true });
+  assert.equal(fresh.commands[0].decision, 'reuse');
+  assert.equal(fresh.commands[0].verifiedAt, at);
+});
+
+test('B-107: an unjudged unrunnable obligation has no proof and cannot complete without one', async (t) => {
+  const root = await repo();
+  t.after(() => rm(root, { recursive: true, force: true }));
+  // Neither sentence supplies the artifact/property authority for an amendment. The CLI does
+  // not judge that ambiguity: it must keep the full obligation and refuse completion sans proof.
+  for (const [index, step] of [`(auto) \`${unrunnable}\``, `(auto) \`${unrunnable}\` — report is good`].entries()) {
+    const file = await plan(root, [[step]], `ambiguous-${index}.md`);
+    const before = await readFile(file, 'utf8');
+    const at = git(root, 'rev-parse', 'HEAD');
+    await assert.rejects(() => appendLog(file, JSON.stringify({ phase: 1, status: 'completed', commits: [at],
+      whatBuilt: 'report', verification: ['CAN\'T RUN: missing script; no unambiguous criterion'] })), /without its verified provenance/);
+    assert.equal(await readFile(file, 'utf8'), before);
+    const report = await gateVerify(root, file);
+    assert.equal(report.commands[0].step, step);
+    assert.equal(report.commands[0].decision, 'run');
+    assert.equal(report.commands[0].verifiedAt, null);
+    assert.equal(parseVerified(before).size, 0);
+  }
+});
 
 // The extraction contract, fixture by fixture. A command recovered from plan prose is the input to
 // a landing gate that decides what to re-run, so every shape the rule cannot resolve must come back

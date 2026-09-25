@@ -110,7 +110,8 @@ were removed on 2026-09-22 and are not to come back.
 - **Before changing what a skill reads or writes in `docs/`**, or the order in which `/esq:fix` stages, verifies and records,
   read `docs/ARCHITECTURE.md § docs/ — ledgers and projections` — one writer per file, with one recorded exception:
   `**Verified:**` is written by `/esq:build` *and* by `/esq:fix` through `esq plan record-verification`, so every reader returns
-  every block a phase records rather than its first. `/esq:fix` may also make a safe prospective plan correction above
+  every block a phase records rather than its first. `/esq:build` may repair an unrunnable prospective auto command under its
+  repair budget, preserving the criterion and historical proof (D-repair-command-before-proof). `/esq:fix` may also make a safe prospective plan correction above
   the execution log, preserving intent, branch/origin, phase identity and historical evidence (D-bounded-correction-exit-preserves-proof). A recording item's path is chosen **before** its verification runs — stage →
   `git write-tree` → one run → judge the criterion → commit the fix → record and commit the proof. `esq validate` blocks the stop
   on a ledger it cannot parse, and the Stop hook asks it only when the registry paths are actually dirty.

@@ -264,6 +264,8 @@ Nothing pushes or publishes a release.
 A remaining limitation: if verification succeeds but the merge is refused, the
 next landing attempt may run that verification again.
 
+Build can repair an unrunnable verification command when the step unambiguously states its artifact and criterion. It preserves that criterion, records the amendment and proves the corrected command; land does not substitute commands or transfer old proofs.
+
 ### Manual verification and interrupted work
 
 A manual step needs an observation of the stated behavior, not a rewritten test
