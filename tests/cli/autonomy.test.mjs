@@ -7,7 +7,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { addRow, branchCheck, idBlock, reserveBlock, reserveId, setStatus, state } from '../../plugin/lib/cli.mjs';
+import { addRow, branchCheck, idBlock, mergeBegin, mergeScan, mergeSeal, reserveBlock, reserveId, setStatus, state } from '../../plugin/lib/cli.mjs';
 
 // What lets esq run without babysitting, proved on real git in throwaway repositories: a linked
 // worktree reserves its own ID block under one lock, a backlog disposition carries its provenance in
@@ -97,6 +97,83 @@ test('concurrent reservations in sibling worktrees produce distinct blocks', asy
   assert.deepEqual([...lows].sort((x, y) => x - y), [1000, 2000, 3000, 4000, 5000, 6000]);
   for (const tree of trees) assert.match(await readFile(path.join(tree, '.esq-id-block'), 'utf8'), /^id-block: \d+-\d+\n$/);
   await assert.rejects(readFile(path.join(root, '.git/esq-id-block.lock'), 'utf8'), /ENOENT/);
+});
+
+test('B-003: removing a worktree preserves its committed IDs through allocation and both merges', async (t) => {
+  const root = await repo();
+  const script = fileURLToPath(new URL('../../scripts/worktree.sh', import.meta.url));
+  const trees = `${root}.worktrees`;
+  t.after(async () => {
+    await rm(root, { recursive: true, force: true });
+    await rm(trees, { recursive: true, force: true });
+  });
+  const manage = (...args) => run('/bin/bash', [script, ...args], { cwd: root });
+  await manage('new', 'retained');
+  const retained = path.join(trees, 'retained');
+  const first = await addRow(retained, path.join(retained, 'docs/BACKLOG.md'), { type: 'bug', summary: 'retained work', source: 'manual' });
+  assert.equal(first.id, 'B-1000');
+  commit(retained, 'retained item');
+  const retainedHead = git(retained, 'rev-parse', 'HEAD');
+  await manage('rm', 'retained');
+  assert.equal(existsSync(retained), false);
+  assert.equal(git(root, 'rev-parse', 'refs/heads/retained'), retainedHead);
+  assert.throws(() => git(root, 'merge-base', '--is-ancestor', 'retained', 'main'));
+
+  await manage('new', 'next');
+  const next = path.join(trees, 'next');
+  const second = await addRow(next, path.join(next, 'docs/BACKLOG.md'), { type: 'bug', summary: 'different work', source: 'manual' });
+  assert.equal(second.id, 'B-2000');
+  commit(next, 'next item');
+  // Reopening the retained branch must also leave its old citations alone.
+  await manage('new', 'retained');
+  assert.equal((await reserveId(retained, path.join(retained, 'docs/BACKLOG.md'))).id, 'B-3000');
+  assert.equal(git(retained, 'rev-parse', 'HEAD'), retainedHead);
+
+  for (const branch of ['next', 'retained']) {
+    assert.equal(mergeBegin(root, branch).refuse, false);
+    assert.deepEqual((await mergeScan(root)).duplicates, []);
+    const sealed = await mergeSeal(root);
+    assert.equal(sealed.verdict, 'sealed', JSON.stringify(sealed));
+  }
+  const ledger = await readFile(path.join(root, 'docs/BACKLOG.md'), 'utf8');
+  for (const id of [first.id, second.id]) assert.equal(ledger.split('\n').filter((line) => line.startsWith(`| ${id} |`)).length, 1);
+  assert.match(ledger, /retained work/);
+  assert.match(ledger, /different work/);
+  // Independent captures can still merge with equal Rank cells (B-184). This regression proves
+  // ID integrity, not full ledger validity; it neither rewrites ranks nor masks them with closure.
+});
+
+test('a removed reservation with no committed ID is reusable, and a branch without a backlog is harmless', async (t) => {
+  const root = await repo();
+  const unused = worktree(root, 'unused');
+  const next = path.join(path.dirname(root), `${path.basename(root)}-next`);
+  t.after(async () => {
+    for (const directory of [root, unused, next]) await rm(directory, { recursive: true, force: true });
+  });
+  assert.equal((await reserveBlock(unused)).low, 1000);
+  git(unused, 'rm', 'docs/BACKLOG.md');
+  commit(unused, 'branch without backlog');
+  git(root, 'worktree', 'remove', unused);
+  worktree(root, 'next');
+  assert.equal((await reserveBlock(next)).low, 1000);
+});
+
+test('an unreadable retained backlog refuses allocation and releases the lock without writing a marker', async (t) => {
+  const root = await repo();
+  const retained = worktree(root, 'retained');
+  const next = path.join(path.dirname(root), `${path.basename(root)}-next`);
+  t.after(async () => {
+    for (const directory of [root, retained, next]) await rm(directory, { recursive: true, force: true });
+  });
+  await addRow(retained, path.join(retained, 'docs/BACKLOG.md'), { type: 'bug', summary: 'retained work', source: 'manual' });
+  commit(retained, 'retained item');
+  const blob = git(retained, 'rev-parse', 'HEAD:docs/BACKLOG.md');
+  git(root, 'worktree', 'remove', retained);
+  worktree(root, 'next');
+  await rm(path.join(root, '.git/objects', blob.slice(0, 2), blob.slice(2)));
+  await assert.rejects(reserveBlock(next), /cat-file/);
+  assert.equal(existsSync(path.join(next, '.esq-id-block')), false);
+  assert.equal(existsSync(path.join(root, '.git/esq-id-block.lock')), false);
 });
 
 test('a sibling worktree created and allocated while a reservation waits on the lock is never omitted', async () => {

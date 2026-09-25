@@ -18,7 +18,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | ---- | ------ | ------ | ----- | --- | --------- | -------- | ------ | --------- | -------- |
 | B-001 | 2026-07-08 | ✨ improvement | lo? | 2300 | Parked Sheets integration; revisit only when the product need is selected and connector capability is revalidated. | plan: backlog-publish-google-sheet Phase 2 |  |  | Open |
 | B-002 | 2026-08-09 | 🐛 bug |  |  | spec.md's `Décisions liées: D-XXX` placeholder cites an ID format no longer allocated | build: prevent-ledger-id-collisions Phase 2 · Done inline |  |  | Done |
-| B-003 | 2026-08-09 | 🐛 bug | med? | 800 | Reproduce ID-block reuse when an unmerged branch survives removal of its worktree; prevent duplicate allocation. | build: prevent-ledger-id-collisions Phase 3 |  |  | Open |
+| B-003 | 2026-08-09 | 🐛 bug | med? |  | Reproduce ID-block reuse when an unmerged branch survives removal of its worktree; prevent duplicate allocation. | build: prevent-ledger-id-collisions Phase 3 · Done by retained-branch-id-witnesses |  |  | Done |
 | B-004 | 2026-08-09 | 🐛 bug | med? |  | The citation-key invariant is replicated in 12 places but audit.sh check 10 guards only the 5 inside the id-allocation markers | build: prevent-ledger-id-collisions Phase 4 · Dropped: Retire literal citation-key parity guards; preserve ID integrity in B-003/B-005. |  |  | Dropped |
 | B-005 | 2026-08-10 | ⚠️ debt | med? | 900 | Cover the exact clean-auto-merge, ancestor-present ledger reconciliation path. | fix: prevent-ledger-id-collisions-fixes |  |  | Open |
 | B-006 | 2026-08-13 | 💡 idea | hi | 2200 | Parked Codex port; restart from current host needs and contracts when cross-host delivery is selected. | manual · Planned by harness-port-adapter-layer |  |  | Planned |
@@ -200,14 +200,31 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-181 | 2026-09-25 | ✨ improvement | hi | 3100 | Carry the user outcome through feature framing, UX defaults and architecture tradeoffs without an unnecessary re-grill. | observed: grill-plan preparation review 2026-09-24 |  |  | Open |
 | B-182 | 2026-09-25 | ✨ improvement | hi | 3200 | Keep preparation focused on real outcomes and relevant decisions, with conditional guidance and concise output. | observed: adversarial preparation review 2026-09-24 |  |  | Open |
 | B-183 | 2026-09-25 | ✨ improvement | hi? |  | Correct architecture authority and reporting instructions; remove the planner alternative quota. | observed: adversarial preparation and architecture review 2026-09-24 · Done by architecture-preparation-review |  |  | Done |
+| B-184 | 2026-09-25 | 🐛 bug | med? | 3300 | Reconcile duplicate tail ranks when independently captured backlog rows merge. | observed: B-003 retained-branch regression; independent rows both carry Rank 100 |  |  | Open |
 
 ---
 
 <!-- Detail sections below. Required for ⚠️ debt and Needs-decision items; optional otherwise. -->
 
+## B-184 — Independent captures can merge with duplicate tail ranks
+
+**Observed (2026-09-24):** The B-003 scratch regression creates two independent
+backlog rows through `addRow`, each starting from an empty backlog. They receive
+distinct IDs (`B-1000`, `B-2000`) but both carry Rank 100. Both merges seal through
+the existing engine; `validate` then reports `duplicate backlog rank 100: B-2000
+and B-1000`. ID preservation succeeds; whole-ledger validity does not.
+
+**Scope:** Reconcile ranks of different incoming rows without changing permanent
+IDs, priority or intentional ordering. This interaction predates the B-003 scan:
+tail allocation and merge code are unchanged. It is outside retained-branch ID
+reservation and outside B-005's ancestor-present duplicate-ID scenario.
+
+**Evidence:** [B-003 implementation record](preparation/2026-09-24-b003-retained-branch.md).
+No correction or product-order decision is claimed here.
+
 ## B-003 — A freed ID block can be re-handed-out while an unmerged branch still holds its IDs
 
-**Current scope (2026-09-24):** plugin/lib/cli.mjs reservation sees live worktrees and main backlog witnesses, not retained branch contents. Keep Open until a scratch-repo reproduction and allocation/merge regression prove the intended behavior.
+**Delivered scope (2026-09-24):** Reproduced on the current runtime, then fixed in the existing locked allocator. Local branch backlog blobs now witness occupied blocks after worktree removal. Allocation, reopening and both merges preserve the original IDs. See the resolution and linked evidence below; duplicate Rank cells are separately recorded in B-184.
 
 **What:** Block reservation picks the lowest index held by no live worktree and witnessed by no
 `B-NNN` in the *main* tree's `docs/BACKLOG.md`. `/esq:worktree rm` deliberately preserves an unmerged
@@ -220,9 +237,11 @@ normal use (`rm` a worktree you're not done with, create another). Phase 4's mer
 loudly rather than renumbering, so nothing is silently corrupted — but the reservation is supposed to
 make the abort unreachable.
 
-**Notes:** The likely fix is a third clause in the witness scan: also count IDs on branches that exist
+**Historical proposal:** The likely fix was a third clause in the witness scan: also count IDs on branches that exist
 but are not merged into the default branch (`git for-each-ref` + `git show <branch>:docs/BACKLOG.md`).
 That is a heavier scan on every create, which is why it wasn't folded into Phase 3 unasked.
+
+**Resolution:** 2026-09-24: Reproduced duplicate B-1000 through actual worktree.sh removal with a retained unmerged branch. The existing locked allocator now counts distinct backlog blobs at local branch tips. Real-Git regressions preserve B-1000/B-2000 through both merges, reserve a fresh block on reopening, reuse an unused block, and refuse unreadable objects without leaving a marker or lock. Final audit: 7/7 PASS. Rank reconciliation is separately recorded as B-184; B-005 remains Open. See docs/preparation/2026-09-24-b003-retained-branch.md. Local only; no publication.
 
 ## B-004 — The citation-key invariant can drift between its unguarded copies
 

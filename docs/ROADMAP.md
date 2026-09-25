@@ -27,9 +27,9 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ### worktree-integrity
 **covers:** B-003, B-005
-**why now:** Then address the retained-branch ID collision and its precise merge-path coverage. The allocator still lacks a retained-branch witness, but this pass has not reproduced the collision, so its impact must be checked against actual worktree use before widening the scan.
+**why now:** The user selected B-003 on 2026-09-24. Its retained-branch collision is reproduced and fixed locally. The remaining B-005 merge-path fixture is separate work; no broader merge correction was commissioned.
 **acceptance:** Scratch worktree removal preserves the unmerged branch without allowing duplicate IDs; the marker-free ancestor-present merge yields one correct row.
-**state:** <!-- GENERATED --> Both Open; related merge tests exist, exact combined fixture remains unproved.
+**state:** <!-- GENERATED --> B-003 Done locally: retained local branch IDs prevent block reuse, with removal/reopening/allocation/merge regressions. B-005 Open: its marker-free ancestor-present fixture remains unproved. A distinct duplicate-tail-rank finding is recorded as B-184, Open; full merge-ledger validity is not claimed.
 
 ### durable-ui-evidence
 **covers:** B-076

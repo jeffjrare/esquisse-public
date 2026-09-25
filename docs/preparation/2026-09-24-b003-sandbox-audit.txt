@@ -1,0 +1,75 @@
+
+Structure — every reference resolves
+  ✓ structure clean — section references, 21 commands, README coverage, every references/ path and every brief section resolve
+
+Package — the plugin and its skills validate
+  ✓ plugin, embedded CLI, native hooks and 21 skills validate
+
+No push — nothing in the shipped plugin runs or spells one
+  ✓ 44 file(s) read; nothing in the shipped plugin runs or spells a push
+
+Conformance — the formats the code parses are intact
+  ✓ 4 behavioral scenarios, 7 observable clauses present
+
+Version — the two manifests agree
+  ✓ release pending — both manifests read 0.3.41 and 6 file(s) changed since the ea37a9e bump that released it; ./scripts/update.sh publishes them
+
+Bounded runner — a hang is a named red line, not a silent pass
+  ✗   ✗ the failing test's name did not survive the 45 passing lines printed after it. Got:
+  ✗       late-failure-case failed (exit 1)
+  ✗             not ok 1 - /tmp/tmp.YJLTdlPGFY/tests/late.test.mjs
+  ✗               ---
+  ✗               location: '/tmp/tmp.YJLTdlPGFY/tests/late.test.mjs:1:1'
+  ✗               failureType: 'testCodeFailure'
+  ✗               exitCode: 1
+  ✗               signal: ~
+  ✗               error: 'test failed'
+  ✗               code: 'ERR_TEST_FAILURE'
+  ✗               ...
+  ✗             # tests 1
+  ✗             # pass 0
+  ✗             # fail 1
+  ✗             # cancelled 0
+  ✗             # skipped 0
+  ✗             # todo 0
+  ✗ 1 failure(s) — the bounded runner is not doing its job.
+
+Product suites — CLI, hooks and corpus helper (bounded 120 s)
+  ✗ the product suites failed (exit 1)
+  ✗       not ok 2 - tests/cli/apply.test.mjs
+  ✗         ---
+  ✗         location: '/home/jeffgirard/projects/esquisse-public-ready/tests/cli/apply.test.mjs:1:1'
+  ✗         failureType: 'testCodeFailure'
+  ✗         exitCode: 1
+  ✗         signal: ~
+  ✗         error: 'test failed'
+  ✗         code: 'ERR_TEST_FAILURE'
+  ✗         ...
+  ✗       not ok 3 - tests/cli/autonomy.test.mjs
+  ✗         ---
+  ✗         location: '/home/jeffgirard/projects/esquisse-public-ready/tests/cli/autonomy.test.mjs:1:1'
+  ✗         failureType: 'testCodeFailure'
+  ✗         exitCode: 1
+  ✗         signal: ~
+  ✗         error: 'test failed'
+  ✗         code: 'ERR_TEST_FAILURE'
+  ✗         ...
+  ✗       not ok 4 - tests/cli/backlog-rank-lifecycle.test.mjs
+  ✗         ---
+  ✗         location: '/home/jeffgirard/projects/esquisse-public-ready/tests/cli/backlog-rank-lifecycle.test.mjs:1:1'
+  ✗         failureType: 'testCodeFailure'
+  ✗         exitCode: 1
+  ✗         signal: ~
+  ✗         error: 'test failed'
+  ✗         code: 'ERR_TEST_FAILURE'
+  ✗         ...
+  ✗       … 10 more failing test(s) in the captured output, not shown (13 failed in all)
+  ✗       # tests 16
+  ✗       # pass 3
+  ✗       # fail 12
+  ✗       # cancelled 1
+  ✗       # skipped 0
+  ✗       # todo 0
+
+Summary
+  2 of 7 checks failed (product).

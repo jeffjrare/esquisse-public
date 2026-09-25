@@ -367,6 +367,9 @@ export async function reserveBlock(directory) {
     const inventory = worktreeLayout(layout.top);
     if (!inventory?.linked) throw new Error(`${layout.top} is no longer a linked worktree of this repository — no ID block was reserved`);
     const taken = new Set([0]);
+    const witness = (text) => {
+      for (const match of text.matchAll(/\bB-(\d+)\b/g)) taken.add(Math.floor(Number(match[1]) / ID_BLOCK_SIZE));
+    };
     for (const tree of inventory.worktrees) {
       let marker = null;
       try { marker = await readIdBlock(tree); } catch { marker = null; }
@@ -376,8 +379,23 @@ export async function reserveBlock(directory) {
     // stops a worktree branched from a stale base from re-minting an ID that already shipped.
     try {
       const text = await readFile(path.join(inventory.main, 'docs/BACKLOG.md'), 'utf8');
-      for (const match of text.matchAll(/\bB-(\d+)\b/g)) taken.add(Math.floor(Number(match[1]) / ID_BLOCK_SIZE));
+      witness(text);
     } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    // Removing a worktree removes its marker, not its committed IDs. Local branch tips are durable
+    // witnesses too, whether or not git considers them merged (main's checkout can be on another
+    // branch). Pin object IDs and read each distinct backlog blob once; no history walk or registry.
+    // ls-tree distinguishes an absent backlog from an unreadable object: only absence is harmless.
+    const tips = new Set(git(inventory.top, ['for-each-ref', '--format=%(objectname)', 'refs/heads/']).split('\n').filter(Boolean));
+    const blobs = new Set();
+    for (const tip of tips) {
+      const entry = git(inventory.top, ['ls-tree', tip, '--', 'docs/BACKLOG.md']);
+      if (!entry) continue;
+      const blob = /^\d+ blob ([0-9a-f]+)\t/.exec(entry)?.[1];
+      if (!blob) throw new Error(`docs/BACKLOG.md at ${tip} is not a blob — no ID block was reserved`);
+      if (blobs.has(blob)) continue;
+      blobs.add(blob);
+      witness(git(inventory.top, ['cat-file', 'blob', blob]));
+    }
     let index = 1;
     while (taken.has(index)) index += 1;
     const low = index * ID_BLOCK_SIZE;

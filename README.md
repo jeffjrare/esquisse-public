@@ -318,6 +318,9 @@ Use separate Git worktrees for independent sessions:
 Open the reported directory in another terminal. Each tree has its own working
 files and a reserved backlog ID block. IDs are permanent; neither allocation nor
 merge renumbers existing citations.
+Removing a worktree keeps any block witnessed by backlog IDs on a retained local
+branch unavailable to new worktrees. Reopening that branch reserves a fresh block
+for new items; existing IDs stay unchanged. An unused block can be reused.
 
 For an attended merge, run `/esq:worktree merge feature-b` from the intended
 destination checkout, or name the destination with `into <branch>`. Planned units
