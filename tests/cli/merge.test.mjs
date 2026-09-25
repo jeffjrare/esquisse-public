@@ -7,7 +7,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { derive, mergeAbort, mergeBegin, mergeLand, mergeScan, mergeSeal } from '../../plugin/lib/cli.mjs';
+import { derive, mergeAbort, mergeBegin, mergeLand, mergeScan, mergeSeal, state, validate } from '../../plugin/lib/cli.mjs';
 
 // Real git, in throwaway repositories, for the reason `ship.test.mjs` gives: these verbs are claims
 // about git's own state — whether MERGE_HEAD is alive, what `merge-base` says, what an abort restores
@@ -595,6 +595,86 @@ test('seal over the binary: exit 0 when it commits, 1 on every refusal, 2 on usa
 // safety claim, so it is never assumed from the first.
 
 const PLAN = 'docs/plans/2026-09-04-unit.md';
+
+const rankedBacklog = (...rows) => '| ID | Date | Type | Pri | Rank | Summary | Source | Epic | Version | Status |\n'
+  + '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n'
+  + rows.map(([id, rank, pri = 'med?']) => `| ${id} | 2026-09-24 | bug | ${pri} | ${rank} | work ${id} | manual | | | Open |\n`).join('');
+const storedOrder = async (root) => (await state(root)).backlog.rows
+  .sort((a, b) => Number(a.rank) - Number(b.rank)).map(({ id, rank, pri }) => [id, rank, pri]);
+
+test('B-184: collision repair preserves deliberate sequences, not ID or priority order', async (t) => {
+  const root = await forked({
+    seed: { 'docs/BACKLOG.md': rankedBacklog(), [PLAN]: planFile('featB', 'main') },
+    onMain: { 'docs/BACKLOG.md': rankedBacklog(['B-090', 100, 'lo'], ['B-010', 200, 'hi']) },
+    onBranch: { 'docs/BACKLOG.md': rankedBacklog(['B-080', 100, 'lo?'], ['B-020', 200, 'hi?']) },
+  });
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const source = git(root, 'rev-parse', 'featB');
+  const landed = await mergeLand(root, PLAN);
+  assert.equal(landed.verdict, 'landed', JSON.stringify(landed));
+  assert.deepEqual(await storedOrder(root), [
+    ['B-090', '100', 'lo'], ['B-080', '200', 'lo?'],
+    ['B-010', '300', 'hi'], ['B-020', '400', 'hi?'],
+  ]);
+  assert.equal((await validate(root)).valid, true);
+  assert.equal(git(root, 'rev-parse', 'featB'), source);
+  assert.ok(landed.applied.some((row) => row.cells.some((cell) => cell.rule === 'rank-collision')));
+});
+
+test('B-184: a marker-free Git merge also repairs distinct rows with equal tail ranks', async (t) => {
+  const seed = Array.from({ length: 8 }, (_, index) => [`B-00${index + 1}`, (index + 1) * 100]);
+  const root = await forked({
+    seed: { 'docs/BACKLOG.md': rankedBacklog(...seed) },
+    onMain: { 'docs/BACKLOG.md': rankedBacklog(seed[0], ['B-010', 900], ...seed.slice(1)) },
+    onBranch: { 'docs/BACKLOG.md': rankedBacklog(...seed, ['B-020', 900]) },
+  });
+  t.after(() => rm(root, { recursive: true, force: true }));
+  assert.equal(mergeBegin(root, 'featB').clean, true);
+  assert.equal((await mergeSeal(root)).verdict, 'sealed');
+  assert.deepEqual((await storedOrder(root)).slice(-2), [['B-010', '900', 'med?'], ['B-020', '1000', 'med?']]);
+  assert.equal((await validate(root)).valid, true);
+});
+
+test('B-184: opposing deliberate moves ask, abort unattended, and accept an attended resolution', async (t) => {
+  const ledger = (middle) => rankedBacklog(['B-001', 100], ['B-002', middle], ['B-003', 300]);
+  const root = await forked({
+    seed: { 'docs/BACKLOG.md': ledger(200), [PLAN]: planFile('featB', 'main') },
+    onMain: { 'docs/BACKLOG.md': ledger(50) },
+    onBranch: { 'docs/BACKLOG.md': ledger(400) },
+  });
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const before = snapshot(root);
+  const refused = await mergeLand(root, PLAN);
+  assert.equal(refused.verdict, 'ask');
+  assert.equal(refused.asks[0].column, 'Rank');
+  assert.deepEqual(snapshot(root), before);
+  assert.equal(mergeHead(root), null);
+
+  mergeBegin(root, 'featB');
+  const conflicted = await readFile(path.join(root, 'docs/BACKLOG.md'), 'utf8');
+  assert.equal((await mergeSeal(root)).verdict, 'markers');
+  assert.equal(await readFile(path.join(root, 'docs/BACKLOG.md'), 'utf8'), conflicted);
+  await write(root, 'docs/BACKLOG.md', ledger(400));
+  assert.equal((await mergeSeal(root)).verdict, 'sealed');
+  assert.deepEqual((await storedOrder(root)).map(([id]) => id), ['B-001', 'B-003', 'B-002']);
+});
+
+test('B-184: a collision cannot erase an incoming placement relative to a moved anchor', async (t) => {
+  const root = await forked({
+    seed: { 'docs/BACKLOG.md': rankedBacklog(['B-001', 100]) },
+    onMain: { 'docs/BACKLOG.md': rankedBacklog(['B-001', 300], ['B-010', 200]) },
+    onBranch: { 'docs/BACKLOG.md': rankedBacklog(['B-001', 100], ['B-020', 200]) },
+  });
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const before = snapshot(root);
+  mergeBegin(root, 'featB');
+  const refused = await mergeSeal(root);
+  assert.equal(refused.verdict, 'ask');
+  assert.match(refused.reason, /B-001 before B-020/);
+  assert.equal(git(root, 'rev-parse', 'HEAD'), before.head);
+  assert.equal(mergeAbort(root).verdict, 'aborted');
+  assert.deepEqual(snapshot(root), before);
+});
 
 // A plan header, written verbatim so a test can commit fields that are not refs at all. `null` omits
 // the line entirely — which is how a legacy plan (no `**Origin:**`) is spelled.

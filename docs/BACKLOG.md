@@ -200,7 +200,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-181 | 2026-09-25 | ✨ improvement | hi | 3100 | Carry the user outcome through feature framing, UX defaults and architecture tradeoffs without an unnecessary re-grill. | observed: grill-plan preparation review 2026-09-24 |  |  | Open |
 | B-182 | 2026-09-25 | ✨ improvement | hi | 3200 | Keep preparation focused on real outcomes and relevant decisions, with conditional guidance and concise output. | observed: adversarial preparation review 2026-09-24 |  |  | Open |
 | B-183 | 2026-09-25 | ✨ improvement | hi? |  | Correct architecture authority and reporting instructions; remove the planner alternative quota. | observed: adversarial preparation and architecture review 2026-09-24 · Done by architecture-preparation-review |  |  | Done |
-| B-184 | 2026-09-25 | 🐛 bug | med? | 3300 | Reconcile duplicate tail ranks when independently captured backlog rows merge. | observed: B-003 retained-branch regression; independent rows both carry Rank 100 |  |  | Open |
+| B-184 | 2026-09-25 | 🐛 bug | med? |  | Reconcile duplicate tail ranks when independently captured backlog rows merge. | observed: B-003 retained-branch regression; independent rows both carry Rank 100 · Done by merge-rank-collisions |  |  | Done |
 
 ---
 
@@ -220,7 +220,11 @@ tail allocation and merge code are unchanged. It is outside retained-branch ID
 reservation and outside B-005's ancestor-present duplicate-ID scenario.
 
 **Evidence:** [B-003 implementation record](preparation/2026-09-24-b003-retained-branch.md).
-No correction or product-order decision is claimed here.
+At capture, no correction or product-order decision was claimed. The local
+correction and its verification are recorded in the resolution below and the
+[B-184 implementation record](preparation/2026-09-24-b184-merge-ranks.md).
+
+**Resolution:** 2026-09-24: Merge sealing reconciles independent equal ranks while preserving IDs, priorities and stored ordering edits; incompatible placements and divergent edits to the same Rank require resolution. B-003 now validates after both merges; four additional real-Git regressions cover deliberate order, marker-free collisions and refusal/abort/resolution. One native ./scripts/audit.sh passed 7/7 product checks. See docs/preparation/2026-09-24-b184-merge-ranks.md. Local only; no push or publication.
 
 ## B-003 — A freed ID block can be re-handed-out while an unmerged branch still holds its IDs
 

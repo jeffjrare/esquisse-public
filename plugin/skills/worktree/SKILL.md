@@ -109,7 +109,7 @@ Follow the CLI's verdict; do not reimplement its precedence:
 - Equal values, a side unchanged from base, and blank versus non-blank can be derived before any ladder.
 - Remaining Status follows Open → Needs-decision → Planned → Done; Dropped has no progress position.
 - Remaining Pri follows lo? < lo < med? < med < hi? < hi.
-- Remaining Rank takes the destination's number under rank-projection; the merged order needs later re-projection.
+- Remaining Rank asks for the intended order when both sides changed the same cell; never silently prefer the destination.
 - Divergent free text (including Summary/Source), decision Statut, Dropped disagreements and off-ladder values can require ask. Do not invent a rule for them.
 
 Batch every actual ask into **one exchange**, including conflicted detail sections: show both values side by side; use AskUserQuestion when available or numbered plain text. Detail choices are ours/theirs/both in order. Never guess an answer or abort merely over a cell disagreement.
@@ -122,10 +122,11 @@ For present-at-base duplicates **outside conflict hunks**, collapse the copies y
 
 ### 4. Seal or hand off the held merge
 
-Call `esq merge seal`. It scans collisions before writing, applies remaining derived ledger hunks, then checks markers before staging/committing as `merge: <name> into <dest>`. **A markers refusal may already have written derived ledger cells**; report applied rather than claiming every refusal is byte-identical.
+Call `esq merge seal`. It scans ID collisions before writing, applies remaining derived ledger hunks, checks markers, then reconciles equal backlog ranks before staging/committing as `merge: <name> into <dest>`. Independent rank ties are numbered uniquely, destination first at a tie, preserving stored order and priorities. **A refusal may already have written derived ledger cells**; report applied rather than claiming every refusal is byte-identical.
 
 - collision → report as above, then abort.
 - markers → no commit; non-ledger markers remain for the user. Ledger markers mean an unanswered ask/detail hunk: resolve it through the existing question rules, never invent values.
+- ask → rank repair cannot preserve a placement or a side already carries duplicate ranks; keep the merge held, settle the intended sequence, then record it through `esq backlog rank` before sealing again.
 - no-merge → nothing held; report rather than manufacturing a merge.
 - refused → relay reason and actual state. Git staging/commit failures are not proof that nothing was staged; inspect state before reporting.
 

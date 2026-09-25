@@ -7,7 +7,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { addRow, branchCheck, idBlock, mergeBegin, mergeScan, mergeSeal, reserveBlock, reserveId, setStatus, state } from '../../plugin/lib/cli.mjs';
+import { addRow, branchCheck, idBlock, mergeBegin, mergeScan, mergeSeal, reserveBlock, reserveId, setStatus, state, validate } from '../../plugin/lib/cli.mjs';
 
 // What lets esq run without babysitting, proved on real git in throwaway repositories: a linked
 // worktree reserves its own ID block under one lock, a backlog disposition carries its provenance in
@@ -139,8 +139,10 @@ test('B-003: removing a worktree preserves its committed IDs through allocation 
   for (const id of [first.id, second.id]) assert.equal(ledger.split('\n').filter((line) => line.startsWith(`| ${id} |`)).length, 1);
   assert.match(ledger, /retained work/);
   assert.match(ledger, /different work/);
-  // Independent captures can still merge with equal Rank cells (B-184). This regression proves
-  // ID integrity, not full ledger validity; it neither rewrites ranks nor masks them with closure.
+  // B-184: both captures began at Rank 100; the second seal repairs that mechanical collision.
+  assert.deepEqual((await state(root)).backlog.rows.map(({ id, rank, pri }) => [id, rank, pri]),
+    [['B-2000', '100', 'med?'], ['B-1000', '200', 'med?']]);
+  assert.equal((await validate(root)).valid, true);
 });
 
 test('a removed reservation with no committed ID is reusable, and a branch without a backlog is harmless', async (t) => {

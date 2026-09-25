@@ -2281,11 +2281,10 @@ test('addRow derives a suggested priority from the type when the caller states n
   assert.equal((await addRow(root, file, { type: '💡 idea', summary: 'x', source: 'manual', pri: 'hi?' })).row[3], 'hi?');
 });
 
-test('derive settles a divergent Rank as a projection instead of asking', async () => {
-  // Two branches that each re-ranked have not disagreed about anything a person could answer.
+test('derive preserves a one-sided Rank edit and asks when both sides chose different positions', async () => {
   assert.deepEqual(derive('100', '200', '100', 'Rank'), { value: '200', rule: 'one-side-unchanged' });
-  assert.deepEqual(derive('100', '200', '50', 'Rank'), { value: '100', rule: 'rank-projection', rerank: true });
-  assert.deepEqual(derive('100', '200', null, 'Rank'), { value: '100', rule: 'rank-projection', rerank: true });
+  assert.match(derive('100', '200', '50', 'Rank').ask, /intended order/);
+  assert.match(derive('100', '200', null, 'Rank').ask, /intended order/);
   // The same two values in any other column are still the question they always were.
   assert.equal(derive('100', '200', null, 'Summary').value, undefined);
   assert.equal(typeof derive('100', '200', null, 'Summary').ask, 'string');

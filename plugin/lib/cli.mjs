@@ -3871,13 +3871,9 @@ export function derive(ours, theirs, base, column = null) {
   if (ourValue === '') return { value: theirValue, rule: 'blank-loses-to-non-blank' };
   if (theirValue === '') return { value: ourValue, rule: 'blank-loses-to-non-blank' };
 
-  // Rank is the one cell that is not an opinion about the item: it is a projection of the row's
-  // priority and the roadmap's edges, so two branches that each re-ranked have not disagreed about
-  // anything a person could answer — they have both regenerated the same projection from different
-  // inputs. Asking per row would put fifty questions to whoever merges two re-ranked ledgers. The
-  // destination's number stands, and the re-rank the merged priorities now imply is owed to
-  // `esq backlog rank`, which is the only writer either side had.
-  if (column === RANK_COLUMN) return { value: ourValue, rule: 'rank-projection', rerank: true };
+  // A rank encodes a chosen position. Different numbers alone cannot prove that two edits meant
+  // the same order; keeping ours used to discard the incoming intention silently.
+  if (column === RANK_COLUMN) return { ask: 'both sides changed Rank — resolve the intended order' };
 
   for (const [name, ladder, offLadder] of [['status', STATUS_LADDER, STATUS_OFF_LADDER], ['pri', PRI_LADDER, []]]) {
     const ourRank = ladder.indexOf(ourValue);
@@ -4248,8 +4244,74 @@ async function mergedBranchName(repository) {
 // a guard people learn to bypass.
 const CONFLICT_MARKER = /^(<{7} |>{7} )/m;
 
-// Commit the held merge. Every check runs before the first write, so a refusal is a no-op: nothing is
-// staged, nothing is committed, and the merge stays held for the caller to resolve or abort.
+// Equal numbers on different rows are not an ordering decision. Keep the stored sequence, break
+// cross-branch ties destination-first, and renumber only when needed. Before writing, prove that
+// this preserves each side's additions/ordering edits relative to the base. An incompatible
+// placement is a question, never a priority/ID sort or an invitation to silently append it.
+async function reconcileMergeRanks(repository, mergeBase) {
+  const file = 'docs/BACKLOG.md';
+  const absolute = path.join(repository, file);
+  let text;
+  try { text = await readText(absolute); }
+  catch (error) { if (error.code === 'ENOENT') return { applied: [] }; throw error; }
+  const table = parseLedgerTable(text);
+  if (!table?.columns.includes(RANK_COLUMN)) return { applied: [] };
+  const ranked = (ledger) => [...(ledger?.rows.values() ?? [])]
+    .filter((row) => /^\d+$/.test(row.Rank ?? ''));
+  const rows = ranked(table);
+  if (new Set(rows.map((row) => Number(row.Rank))).size === rows.length) return { applied: [] };
+  if ([...table.rows.values()].some((row) => row.Rank
+    && (!/^\d+$/.test(row.Rank) || !Number.isSafeInteger(Number(row.Rank))))) {
+    return { ask: 'invalid Rank in the merged backlog — resolve it before reconciling collisions' };
+  }
+
+  const ours = parseLedgerTable(gitOut(repository, ['show', `HEAD:${file}`]));
+  const theirs = parseLedgerTable(gitOut(repository, ['show', `MERGE_HEAD:${file}`]));
+  const base = mergeBase ? parseLedgerTable(gitOut(repository, ['show', `${mergeBase}:${file}`])) : null;
+  const key = table.columns[0];
+  rows.sort((a, b) => Number(a.Rank) - Number(b.Rank)
+    || Number(ours?.rows.has(b[key]) ?? false) - Number(ours?.rows.has(a[key]) ?? false));
+  const positions = new Map(rows.map((row, index) => [row[key], index]));
+  for (const side of [ours, theirs]) {
+    const sequence = ranked(side).filter((row) => positions.has(row[key]))
+      .sort((a, b) => Number(a.Rank) - Number(b.Rank));
+    if (new Set(sequence.map((row) => Number(row.Rank))).size !== sequence.length) {
+      return { ask: 'duplicate Rank already exists on a merge side — resolve its order first' };
+    }
+    for (let i = 0; i < sequence.length; i += 1) {
+      for (let j = i + 1; j < sequence.length; j += 1) {
+        const before = sequence[i][key];
+        const after = sequence[j][key];
+        if (positions.get(before) < positions.get(after)) continue;
+        const baseBefore = base?.rows.get(before)?.Rank;
+        const baseAfter = base?.rows.get(after)?.Rank;
+        // An unchanged relation may yield to the other side's deliberate move. A new or changed
+        // relation may not: numbers from separate branches are insufficient authority to lose it.
+        if (/^\d+$/.test(baseBefore ?? '') && /^\d+$/.test(baseAfter ?? '')
+          && Number(baseBefore) < Number(baseAfter)) continue;
+        return { ask: `Rank reconciliation would reverse ${before} before ${after} — resolve the intended order` };
+      }
+    }
+  }
+  const ranks = new Map(rows.map((row, index) => [row[key], (index + 1) * RANK_STEP]));
+  const rankIndex = table.columns.indexOf(RANK_COLUMN);
+  const lines = text.split('\n');
+  const assignments = [];
+  const applied = [];
+  for (let line = 0; line < lines.length; line += 1) {
+    if (!/^\s*\|/.test(lines[line])) continue;
+    const row = splitRow(lines[line]);
+    const rank = ranks.get(row[0]);
+    if (rank === undefined || row[rankIndex] === String(rank)) continue;
+    assignments.push({ entry: { row, rankIndex, line }, rank });
+    applied.push({ file, id: row[0], cells: [{ column: RANK_COLUMN, value: String(rank), rule: 'rank-collision' }] });
+  }
+  await writeRanks(absolute, lines, assignments);
+  return { applied };
+}
+
+// Commit the held merge. Derived rows may be written before a refusal, but nothing is staged or
+// committed until every check passes; the merge stays held for the caller to resolve or abort.
 //
 // Two refusals are the point of the verb. A duplicate ID still classified `absent-at-base` is two
 // items minted under one number, and sealing it would publish the collision; a surviving conflict
@@ -4302,6 +4364,10 @@ export async function mergeSeal(root) {
   if (marked.length > 0) {
     return refuse(`conflict markers survive in ${marked.join(', ')} — resolve them or run \`esq merge abort\``, 'markers', carrying);
   }
+
+  const ranks = await reconcileMergeRanks(repository, scanned.mergeBase);
+  if (ranks.ask) return refuse(ranks.ask, 'ask', carrying);
+  applied.push(...ranks.applied);
 
   const adding = gitRun(repository, ['add', '-A']);
   if (adding.status !== 0) return refuse(adding.stderr || 'git could not stage the merge result', 'refused', carrying);
