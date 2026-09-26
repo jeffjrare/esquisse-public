@@ -1837,7 +1837,7 @@ async function epicState(repository, lookup) {
         if (!inBacklog) continue;
         const match = line.match(/^- (B-\d+)\b(.*)$/);
         if (!match) continue;
-        const projected = match[2].match(/^ — .+ — ([^—]+)$/)?.[1] ?? null;
+        const projected = match[2].match(/^ — .+ — ([^—]+)$/)?.[1]?.trim() ?? null;
         const projectedStatus = STATUSES.has(projected) ? projected : null;
         const live = lookup(match[1]);
         rows.push({ ...live, projected: line, projectedStatus,
@@ -4265,11 +4265,13 @@ async function reconcileMergeRanks(repository, mergeBase) {
   catch (error) { if (error.code === 'ENOENT') return { applied: [] }; throw error; }
   const table = parseLedgerTable(text);
   if (!table?.columns.includes(RANK_COLUMN)) return { applied: [] };
+  // Only open rows hold a position: a closed row's legacy rank is left as it is, never counted,
+  // renumbered or allowed to block the merge.
   const ranked = (ledger) => [...(ledger?.rows.values() ?? [])]
-    .filter((row) => /^\d+$/.test(row.Rank ?? ''));
+    .filter((row) => ROW_STATUSES.has(row.Status) && /^\d+$/.test(row.Rank ?? ''));
   const rows = ranked(table);
   if (new Set(rows.map((row) => Number(row.Rank))).size === rows.length) return { applied: [] };
-  if ([...table.rows.values()].some((row) => row.Rank
+  if ([...table.rows.values()].some((row) => row.Rank && ROW_STATUSES.has(row.Status)
     && (!/^\d+$/.test(row.Rank) || !Number.isSafeInteger(Number(row.Rank))))) {
     return { ask: 'invalid Rank in the merged backlog — resolve it before reconciling collisions' };
   }
@@ -4307,7 +4309,9 @@ async function reconcileMergeRanks(repository, mergeBase) {
   const lines = text.split('\n');
   const assignments = [];
   const applied = [];
-  for (let line = 0; line < lines.length; line += 1) {
+  // Rows of the ledger table only: a table in a detail section citing an ID is prose, not a row.
+  const bounds = tableAt(lines, key);
+  for (let line = bounds ? bounds.start + 2 : 0; line < (bounds ? bounds.end : 0); line += 1) {
     if (!/^\s*\|/.test(lines[line])) continue;
     const row = splitRow(lines[line]);
     const rank = ranks.get(row[0]);
@@ -4749,7 +4753,7 @@ export async function validate(root) {
       if (rankColumn < 0) continue;
       const rank = (row[rankColumn] ?? '').trim();
       if (rank !== '' && !/^\d+$/.test(rank)) findings.push(`invalid backlog rank for ${id}: ${rank}`);
-      else if (rank !== '') {
+      else if (rank !== '' && ROW_STATUSES.has(row[statusColumn])) {
         const owner = ranks.get(rank);
         if (owner !== undefined) findings.push(`duplicate backlog rank ${rank}: ${owner} and ${id}`);
         else ranks.set(rank, id);

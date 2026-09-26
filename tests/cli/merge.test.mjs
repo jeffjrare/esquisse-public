@@ -1076,3 +1076,21 @@ test('land takes its destination from the plan, not from HEAD and not from a rep
     await rm(root, { recursive: true, force: true });
   }
 });
+
+// A closed row's rank is meaningless once closure clears it; a legacy closed row still carrying one
+// must neither block the merge nor be renumbered by it, and validate must not count it either.
+test('B-184: a legacy rank on a closed row neither blocks collision repair nor gets renumbered', async (t) => {
+  const closed = '| B-050 | 2026-09-01 | bug | med? | 200 | old work | manual | | | Done |\n';
+  const root = await forked({
+    seed: { 'docs/BACKLOG.md': rankedBacklog(['B-001', 100]) + closed },
+    onMain: { 'docs/BACKLOG.md': rankedBacklog(['B-001', 100], ['B-010', 200]) + closed },
+    onBranch: { 'docs/BACKLOG.md': rankedBacklog(['B-001', 100], ['B-020', 200]) + closed },
+  });
+  t.after(() => rm(root, { recursive: true, force: true }));
+  mergeBegin(root, 'featB');
+  const sealed = await mergeSeal(root);
+  assert.equal(sealed.verdict, 'sealed', JSON.stringify(sealed));
+  assert.match(await readFile(path.join(root, 'docs/BACKLOG.md'), 'utf8'), /\| B-050 \|.*\| 200 \|.*\| Done \|/);
+  assert.deepEqual((await storedOrder(root)).filter(([id]) => id !== 'B-050').map(([id]) => id), ['B-001', 'B-010', 'B-020']);
+  assert.equal((await validate(root)).valid, true);
+});
