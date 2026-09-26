@@ -269,6 +269,11 @@ from the plan itself and checks the destination checkout again before writing.
 Conflicts needing judgment are handed back with an attended recovery action.
 Nothing pushes or publishes a release.
 
+When the feature needs more than the merge to reach users — a migration, an environment
+variable, a restart, a flag — the plan's `## Rollout` section and any step a build phase
+recorded are listed in the landing report, in order, under **To reach users**. esq shows
+them; it never runs them.
+
 A remaining limitation: if verification succeeds but the merge is refused, the
 next landing attempt may run that verification again.
 

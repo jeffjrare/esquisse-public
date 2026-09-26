@@ -852,6 +852,7 @@ export const LOG_ENTRY_SCHEMA = [
   { key: 'verification', type: 'stringArray', label: 'non-empty array of non-empty strings', completed: 'required', paused: 'required', note: 'on paused these are the (auto) results' },
   { key: 'manualOutstanding', type: 'stringArray', label: 'non-empty array of non-empty strings', completed: 'refused', paused: 'optional', note: 'a paused entry carries this, blockedBy, or both — never neither' },
   { key: 'blockedBy', type: 'stringArray', label: 'non-empty array of non-empty strings', completed: 'refused', paused: 'optional', note: 'the same-unit backlog rows that stopped the phase, as `esq branch check` names them' },
+  { key: 'rollout', type: 'stringArray', label: 'non-empty array of non-empty strings', completed: 'optional', paused: 'optional', note: 'steps beyond the merge this phase made necessary for users to get the result, which the plan\'s ## Rollout does not list; esq branch check collects them for /esq:land' },
   { key: 'surprises', type: 'string', label: 'non-empty string', completed: 'optional', paused: 'optional' },
   { key: 'backlogCandidates', type: 'string', label: 'non-empty string', completed: 'optional', paused: 'optional' },
   { key: 'forNextPhase', type: 'string', label: 'non-empty string', completed: 'optional', paused: 'refused', note: 'a paused entry writes no hand-off note' },
@@ -1030,6 +1031,7 @@ function renderLogEntry(entry) {
     if (entry.blockedBy) lines.push('', '**Blocked by:**', ...entry.blockedBy.map((item) => `- ${item}`));
     if (entry.manualOutstanding) lines.push('', '**Manual verification outstanding:**', ...entry.manualOutstanding.map((item) => `- ${item}`));
   }
+  if (entry.rollout) lines.push('', '**Rollout:**', ...entry.rollout.map((item) => `- ${item}`));
   if (entry.surprises) lines.push('', `**Surprises / decisions made during execution:** ${entry.surprises}`);
   if (entry.backlogCandidates) lines.push('', `**Backlog candidates:** ${entry.backlogCandidates}`);
   if (entry.forNextPhase) lines.push('', `**For Phase ${phase + 1}:** ${entry.forNextPhase}`);
@@ -1917,7 +1919,7 @@ export async function state(root) {
         origin,
         landed: unitLanded(repository, recorded, origin, settled.file),
         coverage: unitCoverage(repository, unitHeaders(headers, recorded), header.text),
-        unit: { incomplete: unit.incomplete, abandoned: unit.abandoned, open: unit.open, promised: unit.promised, findings: unit.findings },
+        unit: { incomplete: unit.incomplete, abandoned: unit.abandoned, open: unit.open, promised: unit.promised, findings: unit.findings, rollout: unit.rollout },
       };
     }
   }
@@ -2288,7 +2290,7 @@ function planStanding(text) {
 // the list is the same whichever unit plan the caller was handed. `abandoned` is the recorded way out,
 // and it retracts only unbuilt phases: `promised` and `findings` still count the abandoned plan.
 async function shippingUnit(repository, branch, headers) {
-  const unit = { branch: branch ?? null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [] };
+  const unit = { branch: branch ?? null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [] };
   if (!unit.branch) return unit;
   const slugs = new Set();
   for (const header of headers) {
@@ -2301,6 +2303,7 @@ async function shippingUnit(repository, branch, headers) {
     const standing = planStanding(header.text);
     if (standing.abandoned) unit.abandoned.push({ plan: header.relative, ...standing.abandoned });
     else if (standing.state !== 'complete') unit.incomplete.push({ plan: header.relative, state: standing.state, phase: standing.phase });
+    if (!standing.abandoned) unit.rollout.push(...planRollout(header.text).map((step) => ({ plan: header.relative, ...step })));
   }
   unit.findings = await unitFindings(repository, slugs);
   let parsed;
@@ -2326,6 +2329,28 @@ async function shippingUnit(repository, branch, headers) {
   return unit;
 }
 
+// What the unit needs beyond the merge for users to get the result, as its plans wrote it: the bullets
+// of a plan's own `## Rollout` section (above `## Execution log`), then each log entry's `**Rollout:**`
+// list, tagged with its phase. Extraction only — which step matters, and when, is the plan's word.
+function planRollout(text) {
+  const steps = [];
+  const lines = text.split('\n');
+  const log = lines.findIndex((line) => line.trim() === '## Execution log');
+  let collecting = null;
+  let phase = null;
+  lines.forEach((line, index) => {
+    const inLog = log >= 0 && index > log;
+    const heading = /^### Phase (\d+)\b/.exec(line);
+    if (heading && inLog) phase = Number(heading[1]);
+    if (/^#{1,3} /.test(line) || (inLog && /^\*\*[^*]+:\*\*/.test(line))) collecting = null;
+    if (!inLog && /^## Rollout\s*$/.test(line)) { collecting = 'plan'; return; }
+    if (inLog && line.trim() === '**Rollout:**') { collecting = `Phase ${phase ?? '?'}`; return; }
+    const bullet = /^- (.+)$/.exec(line);
+    if (collecting && bullet) steps.push({ source: collecting, step: bullet[1].trim() });
+  });
+  return steps;
+}
+
 // What a caller that is about to write a `completed` execution-log entry needs, derived from the plan
 // file's own path rather than from git: a plan lives at `<root>/docs/plans/<name>.md`, so its root is
 // two directories up from the one holding it. `appendLog` has no repository argument and must not
@@ -2336,7 +2361,7 @@ async function unitForPlan(planPath, planText = null) {
   let text = planText;
   if (text === null) {
     try { text = await readText(file); }
-    catch { return { branch: null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [] }; }
+    catch { return { branch: null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [] }; }
   }
   return shippingUnit(repository, parseBranch(text), await planHeaders(repository));
 }

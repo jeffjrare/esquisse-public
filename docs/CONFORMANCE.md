@@ -28,6 +28,7 @@ not keep a list of what was removed.
 | `## Execution log` | `parsePlan` finds the log span by it; `esq plan append-log` appends under it |
 | `**Branch:**` | `headerField`, then `esq branch check` (the shipping unit) and `esq merge land` (the source ref) |
 | `**Origin:**` | `esq merge land` — the landing **destination**. A plan missing it is refused rather than repaired, so losing the line from the template loses every landing. |
+| `## Rollout` | `esq branch check` collects its bullets into `unit.rollout`, which `/esq:land` shows after the merge. Renamed in the template, every deployment step silently disappears from the landing report. |
 
 **The token, not the sentence around it.** A placeholder explaining which branch belongs in the field
 is prose: reword it freely. What may not change is the field marker the parser matches.

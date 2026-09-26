@@ -122,6 +122,7 @@ need() {
 # there — is prose, and freezing it would make a correct rewording a finding.
 need P-02 plan '## Execution log' 'the `## Execution log` heading `parsePlan` finds the log span by, and `plan append-log` appends under'
 need P-02 plan '**Branch:**' 'the `**Branch:**` header field `headerField` reads, and `esq branch check` and `esq merge land` take the shipping unit and the merge source from'
+need P-02 plan '## Rollout' 'the `## Rollout` section heading `esq branch check` collects `unit.rollout` from, which `/esq:land` shows after the merge'
 need P-02 plan '**Origin:**' 'the `**Origin:**` header field `esq merge land` takes the landing destination from — a plan missing it is refused rather than repaired'
 
 # --- `/esq:build` writes the execution-log entry the classifier reads --------

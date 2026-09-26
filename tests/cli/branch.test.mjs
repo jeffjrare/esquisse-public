@@ -6,7 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { branchCheck, branchResolve } from '../../plugin/lib/cli.mjs';
+import { appendLog, branchCheck, branchResolve } from '../../plugin/lib/cli.mjs';
 
 // Real git, in throwaway repositories: the verdict is a claim about git's own state, and a stub
 // would prove only that the stub agrees with itself. No network, no remote, no model run.
@@ -519,10 +519,36 @@ test('a plan recording no Branch belongs to no unit, and a missing backlog block
   await backlog(root, [['B-201', '🐛 bug', 'build: orphan Phase 1', 'Open']]);
   const verdict = await branchCheck(root, orphan);
   assert.equal(verdict.verdict, 'unrecorded');
-  assert.deepEqual(verdict.unit, { branch: null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [] });
+  assert.deepEqual(verdict.unit, { branch: null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [] });
 
   // A unit whose repository has no docs/BACKLOG.md at all: nothing to read is nothing to block on.
   const bare = await repo({ branches: ['esq/stem'], checkout: 'esq/stem' });
   const file = await plan(bare, 'p.md', { branch: 'esq/stem', origin: 'main' });
   assert.deepEqual((await branchCheck(bare, file)).unit.open, []);
+});
+
+// A unit's rollout is what its plans wrote about reaching users beyond the merge: the plan's own
+// `## Rollout` bullets, then each log entry's `**Rollout:**` list, in order and tagged with their
+// source — extraction only, and nothing from another unit or an abandoned plan.
+test('branch check collects the unit rollout from plan sections and execution-log entries', async () => {
+  const root = await repo({ branches: ['esq/feat'], checkout: 'esq/feat' });
+  const file = path.join(root, 'docs/plans/2026-09-26-feat.md');
+  await writeFile(file, [
+    '# Feat', '', '**Branch:** esq/feat', '**Origin:** main', '',
+    '## Rollout', '<!-- only when the merge is not enough -->', '- Run `pnpm db:migrate` before restarting the API', '- Set `EXPORT_BUCKET` in production', '',
+    '## Phases', '', '### Phase 1 — one', '- **Tasks:**', '  - Task 1.1: a task', '', '## Execution log', '<!-- Appended by /esq:build -->', '',
+  ].join('\n'));
+  await appendLog(file, JSON.stringify({
+    phase: 1, status: 'completed', commits: ['abc1234'], whatBuilt: 'a thing', verification: ['(manual) looked — fine'],
+    rollout: ['Restart the worker so it picks up the new queue'], surprises: 'None.',
+  }));
+  assert.match(await readFile(file, 'utf8'), /\*\*Rollout:\*\*\n- Restart the worker so it picks up the new queue/);
+  await plan(root, '2026-09-26-other.md', { branch: 'esq/other', origin: 'main', body: '\n## Rollout\n- Not this unit\n' });
+
+  const verdict = await branchCheck(root, path.relative(root, file));
+  assert.deepEqual(verdict.unit.rollout, [
+    { plan: 'docs/plans/2026-09-26-feat.md', source: 'plan', step: 'Run `pnpm db:migrate` before restarting the API' },
+    { plan: 'docs/plans/2026-09-26-feat.md', source: 'plan', step: 'Set `EXPORT_BUCKET` in production' },
+    { plan: 'docs/plans/2026-09-26-feat.md', source: 'Phase 1', step: 'Restart the worker so it picks up the new queue' },
+  ]);
 });

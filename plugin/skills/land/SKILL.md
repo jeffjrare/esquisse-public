@@ -118,6 +118,7 @@ Always include:
 - **Landing:** `✔ landed <commit> <branch> → <destination>`, `✔ already landed <branch> → <origin>`, or `○ not landed <reason> <remedy>`. For site.verdict worktree, name the directory where the merge happened.
 - **Closures, if any:** IDs, delivery evidence and bookkeeping commit, including on a later refusal.
 - **Verification whenever the gate ran:** `<n> commands run, <m> reused across <p> plans (proved on <short hash>)`; show `0 reused`, not an omitted clause. Use returned proof hashes; do not invent a shared proof if they differ.
+- **Rollout, whenever `unit.rollout` is non-empty:** under `To reach users`, each step verbatim in order with its source (`<plan> · plan` or `<plan> · Phase N`). These happen after the merge and outside esq; never run them, never count them as NEEDS YOU. On a landed unit, `→ Next` names the first step.
 - **Every non-fresh projection:** `○ advisory <name> <verdict> — <owner>`, arch before spec. Include even when landing stops; never count advice as NEEDS YOU, make it Next, or run its owner.
 - Passed prerequisites and measured elapsed, even on early stop.
 

@@ -253,6 +253,8 @@ Otherwise load none of it; steps 1–5 still run exactly as written. A branch yo
 
 **Backlog candidates:** Things outside the *unit* you noticed but deliberately did NOT do (see "A defect against this unit is not a backlog candidate" above). One line each with a type guess (🐛/✨/☑️/💡), or "None." (the common case). Each names a failure — something that breaks, for someone, under some input; polish is not a candidate.
 
+**Rollout:** <only when this phase made a step beyond the merge necessary — a migration, env var, config, restart, backfill, flag — that the plan's `## Rollout` does not list: payload `rollout`, one imperative line each. `/esq:land` shows them after the merge. Omit otherwise.>
+
 **For Phase N+1:** Hand-off note. Three things max:
 1. What's wired up that the next phase will rely on (files, deps, config)
 2. Decisions that diverge from the plan that the next phase should know

@@ -215,6 +215,13 @@ shipped feature. Keep the promised outcome intact when splitting the work.
 
 [continue for all phases. Single-phase plans are fine — say so plainly.]
 
+## Rollout
+<!-- Only when merging is not enough for users to get the result; omit the section otherwise.
+One imperative line per step, in order: a migration to run, an env var or secret to set,
+config, a restart, a backfill, a flag to flip, an install, a third-party setup.
+`/esq:land` shows these lines verbatim after the merge. -->
+- <step>
+
 ## Risks
 What could go wrong specifically with THIS plan. Not generic risk theater. What you'd watch for during execution.
 Lead with the pre-mortem: the likeliest reason a person does not use this once shipped, and the task that answers it.
@@ -266,8 +273,9 @@ Read the written plan once and correct these yourself:
 2. Keep acceptance, scope, phases and risks consistent. A measurement only possible
    after shipping belongs among the outstanding observations, not a promised green
    from code completion. Preserve the user's actual acceptance condition.
-3. Name widened public schemas/data, existing consumers and any install/restart/release
-   needed for the result to reach users; do not silently promise activation.
+3. Name widened public schemas/data and existing consumers; put any install, migration,
+   config, restart or release the result needs to reach users in `## Rollout`; do not
+   silently promise activation.
 4. Try to falsify the recommendation with a legitimate existing case from the inspected
    code or data, not just the defect it fixes. Trace the proposed rule through both;
    correct it if it rejects valid behavior or changes the meaning of a source field.
