@@ -85,7 +85,7 @@ loads none of this reference.
 
 ## Investigation
 
-Read the codebase to understand context. Use `view`, `grep`, `glob`, follow imports. Read tests and types where relevant. Read git history if the change interacts with recent work.
+Read the codebase to understand context: follow imports, read tests and types where relevant, and git history if the change interacts with recent work. **Investigate in waves.** Each turn sends every lookup you already know you need — the files the task names, their tests and types, the callers you can search for — as parallel calls or one chained command, and a `grep -n` is chained with the `sed -n` slice it leads to. The next wave carries only what the last one revealed; one lookup per turn is the cost to avoid.
 
 Investigate proportionally. A small bug fix needs 2-3 files. A refactor needs the touched module plus boundaries. A feature might span more. Don't read everything; read what informs the plan.
 
