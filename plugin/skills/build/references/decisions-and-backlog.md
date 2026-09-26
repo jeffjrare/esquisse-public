@@ -38,7 +38,7 @@ A detail section is a heading and prose (`What` / `Why it matters` / `Notes`) �
 
 After the execution-log commit — step 6 of `/esq:build`'s "Append to execution log" — scan the **"Surprises / decisions made during execution"** list you just wrote.
 
-**What qualifies as a decision:** any item where you chose between alternatives — a deliberate call that could have gone differently. A pure surprise (something unexpected with no real choice involved) does NOT qualify.
+**What qualifies as a registry decision:** a deliberate choice between alternatives that later work could break or re-litigate it without knowing — a contract or data shape others read, a pattern the codebase will repeat, a trust boundary, a product or business rule, a dependency. A local implementation call — a helper's name, a loop's shape, a fixture — does NOT qualify: the execution log's Surprises already record it, and a registry entry would cost a search, about 600 output tokens and a commit to say it again. A pure surprise with no real choice does not qualify either. Most phases record none.
 
 **If there are qualifying decisions:**
 

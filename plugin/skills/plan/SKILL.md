@@ -104,7 +104,7 @@ If your recommendation depends on a choice the ask-altitude block below marks **
 Anything else, make the call and note the reasoning in the plan.
 
 <!-- ask-altitude:start -->
-**Resolve questions from the repo, then outside research, before asking the user.** Read the mandate, code, approved plan and Active decisions. Engineering and UI choices within those goals and budget are yours: decide and record them in `docs/DECISIONS.md`.
+**Resolve questions from the repo, then outside research, before asking the user.** Read the mandate, code, approved plan and Active decisions. Engineering and UI choices within those goals and budget are yours: decide them in the plan, and add one to `docs/DECISIONS.md` only per *Write decisions to registry*.
 
 Ask only for a named, unrecorded preference or authorization affecting product outcome, scope, a major architecture commitment, a stated constraint, or consequential cost/risk. Multiple viable approaches, uncertainty, UX/architecture subject matter or an absent authorizing decision do not alone justify asking. Failures and missing evidence require diagnosis, not a choice between causes. A prior decision authorizes only what its cited basis covers; an entry without one is context.
 
@@ -308,8 +308,9 @@ tool is unavailable, ask in plain text and wait for the answer; never infer appr
 
 ## Write decisions to registry
 
-Only significant choices belong in `docs/DECISIONS.md`: a recommendation between real
-alternatives or a resolved user decision. If there is no such choice, skip this step.
+Only significant choices belong in `docs/DECISIONS.md`: a resolved user decision, or a
+recommendation between real alternatives that later work could break or re-litigate it without knowing — a contract or data shape others read, a pattern the codebase will repeat, a trust boundary, a product or business rule, a dependency. The plan itself
+records every other choice. If there is no such choice, skip this step.
 Otherwise load `${CLAUDE_SKILL_DIR}/references/decisions.md` for the record format.
 Search only relevant existing decisions; never turn feature planning into a historical
 registry migration.
