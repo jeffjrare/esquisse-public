@@ -389,7 +389,7 @@ Compute `→ Next`:
 - An unclassifiable pick paused or its repair failed → `paused by your choice — nothing to run now (resume later: /esq:converge <brief-path>)`, a failed repair named first, never the original.
 - 🟡 remain → `/esq:plan <brief-path>` · run `/clear` first.
 - Nothing remains and the clean bar stopped the completion → the command that clears it: `/esq:backlog` for a `unit.open` row still standing. The loop ran clean and the branch is not ready; those are two facts, and the second one is the next step.
-- Nothing remains and the completion is recorded → `/esq:land <plan-path>`. No spec or arch refresh is owed first: `/esq:land` reports a stale projection as advice, never a stop, so zone 3 names none as required and this run runs neither.
+- Nothing remains and the completion is recorded → `/clear`, then `/esq:land <plan-path>`. No spec or arch refresh is owed first: `/esq:land` reports a stale projection as advice, never a stop, so zone 3 names none as required and this run runs neither.
 - Nothing remains and the plan records no `**Origin:**` — a legacy plan, which never lands → `"Loop clean — legacy plan, nothing to land."`
 
 The **last line of your entire response** is that `→ Next`, copy-pasteable with its concrete path, and nothing after it.
