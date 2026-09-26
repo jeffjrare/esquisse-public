@@ -67,23 +67,19 @@ Follow the review's next action: fix mechanical findings, plan substantive work,
 or settle a decision that needs your authority. Once the unit is ready:
 
 ```text
+/clear
 /esq:land docs/plans/<date>-invoice-export.md
 ```
 
-For uncertain scope, run `/esq:grill <idea>` first and pass its brief to `plan`.
-Grill proposes a useful outcome from the user's present friction; plan carries it
-through UX choices, architecture tradeoffs and a first usable delivery. Ordinary
-design omissions are resolved during planning, within the accepted constraints.
-Plans keep relevant decisions and verification, without migrating unrelated historical
-registry entries. Corrective procedures and decision-record formats load only when needed.
-One viable approach is enough; alternatives must improve the outcome within the constraints.
-Architecture refreshes use applicable decisions and report changes with short reasons and links.
-For an unfamiliar codebase, `/esq:status` or the `harvest`, `spec` and `arch`
-commands can help on demand; none is a mandatory setup sequence. In `spec`,
-« Je ne sais pas — montre-moi où » shows the documented rule, observed behavior
-and user consequence, then asks only the missing choice. Unresolved rules remain
-unchanged; settled edits survive without certifying a complete refresh. A tiny edit
-that needs no workflow record can use ordinary Claude Code.
+For uncertain scope, run `/esq:grill <idea>` first. It turns a vague idea into a
+brief — who the user is, what friction goes away, what is in and out of scope — and
+`plan` picks it up. For a new product with no UI yet, grill suggests
+`/esq:ui --greenfield` to put two rendered directions on screen before any code.
+
+On an unfamiliar codebase, `/esq:status` orients you, and `harvest`, `spec` and
+`arch` build the decision registry, product spec and architecture map on demand;
+none is a required setup step. A tiny edit that needs no record can use ordinary
+Claude Code.
 
 ### Small changes without a plan
 
@@ -113,6 +109,10 @@ verification state, and enforcing merge boundaries. Its runtime has four pieces:
 | Deterministic CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, preserve verification evidence, and perform safe local merges. It answers structured questions rather than making product choices. |
 | Project records | `docs/plans/`, `docs/BACKLOG.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md` and Git | Keep the plan, decisions, committed work and execution log available to the next session. |
 | Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Protect the installed plugin, validate changed ledgers on stop, and record optional usage counters. They do not decide whether a feature is good. |
+
+Skills pre-approve exactly one tool: the plugin's own CLI (`allowed-tools: Bash(esq *)`), so
+structural bookkeeping never waits on a permission prompt. Every other tool stays under your
+permission settings.
 
 In a planned run, `plan` commits the plan on a new shipping branch. `build`
 implements one phase and records what its verification proved. `review` assesses
@@ -204,7 +204,10 @@ audit scripts. In every example, use the actual paths reported by the preceding
 command. `review` and `check` require an explicit target and ask for one when
 omitted.
 
-The two-generation corrective bound limits new plans. Safe document or prospective plan corrections can still pass through `fix` → `review` → `land`, with historical execution evidence preserved and new proof appended. `fix --accept B-NNN,...` records only the user's explicit acceptance of those findings as `Dropped`, with what remains unfixed; it neither certifies delivery nor bypasses verification.
+Corrections are bounded: a unit gets at most two corrective plans. Past that, safe
+fixes still go through `fix` → `review` → `land`, and `fix --accept B-NNN,...` records
+your explicit decision to leave named findings unfixed — as `Dropped`, never `Done`,
+and without bypassing verification.
 
 ## Sessions and models
 
@@ -301,19 +304,14 @@ Use `backlog` to capture or edit an item and `sweep` to reconcile delivery.
 roadmap, then falls back to backlog priority.
 
 `/esq:roadmap plan` derives the order; bare `/esq:roadmap` refreshes state without
-silently re-planning it. A completed plan does not ship an open covered item:
-roadmap checks its acceptance before recommending reconciliation, and sweep
-closes it only with evidence of the whole outcome, including post-plan conditions.
-Status, backlog and roadmap distinguish explicitly parked work from execution,
-showing its reason and restart condition beside the unchanged canonical status.
-Planned means associated with a plan; it does not mean work is running.
-When discussing one entry, roadmap and status offer `/esq:advance <slug>` for
-eligible work in that Now entry; an explicit whole-Now request keeps `/esq:advance`.
-`/esq:advance` walks `Now`, or one named `Now` entry,
-respecting dependencies and existing plans. It uses one worker per eligible item,
-at most one new plan per entry, decision workers when needed and one final
-roadmap refresh. It stops before building and returns to the starting branch
-between items. It never runs concurrent writers on the same working tree.
+re-planning it. A completed plan does not by itself close the items it covers: sweep
+closes one only with evidence of its whole outcome. Parked work shows its reason and
+restart condition; `Planned` means tied to a plan, not running.
+
+`/esq:advance` walks the roadmap's `Now` items, or one named entry: one worker per
+eligible item, at most one new plan per entry, then one roadmap refresh. It stops
+before building, returns to the starting branch between items, and never runs two
+writers on the same working tree.
 
 `/esq:epic new <title>` creates a theme. Tag work with `epic:<slug>` and use
 `/esq:epic <slug>` to see the current plans and backlog rows joined by that slug.
@@ -364,13 +362,8 @@ takes a positional plan, range or commit, not `--range` or `--commit` flags.
 `brief plan` resolves `plan`, `range` and `finder` from the brief's provenance;
 `brief depth` separately answers the corrective generation and its bound.
 
-`state` keeps the roadmap's projected order/text separate from `roadmap.entries[].live`
-backlog statuses, including Done/Dropped. A mixed closed/open entry is valid; free-form
-roadmap freshness is unassessed. Each entry also returns its existing `acceptance`
-text (or null), so orientation retains restart conditions without another read.
-`epics[].rows` compares explicit projected Backlog
-status bullets with the same live ledger and reports mismatches or unknowns. These
-reads never refresh projections; no Git-history lookup or model call is added.
+`state` reports plans, backlog, roadmap and epics from the live ledgers in one read; it
+never refreshes a projection.
 
 The CLI owns ledger IDs, status cells, plan logs, branch checks and merge safety.
 Most results are JSON; `telemetry summary` defaults to a human-readable report
@@ -494,92 +487,8 @@ intentionally. `measure-wait-cost.mjs`, `measure-rereads.mjs` and
 the default audit. Historical harness observations live in
 [docs/EVIDENCE.md](docs/EVIDENCE.md); they are not fresh runtime guarantees.
 
-### Bounded read-only headless trial
-
-For one response-only preparation/review, reuse the
-[B-182 success](docs/preparation/2026-09-25-b182-tamialog.md#reprise-explicitement-autorisée-hors-sandbox)
-(Claude Code 2.1.282). Name the still-unproved property and announce **one call,
-at most 3 USD / 180 seconds** before launching. Preserve required spending and
-host-execution authorizations; do not rerun an acquired reference.
-
-**Host:** needs provider DNS/HTTPS, credential read, temporary config/result writes
-and child-process-group termination. Here sandbox DNS failed; the authorized
-outside-sandbox launch succeeded. Reuse that approved host context; if approval
-is missing, obtain it before launching. Do not retry a known network failure or
-change the product. Only for changed, uncertain networking,
-`curl --head --max-time 5 https://api.anthropic.com` diagnoses reachability without
-authentication or model cost; no mandatory preflight.
-
-Prepare a disposable `/tmp` case with selected sources, instructions and local
-`plugin/`; exclude `.git`, secrets, external symlinks, later answers and unrelated
-context. Record its hashes. Use absolute paths and a response-only prompt; keep
-results and credentials outside the case. This Linux/first-party recipe copies
-an existing valid credential file without displaying it. If absent/expired,
-arrange authorized authentication separately; never write under `~/.claude/`.
-
-```bash
-CASE_DIR=/tmp/selected-headless-case       # prepared copy, including plugin/
-PROMPT_FILE=/absolute/path/to/prompt.txt
-RESULT_DIR=/tmp/selected-headless-result  # new directory, outside CASE_DIR
-MODEL=opus                               # record the resolved model from result
-HEADLESS_CREDENTIALS="$HOME/.claude/.credentials.json"  # read only
-(
-  set +x
-  set -eu
-  umask 077
-  headless_config=$(mktemp -d /tmp/esq-headless-auth.XXXXXX)
-  trap 'rm -rf -- "$headless_config"' EXIT
-  trap 'exit 130' INT
-  trap 'exit 143' TERM
-  trap 'exit 129' HUP
-  cp -- "$HEADLESS_CREDENTIALS" "$headless_config/.credentials.json"
-  chmod 600 "$headless_config/.credentials.json"
-  mkdir -m 700 -- "$RESULT_DIR"
-  cd -- "$CASE_DIR"
-  headless_start=$(date +%s)
-  headless_rc=0
-  env -u ANTHROPIC_API_KEY -u CLAUDE_CODE_OAUTH_TOKEN \
-    CLAUDE_CONFIG_DIR="$headless_config" ESQ_TELEMETRY=off \
-    timeout --signal=KILL 180s claude --plugin-dir "$CASE_DIR/plugin" -p \
-      --model "$MODEL" --effort medium --output-format stream-json --verbose \
-      --permission-mode dontAsk --restricted \
-      --tools Read,Grep,Glob,Skill --allowedTools Read,Grep,Glob,Skill \
-      --strict-mcp-config --setting-sources '' \
-      --settings '{"disableAllHooks":true,"autoMemoryEnabled":false}' \
-      --no-session-persistence --max-budget-usd 3 \
-      < "$PROMPT_FILE" > "$RESULT_DIR/stream.jsonl" 2> "$RESULT_DIR/stderr.txt" \
-      || headless_rc=$?
-  printf 'exit=%s elapsed_seconds=%s\n' "$headless_rc" \
-    "$(( $(date +%s) - headless_start ))" > "$RESULT_DIR/launcher.txt"
-  exit "$headless_rc"
-)
-```
-
-Use Bash and available GNU `timeout`, without `--foreground`: the whole process
-group is killed at 180 s without grace. Keep the command attached to its host;
-do not detach it. Use the first-party environment without alternate-provider
-routing; the unset variables prevent an ambient key/token overriding the copy.
-
-**Model:** `--tools` exposes Read/Grep/Glob/Skill; `--allowedTools` permits them
-without prompts, while `dontAsk` denies remaining approval requests. No Bash,
-write, agent or web tools. `--restricted` confines file tools to the case, excluding
-authentication. MCP, hooks, memory and session persistence are disabled; managed
-policy still applies. These are model-tool restrictions, not an OS sandbox for
-the host. Host network access grants no additional model tool or blanket bypass.
-[CLI reference](https://code.claude.com/docs/en/cli-reference),
-[config isolation](https://code.claude.com/docs/en/settings).
-
-Retain exit/elapsed time, final result, resolved model, tool denials, cost and
-before/after hashes. No final cost means **unknown**, never zero; 3 USD is the
-configured CLI cap, not a measured bill. No automatic retry. Sanitize evidence
-before retaining it, then delete the case/raw results. The trap removes temporary
-authentication even after timeout; host loss/SIGKILL requires manual removal of
-the leftover `/tmp/esq-headless-auth.*` directory belonging to this run.
-
-Historical proof: **130.49 s, 1.0563188 USD** reported at list price, **482 files
-unchanged**; the earlier network timeout's cost remains unknown. This establishes
-this read-only case, not output quality or build/write permissions. No new trial,
-installation or publication: [B-050 checks and limits](docs/preparation/2026-09-25-b050-headless.md).
+A bounded, read-only headless trial recipe for maintainers lives in
+[docs/headless-trial.md](docs/headless-trial.md).
 
 ### Measured cost per command — 2026-08-19
 
