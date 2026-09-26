@@ -144,7 +144,7 @@ The task, with `<command>` and `<argument>` filled in:
 > If it stopped on something the user must decide, that command requires an option set — a one-line decision, why it is the user's, two or three lettered options each with a one-line consequence and a `do:` that runs as written, and the leaning. Return that block verbatim. If it stopped on a failure that needs no user authority, return a diagnosis — the failing output, the cause and the exact next action — with no option set around it. Only if it named a missing user authority as a bare question, fill the shape in yourself before you return; I will not invent options on your behalf.
 
 <!-- orch-shared:no-paraphrase:start -->
-**Do not restate a command's procedure in your prompt.** The command is the authority on its own work.
+**Invoke the skill; do not paraphrase its procedure in the spawn prompt.** The skill is the authority on its own work.
 <!-- orch-shared:no-paraphrase:end -->
 
 <!-- orch-shared:unattended-flag:start -->
@@ -385,7 +385,7 @@ The **last line of your entire response** is that `→ Next`, copy-pasteable wit
 Send a `PushNotification`: `"esq:converge — <X>/<N> steps. <K fixes applied · M 🟡 remain | stopped at <step>: reason>."`
 
 <!-- orch-shared:notify-ask:start -->
-**Notify before you ask, too:** send `"esq:<this command> — <what gated> needs one decision: <the decision line>"` *before* the `AskUserQuestion` call, not after it.
+**Notify before you ask, too:** send `"esq:<this command> — <what gated> needs one decision: <the decision line>"` through `PushNotification` *before* the `AskUserQuestion` call, not after it.
 <!-- orch-shared:notify-ask:end -->
 
 ## Constraints
