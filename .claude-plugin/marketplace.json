@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "esq",
-      "version": "0.3.56",
+      "version": "0.3.57",
       "source": "./plugin",
       "description": "A durable, evidence-driven workflow from ambiguity through planning, implementation, verification, and review",
       "category": "productivity"
