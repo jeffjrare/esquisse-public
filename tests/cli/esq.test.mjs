@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
-import { execFile } from 'node:child_process';
+import { execFile, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdtempSync } from 'node:fs';
-import { mkdtemp, mkdir, readFile, readdir, stat, utimes, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, realpath, stat, utimes, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { LOG_ENTRY_SCHEMA, addRow, appendLog, briefDepth, briefPending, briefPlan, evidence, planContext, priForType, rankEdges, rankOrder, rankPlace, renderAppendLogHelp, renderEvidence, derive, reserveId, setPri, setStatus, state, validate } from '../../plugin/lib/cli.mjs';
+import { LOG_ENTRY_SCHEMA, addDecisions, addRow, appendLog, briefDepth, briefPending, briefPlan, evidence, planContext, priForType, rankEdges, rankOrder, rankPlace, renderAppendLogHelp, renderEvidence, derive, reserveId, setPri, setStatus, state, validate } from '../../plugin/lib/cli.mjs';
 import { nextPhase, parsePlan, parseVerified } from '../../plugin/lib/markdown.mjs';
 import { DIRECT_SEGMENTS_NOTE, EXCLUDED_RUNS, RUN_ROW_KEYS, INTERRUPTED_RUNS_NOTE, MIN_SAMPLE_RUNS, PLUGIN_DATA_ENV_IGNORED_NOTE, TELEMETRY_OPT_OUT_NOTE, discoverTelemetryFiles, renderTelemetrySummary, spawnModelVerdict, summarizeTelemetry } from '../../plugin/lib/telemetry.mjs';
 
@@ -2171,9 +2171,9 @@ test('brief pending answers which briefs still owe a plan, and never the newest 
   const first = await briefPending(root);
   assert.equal(first.selected, 'docs/plans/2026-09-03-nouvelle-entree.brief.md');
   assert.deepEqual(first.pending.map((row) => row.file), ['docs/plans/2026-09-03-nouvelle-entree.brief.md']);
-  assert.deepEqual(first.consumed.map((row) => [row.file, row.plan, row.reason]), [
-    ['docs/plans/2026-09-01-refonte-visuelle-six-pages.brief.md', 'docs/plans/2026-09-02-refonte-visuelle-six-pages.md', 'plan-exists'],
-  ]);
+  // A consumed grill brief is counted, never listed: it is history no reader routes on.
+  assert.deepEqual(first.consumed, []);
+  assert.equal(first.consumedGrill, 1);
 
   // Plan the second one and nothing is left to plan: briefs still on disk, `selected: null` — the
   // answer /esq:plan stops on instead of reaching back for an old brief.
@@ -2181,7 +2181,7 @@ test('brief pending answers which briefs still owe a plan, and never the newest 
   const drained = await briefPending(root);
   assert.deepEqual(drained.pending, []);
   assert.equal(drained.selected, null);
-  assert.equal(drained.consumed.length, 2);
+  assert.equal(drained.consumedGrill, 2);
 
   // A plan recorded abandoned consumes nothing: `esq plan abandon` is the way back to /esq:plan.
   await write('2026-09-04-nouvelle-entree.md', `# Nouvelle entree\n\n**Abandoned:** 2026-09-05 — third corrective round refused\n\n## Phases\n\n### Phase 1 — one\n- task\n\n## Execution log\n`);
@@ -2494,9 +2494,67 @@ test('next-phase --preflight answers branch, anchor and context in one call, and
   assert.equal(preflight.anchor, anchor);
   assert.deepEqual({ ...preflight, branch: undefined, anchor: undefined }, { ...context, branch: undefined, anchor: undefined });
 
+  // Past the inline budget the section texts leave stdout for one file under the git dir, in order,
+  // and every other byte of the answer is unchanged.
+  const long = header('main').replace('## Phases\n', `## Context\n${'A line of context that makes the plan long.\n'.repeat(700)}\n## Phases\n`);
+  await writeFile(path.join(root, target), long);
+  await git('commit', '-q', '-am', 'plan: long');
+  const bigOut = (await run(bin, ['next-phase', target, '--preflight'], { cwd: root, env })).stdout;
+  const big = JSON.parse(bigOut);
+  const bigContext = JSON.parse((await run(bin, ['next-phase', target, '--context'], { cwd: root, env })).stdout).context;
+  assert.ok(Buffer.byteLength(bigOut) < 24_000);
+  assert.equal(path.dirname(big.context.file), path.join(await realpath(root), '.git', 'esq'));
+  assert.deepEqual(big.context.sections, bigContext.sections.map(({ text, ...rest }) => rest));
+  const spilled = await readFile(big.context.file, 'utf8');
+  assert.equal(spilled, `${bigContext.sections.map((s) => `<!-- esq:section ${s.kind} ${s.from}-${s.to} -->\n${s.text}`).join('\n')}\n`);
+  assert.equal((await git('status', '--porcelain')).stdout, '');
+
   await writeFile(path.join(root, target), header('elsewhere'));
   await git('commit', '-q', '-am', 'plan: another branch');
   const refused = JSON.parse((await run(bin, ['next-phase', target, '--preflight'], { cwd: root, env })).stdout);
   assert.equal(refused.branch.refuse, true);
   assert.deepEqual(Object.keys(refused).sort(), ['branch', 'file']);
+});
+
+// ── decisions add: the registry entry the plan and build workers used to place by hand ─────────
+const DECISION = { slug: 'one-lock-order', title: 'One lock order', scope: 'arch', topic: 'db', date: '2026-09-27', context: 'C.', decision: 'Lock a | b first.', reason: 'R.', tradeoff: 'T.', consequences: 'Q.', alternatives: 'A.' };
+
+test('decisions add creates the registry, then keeps each table order and makes every ID unique', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'esq-cli-decisions-'));
+  const file = path.join(root, 'docs/DECISIONS.md');
+
+  const created = await addDecisions(file, JSON.stringify(DECISION));
+  assert.equal(created.created, true);
+  assert.deepEqual(created.added, [{ id: 'D-one-lock-order', title: 'One lock order' }]);
+  const first = await readFile(file, 'utf8');
+  assert.match(first, /^\| D-one-lock-order \| 2026-09-27 \| arch \| db \| Lock a \\\| b first\. \| Active \|$/m);
+  assert.match(first, /\n---\n\n## D-one-lock-order — One lock order\n\n\*\*Scope:\*\* arch\n\*\*Topic:\*\* db\n\*\*Date:\*\* 2026-09-27\n\*\*Statut:\*\* Active\n\n\*\*Contexte:\*\* C\.\n\*\*Décision:\*\* Lock a \| b first\.\n/);
+  assert.ok(first.endsWith('**Alternatives rejetées:** A.\n'));
+
+  // Oldest-first: appended below the last row. The same slug gets the first free suffix, and a
+  // Fondement is written only when given.
+  const later = await addDecisions(file, JSON.stringify([{ ...DECISION, date: '2026-09-28', fondement: 'mandate — the plan' }, { ...DECISION, date: '2026-09-28' }]));
+  assert.deepEqual(later.added.map((row) => row.id), ['D-one-lock-order-2', 'D-one-lock-order-3']);
+  const rows = (await readFile(file, 'utf8')).split('\n').filter((line) => line.startsWith('| D-')).map((line) => line.split(' | ')[0]);
+  assert.deepEqual(rows, ['| D-one-lock-order', '| D-one-lock-order-2', '| D-one-lock-order-3']);
+  assert.equal((await readFile(file, 'utf8')).match(/\*\*Fondement:\*\*/g).length, 1);
+
+  // Newest-first: a table whose top row is the newer one keeps taking new rows at the top.
+  const newest = path.join(root, 'newest.md');
+  await writeFile(newest, '# Decisions\n\n| # | Date | Scope | Topic | Décision | Statut |\n|---|---|---|---|---|---|\n| D-b | 2026-09-02 | arch | x | B | Active |\n| D-a | 2026-09-01 | arch | x | A | Active |\n\n---\n\n## D-b — B\n\n## D-a — A\n');
+  await addDecisions(newest, JSON.stringify({ ...DECISION, slug: 'c' }));
+  assert.deepEqual((await readFile(newest, 'utf8')).split('\n').filter((line) => line.startsWith('| D-')).map((line) => line.split(' | ')[0]), ['| D-c', '| D-b', '| D-a']);
+
+  // A refused payload writes nothing.
+  const before = await readFile(file, 'utf8');
+  await assert.rejects(addDecisions(file, JSON.stringify([DECISION, { ...DECISION, scope: 'misc' }])), /"scope" must be one of/);
+  await assert.rejects(addDecisions(file, JSON.stringify({ ...DECISION, extra: 1 })), /unknown key "extra"/);
+  await assert.rejects(addDecisions(file, JSON.stringify({ ...DECISION, slug: 'D-x' })), /"slug" must be lowercase/);
+  assert.equal(await readFile(file, 'utf8'), before);
+
+  // `-` reads the payload from stdin, where an apostrophe needs no shell quoting.
+  const bin = fileURLToPath(new URL('../../plugin/bin/esq', import.meta.url));
+  const piped = spawnSync(process.execPath, [bin, 'decisions', 'add', '-', file], { input: JSON.stringify({ ...DECISION, slug: 'l-apostrophe', title: "L'apostrophe" }), encoding: 'utf8', env: { ...process.env, NODE_ENV: '' } });
+  assert.equal(piped.status, 0, piped.stderr);
+  assert.deepEqual(JSON.parse(piped.stdout).added, [{ id: 'D-l-apostrophe', title: "L'apostrophe" }]);
 });

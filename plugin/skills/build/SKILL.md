@@ -19,7 +19,7 @@ You are executing one phase of a plan, then stopping. Each fresh `/esq:build` in
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Use `esq next-phase "$0" --preflight` for the branch-ownership verdict, the continuity anchor, the phase classification and the plan text and log slices this command reads, and `esq validate` for invariants. Append a new entry only through `esq plan append-log "$0" '<json>'`; never hand-edit a new log entry. Use `esq backlog reserve-id` before adding a backlog row. The CLI parses and mutates structure; architecture, scope, verification quality, risk, and UX remain your decisions.
+Use `esq next-phase "$0" --preflight` for the branch-ownership verdict, the continuity anchor, the phase classification and the plan text and log slices this command reads, and `esq validate` for invariants. Append a new entry only through `esq plan append-log "$0" '<json>'`; never hand-edit a new log entry. Use `esq backlog reserve-id` before adding a backlog row, and `esq decisions add` to write a registry entry. The CLI parses and mutates structure; architecture, scope, verification quality, risk, and UX remain your decisions.
 
 Do NOT use plan mode. You need to write code.
 
@@ -49,6 +49,8 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    - `plan`: the whole plan through `## Execution log` and its reserved append comment when present. Without that heading, the whole file.
    - `entry`: the newest log entry and, when distinct, the paused entry selected by the response's `entry` key, including its heading, continuity field and handoff. `roles` identifies each; lines are not duplicated.
    - `appendix`: all plan material following the log span.
+
+   **When `context.file` is set, the response was too large to print inline:** the sections carry no `text`, and that file holds them in the same order, each opened by an `<!-- esq:section <kind> <from>-<to> -->` line. Read it whole with the Read tool in the very next turn; step 6's working set follows in the turn after. Never re-run the preflight, `cat` the plan, or `sed` a slice of the plan to recover the text.
 
    Use these slices without a second classification call, skeleton grep or reread. This snapshot does not replace later reads explicitly required after mutation: recompute `unit.open` before logging, and reread files this run changes when needed. A `⏸` heading classifies by its glyph, never by the clause after it.
 
@@ -291,7 +293,7 @@ Otherwise load none of it; steps 1–5 still run exactly as written. A branch yo
 **The payload, exactly.** One `completed` example and one `paused` one — copy the shape, not the values:
 
 ```bash
-esq plan append-log <plan-path> '{"phase":1,"status":"completed","date":"2026-08-22","planCommittedAt":"46771fd","commits":["8112bb3","6c4bbe8"],"whatBuilt":"The append-log payload is one schema constant the validator and --help both read.","verification":["(auto) node --test tests/cli/esq.test.mjs — 38 pass","(auto) ./scripts/audit.sh — exit 0"],"verified":{"at":"6c4bbe8f1a2b3c4d5e6f708192a3b4c5d6e7f809","commands":["node --test tests/cli/esq.test.mjs","./scripts/audit.sh"]},"surprises":"None — phase executed as planned.","backlogCandidates":"None.","forNextPhase":"Phase 2 enforces the schema this phase published."}'
+esq plan append-log <plan-path> '{"phase":1,"status":"completed","date":"2026-08-22","planCommittedAt":"46771fd","commits":["8112bb3","6c4bbe8"],"whatBuilt":"The append-log payload is one schema constant the validator and --help both read.","verification":["(auto) node --test tests/cli/esq.test.mjs — 38 pass","(auto) ./scripts/audit.sh — exit 0"],"verified":{"at":"6c4bbe8f1a2b3c4d5e6f708192a3b4c5d6e7f809","commands":["node --test tests/cli/esq.test.mjs","./scripts/audit.sh"]},"rollout":["Run the schema migration before the new build serves traffic"],"surprises":"None — phase executed as planned.","backlogCandidates":"None.","forNextPhase":"Phase 2 enforces the schema this phase published."}'
 
 esq plan append-log <plan-path> '{"phase":1,"status":"paused","date":"2026-08-22","planCommittedAt":"46771fd","commits":["8112bb3"],"whatBuilt":"The settings panel renders the dark-mode toggle.","verification":["(auto) node --test tests/ui/panel.test.mjs — 12 pass"],"verified":{"at":"8112bb3f1a2b3c4d5e6f708192a3b4c5d6e7f809","commands":["node --test tests/ui/panel.test.mjs"]},"manualOutstanding":["[on /settings, logged in] toggle dark mode → expect: the panel repaints without a reload"],"surprises":"None — phase executed as planned."}'
 ```

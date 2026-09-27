@@ -33,7 +33,7 @@ Run `esq state`, `esq brief pending` and `esq validate` once, batching these ind
 | `roadmap.freshness` | unassessed for free-form projected text; unknown on read error; never a claim that closed membership makes an entry stale |
 | `epics[]` | file, slug, rows[] with projected line/status and live status; mismatch true/false/null per row; stale compares these Backlog bullets only, not the whole epic |
 | `landing` | For the CLI's settled complete plan: file, branch, origin, landed, coverage, unit |
-| `brief pending` | pending/consumed lists, selected path, file, slug, kind, mtime; corrective yellow count and consumption reason |
+| `brief pending` | pending list, consumed corrective list, `consumedGrill` count, selected path, file, slug, kind, mtime; corrective yellow count and consumption reason |
 
 A missing backlog/roadmap is `null`; an empty Now is `roadmap.head: null`. Projection read errors remain beside healthy facts. A null live status is unknown, never Open or Done. Epic stale is true for a proven row mismatch, false only when every returned row is comparable and agrees, otherwise null; missing epics return an empty list. Check `backlog.error` **before** counts/rows: malformed tables return that field alone. Counts are unknown, never zero. An invalid plan's error is likewise a fact beside healthy results, not a reason to reconstruct the ledger by hand.
 
@@ -72,7 +72,7 @@ Remaining commits indicate **attempted, incomplete** work. Report count, hashes 
 Use `esq brief pending`'s paths and `kind`, never filename globs or a suffix guess:
 - `grill` in pending → awaiting `/esq:plan`.
 - `corrective` in pending → apply remaining 🟢 through `/esq:fix`, then plan 🟡 through `/esq:plan`.
-- A consumed grill brief is historical input, not pending work.
+- A consumed grill brief is historical input, not pending work: only `consumedGrill` counts them.
 - A consumed corrective brief may still hold 🟢/🔴; `reason: no-yellow-left` means it no longer owes a plan, **not** that all findings vanished. Use retained unit.findings where available; otherwise inspect only these returned corrective paths for unresolved items. Report unresolved user gates without proposing already-consumed planning again.
 
 Use selected for the newest planning candidate, with unresolved corrective work kept visible. Never invent a review/check target from a brief name; `esq brief plan <brief>` resolves a corrective target if needed.

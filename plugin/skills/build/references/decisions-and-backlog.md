@@ -42,40 +42,16 @@ After the execution-log commit — step 6 of `/esq:build`'s "Append to execution
 
 **If there are qualifying decisions:**
 
-1. If `docs/DECISIONS.md` does not exist, create it:
+1. **Keep the lookup relevant.** Search existing decision headings/index for this choice and open only matching entries. Do not count, scan or migrate unrelated historical metadata as part of shipping the phase; that cleanup is not its deliverable.
+2. **Write every qualifying decision in one call** — an array of entries, one object each:
 
-```markdown
-# Decisions
-
-<!-- Registry of architectural, product, and functional decisions. Managed by /esq:plan and /esq:build. -->
-<!-- An ID is a permanent citation key: never renumbered, never reused. Code, plans and commit messages may cite it. -->
-
-| # | Date | Scope | Topic | Décision | Statut |
-|---|------|-------|-------|----------|--------|
-
----
+```bash
+esq decisions add - <<'EOF'
+[{"slug":"<3–5 lowercase words from the title, hyphen-joined, no D- prefix>","title":"<Title>","scope":"<arch|prod|func|ux|infra|deps>","topic":"<free-form domain tag — e.g. auth, checkout>","fondement":"<optional — see below>","context":"<why it was needed — 1-2 sentences>","decision":"<what was decided — 1 sentence; it is also the index row's cell>","reason":"<the key tradeoff or reason — 2-3 sentences>","tradeoff":"<what was gained, what was accepted as cost>","consequences":"<what it implies for future work — 1-2 sentences>","alternatives":"<other options and why they were not chosen>"}]
+EOF
 ```
 
-2. **Keep the lookup relevant.** Search existing decision headings/index for this choice and open only matching entries. Add Topic to the new entry. Do not count, scan or migrate unrelated historical metadata as part of shipping the phase; that cleanup is not its deliverable.
-3. **Derive the ID from the title — it is a slug, never a number.** 3–5 lowercase words from the decision title, hyphen-joined (same convention as plan/brief/epic slugs), giving `D-<slug>`. If a `## D-<slug>` heading already exists, append `-2`, `-3`, … until unique. Numbered `D-NNN` entries predating this convention stay exactly as they are — never migrated, never renumbered.
-4. For each decision, add a table row and a full entry:
-
-```markdown
-## D-<slug> — <Title>
-
-**Scope:** <arch | prod | func | ux | infra | deps>
-**Topic:** <free-form domain tag — e.g. "auth", "subscription", "seo", "checkout", "payments">
-**Date:** YYYY-MM-DD
-**Statut:** Active
-**Fondement:** <optional — mandate — the plan clause, CLAUDE.md rule or accepted frame that covers this choice | user — where and when the user authorized this change: the brief's ## Resolved decisions, the answered question, the approved plan>
-
-**Contexte:** Why this decision was needed — 1-2 sentences.
-**Décision:** What was decided — 1 sentence.
-**Raison:** The key tradeoff or reason — 2-3 sentences.
-**Tradeoff:** What was gained and what was accepted as cost — 1 sentence each.
-**Conséquences:** What this decision implies for future work — 1-2 sentences.
-**Alternatives rejetées:** Other options and why they were not chosen.
-```
+The CLI creates `docs/DECISIONS.md` from the standard header when it is missing, suffixes `-2`, `-3`, … onto a slug already taken, places the index row where the table's own order puts it, appends the entry, and prints the IDs it wrote. Numbered `D-NNN` entries predating the slug convention stay exactly as they are. The quoted heredoc keeps apostrophes in the text safe. Never place a row or an entry by hand: a refused payload leaves the file byte-identical, so fix the payload and call again.
 
 **Fondement — what the authority rests on, never what was done.** Write `mandate — <the clause>` when the plan, `CLAUDE.md` or the accepted frame already delegated this choice — a worker records its own technical calls this way without asking anyone — and `user — <where and when>` for a change to an explicit constraint, a promised capability or a major commitment. **The citation after the em dash is the field:** a form with nothing behind it authorizes nothing, and neither do `Statut: Active`, the entry's date, or when its commit landed. Write no field at all when the entry only records an outcome. It is optional and purely additive — never backfill an existing entry, add no migration, and every consumer keeps reading an entry that carries none: the three states are `mandate`, `user` and absent.
 

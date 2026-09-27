@@ -1,6 +1,6 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
-import { appendFile, mkdir, open, readdir, readFile, stat, unlink } from 'node:fs/promises';
+import { appendFile, mkdir, open, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseVerified, readText, splitTableRow, tableAt } from './markdown.mjs';
@@ -435,6 +435,106 @@ function cellText(value, name) {
   if (typeof value !== 'string' || value.trim() === '') throw new Error(`${name} must be a non-empty string`);
   if (/[|\n\r]/.test(value)) throw new Error(`${name} may not contain a pipe or a line break — it is written into one table cell`);
   return value.trim();
+}
+
+// ── The decisions registry: one call per batch of entries ─────────────────────
+// `/esq:plan` and `/esq:build` wrote an entry by locating the index table's last row and the file's
+// end with sed and a script, three turns on a registry that runs to thousands of lines. Structure
+// only: the caller chose that a decision qualifies, its slug and every word of it; the CLI makes the
+// ID unique, places the row and the entry, and writes both in one atomic write.
+const DECISION_SCOPES = new Set(['arch', 'prod', 'func', 'ux', 'infra', 'deps']);
+const DECISION_TEXT_KEYS = [['context', 'Contexte'], ['decision', 'Décision'], ['reason', 'Raison'], ['tradeoff', 'Tradeoff'], ['consequences', 'Conséquences'], ['alternatives', 'Alternatives rejetées']];
+const DECISION_KEYS = new Set(['slug', 'title', 'scope', 'topic', 'date', 'fondement', ...DECISION_TEXT_KEYS.map(([key]) => key)]);
+const DECISIONS_TEMPLATE = `# Decisions
+
+<!-- Registry of architectural, product, and functional decisions. Managed by /esq:plan and /esq:build. -->
+<!-- An ID is a permanent citation key: never renumbered, never reused. Code, plans and commit messages may cite it. -->
+
+| # | Date | Scope | Topic | Décision | Statut |
+|---|------|-------|-------|----------|--------|
+
+---
+`;
+
+function decisionEntry(value, index) {
+  const at = `entry ${index + 1}`;
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${at} must be an object`);
+  for (const key of Object.keys(value)) if (!DECISION_KEYS.has(key)) throw new Error(`${at}: unknown key "${key}" — accepted: ${[...DECISION_KEYS].join(', ')}`);
+  const text = (key, { line = true, optional = false } = {}) => {
+    const raw = value[key];
+    if (raw === undefined && optional) return null;
+    if (typeof raw !== 'string' || raw.trim() === '') throw new Error(`${at}: "${key}" must be a non-empty string`);
+    if (line && /[\n\r]/.test(raw)) throw new Error(`${at}: "${key}" may not contain a line break`);
+    return raw.trim();
+  };
+  const slug = text('slug');
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) throw new Error(`${at}: "slug" must be lowercase words joined by hyphens, without the D- prefix`);
+  const scope = text('scope');
+  if (!DECISION_SCOPES.has(scope)) throw new Error(`${at}: "scope" must be one of ${[...DECISION_SCOPES].join(', ')}`);
+  const date = text('date', { optional: true }) ?? new Date().toISOString().slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error(`${at}: "date" must be YYYY-MM-DD`);
+  const entry = { slug, scope, date, title: text('title'), topic: text('topic'), fondement: text('fondement', { optional: true }) };
+  for (const [key] of DECISION_TEXT_KEYS) entry[key] = text(key, { line: false });
+  return entry;
+}
+
+export async function addDecisions(file, json) {
+  let parsed;
+  try { parsed = JSON.parse(json); }
+  catch (error) { throw new Error(`decisions add: invalid JSON — ${error.message}`); }
+  const entries = (Array.isArray(parsed) ? parsed : [parsed]).map(decisionEntry);
+  if (entries.length === 0) throw new Error('decisions add: no entry given');
+
+  let text;
+  let created = false;
+  try { text = await readText(file); }
+  catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    text = DECISIONS_TEMPLATE;
+    created = true;
+  }
+  const lines = text.replace(/\n+$/, '').split('\n');
+  const table = tableAt(lines, '#');
+  const taken = new Set([...text.matchAll(/^(?:\| *|## *)(D-[A-Za-z0-9-]+)/gm)].map((match) => match[1]));
+  // A table written newest-first stays newest-first; any other order is appended to. The two ends'
+  // Date cells decide it, so the one registry that prepends keeps prepending.
+  const dates = table.rows.map((row) => row[1] ?? '').filter((cell) => /^\d{4}-\d{2}-\d{2}$/.test(cell));
+  const newestFirst = dates.length > 1 && dates[0] > dates[dates.length - 1];
+
+  const rows = [];
+  const sections = [];
+  const added = [];
+  for (const entry of entries) {
+    let id = `D-${entry.slug}`;
+    for (let suffix = 2; taken.has(id); suffix += 1) id = `D-${entry.slug}-${suffix}`;
+    taken.add(id);
+    const cell = entry.decision.replace(/\s*\n\s*/g, ' ').replace(/\|/g, '\\|');
+    rows.push(formatRow([id, entry.date, entry.scope, entry.topic.replace(/\|/g, '\\|'), cell, 'Active']));
+    sections.push([
+      `## ${id} — ${entry.title}`,
+      '',
+      `**Scope:** ${entry.scope}`,
+      `**Topic:** ${entry.topic}`,
+      `**Date:** ${entry.date}`,
+      '**Statut:** Active',
+      ...(entry.fondement ? [`**Fondement:** ${entry.fondement}`] : []),
+      '',
+      ...DECISION_TEXT_KEYS.map(([key, label]) => `**${label}:** ${entry[key]}`),
+    ].join('\n'));
+    added.push({ id, title: entry.title });
+  }
+  const at = newestFirst ? table.start + 2 : table.end;
+  lines.splice(at, 0, ...(newestFirst ? [...rows].reverse() : rows));
+  const body = `${lines.join('\n')}\n\n${sections.join('\n\n')}\n`;
+  if (created) {
+    await mkdir(path.dirname(file), { recursive: true });
+    const temporary = `${file}.${process.pid}.tmp`;
+    await writeFile(temporary, body, 'utf8');
+    await rename(temporary, file);
+  } else {
+    await atomicWrite(file, body);
+  }
+  return { file, created, added };
 }
 
 // One atomic write: the Status cell, and — when the caller states them — the provenance marker in the
@@ -1260,6 +1360,27 @@ function contextSections(plan, pausedNumber) {
 function fileLines(plan) {
   const { lines } = plan;
   return lines.length - (lines.length > 0 && lines[lines.length - 1] === '' ? 1 : 0);
+}
+
+// Claude Code keeps a Bash result inline only under about 30 KB; past it the model gets a 2 KB
+// preview and a path, and pays one or two more turns to read what it was handed (v2.1.283, measured
+// 2026-09-27: 29.5 KB and 37 KB preflights were both persisted). A response over this budget moves the
+// section texts, in order, into one file under the git dir — never the working tree — and names it
+// `context.file`: the worker reads it in one call instead of recovering a persisted blob.
+const INLINE_OUTPUT_BUDGET = 24_000;
+
+async function spillContext(root, file, response) {
+  if (Buffer.byteLength(JSON.stringify(response, null, 2)) <= INLINE_OUTPUT_BUDGET) return response;
+  const gitDir = gitTry(root, ['rev-parse', '--absolute-git-dir']);
+  if (!gitDir) return response;
+  const target = path.join(gitDir, 'esq', `${path.basename(file, '.md')}.context.md`);
+  await mkdir(path.dirname(target), { recursive: true });
+  const { sections } = response.context;
+  const body = sections.map((section) => `<!-- esq:section ${section.kind} ${section.from}-${section.to} -->\n${section.text}`).join('\n');
+  const temporary = `${target}.${process.pid}.tmp`;
+  await writeFile(temporary, `${body}\n`, 'utf8');
+  await rename(temporary, target);
+  return { ...response, context: { ...response.context, file: target, sections: sections.map(({ text, ...rest }) => rest) } };
 }
 
 export function planContext(plan, next) {
@@ -2156,8 +2277,11 @@ export async function briefPending(root) {
     planFor.set(slug, relative(file));
   }
 
+  // A grill brief its plan consumed is history no reader routes on, and the one list that grows with
+  // every initiative: it is counted, never listed, so the answer stays under the inline output budget.
   const pending = [];
   const consumed = [];
+  let consumedGrill = 0;
   for (const candidate of candidates) {
     const plan = planFor.get(candidate.slug);
     let mtime = null;
@@ -2172,14 +2296,15 @@ export async function briefPending(root) {
         continue;
       }
     }
-    if (plan !== null) consumed.push({ ...row, plan, reason: 'plan-exists' });
+    if (plan !== null && candidate.kind === 'grill') consumedGrill += 1;
+    else if (plan !== null) consumed.push({ ...row, plan, reason: 'plan-exists' });
     else pending.push(row);
   }
   // Newest first, with the filename breaking a tie downward — the same order `state` puts plans in,
   // and for the same reason: a fresh clone stamps every file with one mtime.
   const when = (row) => row.mtime ?? '';
   pending.sort((a, b) => (when(a) === when(b) ? b.file.localeCompare(a.file) : (when(a) < when(b) ? 1 : -1)));
-  return { directory: relative(directory), pending, consumed, selected: pending[0]?.file ?? null };
+  return { directory: relative(directory), pending, consumed, consumedGrill, selected: pending[0]?.file ?? null };
 }
 
 // ── The shipping unit, and the defects it filed against its own code ─────────
@@ -4919,7 +5044,7 @@ export async function main(args) {
       const anchor = gitTry(root, ['log', '-1', '--format=%h', '--', action]) || 'unversioned';
       const plan = parsePlan(await readText(action));
       const verdict = nextPhase(plan);
-      return output({ file: action, branch, anchor, ...verdict, context: planContext(plan, verdict) });
+      return output(await spillContext(root, action, { file: action, branch, anchor, ...verdict, context: planContext(plan, verdict) }));
     }
     const plan = parsePlan(await readText(action));
     const verdict = nextPhase(plan);
@@ -5003,6 +5128,18 @@ export async function main(args) {
     if (!flags.type || !flags.summary || !flags.source || positional.length > 1) throw new Error(usage);
     const file = positional[0] || path.join(root, 'docs/BACKLOG.md');
     return output(await addRow(root, file, { type: flags.type, summary: flags.summary, source: flags.source, pri: flags.pri ?? '', epic: flags.epic ?? '', status: flags.status ?? 'Open' }));
+  }
+  if (group === 'decisions' && action === 'add') {
+    const [json, file = path.join(root, 'docs/DECISIONS.md')] = rest;
+    if (!json || rest.length > 2) throw new Error("usage: esq decisions add <json|-> [decisions-file] — one entry object or an array of them; `-` reads it from stdin");
+    // `-` takes the payload from stdin: a registry written in French is full of apostrophes, and a
+    // heredoc is the one quoting a single-quoted shell argument cannot break.
+    let payload = json;
+    if (json === '-') {
+      payload = '';
+      for await (const chunk of process.stdin) payload += chunk;
+    }
+    return output(await addDecisions(file, payload));
   }
   if (group === 'plan' && action === 'append-log') {
     // Before anything reads a path: `--help` must not depend on a plan file existing, and must not
@@ -5227,5 +5364,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--json] [--rows] [file…]>');
 }
