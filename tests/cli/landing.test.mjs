@@ -266,6 +266,10 @@ test('a unit whose review brief was emptied reads corrected, and one never revie
   await setReviewed(root, file, git(root, 'rev-parse', 'HEAD'));
   commit(root, 'plan(reviewed): stem');
   assert.equal((await branchCheck(root, file)).coverage.verdict, 'covered');
+  // Evidence a manual confirmation commits beside the plan is bookkeeping, not reviewable code.
+  await write(root, 'docs/plans/2026-09-20-stem.assets/confirmed-state.png', 'png bytes');
+  commit(root, 'plan(stem): confirm phase 1 manual verification');
+  assert.equal((await branchCheck(root, file)).coverage.verdict, 'covered');
 });
 
 test('recording a review never stales verification, and a requirement edit above the log still does', async () => {

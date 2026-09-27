@@ -2769,7 +2769,7 @@ export async function gateVerify(root, planPath, { workersMoved = false, phase =
         continue;
       }
       if (changed === occurrence.plan) continue;
-      if (changed.startsWith('docs/plans/') && changed.endsWith('.md')) continue;
+      if (planBookkeeping(changed)) continue;
       if (GATE_LEDGERS.has(changed)) continue;
       invalidating.push(changed);
     }
@@ -2874,8 +2874,14 @@ export async function gateVerify(root, planPath, { workersMoved = false, phase =
 // after it was mined reads as fresh, by design, because the list admits the projection files.
 const PROVENANCE_HARMLESS = new Set(['docs/SPEC.md', 'CLAUDE.md', 'docs/ARCHITECTURE.md', 'docs/BACKLOG.md']);
 
+// esquisse's own bookkeeping under docs/plans: plans and briefs, and the evidence captures a manual
+// confirmation commits beside its plan in `<plan-stem>.assets/`. Any other file there is a real artifact.
+function planBookkeeping(changed) {
+  return changed.startsWith('docs/plans/') && (changed.endsWith('.md') || /^docs\/plans\/[^/]+\.assets\//.test(changed));
+}
+
 function provenanceHarmless(changed) {
-  return PROVENANCE_HARMLESS.has(changed) || (changed.startsWith('docs/plans/') && changed.endsWith('.md'));
+  return PROVENANCE_HARMLESS.has(changed) || planBookkeeping(changed);
 }
 
 // Plans are bookkeeping for projections, but their prospective contracts are reviewable work.

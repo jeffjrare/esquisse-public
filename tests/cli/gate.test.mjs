@@ -1542,3 +1542,18 @@ test('a bare directory operand does not stale the proof on its own log append', 
   await logPhase(root, file, 1, [command]);
   assert.equal((await gateVerify(root, file)).commands[0].decision, 'reuse');
 });
+
+// A capture a manual confirmation commits beside the plan after the proof is evidence, not an input:
+// it must not send every proved command back to run at landing. A declared read still would.
+test('an evidence asset beside the plan keeps the proof reusable', async () => {
+  const root = await repo();
+  await writeFile(path.join(root, 'check.mjs'), 'process.exit(0);\n');
+  commit(root, 'check');
+  const file = await plan(root, [['`(auto)` `node check.mjs` — passes']]);
+  execFileSync(process.execPath, ['check.mjs'], { cwd: root, stdio: 'pipe' });
+  await logPhase(root, file, 1, ['node check.mjs']);
+  await mkdir(path.join(root, 'docs/plans/p.assets'), { recursive: true });
+  await writeFile(path.join(root, 'docs/plans/p.assets/confirmed-state.png'), 'png bytes');
+  commit(root, 'plan(p): confirm phase 1 manual verification');
+  assert.equal((await gateVerify(root, file)).commands[0].decision, 'reuse');
+});
