@@ -59,11 +59,19 @@ test('state reports git, the plans newest first with activePlan, and the backlog
   assert.equal(result.plans[0].mtime, '2026-08-19T00:00:00.000Z');
   assert.equal(result.plans[1].state, 'ready');
   assert.deepEqual(result.backlog.counts, { Open: 1, 'Needs-decision': 1, Planned: 1, Done: 1, Dropped: 0 });
-  assert.deepEqual(result.backlog.rows, [
-    { id: 'B-001', pri: 'hi', rank: '', summary: 'first', status: 'Open', epic: '', source: 'manual' },
+  // By default an Open row is counted per priority, never listed; `rows: true` lists every open row.
+  const openRow = { id: 'B-001', pri: 'hi', rank: '', summary: 'first', status: 'Open', epic: '', source: 'manual' };
+  const routed = [
     { id: 'B-002', pri: 'med', rank: '', summary: 'second', status: 'Needs-decision', epic: 'aug', source: 'review' },
     { id: 'B-003', pri: '', rank: '', summary: 'third', status: 'Planned', epic: '', source: 'manual · Planned by x' },
-  ]);
+  ];
+  assert.deepEqual(result.backlog.openPri, { hi: 1 });
+  assert.deepEqual(result.backlog.rows, routed);
+  assert.deepEqual((await state(root, { rows: true })).backlog.rows, [openRow, ...routed]);
+  // An ID list is those open rows alone, and names the IDs no open row carries.
+  const named = (await state(root, { rows: ['B-001', 'B-004'] })).backlog;
+  assert.deepEqual(named.rows, [openRow]);
+  assert.deepEqual(named.notOpen, ['B-004']);
   // No docs/ROADMAP.md at all → roadmap is null.
   assert.equal(result.roadmap, null);
   // Identical mtimes (a fresh clone) → filename descending decides.
@@ -175,7 +183,7 @@ test('state reports a backlog table without an ID header or without a Status col
   assert.equal(result.roadmap.head.slug, 'head-entry');
   // A blank-ID row inside a well-formed table is validate's finding, not state's: the rows still come back.
   await writeFile(file, original + '|  | 2026-08-19 | bug | | blank id | manual | | | Open |\n');
-  result = await state(root);
+  result = await state(root, { rows: true });
   assert.equal(result.backlog.error, undefined);
   assert.deepEqual(result.backlog.counts, { Open: 2, 'Needs-decision': 0, Planned: 1, Done: 0, Dropped: 0 });
   assert.deepEqual(result.backlog.rows.map((row) => row.id), ['B-001', 'B-003', '']);
@@ -2247,21 +2255,21 @@ test('the first write into a nine-column backlog adds the Rank header and pads e
   assert.equal(added.row[4], '100');
 
   // Capture assigns only the new row's neutral tail; the legacy row stays unclassified.
-  const rows = (await state(root)).backlog.rows;
+  const rows = (await state(root, { rows: true })).backlog.rows;
   assert.deepEqual(rows.map((row) => [row.id, row.pri, row.rank]), [['B-001', 'hi', ''], ['B-002', 'lo', '100']]);
 });
 
 test('a backlog that already carries Rank round-trips the cell, and one without it reads blank', async () => {
   const wide = await rankFixture(TEN, '| B-001 | 2026-08-17 | 🐛 bug | hi | 100 | first | manual | | | Open |');
-  assert.deepEqual((await state(wide)).backlog.rows.map((row) => row.rank), ['100']);
+  assert.deepEqual((await state(wide, { rows: true })).backlog.rows.map((row) => row.rank), ['100']);
   // A second write neither widens it again nor disturbs the stored number.
   await addRow(wide, path.join(wide, 'docs/BACKLOG.md'), { type: '💡 idea', summary: 'second', source: 'manual' });
-  const rows = (await state(wide)).backlog.rows;
+  const rows = (await state(wide, { rows: true })).backlog.rows;
   assert.deepEqual(rows.map((row) => [row.id, row.rank]), [['B-001', '100'], ['B-002', '200']]);
   assert.equal((await readFile(path.join(wide, 'docs/BACKLOG.md'), 'utf8')).match(/Rank/g).length, 1);
 
   const narrow = await rankFixture(NINE, '| B-001 | 2026-08-17 | 🐛 bug | hi | first | manual | | | Open |');
-  assert.deepEqual((await state(narrow)).backlog.rows.map((row) => row.rank), ['']);
+  assert.deepEqual((await state(narrow, { rows: true })).backlog.rows.map((row) => row.rank), ['']);
 });
 
 test('addRow derives a suggested priority from the type when the caller states none', async () => {
@@ -2372,7 +2380,7 @@ test('rank --order assigns the sparse sequence and widens a nine-column ledger t
   assert.deepEqual(result.ranked, [{ id: 'B-003', rank: 100 }, { id: 'B-001', rank: 200 }, { id: 'B-002', rank: 300 }]);
   // Sparse by 100 so a later placement fits between any two neighbours, and the closed row keeps its blank.
   assert.deepEqual(await ranksOf(file), { 'B-001': '200', 'B-002': '300', 'B-003': '100', 'B-004': '' });
-  assert.deepEqual((await state(root)).backlog.rows.map((row) => [row.id, row.rank]), [['B-001', '200'], ['B-002', '300'], ['B-003', '100']]);
+  assert.deepEqual((await state(root, { rows: true })).backlog.rows.map((row) => [row.id, row.rank]), [['B-001', '200'], ['B-002', '300'], ['B-003', '100']]);
 });
 
 test('rank --order refuses every list it cannot turn into one total order', async () => {
@@ -2560,4 +2568,45 @@ test('decisions add creates the registry, then keeps each table order and makes 
   const piped = spawnSync(process.execPath, [bin, 'decisions', 'add', '-', file], { input: JSON.stringify({ ...DECISION, slug: 'l-apostrophe', title: "L'apostrophe" }), encoding: 'utf8', env: { ...process.env, NODE_ENV: '' } });
   assert.equal(piped.status, 0, piped.stderr);
   assert.deepEqual(JSON.parse(piped.stdout).added, [{ id: 'D-l-apostrophe', title: "L'apostrophe" }]);
+});
+
+// `esq state` on a long history: complete plans by file and state only, and past the inline budget
+// the whole answer goes to one file under the git dir, with the scalars and counts kept inline.
+test('state lists complete plans by file and state, and spills a long answer under the git dir', async () => {
+  const run = (file, args, options = {}) => promisify(execFile)(file, args, { timeout: 10_000, ...options });
+  const bin = fileURLToPath(new URL('../../plugin/bin/esq', import.meta.url));
+  const env = { ...process.env, NODE_ENV: '', ESQ_TEST_GIT_ROOT: '' };
+  const root = await mkdtemp(path.join(os.tmpdir(), 'esq-cli-state-spill-'));
+  const git = (...args) => run('git', ['-C', root, ...args], { env });
+  await git('init', '-q', '-b', 'main');
+  await git('config', 'user.email', 'test@example.invalid');
+  await git('config', 'user.name', 'Test');
+  await mkdir(path.join(root, 'docs/plans'), { recursive: true });
+  const done = '# Done\n\n## Phases\n\n### Phase 1 — one\n- task\n\n## Execution log\n\n### Phase 1 — completed 2026-09-01\n**Plan committed at:** abc1234\n';
+  await writeFile(path.join(root, 'docs/plans/2026-09-01-done.md'), done);
+  const rows = Array.from({ length: 200 }, (_, index) => `| B-${String(index + 1).padStart(3, '0')} | 2026-09-01 | 🐛 bug | med? | ${'a long open summary '.repeat(4)} | manual | | | Open |`).join('\n');
+  await writeFile(path.join(root, 'docs/BACKLOG.md'), `# Backlog\n\n| ID | Date | Type | Pri | Summary | Source | Epic | Version | Status |\n|---|---|---|---|---|---|---|---|---|\n${rows}\n`);
+  await git('add', '-A');
+  await git('commit', '-q', '-m', 'fixture');
+
+  const small = JSON.parse((await run(bin, ['state'], { cwd: root, env })).stdout);
+  assert.equal(small.file, undefined);
+  assert.deepEqual(small.plans, [{ file: 'docs/plans/2026-09-01-done.md', state: 'complete' }]);
+  assert.deepEqual(small.backlog.rows, []);
+  assert.deepEqual(small.backlog.openPri, { 'med?': 200 });
+
+  const out = (await run(bin, ['state', '--rows'], { cwd: root, env })).stdout;
+  const spilled = JSON.parse(out);
+  assert.ok(Buffer.byteLength(out) < 24_000);
+  assert.equal(spilled.file, path.join(await realpath(root), '.git', 'esq', 'state.json'));
+  assert.equal(spilled.backlog.counts.Open, 200);
+  assert.equal(spilled.backlog.rows, undefined);
+  const whole = JSON.parse(await readFile(spilled.file, 'utf8'));
+  assert.equal(whole.backlog.rows.length, 200);
+  assert.equal((await git('status', '--porcelain')).stdout, '');
+
+  // Named rows stay inline even when the rest spills.
+  const named = JSON.parse((await run(bin, ['state', '--rows', 'B-001,B-999'], { cwd: root, env })).stdout);
+  assert.deepEqual(named.backlog.rows.map((row) => row.id), ['B-001']);
+  assert.deepEqual(named.backlog.notOpen, ['B-999']);
 });

@@ -679,7 +679,7 @@ const PLAN = 'docs/plans/2026-09-04-unit.md';
 const rankedBacklog = (...rows) => '| ID | Date | Type | Pri | Rank | Summary | Source | Epic | Version | Status |\n'
   + '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n'
   + rows.map(([id, rank, pri = 'med?']) => `| ${id} | 2026-09-24 | bug | ${pri} | ${rank} | work ${id} | manual | | | Open |\n`).join('');
-const storedOrder = async (root) => (await state(root)).backlog.rows
+const storedOrder = async (root) => (await state(root, { rows: true })).backlog.rows
   .sort((a, b) => Number(a.rank) - Number(b.rank)).map(({ id, rank, pri }) => [id, rank, pri]);
 
 test('B-184: collision repair preserves deliberate sequences, not ID or priority order', async (t) => {

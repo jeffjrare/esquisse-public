@@ -1985,12 +1985,49 @@ async function epicState(repository, lookup) {
       }
       const stale = rows.some((row) => row.mismatch === true) ? true
         : rows.length && rows.every((row) => row.mismatch === false) ? false : null;
-      return { file, slug: name.slice(0, -3), rows, stale };
+      // A row whose projection agrees with the backlog is summed into `stale`, never listed: it is the
+      // one kind nothing routes on, and the kind that grows with every closed item.
+      return { file, slug: name.slice(0, -3), rows: rows.filter((row) => row.mismatch !== false), agreeing: rows.filter((row) => row.mismatch === false).length, stale };
     } catch (error) { return { file, rows: [], stale: null, error: error.message }; }
   }));
 }
 
-export async function state(root) {
+// `esq state` is read by status, roadmap and advance, and on a repository with a long history it ran to
+// 219 KB (events-tracker, 2026-09-28: 340 open rows, 170 complete plans): past Claude Code's ~30 KB
+// inline limit, so the reader got a preview and re-ran it through filters. The default answer lists
+// what a reader routes on — Planned and Needs-decision rows, an Open count per priority, complete
+// plans by file and state only — and `--rows` adds every open row. Whatever is still over the inline
+// budget is written whole under the git dir and named by `file`, with the scalars kept inline.
+// Valid JSON for the Read tool rather than for a terminal: a value whose compact form is short holds
+// one line, anything longer opens by key or element. Indenting every short object costs about a third
+// of the file, and a single-line document would be cut at the Read tool's line limit.
+export function readableJson(value, indent = '') {
+  const flat = JSON.stringify(value);
+  if (flat === undefined || flat.length <= 400 || value === null || typeof value !== 'object') return flat;
+  const inner = `${indent}  `;
+  if (Array.isArray(value)) return `[\n${value.map((item) => `${inner}${readableJson(item, inner)}`).join(',\n')}\n${indent}]`;
+  const keys = Object.keys(value).filter((key) => value[key] !== undefined);
+  return `{\n${keys.map((key) => `${inner}${JSON.stringify(key)}: ${readableJson(value[key], inner)}`).join(',\n')}\n${indent}}`;
+}
+
+export async function stateAnswer(root, { rows = false } = {}) {
+  const answer = await state(root, { rows });
+  if (Buffer.byteLength(JSON.stringify(answer, null, 2)) <= INLINE_OUTPUT_BUDGET) return answer;
+  const gitDir = gitTry(answer.root, ['rev-parse', '--absolute-git-dir']);
+  if (!gitDir) return answer;
+  const target = path.join(gitDir, 'esq', 'state.json');
+  await mkdir(path.dirname(target), { recursive: true });
+  const temporary = `${target}.${process.pid}.tmp`;
+  await writeFile(temporary, `${readableJson(answer)}\n`, 'utf8');
+  await rename(temporary, target);
+  const { root: top, branch, dirty, activePlan, landing, idBlock, inFlight } = answer;
+  // Rows the caller named by ID stay inline: they are few, and they are why it called.
+  const { counts, openPri, error, notOpen } = answer.backlog ?? {};
+  const named = Array.isArray(rows) ? { rows: answer.backlog?.rows } : {};
+  return { file: target, root: top, branch, dirty, activePlan, backlog: answer.backlog && { counts, openPri, error, ...named, notOpen }, landing, idBlock, inFlight };
+}
+
+export async function state(root, { rows: allRows = false } = {}) {
   const repository = git(root, ['rev-parse', '--show-toplevel']);
   const plans = [];
   const headers = [];
@@ -2027,7 +2064,19 @@ export async function state(root) {
     const parsed = await backlogTable(path.join(repository, 'docs/BACKLOG.md'));
     const { table, statusColumn } = parsed;
     const counts = Object.fromEntries([...STATUSES].map((status) => [status, table.rows.filter((row) => row[statusColumn] === status).length]));
-    backlog = { counts, rows: backlogRows(parsed) };
+    const rows = backlogRows(parsed);
+    const openPri = {};
+    for (const row of rows) if (row.status === 'Open') openPri[row.pri] = (openPri[row.pri] ?? 0) + 1;
+    // `rows: true` is every open row; an ID list is those rows alone, and `notOpen` names the IDs no
+    // open row carries (closed, or absent) so a caller never reads an omission as a row.
+    // The default list is settled below, once the roadmap says which Open rows it covers.
+    let listed = rows;
+    let notOpen;
+    if (Array.isArray(allRows)) {
+      listed = rows.filter((row) => allRows.includes(row.id));
+      notOpen = allRows.filter((id) => !listed.some((row) => row.id === id));
+    }
+    backlog = { counts, openPri, rows: listed, ...(notOpen ? { notOpen } : {}) };
     parsedBacklog = parsed;
   } catch (error) {
     // A table backlogTable() cannot locate or shape (no ID header, no Status column) is reported beside the
@@ -2037,6 +2086,12 @@ export async function state(root) {
   }
   const lookup = projectionLookup(parsedBacklog, backlog);
   const [roadmap, epics] = await Promise.all([roadmapState(repository, lookup), epicState(repository, lookup)]);
+  // By default an Open row is listed only when the roadmap covers it — the rows status routes on and
+  // shows as parked; every other Open row is in `openPri`.
+  if (allRows === false && backlog?.rows) {
+    const covered = new Set((roadmap?.entries ?? []).flatMap((entry) => (entry.live ?? []).map((live) => live.id)));
+    backlog.rows = backlog.rows.filter((row) => row.status !== 'Open' || covered.has(row.id));
+  }
   // The landing facts of the newest healthy plan, and only once it is complete — the plan
   // /esq:status routes its next action off. The same three facts `esq branch check` carries, read
   // from the text this loop already holds: whether it landed (a deleted branch included), whether a
@@ -2061,7 +2116,10 @@ export async function state(root) {
       };
     }
   }
-  return { root: repository, branch: git(repository, ['branch', '--show-current']), dirty: git(repository, ['status', '--porcelain']) !== '', activePlan, plans, backlog, roadmap, epics, landing, idBlock: await idBlock(repository), inFlight: await inFlightUnits(repository) };
+  // A complete plan is listed by file and state alone: readers ask only whether a cited or member plan
+  // is complete, and the rest of its entry repeated for every plan ever finished.
+  const listed = plans.map((plan) => (plan.state === 'complete' && !plan.abandoned ? { file: plan.file, state: plan.state } : plan));
+  return { root: repository, branch: git(repository, ['branch', '--show-current']), dirty: git(repository, ['status', '--porcelain']) !== '', activePlan, plans: listed, backlog, roadmap, epics, landing, idBlock: await idBlock(repository), inFlight: await inFlightUnits(repository) };
 }
 
 // ── Shipping units that live on other branches ───────────────────────────────
@@ -5042,7 +5100,13 @@ function renderStandards(report) {
 export async function main(args) {
   const [group, action, ...rest] = args;
   const root = process.cwd();
-  if (group === 'state' && action === undefined) return output(await state(root));
+  if (group === 'state' && (action === undefined || action === '--rows')) {
+    const usage = 'usage: esq state [--rows [B-NNN,B-NNN…]]';
+    if (rest.length > 1 || (action === undefined && rest.length)) throw new Error(usage);
+    const ids = rest[0]?.split(',').map((id) => id.trim()).filter(Boolean);
+    if (ids && !ids.every((id) => /^B-\d+$/.test(id))) throw new Error(usage);
+    return output(await stateAnswer(root, { rows: ids ?? action === '--rows' }));
+  }
   if (group === 'next-phase' && action) {
     // `--context` is additive and opt-in: the unflagged response is exactly what it has always been,
     // and the flagged one is that object with `context` beside it. One `readText`, one `parsePlan`,
@@ -5381,5 +5445,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--json] [--rows] [file…]>');
 }

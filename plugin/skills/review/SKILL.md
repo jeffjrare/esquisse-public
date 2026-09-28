@@ -39,7 +39,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    - `<A>..<B>`, or a single commit-ish (`HEAD`, a hash, a tag) → **a plan-less review** of exactly those commits (e.g. a fix `/esq:work` made inline, with no plan file). Skip to step 3.
    - **No argument → STOP and ask in one line:** `/esq:review <plan-path>` or `/esq:review <A>..<B>` (or one commit). Never choose the latest plan or offer a guessed plan menu.
 
-2. Read the plan file briefly — what was supposedly built, plus any prospective contract correction the scope query returns. A commit range has no plan to read.
+2. Read the plan file briefly, with the Read tool — `cat` of a plan past ~30 KB comes back as a preview and costs a second read — for what was supposedly built, plus any prospective contract correction the scope query returns. A commit range has no plan to read.
 3. Run **`esq review scope <target>` once**. Keep its pinned head, base/provenance, commits, paths, `bookkeepingOnly` and `diff`; route off `mode`, never reconstruct its answer.
    - `delta`: report "Delta review since <base short hash> (<review brief | clean review>) — say 'full re-review' to override."
    - `full`: review the unit from its plan commit. Pass `--full` when the user explicitly asks for a full plan re-review.

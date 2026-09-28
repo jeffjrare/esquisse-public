@@ -50,7 +50,7 @@ for (const closed of ['Done', 'Dropped']) {
   test(`B-172: add → state → ${closed} → rerank → reopen preserves order and provenance`, async (t) => {
     const { file, cli, ledger, valid, add } = await fixture(t, [row('B-001', '400', 'Open', 'hi'), row('B-002', '200', 'Planned', 'med?')]);
     const { id } = await add();
-    assert.equal((await cli('state')).backlog.rows.find((entry) => entry.id === id).rank, '500');
+    assert.equal((await cli('state', '--rows')).backlog.rows.find((entry) => entry.id === id).rank, '500');
     await valid();
     for (const status of ['Needs-decision', 'Planned', 'Open']) {
       await cli('backlog', 'set-status', id, status);
@@ -66,7 +66,7 @@ for (const closed of ['Done', 'Dropped']) {
     await cli('backlog', 'rank', '--order', 'B-002', 'B-001');
     await valid();
     await cli('backlog', 'set-status', id, 'Open');
-    const reopened = (await cli('state')).backlog.rows;
+    const reopened = (await cli('state', '--rows')).backlog.rows;
     assert.deepEqual(reopened.map((entry) => [entry.id, entry.rank, entry.pri]), [['B-001', '200', 'hi'], ['B-002', '100', 'med?'], [id, '300', 'lo?']]);
     assert.equal(reopened.find((entry) => entry.id === id).source, source);
     assert.match(await readFile(file, 'utf8'), /Historical evidence retained\./);
@@ -105,7 +105,7 @@ for (const legacy of [false, true]) {
       const seed = initial === 'empty' ? [] : [row('B-001', initial === 'closed' ? '800' : '', initial === 'closed' ? 'Done' : 'Open')];
       const { cli, ledger, valid, add } = await fixture(t, seed, legacy);
       const { id } = await add('--status', 'Needs-decision', '--pri', 'med');
-      assert.equal((await cli('state')).backlog.rows.find((entry) => entry.id === id).rank, '100');
+      assert.equal((await cli('state', '--rows')).backlog.rows.find((entry) => entry.id === id).rank, '100');
       if (initial === 'unranked') assert.equal((await ledger())[0].Rank, '');
       await valid();
       await cli('backlog', 'set-status', id, 'Dropped');

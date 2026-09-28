@@ -140,7 +140,7 @@ test('B-003: removing a worktree preserves its committed IDs through allocation 
   assert.match(ledger, /retained work/);
   assert.match(ledger, /different work/);
   // B-184: both captures began at Rank 100; the second seal repairs that mechanical collision.
-  assert.deepEqual((await state(root)).backlog.rows.map(({ id, rank, pri }) => [id, rank, pri]),
+  assert.deepEqual((await state(root, { rows: true })).backlog.rows.map(({ id, rank, pri }) => [id, rank, pri]),
     [['B-2000', '100', 'med?'], ['B-1000', '200', 'med?']]);
   assert.equal((await validate(root)).valid, true);
 });
@@ -296,7 +296,7 @@ test('a unit planned on its own branch stays visible from the branch that planne
   commit(root, 'plan: stray');
   git(root, 'switch', '-q', 'main');
 
-  const snapshot = await state(root);
+  const snapshot = await state(root, { rows: true });
   assert.equal(snapshot.branch, 'main');
   assert.deepEqual(snapshot.inFlight.map((unit) => unit.branch), ['esq/topic']);
   const [unit] = snapshot.inFlight;

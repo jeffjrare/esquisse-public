@@ -53,7 +53,7 @@ async function fixture(t) {
 
 test('state preserves projected order and mixed closed/open coverage without claiming staleness', async (t) => {
   const root = await fixture(t);
-  const result = await state(root);
+  const result = await state(root, { rows: true });
   assert.equal(result.roadmap.head.slug, 'dependable-queue');
   assert.equal(result.roadmap.head.state, roadmap.match(/GENERATED --> (.*)/)[1]);
   assert.equal(result.roadmap.freshness, 'unassessed');
@@ -77,8 +77,9 @@ test('epic compares only explicit projected status cells and excludes historical
   assert.equal(result.stale, true);
   assert.deepEqual(result.rows.map(({ id, status, projectedStatus, mismatch }) => ({ id, status, projectedStatus, mismatch })), [
     { id: 'B-044', status: 'Done', projectedStatus: 'Open', mismatch: true },
-    { id: 'B-079', status: 'Open', projectedStatus: 'Open', mismatch: false },
   ]);
+  // A row whose projection agrees is counted, never listed.
+  assert.equal(result.agreeing, 1);
   await writeFile(path.join(root, 'docs/epics/aug-18-improv.md'), epic.replace('measured — Open', 'measured — Done'));
   result = (await state(root)).epics[0];
   assert.equal(result.stale, false);

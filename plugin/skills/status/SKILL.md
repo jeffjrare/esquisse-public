@@ -19,23 +19,24 @@ Before recommending `/esq:plan` for a corrective brief, ask `esq brief depth <br
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Run `esq state`, `esq brief pending` and `esq validate` once, batching these independent readers. Surface validation findings. Do not glob plans/briefs or parse backlog/roadmap facts the CLI supplies.
+Run `esq state`, `esq brief pending` and `esq validate` once, batching these independent readers. When `esq state`'s answer carries `file`, it was too large to print: that file is the whole answer, so Read it in the next turn and never re-run the command. Surface validation findings. Do not glob plans/briefs or parse backlog/roadmap facts the CLI supplies.
 
 | Reader/field | Facts to retain |
 |---|---|
 | `state.root, branch, dirty` | Git state |
 | `activePlan` | Most recently modified plan file, not necessarily one in progress |
-| `plans[]` | Already newest-first: file, mtime, state (ready/paused/complete/no-phases/invalid), phase, paused entry; optional abandoned date/reason; invalid entries carry error |
+| `plans[]` | Already newest-first: file, mtime, state (ready/paused/complete/no-phases/invalid), phase, paused entry; optional abandoned date/reason; invalid entries carry error. A complete plan carries file and state only |
 | `backlog.counts` | Open, Needs-decision, Planned, Done, Dropped |
-| `backlog.rows` | Open/Needs-decision/Planned rows: id, pri, rank, summary, status, epic, source |
+| `backlog.openPri` | Open rows counted per Pri cell (`hi`, `hi?`, `med?`, …) |
+| `backlog.rows` | Every Needs-decision/Planned row, and each Open row the roadmap covers: id, pri, rank, summary, status, epic, source |
 | `roadmap.head` | Top Now entry: slug, covers, whyNow, needs, unblocks, state (projected text; GENERATED marker stripped) |
 | `roadmap.entries[]` | Now/Next/Later in projected order, same fields plus acceptance (text or null), horizon and live[]: explicit covered ID, current backlog status (including Done/Dropped), or null with error |
 | `roadmap.freshness` | unassessed for free-form projected text; unknown on read error; never a claim that closed membership makes an entry stale |
-| `epics[]` | file, slug, rows[] with projected line/status and live status; mismatch true/false/null per row; stale compares these Backlog bullets only, not the whole epic |
+| `epics[]` | file, slug, stale, rows[] with projected line/status and live status for each row whose mismatch is true or null, and `agreeing`, the count of rows that match; stale compares these Backlog bullets only, not the whole epic |
 | `landing` | For the CLI's settled complete plan: file, branch, origin, landed, coverage, unit |
 | `brief pending` | pending list, consumed corrective list, `consumedGrill` count, selected path, file, slug, kind, mtime; corrective yellow count and consumption reason |
 
-A missing backlog/roadmap is `null`; an empty Now is `roadmap.head: null`. Projection read errors remain beside healthy facts. A null live status is unknown, never Open or Done. Epic stale is true for a proven row mismatch, false only when every returned row is comparable and agrees, otherwise null; missing epics return an empty list. Check `backlog.error` **before** counts/rows: malformed tables return that field alone. Counts are unknown, never zero. An invalid plan's error is likewise a fact beside healthy results, not a reason to reconstruct the ledger by hand.
+A missing backlog/roadmap is `null`; an empty Now is `roadmap.head: null`. Projection read errors remain beside healthy facts. A null live status is unknown, never Open or Done. Epic `stale` comes computed: true for a proven row mismatch, false only when every row is comparable and agrees, otherwise null; missing epics return an empty list. Check `backlog.error` **before** counts/rows: malformed tables return that field alone. Counts are unknown, never zero. An invalid plan's error is likewise a fact beside healthy results, not a reason to reconstruct the ledger by hand.
 
 Read only facts absent from those answers: healthy plan headings/Epic/log details, unresolved brief content, epic metadata and arch/spec markers. Cache each plan's phase headings, Epic, log dates, hashes and work description on its first read. All subsequent steps reuse that cache; never re-read an unchanged file. Batch independent reads. Announce the read-only scope before a long pass and report measured elapsed.
 
@@ -79,7 +80,7 @@ Use selected for the newest planning candidate, with unresolved corrective work 
 
 ## 4. Backlog and roadmap
 
-Show Open total and hi count from pri, Needs-decision separately, and Planned separately. Closed items contribute counts only. Missing file → `No BACKLOG.md found.` On backlog.error, render `✖ backlog <error as given>`, counts unknown, and skip closure candidates and count-based backlog advice.
+Show Open total and hi count from `openPri` (`hi` plus `hi?`), Needs-decision separately, and Planned separately. Closed items contribute counts only. Missing file → `No BACKLOG.md found.` On backlog.error, render `✖ backlog <error as given>`, counts unknown, and skip closure candidates and count-based backlog advice.
 
 For Planned rows, retain Source's ` · Planned by <slug>` marker; skip rows without it. Group by slug and match the named plan in the retained plan list, reading `docs/plans/<slug>.md` only if not already cached and classification is still needed. Missing → `plan file not found`, no hunt. Invalid → `plan unreadable`, not a candidate. Before suggesting closure on a complete plan, read only the item's detail and cited acceptance evidence not already retained. Whole outcome evidenced → candidate for reconciliation; otherwise show `plan complete; acceptance unmet/unproved: <condition>`, never a closure candidate or a reason to rerun completed phases. Show its ID; never edit or assert Done. Omit an empty candidate block.
 

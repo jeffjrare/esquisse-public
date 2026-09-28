@@ -28,7 +28,7 @@ After resolving the mode, announce `Mode: <show & refresh | derive the order | a
 - **A — derive:** first token `plan` or `re-plan`, or a user invocation with no argument and no file.
 - **C — edit:** any other text.
 
-B reads the roadmap, backlog **table rows** (or `esq state`'s `backlog.rows`), `esq state`'s `inFlight`, cited plans and cited epic Status. Before a completion recommendation, also read only the relevant open items' detail sections and their cited acceptance evidence already in those sources. No code, verification rerun or plan sweep. C has the same budget, including the moved entry's and neighbour's covered rows. A adds only its Gather inputs below.
+B reads the roadmap and one `esq state` — its `backlog.rows` already hold every row the roadmap covers, plus `inFlight` and `plans[].state`; when the answer carries `file`, that file is the whole answer: Read it in the next turn, never re-run `esq state` through a filter — then cited plans and cited epic Status. Before a completion recommendation, also read only the relevant open items' detail sections and their cited acceptance evidence already in those sources. No code, verification rerun or plan sweep. C has the same budget, including the moved entry's and neighbour's covered rows. A adds only its Gather inputs below.
 
 <!-- shared:read-once:start -->
 **Read each file once**, taking the needed slice on large files and retaining it for later steps. Re-read only if you have written to it since. A later reference to that file or a desire to double-check does not justify another read.
@@ -64,7 +64,7 @@ For example, dev-only dependency bumps can share one low-risk entry that lands f
 ### Gather and judge
 
 Read:
-1. Backlog rows: Open, Needs-decision and Planned; omit Done/Dropped.
+1. Backlog rows: Open, Needs-decision and Planned; omit Done/Dropped. `esq state --rows` lists them all; when its answer carries `file`, Read that file — by `offset`/`limit` ranges if one read is refused — and never re-run the command through a filter.
 2. Plans under `docs/plans/`, excluding `*.brief.md` and `*.log.md`: title, Epic and Execution log.
 3. Epics: Status, Goal, Scope. Active next slices usually rise; paused/done epics' items sink.
 4. Existing decisions that constrain ordering.

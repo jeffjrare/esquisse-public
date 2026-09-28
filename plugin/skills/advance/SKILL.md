@@ -45,7 +45,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
 ## Preflight
 
-1. **Read `docs/ROADMAP.md`, and run `esq state` in the same call** (`backlog.rows`, `inFlight`, and `branch` — the starting branch). No roadmap file → STOP: "No roadmap — run `/esq:roadmap plan` to derive one, then this command works its top." Never fall back to backlog priority.
+1. **Read `docs/ROADMAP.md`, and run `esq state` in the same call** (`backlog.rows` — every row the roadmap covers —, `inFlight`, and `branch` — the starting branch). When the answer carries `file`, that file is the whole answer: Read it in the next turn. No roadmap file → STOP: "No roadmap — run `/esq:roadmap plan` to derive one, then this command works its top." Never fall back to backlog priority.
 2. **Resolve the target within `## Now` only.** Empty arguments select the whole horizon. Otherwise `$0` selects exactly one entry: first an exact `### <target>` slug, or a `B-NNN` in its `covers:` line. Never widen a failed lookup into a bare run or guess another entry.
    If no Now entry matches, stop before spawning and name the miss:
    - Elsewhere in the roadmap → promote it with `/esq:roadmap` or work its items with `/esq:work B-N`.
