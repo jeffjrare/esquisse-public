@@ -141,7 +141,7 @@ Recording spares the landing gate a re-run of a command already proved green on 
 
    ```
    git add <files> && git commit -m "fix(scope): …" \
-     && esq plan record-verification <plan> --confirm '{"by":"<brief-slug> item <n>","at":"<the commit>","tree":"<the write-tree>","step":"<the step, verbatim>"}' \
+     && esq plan record-verification <plan> --confirm '{"by":"<brief-slug> item <n>","at":"<the commit>","tree":"<the write-tree>","step":"<the whole (auto) step line as the plan now reads it — marker, command and criterion — never the command alone>"}' \
      && git add <plan> && git commit -m "docs(plan): record the verification of <step>"
    ```
 

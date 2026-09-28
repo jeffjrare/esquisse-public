@@ -495,7 +495,21 @@ export async function addDecisions(file, json) {
   }
   const lines = text.replace(/\n+$/, '').split('\n');
   const table = tableAt(lines, '#');
-  const taken = new Set([...text.matchAll(/^(?:\| *|## *)(D-[A-Za-z0-9-]+)/gm)].map((match) => match[1]));
+  // A taken ID is refused, never suffixed: the caller that reaches it has usually re-recorded a
+  // decision its plan already holds, and a silent `-2` wrote that duplicate (events-tracker,
+  // 2026-09-27). The existing title comes back so the caller can tell which case it is.
+  const existing = new Map([...text.matchAll(/^\| *(D-[A-Za-z0-9-]+)/gm)].map((match) => [match[1], null]));
+  for (const match of text.matchAll(/^## *(D-[A-Za-z0-9-]+)(?: — (.*))?$/gm)) existing.set(match[1], match[2] ?? null);
+  const batch = new Set();
+  for (const entry of entries) {
+    const id = `D-${entry.slug}`;
+    if (existing.has(id)) {
+      const title = existing.get(id);
+      throw new Error(`decisions add: ${id} already exists${title ? ` ("${title}")` : ''} — if it records this decision, write nothing; otherwise choose another slug. Nothing was written.`);
+    }
+    if (batch.has(id)) throw new Error(`decisions add: ${id} appears twice in this payload. Nothing was written.`);
+    batch.add(id);
+  }
   // A table written newest-first stays newest-first; any other order is appended to. The two ends'
   // Date cells decide it, so the one registry that prepends keeps prepending.
   const dates = table.rows.map((row) => row[1] ?? '').filter((cell) => /^\d{4}-\d{2}-\d{2}$/.test(cell));
@@ -505,9 +519,7 @@ export async function addDecisions(file, json) {
   const sections = [];
   const added = [];
   for (const entry of entries) {
-    let id = `D-${entry.slug}`;
-    for (let suffix = 2; taken.has(id); suffix += 1) id = `D-${entry.slug}-${suffix}`;
-    taken.add(id);
+    const id = `D-${entry.slug}`;
     const cell = entry.decision.replace(/\s*\n\s*/g, ' ').replace(/\|/g, '\\|');
     rows.push(formatRow([id, entry.date, entry.scope, entry.topic.replace(/\|/g, '\\|'), cell, 'Active']));
     sections.push([
@@ -1761,7 +1773,12 @@ export async function recordVerification(root, planPath, confirmJson) {
   // or nothing is recorded.
   const matches = autoSteps(text).filter((candidate) => candidate.step === payload.step);
   if (matches.length === 0) {
-    return decline('step-unknown', `No (auto) step of ${relative} carries that text, so there is no phase this proof belongs to. Copy the step verbatim from the plan's own **Verification:** list — it is matched as a literal, never as a pattern. ${unchanged}`);
+    // The usual miss is the bare command where the whole step was owed. The steps that run the same
+    // command come back verbatim, so the retry is a copy rather than a read of this file's source —
+    // still an exact match on the retry, never an attribution made here.
+    const command = extractAutoCommand(payload.step) ?? payload.step.trim();
+    const candidates = autoSteps(text).filter((candidate) => extractAutoCommand(candidate.step) === command);
+    return decline('step-unknown', `No (auto) step of ${relative} carries that text, so there is no phase this proof belongs to. \`step\` is the whole step line — marker, command and criterion — copied verbatim from the plan's own **Verification:** list; it is matched as a literal, never as a pattern.${candidates.length ? ' `candidates` lists the steps running that command.' : ''} ${unchanged}`, candidates.length ? { candidates } : {});
   }
   if (matches.length > 1) {
     const phases = [...new Set(matches.map((match) => match.phase))].sort((left, right) => left - right);

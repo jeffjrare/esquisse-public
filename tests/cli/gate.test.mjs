@@ -1119,6 +1119,13 @@ test('a step no phase carries, and one two phases carry, each record nothing', a
   const unknown = await byteIdentical(file, () => record(root, file, proofFor(root, '`(auto)` `pnpm lint` — clean')));
   assert.equal(unknown.refuse, true);
   assert.equal(unknown.code, 'step-unknown');
+  assert.equal(unknown.candidates, undefined);
+
+  // The bare command where the whole step was owed: refused all the same, with the steps that run
+  // it handed back verbatim for the retry.
+  const bare = await byteIdentical(file, () => record(root, file, proofFor(root, 'pnpm test')));
+  assert.equal(bare.code, 'step-unknown');
+  assert.deepEqual(bare.candidates, [{ phase: 1, step: STEP_ONE }, { phase: 2, step: STEP_TWO }]);
 
   // Two phases naming the same *command* under different criteria: attribution is by step, so the
   // step whose criterion was not met records nothing and the other records normally.

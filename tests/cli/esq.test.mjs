@@ -2531,12 +2531,11 @@ test('decisions add creates the registry, then keeps each table order and makes 
   assert.match(first, /\n---\n\n## D-one-lock-order — One lock order\n\n\*\*Scope:\*\* arch\n\*\*Topic:\*\* db\n\*\*Date:\*\* 2026-09-27\n\*\*Statut:\*\* Active\n\n\*\*Contexte:\*\* C\.\n\*\*Décision:\*\* Lock a \| b first\.\n/);
   assert.ok(first.endsWith('**Alternatives rejetées:** A.\n'));
 
-  // Oldest-first: appended below the last row. The same slug gets the first free suffix, and a
-  // Fondement is written only when given.
-  const later = await addDecisions(file, JSON.stringify([{ ...DECISION, date: '2026-09-28', fondement: 'mandate — the plan' }, { ...DECISION, date: '2026-09-28' }]));
-  assert.deepEqual(later.added.map((row) => row.id), ['D-one-lock-order-2', 'D-one-lock-order-3']);
+  // Oldest-first: appended below the last row, and a Fondement is written only when given.
+  const later = await addDecisions(file, JSON.stringify([{ ...DECISION, slug: 'two', date: '2026-09-28', fondement: 'mandate — the plan' }, { ...DECISION, slug: 'three', date: '2026-09-28' }]));
+  assert.deepEqual(later.added.map((row) => row.id), ['D-two', 'D-three']);
   const rows = (await readFile(file, 'utf8')).split('\n').filter((line) => line.startsWith('| D-')).map((line) => line.split(' | ')[0]);
-  assert.deepEqual(rows, ['| D-one-lock-order', '| D-one-lock-order-2', '| D-one-lock-order-3']);
+  assert.deepEqual(rows, ['| D-one-lock-order', '| D-two', '| D-three']);
   assert.equal((await readFile(file, 'utf8')).match(/\*\*Fondement:\*\*/g).length, 1);
 
   // Newest-first: a table whose top row is the newer one keeps taking new rows at the top.
@@ -2550,6 +2549,10 @@ test('decisions add creates the registry, then keeps each table order and makes 
   await assert.rejects(addDecisions(file, JSON.stringify([DECISION, { ...DECISION, scope: 'misc' }])), /"scope" must be one of/);
   await assert.rejects(addDecisions(file, JSON.stringify({ ...DECISION, extra: 1 })), /unknown key "extra"/);
   await assert.rejects(addDecisions(file, JSON.stringify({ ...DECISION, slug: 'D-x' })), /"slug" must be lowercase/);
+  // A taken ID is refused with its title, never suffixed into a duplicate — and so is a repeat
+  // inside one payload.
+  await assert.rejects(addDecisions(file, JSON.stringify([{ ...DECISION, slug: 'four' }, DECISION])), /D-one-lock-order already exists \("One lock order"\)/);
+  await assert.rejects(addDecisions(file, JSON.stringify([{ ...DECISION, slug: 'four' }, { ...DECISION, slug: 'four' }])), /D-four appears twice/);
   assert.equal(await readFile(file, 'utf8'), before);
 
   // `-` reads the payload from stdin, where an apostrophe needs no shell quoting.
