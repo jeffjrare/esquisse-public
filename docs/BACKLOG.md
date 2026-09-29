@@ -202,6 +202,8 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-183 | 2026-09-25 | ✨ improvement | hi? |  | Correct architecture authority and reporting instructions; remove the planner alternative quota. | observed: adversarial preparation and architecture review 2026-09-24 · Done by architecture-preparation-review |  |  | Done |
 | B-184 | 2026-09-25 | 🐛 bug | med? |  | Reconcile duplicate tail ranks when independently captured backlog rows merge. | observed: B-003 retained-branch regression; independent rows both carry Rank 100 · Done by merge-rank-collisions |  |  | Done |
 | B-185 | 2026-09-25 | 🐛 bug | hi |  | Preserve significant whitespace in auto commands through Markdown extraction and landing proof reuse. | observed: events-tracker landing plan 2026-09-24-vitrine-fonctions-recentes-multi-membre, command line 232 and proof line 295 · Done by preserve-command-whitespace |  |  | Done |
+| B-186 | 2026-09-29 | ⚠️ debt | med? |  | No end-to-end proof that an opted-in /esq:plan run launches the Codex counter-plan, kills it when late, and records the Adversary block and Codex: line | fix: codex-adversary-in-plan · Planned by codex-adversary-in-plan-fixes · Done by codex-adversary-in-plan-fixes |  |  | Done |
+| B-187 | 2026-09-29 | ⚠️ debt | med? |  | Probe-codex-plan cannot prove the skill stopped the late counter-plan (host teardown looks the same), and its one-line task now trips /esq:plan's small-task exit | fix: codex-adversary-in-plan-fixes · Planned by codex-adversary-in-plan-fixes-fixes · Done by codex-adversary-in-plan-fixes-fixes |  |  | Done |
 
 ---
 
@@ -1514,3 +1516,19 @@ same amendment.
 ## B-185 — Preserve significant whitespace in auto commands through Markdown extraction and landing proof reuse.
 
 **Resolution:** Removed global whitespace compression from listItems; preserved Markdown list and continuation handling and exact proof strings. Three regressions cover the real eight-command excerpt, significant spaces/tabs, continuations, exact proof recording, deduplication and reuse versus a distinct single-space command. One final product audit passed 7/7 in 26.61 s. Evidence: docs/preparation/2026-09-25-b185-command-whitespace.md. Local source only; events-tracker read-only, no installation or publication.
+
+## B-186 — No end-to-end proof of the opted-in Codex adversary in /esq:plan
+
+**What:** Only the two schema smokes ran for `codex-adversary-in-plan`; no recorded opted-in `/esq:plan` run on a scratch target shows the counter-plan launched, killed when late, and the `Adversary (codex` block in the plan commit body (`git log -1 --format=%b`) plus the `Codex:` report line.
+**Why it matters:** The feature's first Done-looks-like bullet stays unproved; a regression in the gate read, the background launch or the commit body would ship unseen.
+**Notes:** Needs a planned observation run, after the two 🟢 fixes (6ec9aea gate read, ac31c38 Bash timeout) that it depends on; not a mechanical fix.
+
+**Resolution:** scripts/probe-codex-plan.sh (66ffd73) ran one opted-in headless /esq:plan with a forced-late counter-plan: 5/5 PASS (launch order, blind, Adversary block with counter-plan not returned, Codex: report line, no leftover process), 97 s, 0.44 USD
+
+## B-187 — Probe-codex-plan cannot prove the skill stopped the late counter-plan, and its one-line task trips /esq:plan's small-task exit
+
+**What:** `scripts/probe-codex-plan.sh` assertion 5 only checks that no counter-plan process survives `claude -p`, which an exiting headless host can cause by reaping its own background tasks; it should also require a `TaskStop` `tool_use` in `stream.jsonl`. Separately, the probe's one-line `--version` task now lets `/esq:plan` take its "much smaller than expected, do it directly" exit (`plugin/skills/plan/SKILL.md:102`): a 2026-09-28 run ended in 12 s with no plan and no Codex call (0/5).
+**Why it matters:** An edit to `codex-adversary.md` that drops "stop its background task" still passes 5/5, leaving interactive `ESQ_CODEX=on` users with a late counter-plan spending Codex tokens until its timeout; and a probe whose target is skipped nondeterministically proves nothing on re-run.
+**Notes:** The 🟢 TaskStop check was applied and parsed correctly on a synthetic stream, but its one verification run went red on the small-task exit, so it was discarded unrecorded. Fixing it means choosing a probe task the small-task exit cannot apply to, which changes Task 1.1's named target — a probe design choice for /esq:plan (brief `docs/plans/2026-09-28-codex-adversary-in-plan-fixes-fixes.brief.md`).
+
+**Resolution:** probe assertion 5 now requires the skill's own TaskStop tool_use (dry-run counterexample reds) and plans a pinned multi-file task; 4c7b9d1, real run 5/5 green in 116 s

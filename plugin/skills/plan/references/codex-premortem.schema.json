@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["findings"],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "where", "claim", "evidence", "fix"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["missing-task", "criterion-does-not-prove", "criterion-between-phases", "phase-order", "scope", "security", "other"]
+          },
+          "where": { "type": "string" },
+          "claim": { "type": "string" },
+          "evidence": { "type": "string" },
+          "fix": { "type": "string" }
+        }
+      }
+    }
+  }
+}
