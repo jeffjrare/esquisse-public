@@ -1,0 +1,9 @@
+{
+  "plugin/skills/plan/SKILL.md": {
+    "commit": "5031a4a",
+    "before_sha256": "4cd1d43ef8f23edddf9727d4a9a8c67c89b7cd4d390e850542f42e67dc2b99a6",
+    "after_sha256": "1a002c48dc1038977226ddf1b6eeaf233ec3982948b06ef9048da9b2ca6def5a",
+    "before_words": 5375,
+    "after_words": 5421
+  }
+}

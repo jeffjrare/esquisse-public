@@ -1,0 +1,690 @@
+[
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-24-vitrine-fonctions-recentes-multi-membre.brief.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "*.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "docs/**/*.md"
+    }
+  },
+  {
+    "result_characters": 10971,
+    "result_sha256": "7f3c369d5387f94ac4250a1ff18960769392ae09c95b08a3dbc34e6f43f96ebb",
+    "is_error": false
+  },
+  {
+    "result_characters": 1712,
+    "result_sha256": "5bb8206413438127dd7e568b3b02909757fdaf63069c4328795a9ed66d247ecb",
+    "is_error": false
+  },
+  {
+    "result_characters": 252,
+    "result_sha256": "e4a97fac5a214f62a658d0d4ce62197daa9f60d69aed48ec07c2f92d0b4e53a2",
+    "is_error": false
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "landing/src/**/*"
+    }
+  },
+  {
+    "result_characters": 3087,
+    "result_sha256": "6322794dc91e1eb16b34a74c09b3fe8ec4d5ae6b9af80257b16c93568733db47",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/CLAUDE.md"
+    }
+  },
+  {
+    "result_characters": 5675,
+    "result_sha256": "2381d0461da07588c430a9d6bf7b4f1cd4641d1d605287d1f09be368a7407ac9",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/plugin/skills/plan/references/screens-and-manual-steps.md"
+    }
+  },
+  {
+    "result_characters": 7554,
+    "result_sha256": "14a21115142100aebc7da2147d2fd2217cb24ea035e6b4dda071b4407f6bafe3",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/Features.astro"
+    }
+  },
+  {
+    "result_characters": 4893,
+    "result_sha256": "b50df0fe0bc7ee56fe1dd80a9c82f93f62a65264250e1e10e46438ba0addfda5",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/index.astro"
+    }
+  },
+  {
+    "result_characters": 3516,
+    "result_sha256": "3eca5f5028e0c7911f8869ca997f62bd74ff0b6205892d2d5dcdc853719c8649",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/en/index.astro"
+    }
+  },
+  {
+    "result_characters": 2723,
+    "result_sha256": "499906ddaecc3891de1c670dc216b04c830029f8b88666a4c7eee36c99d7b340",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/fragments/SwitcherFragment.astro"
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/mockups/QuickLogMock.astro"
+    }
+  },
+  {
+    "result_characters": 3514,
+    "result_sha256": "d0d667d386ef86d9b0ded867dbcd2a90f557655718c9b3c64d57a1e6b044cc01",
+    "is_error": false
+  },
+  {
+    "result_characters": 5339,
+    "result_sha256": "b3934681b4fb47a1750068aa549c22f22fe1245aeff78edab9bfb4c4f03a6002",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/LookingBack.astro"
+    }
+  },
+  {
+    "result_characters": 5410,
+    "result_sha256": "6db05df06a23ee0b1929d6f6f41619bc179932b143ce6055cb37067aaef66e51",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^#+ .*D-|nothing may come between|entre l'étape 3|Forecasting",
+      "path": "<case>/docs/DECISIONS.md",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 2222,
+    "result_sha256": "acfbbbda290e2d469fa859995887ba07dc796fac7418eb6323126d8ca6415801",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json"
+    }
+  },
+  {
+    "result_characters": 54454,
+    "result_sha256": "aa85491ccb6a0831fb47034b7e341f8505fb0e6abebf18d63eaf62b6bc0d53e6",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing|écart minimum|Enregistrer quand même|Save anyway|recurring|récurrent",
+      "path": "<case>/frontend/src/locales",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 2294,
+    "result_sha256": "303a0458240956d643d0855c322642b460004a72348bd21ce0d675961cec76de",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^## D-(le-budget-de-hauteur|le-changement-de-maisonnee|la-vitrine|le-catalogue-note)|étape 3|Forecasting|nothing may come",
+      "path": "<case>/docs/DECISIONS.md",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 2430,
+    "result_sha256": "086c1910bcb2f155420f4fcfa2a4b043f5d82415469e59cad338e1403ab25a75",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/DECISIONS.md",
+      "offset": 16205,
+      "limit": 56
+    }
+  },
+  {
+    "result_characters": 7168,
+    "result_sha256": "5b7c1498710d3f4f491f1ef18ffc31b34f7435c320ed97015d871b7a2ff5c0b5",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/DECISIONS.md",
+      "offset": 16960,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 5769,
+    "result_sha256": "cd8b8000486dc6e36b5fc0d6bacc354e8a759fb64811055e4975b2bc8415a078",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/DECISIONS.md",
+      "offset": 10600,
+      "limit": 16
+    }
+  },
+  {
+    "result_characters": 2287,
+    "result_sha256": "93be6e0725e5a2a47c8bbdaaa2baf216fc407c968421282915d91199bd9bdbba",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/fr.json",
+      "offset": 470,
+      "limit": 75
+    }
+  },
+  {
+    "result_characters": 3427,
+    "result_sha256": "70a52cdb7d25565a6bcd7fe54fbe723bb558d8f8adac860f9df12171fe7faec8",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing\\.gap|spacing\\.confirmQuestion|recurringValues",
+      "path": "<case>/frontend/src",
+      "glob": "*.tsx",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 1015,
+    "result_sha256": "c156ca679c834cd2381ad3e34c8388ec79673c6206edd42a153e8e1cb33e6e7d",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/en.json",
+      "offset": 479,
+      "limit": 62
+    }
+  },
+  {
+    "result_characters": 2835,
+    "result_sha256": "76f886162fd0c01e4ea8edc1da4140d849a4439e5fa445587f9c21118a6b815b",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^#+ .*(option|Espacement|écart|Valeurs fréquentes|pastille|Filtr)",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 27,
+    "result_sha256": "b46b5aaecb3218352e0efa5d65be1bbdee81088f9022474cd75ff03e4ab3b71c",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/spacing-confirm.tsx"
+    }
+  },
+  {
+    "result_characters": 6218,
+    "result_sha256": "a5c6386c94652bbf598ceb5da11d4d340465812b8aa73d7e48c4c2c92a14fd89",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "offset": 580,
+      "limit": 30
+    }
+  },
+  {
+    "result_characters": 1463,
+    "result_sha256": "fba96452c2f43959069e062f27a34d9bfb2fa83cd0bdcf23e23feca4c9f82673",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "offset": 755,
+      "limit": 60
+    }
+  },
+  {
+    "result_characters": 2104,
+    "result_sha256": "5e5a5d31fa73a677357bfc5814a121d6c2136284080a6020b838137d35e61d8e",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "espacement|écart minimal|valeurs fréquentes|par option|filtre.*option|option.*filtr",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 1502,
+    "result_sha256": "e146ffcbcb473932f796a3f7fff494765f6ae508232826aa25f2aa2c0919af7a",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/SPEC.md",
+      "offset": 1281,
+      "limit": 56
+    }
+  },
+  {
+    "result_characters": 10373,
+    "result_sha256": "d51d110aa3e6056cbdf2b50fa270cf205a4c491d4cee6b5bab5148cd71c639eb",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "Espacement minimal|SPACING|minimum-spacing|Valeurs fréquentes|recurring-quantity|valeurs récurrentes",
+      "path": "<case>/docs",
+      "output_mode": "content",
+      "head_limit": 30
+    }
+  },
+  {
+    "result_characters": 4423,
+    "result_sha256": "26aabc107661987fbc496fc94f1de11e7098932738d057d385f067e6949d137a",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "terracotta|5 100|5100|limit",
+      "path": "<case>/landing/DESIGN.md",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 1213,
+    "result_sha256": "a0324d0d3c3168a6fd8967595c6f8aecf8260ed393bef490a215a05f7208ac08",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing|Spacing",
+      "path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 1609,
+    "result_sha256": "d4f31e105dd909285b119eb632b959ae69323797db33a1ab1e93d03852d39f10",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/DESIGN.md",
+      "offset": 80,
+      "limit": 20
+    }
+  },
+  {
+    "result_characters": 1495,
+    "result_sha256": "8e2ceff4835b74fe98df43c608056aa48a4f56667b6af16dafa546ec0186d1c8",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/DESIGN.md",
+      "offset": 440,
+      "limit": 80
+    }
+  },
+  {
+    "result_characters": 5369,
+    "result_sha256": "4a1a410e396fb0c86a1025ac8b64c08ae66c7e62c93cdbb77c5bb99e96163315",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "B-530|B-170 ",
+      "path": "<case>/docs/BACKLOG.md",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 1045,
+    "result_sha256": "6b5b7edad20c20fbcb94c49c95f59386bf2bdfa86ca9f04f9ee237b7aa332840",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "offset": 560,
+      "limit": 120
+    }
+  },
+  {
+    "result_characters": 6135,
+    "result_sha256": "47745ac5d19223e95fec825ec5e7af6c0694f30603e2f56f3f469c865a3b67a3",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "Espacement|au moins|avertit|Enregistrer quand même",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "head_limit": 15
+    }
+  },
+  {
+    "result_characters": 3268,
+    "result_sha256": "db611cae180f8f7cf29e2f6bb405917a6ae10c3d89cae04c9db2437477fb7f4d",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "due|--color-(warning|success)",
+      "path": "<case>/landing/src/styles/landing.css",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 981,
+    "result_sha256": "893f3683d80a0c148582a3ae781bce101c487741fda5c74b11d190a8de584d66",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "fieldValue|fieldLabel|sheet",
+      "path": "<case>/landing/src",
+      "glob": "*.{astro,ts}",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 3862,
+    "result_sha256": "22980663c5135d9db68c9c5d8a3400ffed21e4d45f4f7df1379958262c1176f6",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "BUDGET|limit|5100|5 100|fold|229",
+      "path": "<case>/landing/scripts/audit.mjs",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 1359,
+    "result_sha256": "e6f38cd0b3561e21b7b2d515db9f39c8c485670d75693eedaccc205fd0ea3d12",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "5 100|5100|5,100",
+      "path": "<case>",
+      "glob": "!docs/DECISIONS.md",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 2163,
+    "result_sha256": "e14e0b666f37cf4401cad4152c3b46f858d429b5f6c5ae0d1ea95915b3eeb16b",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/scripts/audit.mjs",
+      "offset": 1,
+      "limit": 60
+    }
+  },
+  {
+    "result_characters": 4100,
+    "result_sha256": "c9fd7b86d4e6216e33a3caf39e03c4e77399273551f6e5459fcd268f9a54d712",
+    "is_error": false
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "landing/package.json"
+    }
+  },
+  {
+    "result_characters": 20,
+    "result_sha256": "9e817aceaf0d48fcd9ea6336e46f5ec5657ce7c8f662ea6f9683f71acfb3fde8",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/package.json"
+    }
+  },
+  {
+    "result_characters": 984,
+    "result_sha256": "b3420a700d293a5002738af5c1709b0f1a68cfc87c3d5cf89d38e330cdde4ada",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/types.ts",
+      "offset": 85,
+      "limit": 35
+    }
+  },
+  {
+    "result_characters": 1128,
+    "result_sha256": "598e1d454ef14476b13b85a83134d6f0a5f138a906726098e91867248fef707e",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "household|Features|switcher",
+      "path": "<case>/landing/src/copy/types.ts",
+      "output_mode": "content",
+      "-n": true
+    }
+  },
+  {
+    "result_characters": 1436,
+    "result_sha256": "4adceaf963b4407a8318a4396f394db464b077619af0dc44f1a276a5d116d2a2",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"subhead\"|\"fieldValue\"|\"fieldLabel\"|\"second\": \"The period|\"heading\": \"The whole household|\"lead\": \"An entry|\"fourth\": \"One account|\"third\": \"When another|\"justNow\"|\"ago\"",
+      "path": "<case>/landing/src/copy/en.json",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 800,
+    "result_sha256": "644c2027293ee9526695f161a4c94ec5b957ac9ea28964c86453ee1cbc7deb1e",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"ago\"|\"hours\"|\"hour_|h ago",
+      "path": "<case>/frontend/src/locales/en.json",
+      "output_mode": "content",
+      "head_limit": 8
+    }
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "action|Analyser",
+      "path": "<case>/landing/src/components/fragments/ImportFragment.astro",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 139,
+    "result_sha256": "2231ad73f2bb41f011c3fcea616a0730da83e6450a273c95b2c92a5eceec3c4f",
+    "is_error": false
+  },
+  {
+    "result_characters": 372,
+    "result_sha256": "40726b828f605ba85cb68517305adb0219df9cf12346ffae865f8995c629eea6",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/fragments/ImportFragment.astro",
+      "offset": 1,
+      "limit": 60
+    }
+  },
+  {
+    "result_characters": 2307,
+    "result_sha256": "b27a67fbbdcc8fe1ae0d87034940e7d0479053838490aa9af2d392402fd204cd",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"points\"|\"second\":",
+      "path": "<case>/landing/src/copy/en.json",
+      "output_mode": "content",
+      "-A": 1,
+      "offset": 0,
+      "head_limit": 0,
+      "glob": "en.json"
+    }
+  },
+  {
+    "result_characters": 1888,
+    "result_sha256": "3c29cbe29ba7bc5ab090ba884fcb2f65733b8a911ebc7aa51ce8b41d8570b17e",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "landing|4321|360|audit",
+      "path": "<case>/.claude/skills/run-tamialog/SKILL.md",
+      "output_mode": "content",
+      "head_limit": 15
+    }
+  },
+  {
+    "result_characters": 776,
+    "result_sha256": "3e67cb991411953603caed31bc65c78d50df3a30650e292ed259ed4e7adb7fad",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "Features|maisonnée.*section|séquence|six sections|ordre des sections",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "head_limit": 10
+    }
+  },
+  {
+    "result_characters": 607,
+    "result_sha256": "a44443642ffa82c2b3b784b39d3a845e906699e84398029b810f82517f5fad6e",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "parity|satisfies|copy/\\*\\.json|en\\.json",
+      "path": "<case>/landing/src",
+      "glob": "**/__tests__/*.ts",
+      "output_mode": "files_with_matches"
+    }
+  },
+  {
+    "result_characters": 171,
+    "result_sha256": "63657e4dc9c09a4063db59a760c95fbf9dfb19f5458cf17c6264300cee994373",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "Page publique|Comment ça marche.*prévision|sous le bento|en dernier",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-o": true
+    }
+  },
+  {
+    "result_characters": 50,
+    "result_sha256": "745c2466f027c486ae359d81ca50437e3bbc349d30323c3464fafa94d132558c",
+    "is_error": false
+  }
+]
