@@ -98,3 +98,31 @@ above. There is no 🔴 item and no 🟢 item left for `/esq:fix`.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-28
+
+**Plan committed at:** 68f0aea
+
+**Commits:** 4c7b9d1
+
+**Verified:** 4c7b9d1d95884ab61e50edd05050c5a0a98fced8
+- `bash -n scripts/probe-codex-plan.sh`
+- `scripts/probe-codex-plan.sh`
+- `./scripts/audit.sh`
+
+**What got built:** scripts/probe-codex-plan.sh assertion 5 now fails with `the skill never called TaskStop` unless an assistant tool_use named TaskStop is in the stream (and still fails on a leftover process); the probe task is a pinned multi-file todo feature /esq:plan plans rather than waving off.
+
+**Verification:**
+- (auto) bash -n scripts/probe-codex-plan.sh — parses
+- (auto) zero-cost dry run, fake claude on PATH writing a stream with no TaskStop — `FAIL 5 skill called TaskStop — the skill never called TaskStop` (the counterexample the old check passed: no process alive); same fake with a TaskStop tool_use — `PASS 5 skill called TaskStop, no counter-plan process left behind`
+- (auto) scripts/probe-codex-plan.sh — exit 0, 5/5 PASS, assertion 5: `skill called TaskStop, no counter-plan process left behind`; claude exit=0, elapsed 116 s, cost 0.4361 USD; plan commit `plan: todo-command-set`, Adversary block verbatim: `Adversary (codex config):` / `counter-plan: not returned — still running when the pre-mortem ended; stopped` / `F1 accepted criterion-does-not-prove — error cases now assert stderr non-empty and stdout empty` / `F2 accepted criterion-does-not-prove — wrong-shape JSON now tested against list/add/done with byte preservation`
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), 27 s
+
+**Surprises / decisions made during execution:** - Task 1.2 not needed: the first real run was green, so no skill defect and no re-run.
+- Cost stayed at 0.44 USD, not the 1–2 USD the plan expected; the larger task did not lengthen the investigation noticeably.
+- B-187 is a `fix:`-sourced ⚠️ row of this unit, so it was closed (Done, 4c7b9d1 + the green run) before logging, since `unit.open` would otherwise block the completed entry.
+- After the run, no counter-plan process and no /tmp scratch dirs were left (checked with `ps`, not `pgrep -f`, which matches its own shell).
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. The unit is ready for /esq:review; one green run doesn't prove the probe task is stable across model runs (Risks).
