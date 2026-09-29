@@ -37,6 +37,8 @@ Print this line first, before any tool call, then continue with the first call i
 
 > `/esq:plan — writing one plan file. Bound: no subagents, at most 4 questions per round, at most 3 web searches per load-bearing decision.`
 
+With `ESQ_CODEX=on` in the environment, the line ends `…; with ESQ_CODEX=on, 2 read-only Codex calls (≤15 min background, ≤10 min foreground).` instead of its period, and you load `${CLAUDE_SKILL_DIR}/references/codex-adversary.md` in the same turn. Unset, nothing here changes.
+
 Stop at the bound and report what remains uncovered. Announce the resolved target after preflight.
 <!-- announce-open:end -->
 
@@ -64,6 +66,8 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
     <!-- announce:end -->
 
     This is the free moment to be redirected — the target is on screen before anything has been spent on it.
+
+    **`ESQ_CODEX=on` only:** in this same response, launch the blind counter-plan in the background, per § 1 of `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`.
 
 <!-- shared:batch-independent:start -->
 **Batch independent, read-only calls in one turn.** A call that consumes another's result waits for it. Serialize Git mutations, writes to the same file, and reads of a file another call writes; never run them concurrently. Group ordered shell operations with `&&` in one call so failure stops the chain.
@@ -235,6 +239,8 @@ Things you couldn't decide without more input. Be specific about what would reso
 
 The `<!-- comment -->` after `## Execution log` is required — it signals to `/esq:build` that this section is reserved.
 
+**`ESQ_CODEX=on` only — `## Approaches considered`:** read the counter-plan if it has returned and judge it there, per § 1 and § 3 of `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`; a structurally different Codex approach replaces the self-invented alternative. Not returned yet: write the section without it.
+
 ## Style for the plan content
 
 Keep only what changes an implementation or product decision: the useful result,
@@ -328,6 +334,7 @@ registry migration.
 
 After writing the plan file and updating DECISIONS.md (if applicable):
 
+0. **`ESQ_CODEX=on` only:** run the pre-mortem, judge it and make the accepted plan edits before anything is staged, per § 2–3 of `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`. Its § 4 `Adversary` block becomes step 3's commit body, and its count line joins step 4's report.
 1. **Cut the shipping unit, and fill both fields from it**, here and not earlier.
    `git branch --show-current`, run once: that is `**Origin:**`. Then `git switch -c esq/<slug>`
    from it, and that name is `**Branch:**`. Write both into the plan file's header before staging. Empty output means detached HEAD, and a non-zero exit means no git repository: in both
@@ -335,7 +342,7 @@ After writing the plan file and updating DECISIONS.md (if applicable):
    what `esq branch resolve <slug>` answered — `reuse` copies the two fields and creates nothing, `new`
    cuts from the stem's `**Origin:**`; an `esq/<slug>` that already exists stops the command here.
 2. **Stage this command's whole tail in one call**, naming only the files this run actually wrote: `git add docs/plans/<filename>` always, plus `docs/DECISIONS.md` if you updated it and `docs/BACKLOG.md` if preflight step 9 flipped any row to `Planned`. Never stage a file this run did not write — with one exception. **A corrective brief you planned is retired in this same commit.** From the `*-fixes*.brief.md` you planned, strike the `## 🟡 Needs a plan` section and every 🔴 item this run resolved through `AskUserQuestion`; when no 🟢, 🟡 or 🔴 item remains, `git rm` the brief, otherwise `git add` it with the rest intact — an unapplied 🟢 is still `/esq:fix`'s and an open 🔴 is still the user's. Never a grill brief, and never a brief this run did not plan. The why is `D-plan-retires-the-brief-it-plans`: `unit.findings` counts every corrective brief still on disk.
-3. `git commit -m "plan: <slug>"` — **one** commit, not two: `/esq:plan` owns every one of these files in this one pass, and reverting the plan must revert the status flip it caused.
+3. `git commit -m "plan: <slug>"` (plus `-m "<the Adversary block>"` when step 0 ran) — **one** commit, not two: `/esq:plan` owns every one of these files in this one pass, and reverting the plan must revert the status flip it caused.
 4. Tell the user:
    - The file path
    - **The shipping unit it created** — two lines, `Branch: esq/<slug>` and `Origin: <name>` — or,
@@ -343,6 +350,7 @@ After writing the plan file and updating DECISIONS.md (if applicable):
      repository) and that `/esq:build` will therefore treat the plan as legacy: it refuses
      nothing, and it never lands.
    - One-sentence summary of the recommendation
+   - With `ESQ_CODEX=on`: the `Codex:` count line from step 0
    - Suggested next step. **A plan with 2+ phases has two ways to execute, and the user picks — name both:**
      - Always: "Review the plan in your editor. When ready, `/clear` and run `/esq:build <plan-path>` to execute Phase 1."
      - When the plan has 2 or more phases, add: "Or `/esq:autopilot <plan-path>` to run all <N> phases unattended — it stops at the first gate that needs you. Cap the first run (`/esq:autopilot <plan-path> 2`) if you'd rather watch a couple land first."
