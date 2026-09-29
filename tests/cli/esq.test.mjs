@@ -2546,6 +2546,10 @@ test('decisions add creates the registry, then keeps each table order and makes 
   assert.deepEqual(rows, ['| D-one-lock-order', '| D-two', '| D-three']);
   assert.equal((await readFile(file, 'utf8')).match(/\*\*Fondement:\*\*/g).length, 1);
 
+  // A slug's spelling is normalized, never refused: prefix, capitals, accents, spaces.
+  const spelled = await addDecisions(path.join(root, 'spelled.md'), JSON.stringify({ ...DECISION, slug: 'D-Écrire copy_First-person' }));
+  assert.deepEqual(spelled.added.map((entry) => entry.id), ['D-ecrire-copy-first-person']);
+
   // Newest-first: a table whose top row is the newer one keeps taking new rows at the top.
   const newest = path.join(root, 'newest.md');
   await writeFile(newest, '# Decisions\n\n| # | Date | Scope | Topic | Décision | Statut |\n|---|---|---|---|---|---|\n| D-b | 2026-09-02 | arch | x | B | Active |\n| D-a | 2026-09-01 | arch | x | A | Active |\n\n---\n\n## D-b — B\n\n## D-a — A\n');
@@ -2556,7 +2560,7 @@ test('decisions add creates the registry, then keeps each table order and makes 
   const before = await readFile(file, 'utf8');
   await assert.rejects(addDecisions(file, JSON.stringify([DECISION, { ...DECISION, scope: 'misc' }])), /"scope" must be one of/);
   await assert.rejects(addDecisions(file, JSON.stringify({ ...DECISION, extra: 1 })), /unknown key "extra"/);
-  await assert.rejects(addDecisions(file, JSON.stringify({ ...DECISION, slug: 'D-x' })), /"slug" must be lowercase/);
+  await assert.rejects(addDecisions(file, JSON.stringify({ ...DECISION, slug: 'D-' })), /"slug" must contain letters or digits/);
   // A taken ID is refused with its title, never suffixed into a duplicate — and so is a repeat
   // inside one payload.
   await assert.rejects(addDecisions(file, JSON.stringify([{ ...DECISION, slug: 'four' }, DECISION])), /D-one-lock-order already exists \("One lock order"\)/);

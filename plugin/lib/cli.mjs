@@ -467,8 +467,12 @@ function decisionEntry(value, index) {
     if (line && /[\n\r]/.test(raw)) throw new Error(`${at}: "${key}" may not contain a line break`);
     return raw.trim();
   };
-  const slug = text('slug');
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) throw new Error(`${at}: "slug" must be lowercase words joined by hyphens, without the D- prefix`);
+  // The slug's spelling is structure, not judgment: a `D-` prefix, capitals or accents are normalized
+  // here rather than refused, since a refusal reached the user as a command to retype
+  // (devenir-un-endroit-sur, 2026-09-28). The resulting ID is returned in `added`.
+  const slug = text('slug').replace(/^d-/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  if (slug === '') throw new Error(`${at}: "slug" must contain letters or digits`);
   const scope = text('scope');
   if (!DECISION_SCOPES.has(scope)) throw new Error(`${at}: "scope" must be one of ${[...DECISION_SCOPES].join(', ')}`);
   const date = text('date', { optional: true }) ?? new Date().toISOString().slice(0, 10);
