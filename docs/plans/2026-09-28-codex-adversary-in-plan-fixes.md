@@ -111,3 +111,30 @@ None: spending is bounded above and announced by the script before launch; the b
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-28
+
+**Plan committed at:** 73f1ed5
+
+**Commits:** 66ffd73
+
+**Verified:** 66ffd732dabf194fee788bf515ecd6a0d516aa89
+- `scripts/probe-codex-plan.sh`
+- `./scripts/audit.sh`
+
+**What got built:** scripts/probe-codex-plan.sh: a maintainer-only probe that runs one real headless opted-in /esq:plan on a throwaway repo behind a codex shim (late counter-plan forced, pre-mortem on the real Codex CLI) and judges five properties; not wired into audit.sh or --lab.
+
+**Verification:**
+- (auto) scripts/probe-codex-plan.sh — exit 0, 5/5 PASS on the first run, background, outside the sandbox; claude exit 0, 97 s, 0.437 USD (reported); report line `Codex: counter-plan not returned (stopped once the review was done); pre-mortem 2/3 accepted.`; plan commit body verbatim: `Adversary (codex config): / counter-plan: not returned — still running when the pre-mortem ended / F1 accepted criterion-does-not-prove — the test ignored the CLI's exit status / F2 accepted criterion-does-not-prove — a hardcoded version would have passed / F3 rejected criterion-does-not-prove — Node realpaths the bin symlink; a package install is out of scope`
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), exit 0
+
+**Surprises / decisions made during execution:** - Assertion 2 (blind) is judged as: no `## Phases` in the counter-plan prompt AND no plan file under docs/plans when it was launched (the shim records it), not as a grep for a `docs/plans/<date>-` path: codex-adversary.md requires the prompt to name `docs/plans/<today>-<slug>*` as the path NOT to read, so the literal grep would red on the prompt the reference mandates. The chosen check is at least as strict about the property (the plan did not exist yet).
+- Assertion 4 accepts a Markdown list/quote/backtick prefix before `Codex:` (the report is Markdown); the observed line started with `Codex:` bare.
+- Claude's Bash tool re-sources ~/.bashrc, which prepends ~/.local/bin (the real codex), so the shim is also re-prepended via CLAUDE_ENV_FILE; a zero-cost dry run with a fake `claude` proved interception before any spend.
+- --add-dir "$REPO/plugin" added beside --restricted so the file tools can read the skill's references.
+- Task 1.2 not executed: no assertion failed, so no skill defect to fix. B-186 closed Done (ca47b0d) before this entry, from this run's evidence.
+- Kill-on-late is proved on the headless host only; the interactive TaskStop path is covered by the same skill text but was not observed interactively.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase — no next phase. Re-run scripts/probe-codex-plan.sh by hand after any edit to plugin/skills/plan/references/codex-adversary.md (≈0.5 USD, ~2 min).
