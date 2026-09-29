@@ -1,0 +1,527 @@
+[
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-24-vitrine-fonctions-recentes-multi-membre.brief.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "*.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "docs/**/*"
+    }
+  },
+  {
+    "result_characters": 252,
+    "result_sha256": "e4a97fac5a214f62a658d0d4ce62197daa9f60d69aed48ec07c2f92d0b4e53a2",
+    "is_error": false
+  },
+  {
+    "result_characters": 10971,
+    "result_sha256": "7f3c369d5387f94ac4250a1ff18960769392ae09c95b08a3dbc34e6f43f96ebb",
+    "is_error": false
+  },
+  {
+    "result_characters": 1712,
+    "result_sha256": "5bb8206413438127dd7e568b3b02909757fdaf63069c4328795a9ed66d247ecb",
+    "is_error": false
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "landing/**/*"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "frontend/src/**/*"
+    }
+  },
+  {
+    "result_characters": 3547,
+    "result_sha256": "373735fbb005bde3986d5c036526650d544fa2eed0907d407f39b78c278d50cd",
+    "is_error": false
+  },
+  {
+    "result_characters": 6605,
+    "result_sha256": "26b6e8a99aed2b465f4532c4998d940dfefcf366087a085ea180b79932f1a624",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/CLAUDE.md"
+    }
+  },
+  {
+    "result_characters": 5675,
+    "result_sha256": "2381d0461da07588c430a9d6bf7b4f1cd4641d1d605287d1f09be368a7407ac9",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/plugin/skills/plan/references/screens-and-manual-steps.md"
+    }
+  },
+  {
+    "result_characters": 7554,
+    "result_sha256": "14a21115142100aebc7da2147d2fd2217cb24ea035e6b4dda071b4407f6bafe3",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/Features.astro"
+    }
+  },
+  {
+    "result_characters": 4893,
+    "result_sha256": "b50df0fe0bc7ee56fe1dd80a9c82f93f62a65264250e1e10e46438ba0addfda5",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/index.astro"
+    }
+  },
+  {
+    "result_characters": 3516,
+    "result_sha256": "3eca5f5028e0c7911f8869ca997f62bd74ff0b6205892d2d5dcdc853719c8649",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/en/index.astro"
+    }
+  },
+  {
+    "result_characters": 2723,
+    "result_sha256": "499906ddaecc3891de1c670dc216b04c830029f8b88666a4c7eee36c99d7b340",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/fragments/SwitcherFragment.astro"
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/mockups/QuickLogMock.astro"
+    }
+  },
+  {
+    "result_characters": 3514,
+    "result_sha256": "d0d667d386ef86d9b0ded867dbcd2a90f557655718c9b3c64d57a1e6b044cc01",
+    "is_error": false
+  },
+  {
+    "result_characters": 5339,
+    "result_sha256": "b3934681b4fb47a1750068aa549c22f22fe1245aeff78edab9bfb4c4f03a6002",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/LookingBack.astro"
+    }
+  },
+  {
+    "result_characters": 5410,
+    "result_sha256": "6db05df06a23ee0b1929d6f6f41619bc179932b143ce6055cb37067aaef66e51",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(hero|features|lookingBack|steps)\"",
+      "path": "<case>/landing/src/copy/fr.json",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 74,
+    "result_sha256": "ca0d8cf46f4e08672e29a81cafac6784fa75d57cce347350d1af8406071e85de",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing|minGap|ecart|écart|Enregistrer quand même|Save anyway",
+      "path": "<case>/frontend/src/locales",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 2385,
+    "result_sha256": "b30acc7957a8183084ba8fbe4c5605efec556ccf8fa8e3c49c9e9a033c4bbb75",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-24-minimum-spacing-warning.brief.md"
+    }
+  },
+  {
+    "result_characters": 9823,
+    "result_sha256": "df4e4a3de8c1ddc8e8a5fb416388eb16960b6ae7e301da25915190e2d8a79d5d",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/fr.json",
+      "offset": 340,
+      "limit": 175
+    }
+  },
+  {
+    "result_characters": 9067,
+    "result_sha256": "351464418f5dbe14cea205cdf9f401d657284c25cfefd6ff30135361b3cf4d4d",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 1,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 2113,
+    "result_sha256": "ac3fde2bb97f540803ff282e689478cf08e3261a61fbb03f0951aba213a6f1ee",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 151,
+      "limit": 80
+    }
+  },
+  {
+    "result_characters": 2601,
+    "result_sha256": "224b3aa7fba08700ef61a88b655caf66d119a342bac04b2e58d8804fa6ee8f91",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 353,
+      "limit": 30
+    }
+  },
+  {
+    "result_characters": 1711,
+    "result_sha256": "6ca5724a0600a31ea4523d28925e9c2ccf52c749579f33031be1ee1d3f825e62",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 505,
+      "limit": 30
+    }
+  },
+  {
+    "result_characters": 1558,
+    "result_sha256": "e52ad659d5ded458d691614c23b89c77b48c3815e117c01ddea03712e56131d5",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing|recurring|chip",
+      "path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 2154,
+    "result_sha256": "29af65f51eb9b6cf011ab8ffec2d859d26f2a342cf0b56a9e35624006bd24c8d",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^#{2,4} ",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content"
+    }
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "budget|5 ?100|4 ?800|limit",
+      "path": "<case>/landing/scripts/audit.mjs",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 1677,
+    "result_sha256": "8597f146f6d014943d8bec16a73849fb4a878b1007d677af66a7773e097f7a92",
+    "is_error": false
+  },
+  {
+    "result_characters": 1568,
+    "result_sha256": "65ce0597feaf1cb4f547328f290d4e6799a9cececb2333f0c8a2208ddb36f42e",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "offset": 425,
+      "limit": 20
+    }
+  },
+  {
+    "result_characters": 961,
+    "result_sha256": "bd678e600fabe80453780b881c1f4ee0914775d3eb08925e313bc3a59bed2a66",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "offset": 600,
+      "limit": 80
+    }
+  },
+  {
+    "result_characters": 3574,
+    "result_sha256": "1d7a3b6e4fb54b64a8f8b07c03c056c8ab7adadb9bccad27cbdbb430d40c7530",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/SPEC.md",
+      "offset": 951,
+      "limit": 35
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/SPEC.md",
+      "offset": 1302,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 6712,
+    "result_sha256": "ed52ac2986b172df5fe44c2ea11a7d3a6d30867bcecbfcf83e41a4bc1154e156",
+    "is_error": false
+  },
+  {
+    "result_characters": 7217,
+    "result_sha256": "f02d0dcb33112060a25921b1c49ac2c1a086181b4ddd012a8f5cf8ec91ac8a4a",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "[Ee]spacement|pastilles? de (valeurs|quantit)|récurrent|B-529|B-530",
+      "path": "<case>/docs",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 7598,
+    "result_sha256": "d08d78040b751981dcdda744b7ed54a2cc0381d3b846f5b0aeef626d0e1c689c",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurringValues|chip",
+      "path": "<case>/frontend/src/components/features/topics",
+      "output_mode": "files_with_matches"
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/scripts/audit.mjs",
+      "offset": 1,
+      "limit": 116
+    }
+  },
+  {
+    "result_characters": 6919,
+    "result_sha256": "c9126a1e81d6d62d6b8209ad0fe00555ffd393033cb3f7840f425373c7194a3d",
+    "is_error": false
+  },
+  {
+    "result_characters": 3008,
+    "result_sha256": "d5e71f7bf899cdf361b2c9357b25ec1bf56d5f1844a741b6fd4f6a8fd126b5de",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurringValues|RecurringChips|recurring",
+      "path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "output_mode": "content",
+      "-n": true
+    }
+  },
+  {
+    "result_characters": 365,
+    "result_sha256": "e823bad36ee8244fb40e925b5b1d45792b080fb856d0988241203c7c122787f3",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "--color-due|due-text|--color-success|--color-primary\\b",
+      "path": "<case>/landing/src/styles/landing.css",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 1257,
+    "result_sha256": "5c08dd0bb32b658b346b6b2cd1699465cbc60cd5fd5c97b4f7ff1ae11114f9c7",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/DECISIONS.md",
+      "offset": 18448,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 4450,
+    "result_sha256": "dad42c0c863ff9a68c1f47de7b480ecb42095a24edb77e7e7c563baf5e7d23ef",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "D-le-changement-de-maisonnee-se-montre-dans-sa-section|D-le-budget-de-hauteur-passe-a-5-100|D-le-catalogue-note-une-lecture",
+      "path": "<case>/docs/DECISIONS.md",
+      "output_mode": "content",
+      "-n": true
+    }
+  },
+  {
+    "result_characters": 992,
+    "result_sha256": "9c8fe260db443b97098e8ba60ea0863df75aa807de122f4545f01401a0b3d72c",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "offset": 585,
+      "limit": 20
+    }
+  },
+  {
+    "result_characters": 932,
+    "result_sha256": "e3432c0ca5bbbeb0a310376da82dbbcda63bff7141c24d79a87833f382baf811",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "offset": 760,
+      "limit": 50
+    }
+  },
+  {
+    "result_characters": 1989,
+    "result_sha256": "d9264d41c9934cdece9f7902fd4fc4dcc333508f9e0e51c8e316d2e8763b8704",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "5[  ]?100|5100",
+      "path": "<case>",
+      "glob": "{landing/DESIGN.md,docs/ARCHITECTURE.md,.claude/skills/landing-and-deploy/SKILL.md,landing/README.md}",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 327,
+    "result_sha256": "a5572e4f520142eb5b2c863e97818bb00cd03dd48c180e8d219c2a5185ba9c78",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(recurringValues|typeFilter|optionFilter|all|allOptions)\"|\"topics\\.filter",
+      "path": "<case>/frontend/src/locales/fr.json",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 296,
+    "result_sha256": "6cb274310a65c45c52a01644eebd11aa64ac4ab61717dad2047f4e1df4b5a512",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/en.json",
+      "offset": 479,
+      "limit": 6
+    }
+  },
+  {
+    "result_characters": 341,
+    "result_sha256": "3d7c7a04806a93c672d117da9d724cfff35fc777e058030e9b98928cddbe8096",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(subhead|heading|lead|first|second|third|fourth)\"",
+      "path": "<case>/landing/src/copy/en.json",
+      "output_mode": "content",
+      "head_limit": 0,
+      "-n": true,
+      "offset": 0
+    }
+  },
+  {
+    "result_characters": 4895,
+    "result_sha256": "f28921d7399f97530f29d7bc6f5141c0e767fae7009ff5c36a56df96d4c80c24",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/package.json"
+    }
+  },
+  {
+    "result_characters": 984,
+    "result_sha256": "b3420a700d293a5002738af5c1709b0f1a68cfc87c3d5cf89d38e330cdde4ada",
+    "is_error": false
+  }
+]
