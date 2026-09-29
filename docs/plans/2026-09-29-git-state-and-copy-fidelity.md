@@ -132,3 +132,30 @@ above.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-29
+
+**Plan committed at:** a629393
+
+**Commits:** 44f5ff6, babfddd, 31097e7, 053276f, cc45e94, 33fd6bb
+
+**Verified:** 33fd6bbc3208f754c6185abb1176a5b90e44f523
+- `grep -c "not observed" plugin/skills/plan/SKILL.md`
+- `grep -c "preparation/2026-09-29-b188-b189-tamialog.md" docs/BACKLOG.md`
+- `./scripts/audit.sh`
+
+**What got built:** Both /esq:plan wording fixes (C7 observed-Git-state rule, C5 full-translation clause) were written, judged on one bounded set of 3 Tamialog runs, and reverted under the pre-written rule because C1 and C6 fell to 1/3; the retained evidence and French report are in docs/preparation/2026-09-29-b188-b189-tamialog*, and B-188/B-189 are back to Open with dated notes.
+
+**Verification:**
+- (auto) grep -c "not observed" plugin/skills/plan/SKILL.md — 0 (exit 1): Task 1.1 reverted, matching the report's regression verdict; SKILL.md back to 8f505624… byte-identical
+- (auto) grep -c "preparation/2026-09-29-b188-b189-tamialog.md" docs/BACKLOG.md — 2 (both detail notes)
+- (auto) ./scripts/audit.sh — exit 0, Clean — 7 checks (product), 25 s
+
+**Surprises / decisions made during execution:** - Run set (3 runs, 157/154/152 s, 3.65 USD reported list price, ≤ 9 USD bound): C7 3/3 (from 1/3), C5 3/3 on the qualifier reading (1/3 on the literal "powdered-formula" label), but C1 1/3 and C6 1/3 (from 2/3) — the rule reads regression, so both edits were reverted. Plausible, unproven mechanism: the C5 clause lengthens item 6, where the C1 and C6 clauses live; noise is the alternative at n = 3.
+- Task 1.5 is two `git revert` commits (053276f, cc45e94), one per reverted task, rather than one combined commit, so each stays independently revertible.
+- `esq backlog set-status … Open` accepts neither `--by` nor `--reason`; the disposition reason lives in the dated detail notes instead.
+- One tool error in run 2 (Grep on a nonexistent `EventFields.tsx`), no effect; no permission denials; case 484 files unchanged; no auth tempdir left.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. Next lever named in the report, not proven: run the C7 rule alone (it sits outside item 6), and try a C5 clause that does not lengthen item 6. No rollout is owed: nothing is kept in plugin/.
