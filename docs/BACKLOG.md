@@ -202,7 +202,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-183 | 2026-09-25 | ✨ improvement | hi? |  | Correct architecture authority and reporting instructions; remove the planner alternative quota. | observed: adversarial preparation and architecture review 2026-09-24 · Done by architecture-preparation-review |  |  | Done |
 | B-184 | 2026-09-25 | 🐛 bug | med? |  | Reconcile duplicate tail ranks when independently captured backlog rows merge. | observed: B-003 retained-branch regression; independent rows both carry Rank 100 · Done by merge-rank-collisions |  |  | Done |
 | B-185 | 2026-09-25 | 🐛 bug | hi |  | Preserve significant whitespace in auto commands through Markdown extraction and landing proof reuse. | observed: events-tracker landing plan 2026-09-24-vitrine-fonctions-recentes-multi-membre, command line 232 and proof line 295 · Done by preserve-command-whitespace |  |  | Done |
-| B-186 | 2026-09-29 | ⚠️ debt | med? | 3300 | No end-to-end proof that an opted-in /esq:plan run launches the Codex counter-plan, kills it when late, and records the Adversary block and Codex: line | fix: codex-adversary-in-plan · Planned by codex-adversary-in-plan-fixes |  |  | Planned |
+| B-186 | 2026-09-29 | ⚠️ debt | med? |  | No end-to-end proof that an opted-in /esq:plan run launches the Codex counter-plan, kills it when late, and records the Adversary block and Codex: line | fix: codex-adversary-in-plan · Planned by codex-adversary-in-plan-fixes · Done by codex-adversary-in-plan-fixes |  |  | Done |
 
 ---
 
@@ -1521,3 +1521,5 @@ same amendment.
 **What:** Only the two schema smokes ran for `codex-adversary-in-plan`; no recorded opted-in `/esq:plan` run on a scratch target shows the counter-plan launched, killed when late, and the `Adversary (codex` block in the plan commit body (`git log -1 --format=%b`) plus the `Codex:` report line.
 **Why it matters:** The feature's first Done-looks-like bullet stays unproved; a regression in the gate read, the background launch or the commit body would ship unseen.
 **Notes:** Needs a planned observation run, after the two 🟢 fixes (6ec9aea gate read, ac31c38 Bash timeout) that it depends on; not a mechanical fix.
+
+**Resolution:** scripts/probe-codex-plan.sh (66ffd73) ran one opted-in headless /esq:plan with a forced-late counter-plan: 5/5 PASS (launch order, blind, Adversary block with counter-plan not returned, Codex: report line, no leftover process), 97 s, 0.44 USD
