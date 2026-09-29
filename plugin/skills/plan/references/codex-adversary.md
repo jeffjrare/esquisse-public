@@ -41,7 +41,8 @@ background task has not finished, go on without it. Nothing waits for it.
 
 ### 2. Pre-mortem — the written plan, in the foreground
 
-After the plan is written and read once (§ Right-size), before "Commit and stop" step 1, one foreground call:
+After the plan is written and read once (§ Right-size), before "Commit and stop" step 1, one foreground call,
+made with the Bash tool's `timeout: 600000` — its 120000 ms default would cut the `timeout 570` run at 2 minutes:
 
 ```bash
 d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && \
