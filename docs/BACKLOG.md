@@ -205,7 +205,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-186 | 2026-09-29 | ⚠️ debt | med? |  | No end-to-end proof that an opted-in /esq:plan run launches the Codex counter-plan, kills it when late, and records the Adversary block and Codex: line | fix: codex-adversary-in-plan · Planned by codex-adversary-in-plan-fixes · Done by codex-adversary-in-plan-fixes · detail in 29cd437 |  |  | Done |
 | B-187 | 2026-09-29 | ⚠️ debt | med? |  | Probe-codex-plan cannot prove the skill stopped the late counter-plan (host teardown looks the same), and its one-line task now trips /esq:plan's small-task exit | fix: codex-adversary-in-plan-fixes · Planned by codex-adversary-in-plan-fixes-fixes · Done by codex-adversary-in-plan-fixes-fixes · detail in 29cd437 |  |  | Done |
 | B-188 | 2026-09-29 | ✨ improvement | hi? | 200 | Grill-plan copy keeps every qualifier across FR/EN (e.g. powdered-formula) | observed: 2026-09-29-b181-variance-then-fix Phase 2 · Planned by 2026-09-29-git-state-and-copy-fidelity |  |  | Open |
-| B-189 | 2026-09-29 | 🐛 bug | hi? | 100 | Preparation must not assert unobserved Git state (e.g. detached HEAD) | observed: 2026-09-29-b181-variance-then-fix Phase 2 · Planned by 2026-09-29-git-state-and-copy-fidelity |  |  | Open |
+| B-189 | 2026-09-29 | 🐛 bug | hi? | 100 | Preparation must not assert unobserved Git state (e.g. detached HEAD) | observed: 2026-09-29-b181-variance-then-fix Phase 2 · Planned by 2026-09-29-git-state-and-copy-fidelity · Planned by 2026-09-29-git-state-rule-alone |  |  | Planned |
 
 ---
 
