@@ -16,7 +16,12 @@
 #   3. the plan commit's body carries the `Adversary (codex config` block with
 #      `counter-plan: not returned`;
 #   4. the final report carries a `Codex:` line;
-#   5. no counter-plan process is left alive once the run has ended.
+#   5. the skill itself called TaskStop (an assistant tool_use in the stream —
+#      an exiting headless host may reap the task on its own, so a clean process
+#      table alone proves nothing), and no counter-plan process is left alive.
+#
+# The task is a pinned multi-file feature, so /esq:plan's small-task exit and
+# its ambiguity stop (no question tool in -p) have no ground.
 #
 # How: a `codex` shim goes first on PATH. It logs every call's argv and stdin.
 # The counter-plan call (argv names codex-counter-plan.schema.json) sleeps past
@@ -43,7 +48,7 @@ REPO=$(cd "$(dirname "$0")/.." && pwd)
 CREDENTIALS="$HOME/.claude/.credentials.json"
 BUDGET_USD=5
 BOUND_S=1200
-TASK='Add a --version flag to cli.js that prints the version from package.json'
+TASK='Add a todo command set to cli.js — `todo add <text>`, `todo list`, `todo done <n>` — in a new lib/todo.js that stores items in .todo.json in the current directory, rejects a missing or non-numeric <n> with exit 1, treats a missing file as empty and a corrupt one as an error with exit 1, and add node:test tests in test/todo.test.js covering each command and those error cases.'
 
 REAL_CODEX=$(command -v codex) || { printf 'probe: no codex on PATH — nothing to probe\n' >&2; exit 2; }
 command -v claude >/dev/null || { printf 'probe: no claude on PATH\n' >&2; exit 2; }
@@ -167,15 +172,22 @@ fi
 
 readarray -t final < <(node -e '
   const lines = require("fs").readFileSync(process.argv[1], "utf8").split("\n");
-  let r = null;
-  for (const l of lines) { try { const o = JSON.parse(l); if (o.type === "result") r = o; } catch {} }
+  let r = null, stop = false;
+  for (const l of lines) {
+    let o; try { o = JSON.parse(l); } catch { continue; }
+    if (o.type === "result") r = o;
+    if (o.type === "assistant" && Array.isArray(o.message?.content) &&
+        o.message.content.some(c => c && c.type === "tool_use" && c.name === "TaskStop")) stop = true;
+  }
   const text = r && typeof r.result === "string" ? r.result : "";
   const codex = text.split("\n").find(l => /^[\s>*`-]*Codex:/.test(l)) ?? "";
   console.log(r && typeof r.total_cost_usd === "number" ? r.total_cost_usd : "unknown");
   console.log(codex.trim());
+  console.log(stop ? "yes" : "no");
 ' "$RESULT/stream.jsonl" 2>/dev/null)
 cost=${final[0]:-unknown}
 codex_line=${final[1]:-}
+task_stop=${final[2]:-no}
 if [ -n "$codex_line" ]; then
   pass "4 final report carries: $codex_line"
 else
@@ -183,10 +195,12 @@ else
 fi
 
 left=$(pgrep -f -- "$MARKER" | tr '\n' ' ')
-if [ -z "$left" ]; then
-  pass '5 no counter-plan process left behind'
-else
+if [ "$task_stop" != yes ]; then
+  fail '5 skill called TaskStop' 'the skill never called TaskStop'"${left:+; alive: pid $left}"
+elif [ -n "$left" ]; then
   fail '5 no counter-plan process left behind' "alive: pid $left"
+else
+  pass '5 skill called TaskStop, no counter-plan process left behind'
 fi
 
 printf 'claude exit=%s elapsed_seconds=%s cost_usd=%s\n' "$rc" "$elapsed" "$cost"
