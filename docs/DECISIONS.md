@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-keep-git-state-rule-despite-c6 | 2026-09-29 | func | esq-plan | Keep the observed-Git-state rule (44f5ff6) in /esq:plan and accept C6 at 1/3, with no further run set. | Active |
 | D-codex-adversary-opt-in-input-only | 2026-09-29 | arch | plan | With ESQ_CODEX=on, /esq:plan runs `codex exec -s read-only` twice (blind counter-plan in the background, pre-mortem before the commit) and judges each answer itself; unset, nothing changes. | Active |
 | D-bounded-correction-exit-preserves-proof | 2026-09-24 | func | corrective-loop | Exhaustion limits new plans; safe prospective fixes and explicit dispositions preserve proof and owe review | Active |
 | D-standards-resolves-or-refuses | 2026-09-21 | arch | standards | `esq standards` serves a partial referent with a finding, but refuses when neither file yields text | Active |
@@ -5397,3 +5398,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gains an uncorrelated second opinion on the plan; costs a few minutes of wall-clock per plan and sends the goal and read code to OpenAI under the user's Codex login.
 **Conséquences:** Codex output is untrusted data: it never gates, fails or rewrites a plan, and no command in it runs. Judgments live in the plan commit body so build workers never read them. The feature is removed if 3 opted-in cycles show no accepted finding that changed a phase or criterion.
 **Alternatives rejetées:** The Codex plugin's codex-companion task (moving cache path, prose output, job polling); a Claude subagent adversary (correlated blind spots, breaks plan's no-subagent bound); resuming Codex's session for the pre-mortem (--last can pick an unrelated session).
+
+## D-keep-git-state-rule-despite-c6 — Keep the observed-Git-state rule despite C6 at 1/3
+
+**Scope:** func
+**Topic:** esq-plan
+**Date:** 2026-09-29
+**Statut:** Active
+**Fondement:** user — delegated in chat on 2026-09-29 ("you decide") after the B-189 decision at /esq:land git-state-rule-alone
+
+**Contexte:** Two run sets reverted the /esq:plan rule that names a Git state only from observed command output (44f5ff6) under a pre-written no-regression rule, because C6 fell from 2/3 to 1/3, while C7 held 6/6 (1/3 without it).
+**Décision:** Keep the observed-Git-state rule (44f5ff6) in /esq:plan and accept C6 at 1/3, with no further run set.
+**Raison:** C6 fails identically with or without the rule (build, then audit without --no-build), and its clause sits in read-back item 6, far from the rule's edits. At n = 3 a one-run swing cannot be told from noise, so a third set buys no answer.
+**Tradeoff:** Gained: shell-less plans stop inventing Git state. Accepted: ~95 words per /esq:plan load, and a no-regression rule overridden for C6 on this change only.
+**Conséquences:** A later C6 drop is not evidence against this rule; C6 is its own fragility, to be fixed on its own. The pre-written no-regression rule still applies to other changes.
+**Alternatives rejetées:** A third 3-run set (≈3.6 USD list price, cannot separate noise at n = 3); dropping B-189 as a known limit (loses a 6/6 fix).

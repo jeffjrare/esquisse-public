@@ -1,0 +1,571 @@
+[
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-24-vitrine-fonctions-recentes-multi-membre.brief.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "*.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "docs/**/*"
+    }
+  },
+  {
+    "result_characters": 10971,
+    "result_sha256": "7f3c369d5387f94ac4250a1ff18960769392ae09c95b08a3dbc34e6f43f96ebb",
+    "is_error": false
+  },
+  {
+    "result_characters": 252,
+    "result_sha256": "e4a97fac5a214f62a658d0d4ce62197daa9f60d69aed48ec07c2f92d0b4e53a2",
+    "is_error": false
+  },
+  {
+    "result_characters": 1712,
+    "result_sha256": "5bb8206413438127dd7e568b3b02909757fdaf63069c4328795a9ed66d247ecb",
+    "is_error": false
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "landing/**/*.{astro,json,mjs,ts,css}"
+    }
+  },
+  {
+    "result_characters": 3337,
+    "result_sha256": "8855ecd016e281543961581f510f6db76c329a1b97b2c736b248f771cfe9b7d2",
+    "is_error": false
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "frontend/src/**/*"
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/CLAUDE.md"
+    }
+  },
+  {
+    "result_characters": 5675,
+    "result_sha256": "2381d0461da07588c430a9d6bf7b4f1cd4641d1d605287d1f09be368a7407ac9",
+    "is_error": false
+  },
+  {
+    "result_characters": 6605,
+    "result_sha256": "26b6e8a99aed2b465f4532c4998d940dfefcf366087a085ea180b79932f1a624",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/plugin/skills/plan/references/screens-and-manual-steps.md"
+    }
+  },
+  {
+    "result_characters": 7554,
+    "result_sha256": "14a21115142100aebc7da2147d2fd2217cb24ea035e6b4dda071b4407f6bafe3",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/Features.astro"
+    }
+  },
+  {
+    "result_characters": 4893,
+    "result_sha256": "b50df0fe0bc7ee56fe1dd80a9c82f93f62a65264250e1e10e46438ba0addfda5",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/index.astro"
+    }
+  },
+  {
+    "result_characters": 3516,
+    "result_sha256": "3eca5f5028e0c7911f8869ca997f62bd74ff0b6205892d2d5dcdc853719c8649",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/en/index.astro"
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/fragments/SwitcherFragment.astro"
+    }
+  },
+  {
+    "result_characters": 2723,
+    "result_sha256": "499906ddaecc3891de1c670dc216b04c830029f8b88666a4c7eee36c99d7b340",
+    "is_error": false
+  },
+  {
+    "result_characters": 3514,
+    "result_sha256": "d0d667d386ef86d9b0ded867dbcd2a90f557655718c9b3c64d57a1e6b044cc01",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/scripts/audit.mjs"
+    }
+  },
+  {
+    "result_characters": 21839,
+    "result_sha256": "e92c6c46738cd6862017052580d19a6ac82204470c54791905e1419fdbf63f17",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(hero|features|household|lookingBack|sheet|subhead|points|switcher)\"",
+      "path": "<case>/landing/src/copy/fr.json",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 500,
+    "result_sha256": "bb7952cdaae31ae27b1508a9ee618ba4c0992c7a921521ac4372109f40b8a0bd",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "interface (Features|Feature|Hero|LookingBack|StepSheet|Sheet|Steps)\\b|sheet|household|switcher|minSpacing",
+      "path": "<case>/landing/src/copy/types.ts",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 1775,
+    "result_sha256": "7ed6297520e079b188f5a679a553d88434691244e3a39e24625dba1ee72a0c9e",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 200,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 1388,
+    "result_sha256": "252775a017d96d6cce62cee1d204b0b86db2b61a0708a4a8846d9fbacd73efe1",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 350,
+      "limit": 30
+    }
+  },
+  {
+    "result_characters": 1652,
+    "result_sha256": "d5ff51eb290be86024796a23cba08f5cb1d20820cbbc708a2111683fac2353fc",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 508,
+      "limit": 22
+    }
+  },
+  {
+    "result_characters": 1131,
+    "result_sha256": "5d68e1140e0391e9f7edb553f3887ad3cfccd13449f0125d3c626077e44c90c0",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/types.ts",
+      "offset": 85,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 1197,
+    "result_sha256": "65a9ba96365be28bf3a17bacff11a3a518a3bbfb6d818e91807e23b949738223",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/types.ts",
+      "offset": 495,
+      "limit": 135
+    }
+  },
+  {
+    "result_characters": 4924,
+    "result_sha256": "21d448995941f24ae7e91bebb592f06f1fd95cb2d3021b7e0c151235884a0a9f",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "(spacing|Spacing|écart|anyway|quand même|recent(Values|Chips)|recurring)",
+      "path": "<case>/frontend/src/locales",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 2472,
+    "result_sha256": "38e5954a838acf9266e3a380560d68779abd4dbdcbce8dcd4df66c06085d8db5",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-24-minimum-spacing-warning.brief.md"
+    }
+  },
+  {
+    "result_characters": 9823,
+    "result_sha256": "df4e4a3de8c1ddc8e8a5fb416388eb16960b6ae7e301da25915190e2d8a79d5d",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/fr.json",
+      "offset": 470,
+      "limit": 75
+    }
+  },
+  {
+    "result_characters": 3427,
+    "result_sha256": "70a52cdb7d25565a6bcd7fe54fbe723bb558d8f8adac860f9df12171fe7faec8",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/en.json",
+      "offset": 476,
+      "limit": 66
+    }
+  },
+  {
+    "result_characters": 2984,
+    "result_sha256": "1f37520e3fc3d016f143df78f3524509aa03ac648e3d813c68f941d3392feb57",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "5[  ]?100|5100",
+      "path": "<case>",
+      "output_mode": "content",
+      "glob": "!**/node_modules/**"
+    }
+  },
+  {
+    "result_characters": 2855,
+    "result_sha256": "524af8667351029ab6ebe25e5e7534c089a7650d6cf310cd5c420355e35dbd25",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing|recurringValues|confirmAction|Chip|chip|amber|due|warn",
+      "path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "output_mode": "content",
+      "-C": 2
+    }
+  },
+  {
+    "result_characters": 4052,
+    "result_sha256": "2fcdd34c65d36c5b49312a087c5fb92ef3e3ba37f29f2dd75d1d2bea3ecbd552",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/mockups/QuickLogMock.astro"
+    }
+  },
+  {
+    "result_characters": 5339,
+    "result_sha256": "b3934681b4fb47a1750068aa549c22f22fe1245aeff78edab9bfb4c4f03a6002",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^## D-le-changement-de-maisonnee-se-montre-dans-sa-section",
+      "path": "<case>/docs/DECISIONS.md",
+      "output_mode": "content",
+      "-A": 14
+    }
+  },
+  {
+    "result_characters": 1555,
+    "result_sha256": "1c94954b00d958df3cfda0d1bfda8051ab882efe3d2d012a8bc2e7cf3b11fff3",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurringValues|recurring",
+      "path": "<case>/frontend/src/components/features/topics",
+      "output_mode": "content",
+      "glob": "!**/__tests__/**",
+      "-C": 3,
+      "head_limit": 80
+    }
+  },
+  {
+    "result_characters": 5742,
+    "result_sha256": "e391b9fcfe71c7e6e90af4a008591c394fb8c523a53dedbf2b04730449610894",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "terracotta|Rhythm|5 100|bento|fragment",
+      "path": "<case>/landing/DESIGN.md",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 2983,
+    "result_sha256": "ce9d595975b0673b4aabcca052a07d30d8de20f7a7a75766e692e341d133cf6e",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^#+ .*(Espacement|écart|Valeurs fréquentes|pastille|option|Filtrer|Quand un autre membre)",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 39,
+    "result_sha256": "cecaaac63a994aa9bcc5079b2a3d6d35b0af8416617b1bb2b97e56b03cd26e86",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/DESIGN.md",
+      "offset": 455,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 2560,
+    "result_sha256": "74e1fa038c63aa70a4171fccd42aa02fd859ee419d49e7124822fb1754ee392c",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "quand même|valeurs fréquentes|Valeurs que la maisonnée|par option|au moins .* entre deux saisies|Espacement minimal",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 1960,
+    "result_sha256": "3db062217735379f5cb3e6753bd8662d54691e6979a423d6be06da076c4edf4a",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "offset": 760,
+      "limit": 50
+    }
+  },
+  {
+    "result_characters": 1989,
+    "result_sha256": "d9264d41c9934cdece9f7902fd4fc4dcc333508f9e0e51c8e316d2e8763b8704",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "espacement|fréquent|filtr|d'écart|écart minimal",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true,
+      "head_limit": 40
+    }
+  },
+  {
+    "result_characters": 6890,
+    "result_sha256": "9e38f40fa874def3767c8ec25baea9cae9c7d77ce272ae5617099d7afba448c3",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "offset": 560,
+      "limit": 35
+    }
+  },
+  {
+    "result_characters": 1775,
+    "result_sha256": "595e7d528a851bbff65710407d0d62b73c1292286520d7180e66644d3c10d0b1",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/LookingBack.astro",
+      "limit": 60
+    }
+  },
+  {
+    "result_characters": 3715,
+    "result_sha256": "42a4dbd0e41a9bf8952281e1c541fd5f0ac20a6b6b7ed93d1f2d18d7d1a6459c",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "Acétaminophène|au moins .* entre|valeurs que|reviennent|une pression remplit|B-529|B-530",
+      "path": "<case>/docs",
+      "output_mode": "content",
+      "glob": "{SPEC.md,BACKLOG.md}",
+      "head_limit": 20
+    }
+  },
+  {
+    "result_characters": 873,
+    "result_sha256": "fb0c202f01fddcfec17a0ecfbce27c0fcd4faf8c6eda1695a2ffccb2777d1cad",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/SPEC.md",
+      "offset": 1320,
+      "limit": 16
+    }
+  },
+  {
+    "result_characters": 3222,
+    "result_sha256": "ae2d6c3b0364faca754ba63be0432ee9c7771fae338af8396a64c53c7af1dbc9",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "Features|household|maisonnée",
+      "path": "<case>/landing/src/components",
+      "output_mode": "content",
+      "glob": "{Forecasting,Discover,Steps,Hero}.astro"
+    }
+  },
+  {
+    "result_characters": 733,
+    "result_sha256": "63d2de6163d42b8315c4b877ad3725628567f02b379a4dfa751752d9d13a3f79",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"subhead\"|\"fieldLabel\"|\"fieldValue\"|\"heading\": \"(Everything|The whole)|\"lead\": \"An entry|\"second\": \"You choose|\"first\": \"The full history",
+      "path": "<case>/landing/src/copy/en.json",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 885,
+    "result_sha256": "9ba638e1551186b198df7fdfb433825b71992fa190dac3dbc83f10f485fba61c",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^## B-530",
+      "path": "<case>/docs/BACKLOG.md",
+      "output_mode": "content",
+      "-A": 14
+    }
+  },
+  {
+    "result_characters": 16,
+    "result_sha256": "4b4d7ac22cee34f92cd16fbe4193b0eb106e185100ea38f72b0190e1affaf933",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(household|lookingBack)\": \\{",
+      "path": "<case>/landing/src/copy/en.json",
+      "output_mode": "content",
+      "-A": 9
+    }
+  },
+  {
+    "result_characters": 2141,
+    "result_sha256": "2add6b954d179c9e27a73ac295bbb409bd366fadbd535d1f6fd03e84254c2669",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/package.json"
+    }
+  },
+  {
+    "result_characters": 984,
+    "result_sha256": "b3420a700d293a5002738af5c1709b0f1a68cfc87c3d5cf89d38e330cdde4ada",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "due-text|--color-due",
+      "path": "<case>/landing/src/styles/landing.css",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 537,
+    "result_sha256": "7c24ed17537fb17fefa9a416c68d0516a28026e3c711ab5e56cd585113598d9d",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "fieldValue|fieldLabel",
+      "path": "<case>/landing/src/components/Steps.astro",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 115,
+    "result_sha256": "4ac4f074e6de24af2f030d91821619c9fd90e0bcde5d833f2abb0622512d3217",
+    "is_error": false
+  }
+]

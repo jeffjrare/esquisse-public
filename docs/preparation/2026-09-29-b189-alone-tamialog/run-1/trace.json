@@ -1,0 +1,482 @@
+[
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-24-vitrine-fonctions-recentes-multi-membre.brief.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "*.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "docs/**/*"
+    }
+  },
+  {
+    "result_characters": 10971,
+    "result_sha256": "7f3c369d5387f94ac4250a1ff18960769392ae09c95b08a3dbc34e6f43f96ebb",
+    "is_error": false
+  },
+  {
+    "result_characters": 1712,
+    "result_sha256": "5bb8206413438127dd7e568b3b02909757fdaf63069c4328795a9ed66d247ecb",
+    "is_error": false
+  },
+  {
+    "result_characters": 252,
+    "result_sha256": "e4a97fac5a214f62a658d0d4ce62197daa9f60d69aed48ec07c2f92d0b4e53a2",
+    "is_error": false
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "{landing,frontend}/**/*"
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/DESIGN.md"
+    }
+  },
+  {
+    "result_characters": 6605,
+    "result_sha256": "fba28ca1fad35339e0cf10b212dbdaaad22884011e1701e9433beba25f9404cf",
+    "is_error": false
+  },
+  {
+    "result_characters": 37179,
+    "result_sha256": "558d50143d5f5a55e0b65e023997dcd02bcbe536b93cde63cbac945d4b4583ff",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "5[  ,.]?100|budget|B-530|B-170|maisonn|D-le-changement|écart|pastille|filtre par option|lookingBack",
+      "path": "<case>/docs",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 2234,
+    "result_sha256": "5c62ed214851047c8f20826feca5ae551f8e06393906df67d25aa79088681f81",
+    "is_error": false
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "landing/**/*.{astro,ts,mjs,json}"
+    }
+  },
+  {
+    "result_characters": 3306,
+    "result_sha256": "994f61442d6ccab114eb632cdc81068b43b138148ec3f3d29cde1b49a6520253",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing|écart|Enregistrer quand même|Save anyway",
+      "path": "<case>/frontend/src/locales",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 2385,
+    "result_sha256": "b30acc7957a8183084ba8fbe4c5605efec556ccf8fa8e3c49c9e9a033c4bbb75",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/fr.json",
+      "offset": 350,
+      "limit": 165
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/Features.astro"
+    }
+  },
+  {
+    "result_characters": 4893,
+    "result_sha256": "b50df0fe0bc7ee56fe1dd80a9c82f93f62a65264250e1e10e46438ba0addfda5",
+    "is_error": false
+  },
+  {
+    "result_characters": 8373,
+    "result_sha256": "c3b385639aff09ccd87d811d596177e4326abf3938a569df618851247b10702d",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/index.astro"
+    }
+  },
+  {
+    "result_characters": 3516,
+    "result_sha256": "3eca5f5028e0c7911f8869ca997f62bd74ff0b6205892d2d5dcdc853719c8649",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing\\.|confirmQuestion|backdate\\.confirmAction",
+      "path": "<case>/frontend/src/components",
+      "output_mode": "content",
+      "glob": "!**/__tests__/**"
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/en.json",
+      "offset": 478,
+      "limit": 27
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json"
+    }
+  },
+  {
+    "result_characters": 1267,
+    "result_sha256": "79c725d0249eb5278b9ffd88ab992747731d80c6a196180f7d847b53a0f5cbbe",
+    "is_error": false
+  },
+  {
+    "result_characters": 3344,
+    "result_sha256": "809fd052528a96913588b72d9b736ad72fe4c05c04d9bc0a9fbb81add77864bf",
+    "is_error": false
+  },
+  {
+    "result_characters": 54454,
+    "result_sha256": "aa85491ccb6a0831fb47034b7e341f8505fb0e6abebf18d63eaf62b6bc0d53e6",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/spacing-confirm.tsx"
+    }
+  },
+  {
+    "result_characters": 6218,
+    "result_sha256": "a5c6386c94652bbf598ceb5da11d4d340465812b8aa73d7e48c4c2c92a14fd89",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurring|chip|spacing",
+      "path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 2154,
+    "result_sha256": "29af65f51eb9b6cf011ab8ffec2d859d26f2a342cf0b56a9e35624006bd24c8d",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/mockups/QuickLogMock.astro"
+    }
+  },
+  {
+    "result_characters": 5339,
+    "result_sha256": "b3934681b4fb47a1750068aa549c22f22fe1245aeff78edab9bfb4c4f03a6002",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "BUDGET|limit|5100|5 100",
+      "path": "<case>/landing/scripts/audit.mjs",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 994,
+    "result_sha256": "bf85e2a2feaf330512d108c391e5ad81661e31e9ca5d5f014b4c644c26ae9677",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "offset": 236,
+      "limit": 36
+    }
+  },
+  {
+    "result_characters": 1676,
+    "result_sha256": "f192ab6584dc03a7bf68781ffa4dd2a349424bbf344eaeef4b3352637ee9e804",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "offset": 396,
+      "limit": 45
+    }
+  },
+  {
+    "result_characters": 2096,
+    "result_sha256": "7291d67b146c9f7da3bf01add94a0e4c59917cc017a9ccccb5c8002ae5766435",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "offset": 630,
+      "limit": 50
+    }
+  },
+  {
+    "result_characters": 1775,
+    "result_sha256": "3923f9026978784d8e2db2da2af60e7f2cd392974ae6935519df241aeb7281b5",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurringValues",
+      "path": "<case>/frontend/src",
+      "output_mode": "files_with_matches"
+    }
+  },
+  {
+    "result_characters": 219,
+    "result_sha256": "06195d1ca668baed3b712f11c5ea60173a607d3f25e0c2cbbb0d6e50db8fb10f",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurring|chip",
+      "path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "output_mode": "content",
+      "-i": true,
+      "-C": 2
+    }
+  },
+  {
+    "result_characters": 2068,
+    "result_sha256": "aefda2b4561a71ae7501ed9b0b55c61aec5dad65428ab012e10ee79e11e6e85c",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurring|filtre|option.*filter|Filtrer|écart minimal|Espacement|pastilles de valeurs",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 5448,
+    "result_sha256": "a22f9a1363e67fada8b632cf904d64c947df1f36341be87c04d23ff6217671e7",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/types.ts"
+    }
+  },
+  {
+    "result_characters": 49408,
+    "result_sha256": "7b72ed07ce6d06a2bce4189aad9102e7a7d2394cfdb82380ed635ddfbb096407",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/SPEC.md",
+      "offset": 1318,
+      "limit": 20
+    }
+  },
+  {
+    "result_characters": 3911,
+    "result_sha256": "0b549b20f7e788a7953a24534a0e3dc71fe2473a11592cfcae909d081d4cb0ae",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "espacement|B-529|valeurs? (récurrente|fréquente|habituelle)|revien(t|nent) souvent",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 278,
+    "result_sha256": "9a7a2611a2d5cc0bca0b2e446d10c6427c6ae3dc86767723d60c076502bca2df",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "offset": 776,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 1361,
+    "result_sha256": "90ea7b7af905452664aa2e93681f192232444ad236216dfb092d29fba98a08d3",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^## (D-le-budget-de-hauteur-passe-a-5-100|D-le-changement-de-maisonnee-se-montre-dans-sa-section|D-le-catalogue-note-une-lecture)|B-530|B-170",
+      "path": "<case>/docs",
+      "output_mode": "content",
+      "glob": "{DECISIONS,BACKLOG}.md"
+    }
+  },
+  {
+    "result_characters": 2647,
+    "result_sha256": "938385e2a65b788e623ee83e50ae12fdcc40f5fe1cd286e4b3d67a20b662e027",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/DECISIONS.md",
+      "offset": 16205,
+      "limit": 22
+    }
+  },
+  {
+    "result_characters": 2005,
+    "result_sha256": "079378b71123655cc6cbfa6dc852ec558493c36d3cc3ef9793caac34963106c4",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/DECISIONS.md",
+      "offset": 16960,
+      "limit": 22
+    }
+  },
+  {
+    "result_characters": 3020,
+    "result_sha256": "40615730de6d4c56bcae04d7302ea0b4602f9cca998ff0c6dd24fc4da995f2d3",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(subhead|fieldValue|fieldLabel|heading|lead|first|second|third|fourth)\":",
+      "path": "<case>/landing/src/copy/en.json",
+      "output_mode": "content",
+      "head_limit": 0,
+      "offset": 0
+    }
+  },
+  {
+    "result_characters": 4972,
+    "result_sha256": "64ac9a6cf5f32654f0258f73097e6534980c00b7d54c03455d795ec0016f21c9",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "5[  ]?100|5,100",
+      "path": "<case>",
+      "glob": "{landing/**,docs/ARCHITECTURE.md,.claude/skills/**}",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 519,
+    "result_sha256": "31332b8376099af51f4b63619ee0527273e01495c7e0b72dcfb38de868932128",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "fieldValue|fieldLabel|QuickLogMock",
+      "path": "<case>/landing/src/components/Steps.astro",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 199,
+    "result_sha256": "1c6b35058688a669556ceb0641a91ab47ec22b07901593f81d0d88fd33ede5e4",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/package.json"
+    }
+  },
+  {
+    "result_characters": 984,
+    "result_sha256": "b3420a700d293a5002738af5c1709b0f1a68cfc87c3d5cf89d38e330cdde4ada",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "Features|<Steps|Forecasting",
+      "path": "<case>/landing/src/pages/en/index.astro",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 236,
+    "result_sha256": "abdbf57abd96a4479760b8219413cc9878adc73bee32b422b72a0ff5226ab1d5",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"ago\":|\"recurringValues\":|\"log\": \\{",
+      "path": "<case>/frontend/src/locales",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 403,
+    "result_sha256": "0daea1f4d291fa87a807b866762a26a6347146a2140675bf733fec518be82942",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "household|below|dessous",
+      "path": "<case>/landing/src/components/Discover.astro",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 109,
+    "result_sha256": "26470a3a92e560a663c57e9fe132e4e47638ca2727036610ae502df683637b79",
+    "is_error": false
+  }
+]
