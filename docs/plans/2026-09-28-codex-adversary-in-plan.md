@@ -142,3 +142,31 @@ the rest follows the Recommendation.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-28
+
+**Plan committed at:** 56eaf98
+
+**Commits:** 4802712, 09c3971, efa75e0
+
+**Verified:** efa75e06fbc0767f0efa5ca4391af7c6ddd748d7
+- `codex exec -s read-only --ephemeral --output-schema plugin/skills/plan/references/codex-premortem.schema.json "Reply with an empty findings list."`
+- `codex exec -s read-only --ephemeral --output-schema plugin/skills/plan/references/codex-counter-plan.schema.json "Reply with approach 'none', no phases, structuralChoice 'none' and no risks."`
+- `./scripts/audit.sh`
+
+**What got built:** /esq:plan, with ESQ_CODEX=on, launches a blind Codex counter-plan in the background at the announce and a foreground pre-mortem before the commit, judges both and records the verdicts in the plan commit body; the reference, two structured-output schemas and a README section ship it. Unset, the skill loads nothing new.
+
+**Verification:**
+- (auto) codex exec -s read-only --ephemeral --output-schema plugin/skills/plan/references/codex-premortem.schema.json "Reply with an empty findings list." — exit 0, final message {"findings": []}
+- (auto) codex exec -s read-only --ephemeral --output-schema plugin/skills/plan/references/codex-counter-plan.schema.json "Reply with approach 'none', no phases, structuralChoice 'none' and no risks." — exit 0, final message parses with keys approach, phases, risks, structuralChoice
+- (auto) ./scripts/audit.sh — exit 0, Clean — 7 checks (product), structure references resolve, product suites pass (27s)
+
+**Surprises / decisions made during execution:** - The two smokes were run with an added `-o <scratch file>` so the final message could be read without the transcript; the command and its criterion are otherwise as written.
+- A reference file is read raw, so `${CLAUDE_SKILL_DIR}` is not substituted inside it: the reference names the schemas as `<refs>/…`, the directory it was loaded from, which the SKILL.md load line resolves.
+- The `## Approaches considered` hook first landed inside the plan template's code fence (it would have been copied into every plan); it sits just after the template instead.
+- Both Codex calls discard stdout and send stderr to `<git-dir>/esq/*.err`, so the Codex transcript never enters Claude's context; the `.err` last line is the `not run` reason.
+- The pre-mortem runs as "Commit and stop" step 0, before the branch is cut, so its accepted edits land in the one plan commit.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. The first real opted-in `/esq:plan` run is the end-to-end proof: counter-plan launch, kill-on-late, and the Adversary block in the commit body are untested beyond the schema smokes.
