@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["approach", "phases", "structuralChoice", "risks"],
+  "properties": {
+    "approach": { "type": "string" },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "outcome", "proof"],
+        "properties": {
+          "name": { "type": "string" },
+          "outcome": { "type": "string" },
+          "proof": { "type": "string" }
+        }
+      }
+    },
+    "structuralChoice": { "type": "string" },
+    "risks": { "type": "array", "items": { "type": "string" } }
+  }
+}
