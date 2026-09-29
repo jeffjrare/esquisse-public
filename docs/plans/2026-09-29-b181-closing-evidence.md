@@ -25,7 +25,10 @@ one inspectable run on the same Tamialog case, not by assertion.
   proposal kept whole, a normalized trace, metrics, and an after-arm vs new-run table on each closing criterion plus
   words/time/cost (reported, not gating).
 - B-181 is either Done, with a note citing the run and its limits, or still Open with the reason. When a regression
-  occurred, the fix is withdrawn and the diff is empty against the pre-unit source.
+  occurred, the fix is withdrawn: `SKILL.md` keeps no Task 1.1 sentence, and differs from the pre-unit source only by
+  what a later authorized unit kept (item 6, `b181-variance-then-fix` Task 2.1, `538c7c8`). *Amended 2026-09-29
+  (b181-closing-evidence-fixes item 1): was "the diff is empty against the pre-unit source". The stacked unit merged
+  here kept a different item, and the property this line protects still holds: the withdrawn fix leaves no trace.*
 - `./scripts/audit.sh` PASS is recorded.
 
 ## Approaches considered
@@ -99,7 +102,7 @@ Single-phase plan.
 - **Verification:**
   - `(auto)` `test -s docs/preparation/2026-09-29-b181-fidelity.md` — the evidence report exists
   - `(auto)` `grep -c "preparation/2026-09-29-b181-fidelity.md" docs/BACKLOG.md` — the B-181 detail note links the evidence (count ≥ 1)
-  - `(auto)` `git diff main -- plugin/skills/plan/SKILL.md` — shows only the Task 1.1 sentences when the fix is kept, or is empty when it was withdrawn, matching the disposition in the evidence file
+  - `(auto)` `git diff main -- plugin/skills/plan/SKILL.md` — shows no Task 1.1 sentence (withdrawn in `a5e1666`); its only change is item 6 kept by `docs/plans/2026-09-29-b181-variance-then-fix.md` Task 2.1 (`538c7c8`), matching the kept verdict in `docs/preparation/2026-09-29-b181-variance.md`. *Amended 2026-09-29 (b181-closing-evidence-fixes item 1): was "shows only the Task 1.1 sentences when the fix is kept, or is empty when it was withdrawn, matching the disposition in the evidence file". The merged stacked unit kept a different item, and the property is unchanged: the diff holds exactly what the recorded evidence decided.*
   - `(auto)` `./scripts/audit.sh` — PASS (runs the product suites itself; no `node --test` beside it; `ESQ_TELEMETRY` must not be inherited from the trial launcher, the 2026-09-25 lesson)
 
 ## Risks
