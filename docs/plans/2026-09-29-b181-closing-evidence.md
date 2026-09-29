@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 3ee7602449890e2b8668b89ccb80f5842a6627d9
+
 ## Context
 B-181 (carry the user's outcome from grill to plan without a re-grill) stays Open: the retained Tamialog "after"
 proposal (`docs/preparation/2026-09-25-b181-tamialog/after-proposal.md`, fix `7a79ffa`) restored the drawer notice and
