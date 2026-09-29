@@ -204,8 +204,8 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-185 | 2026-09-25 | 🐛 bug | hi |  | Preserve significant whitespace in auto commands through Markdown extraction and landing proof reuse. | observed: events-tracker landing plan 2026-09-24-vitrine-fonctions-recentes-multi-membre, command line 232 and proof line 295 · Done by preserve-command-whitespace · detail in 29cd437 |  |  | Done |
 | B-186 | 2026-09-29 | ⚠️ debt | med? |  | No end-to-end proof that an opted-in /esq:plan run launches the Codex counter-plan, kills it when late, and records the Adversary block and Codex: line | fix: codex-adversary-in-plan · Planned by codex-adversary-in-plan-fixes · Done by codex-adversary-in-plan-fixes · detail in 29cd437 |  |  | Done |
 | B-187 | 2026-09-29 | ⚠️ debt | med? |  | Probe-codex-plan cannot prove the skill stopped the late counter-plan (host teardown looks the same), and its one-line task now trips /esq:plan's small-task exit | fix: codex-adversary-in-plan-fixes · Planned by codex-adversary-in-plan-fixes-fixes · Done by codex-adversary-in-plan-fixes-fixes · detail in 29cd437 |  |  | Done |
-| B-188 | 2026-09-29 | ✨ improvement | hi? | 200 | Grill-plan copy keeps every qualifier across FR/EN (e.g. powdered-formula) | observed: 2026-09-29-b181-variance-then-fix Phase 2 · Planned by 2026-09-29-git-state-and-copy-fidelity |  |  | Planned |
-| B-189 | 2026-09-29 | 🐛 bug | hi? | 100 | Preparation must not assert unobserved Git state (e.g. detached HEAD) | observed: 2026-09-29-b181-variance-then-fix Phase 2 · Planned by 2026-09-29-git-state-and-copy-fidelity |  |  | Planned |
+| B-188 | 2026-09-29 | ✨ improvement | hi? | 200 | Grill-plan copy keeps every qualifier across FR/EN (e.g. powdered-formula) | observed: 2026-09-29-b181-variance-then-fix Phase 2 · Planned by 2026-09-29-git-state-and-copy-fidelity |  |  | Open |
+| B-189 | 2026-09-29 | 🐛 bug | hi? | 100 | Preparation must not assert unobserved Git state (e.g. detached HEAD) | observed: 2026-09-29-b181-variance-then-fix Phase 2 · Planned by 2026-09-29-git-state-and-copy-fidelity |  |  | Open |
 
 ---
 
@@ -992,8 +992,12 @@ spending anything on hooks.
 **Why it matters:** Split off from B-181 (2026-09-29-b181-variance-then-fix, Phase 2) because it is the one criterion of B-181's closing set that the kept fix did not make reliable, and it names a narrower, distinct failure (copy fidelity across languages) rather than B-181's broader framing.
 **Notes:** Evidence and the exact lines: [B-181 variance](preparation/2026-09-29-b181-variance.md) (C5, criteria × runs table) and [B-181 fidelity trial](preparation/2026-09-29-b181-fidelity.md).
 
+**Run set (2026-09-29, 2026-09-29-git-state-and-copy-fidelity):** Item 6 was tightened (a translation renders each modifier of the source and is written in full). C5 held 3/3 on the qualifier reading ("powdered" / "powder" / "powdered-formula"), 1/3 on the literal "powdered-formula" label. But C1 and C6 fell to 1/3 (from 2/3), so the pre-written rule read regression: both edits of the shared set were reverted (053276f, cc45e94) and the row is back to Open. Next lever, not proven: a C5 clause that does not lengthen item 6, where the C1/C6 clauses live. Evidence: [B-188/B-189 run set](preparation/2026-09-29-b188-b189-tamialog.md).
+
 ## B-189 — Preparation must not assert unobserved Git state (e.g. detached HEAD)
 
 **What:** In a shell-less read-only preparation run (no `git` available), `/esq:plan` sometimes asserts a specific Git state it cannot have observed — e.g. "Le dépôt est en HEAD détachée" — in 2 of 3 runs of the 2026-09-29 variance fix arm, up from 0 of 2 delivered baseline runs. The 2026-09-25 UI-case retry and the fidelity trial had both held this criterion; the fix arm's regression is untargeted and not attributable to the fix itself.
 **Why it matters:** Split off from B-181 (2026-09-29-b181-variance-then-fix, Phase 2) as the second criterion the kept fix left unreliable. Inventing Git state is a correctness defect independent of copy fidelity or instruction-following, and worth its own guard/rule rather than riding on B-181's title.
 **Notes:** Evidence and the exact lines: [B-181 variance](preparation/2026-09-29-b181-variance.md) (C7, criteria × runs table).
+
+**Run set (2026-09-29, 2026-09-29-git-state-and-copy-fidelity):** A rule naming a Git state only from the output of a command that ran, with "branch not observed" otherwise, held C7 3/3 (from 1/3). But the shared set regressed C1 and C6 to 1/3, so the pre-written rule reverted both edits (053276f, cc45e94) and the row is back to Open. This rule sits outside item 6 and is a candidate for a run set on its own. Evidence: [B-188/B-189 run set](preparation/2026-09-29-b188-b189-tamialog.md).
