@@ -368,7 +368,8 @@ takes a positional plan, range or commit, not `--range` or `--commit` flags.
 `brief depth` separately answers the corrective generation and its bound.
 
 `state` reports plans, backlog, roadmap and epics from the live ledgers in one read; it
-never refreshes a projection.
+never refreshes a projection. An answer too long to print — `state`'s, or `review scope`'s diff — is written under
+the git dir and named by `file` / `diffFile`, with the `ranges` that read it whole.
 
 The CLI owns ledger IDs, status cells, plan logs, branch checks and merge safety.
 Most results are JSON; `telemetry summary` defaults to a human-readable report

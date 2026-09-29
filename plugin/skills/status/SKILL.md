@@ -19,7 +19,7 @@ Before recommending `/esq:plan` for a corrective brief, ask `esq brief depth <br
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Run `esq state`, `esq brief pending` and `esq validate` once, batching these independent readers. When `esq state`'s answer carries `file`, it was too large to print: that file is the whole answer, so Read it in the next turn and never re-run the command. Surface validation findings. Do not glob plans/briefs or parse backlog/roadmap facts the CLI supplies.
+Run `esq state`, `esq brief pending` and `esq validate` once, batching these independent readers. When `esq state`'s answer carries `file`, it was too large to print: that file is the whole answer, so Read it in the next turn — every range its `ranges` names, in one batch — and never re-run the command. Surface validation findings. Do not glob plans/briefs or parse backlog/roadmap facts the CLI supplies.
 
 | Reader/field | Facts to retain |
 |---|---|

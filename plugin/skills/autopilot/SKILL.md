@@ -30,7 +30,7 @@ A fresh subagent supplies the clean context `/esq:build` requests with `/clear` 
 <!-- announce-open:start -->
 Print this line first, before any tool call, then continue with the first call in the same response:
 
-> `/esq:autopilot — running the plan's remaining phases. Bound: one subagent per phase, one extra per decision, at most one reconcile pass per unlogged phase.`
+> `/esq:autopilot — running the plan's remaining phases. Bound: one subagent per phase, two extra per decision (apply, resume), at most one reconcile pass per unlogged phase.`
 
 Stop at the bound and report what remains uncovered. Announce the resolved target after preflight.
 <!-- announce-open:end -->
@@ -57,7 +57,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 6. **Record the starting `HEAD` short hash** — the report needs the range.
 7. **Announce the resolved target** — the second line:
    <!-- announce:start -->
-   > `Autopilot on <slug>: <N> phase(s) remaining — <N> subagents worst case, plus at most one reconcile pass per phase left unlogged and one apply agent per decision whose approved action routes apply.`
+   > `Autopilot on <slug>: <N> phase(s) remaining — <N> subagents worst case, plus at most one reconcile pass per phase left unlogged and per decision whose approved action routes apply, one apply agent and one resume.`
    <!-- announce:end -->
 
    Do not ask for confirmation.
@@ -110,7 +110,7 @@ Here that is the execution log: re-run the skeleton grep, recompute `L` and `A`,
 
 **Classify by `⏸`, never by its following clause.** Both manual-verification and same-unit-defect pauses are authority gates.
 
-**A missing entry is not a verdict.** A reported failure stops immediately, its option set or diagnosis relayed; never retry it. Without one — even after a success claim, death, interruption or unusable response — the phase is **unclassified**.
+**A missing entry is not a verdict.** A reported failure stops immediately, its option set or diagnosis relayed; never retry it — **except a diagnosis with no option set whose exact next action is re-running `/esq:build <this plan>`** (a flake outside the phase's change, its tasks committed): nothing in it is the user's, so the phase is unclassified and takes its one reconcile pass. Without a reported failure — even after a success claim, death, interruption or unusable response — the phase is **unclassified**.
 
 **One reconcile pass per unclassified phase:** spawn a phase agent on the same plan with the normal loop prompt; build reconciles landed commits and passing verification before building. This pass does not consume the phase cap.
 
@@ -134,12 +134,12 @@ Stop the loop when: a gate fires, the phase cap is reached, or no phases remain.
 
 ## Stops you dissolve, stops you honor
 
-**You dissolve exactly one stop** — `/esq:build`'s end-of-a-successful-phase `[context]` instruction to `/clear` and re-run. Continue past it silently.
+**You dissolve three stops, and only these:** `/esq:build`'s end-of-a-successful-phase `[context]` instruction to `/clear` and re-run, which you continue past silently; a failure whose only action is re-running `/esq:build` on this plan (§ 2, one reconcile pass); and a `⏸ blocked` phase once its chosen option is applied (§ "Then resume").
 
 **You honor every other stop**, without exception and without interpretation:
 
 - A `(manual)` step whose observation link stayed uncovered — closing it exceeded the phase's mandate or failed inside its bound.
-- Any `(auto)` verification failure, any failed test.
+- Any `(auto)` verification failure, any failed test, unless its own diagnosis names nothing but re-running `/esq:build` (above).
 - Drift: a task that doesn't advance its phase's goal.
 - A task or plan the phase agent found wrong as written.
 - Any question the phase agent wanted to put to the user.
@@ -209,7 +209,7 @@ The task, for the one route that spawns:
 
 > Apply exactly this change and nothing else: `<the chosen do:, verbatim — on an approved repair the replacement, never the original>`. Do not improve on, widen, or second-guess it. Make the change and run the verification the plan's phase names — on an approved repair, by its `verify:` alone, never the phase suite. Only once that verification passes, commit it alone as `fix(<scope>): <the option's label>`. If the change cannot be applied as written, make no edit and report why. If it fails that verification, stop: commit nothing, reset, restore, clean or discard nothing, and report the failure and the edits left in the tree. On a repair, `<its deferred reminder>` is not yours to do, and if that verification already passes, change only the record.
 
-**Then resume — only when it costs nothing already paid for.** A gated phase cannot be reconciled, so resuming re-walks every task. Check the phase agent's report for commits made before it broke:
+**Then resume — only when it costs nothing already paid for.** A phase that logged `⏸ blocked on an open same-unit defect` always resumes: spawn a normal phase agent, whose `/esq:build` resolves the block by re-running only the owed checks — no task is re-walked — then carries on; a second block stops the run (one round per gate). A gated phase with no entry cannot be reconciled, so resuming re-walks every task. Check the phase agent's report for commits made before it broke:
 
 - **It committed nothing** → re-run the phase through a normal phase agent, exactly as the loop does, and carry on.
 - **It committed some tasks** → stop and hand back, with `→ Next: /esq:build <plan-path>`. The option is applied and committed; the re-walk belongs to an attended `/esq:build`.
@@ -304,7 +304,7 @@ Send a `PushNotification`: `"esq:autopilot — <X>/<Y> phases done. <stopped at 
 - **An unclassified phase is not a failed one.** Its single reconcile pass classifies it; one pass per phase, and a pass reporting a failure is relayed as a failure, never passed again.
 - **Never edit the plan file's phases, tasks, or scope.** Re-planning belongs to `/esq:plan`.
 - **Never chain into another command** (`/esq:check`, `/esq:review`, `/esq:fix`, `/esq:converge`, `/esq:arch`, `/esq:spec`); recommend the next step and stop. Relaying the `Planned by <slug>` rows as close proposals is reporting, not chaining.
-- **The bound, stated up front:** one subagent per phase, strictly sequential; one apply agent per decision whose approved action routes `apply`; at most one reconcile pass per unlogged phase.
+- **The bound, stated up front:** one subagent per phase, strictly sequential; one apply agent per decision whose approved action routes `apply`, plus one resume when it cleared a `⏸ blocked` phase; at most one reconcile pass per unlogged phase.
 - **A gate is put to the user as a prompt, resolved by their pick, and applied verbatim** — never twice, never unanswered, never with an option you wrote. Never answer a gate for the user, never pick an option from an `AskUserQuestion` a subagent raised, never form your own leaning or act on an unanswered prompt.
 - **A decision is relayed as an option set, a diagnosis as a diagnosis** — every option, diagnosis and action comes from the phase agent, never from you.
 - **Decide from the execution log**, never from a subagent's self-report.

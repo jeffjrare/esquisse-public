@@ -28,7 +28,7 @@ After resolving the mode, announce `Mode: <show & refresh | derive the order | a
 - **A — derive:** first token `plan` or `re-plan`, or a user invocation with no argument and no file.
 - **C — edit:** any other text.
 
-B reads the roadmap and one `esq state` — its `backlog.rows` already hold every row the roadmap covers, plus `inFlight` and `plans[].state`; when the answer carries `file`, that file is the whole answer: Read it in the next turn, never re-run `esq state` through a filter — then cited plans and cited epic Status. Before a completion recommendation, also read only the relevant open items' detail sections and their cited acceptance evidence already in those sources. No code, verification rerun or plan sweep. C has the same budget, including the moved entry's and neighbour's covered rows. A adds only its Gather inputs below.
+B reads the roadmap and one `esq state` — its `backlog.rows` already hold every row the roadmap covers, plus `inFlight` and `plans[].state`; when the answer carries `file`, that file is the whole answer: Read it in the next turn — every range its `ranges` names, in one batch — never re-run `esq state` through a filter — then cited plans and cited epic Status. Before a completion recommendation, also read only the relevant open items' detail sections and their cited acceptance evidence already in those sources. No code, verification rerun or plan sweep. C has the same budget, including the moved entry's and neighbour's covered rows. A adds only its Gather inputs below.
 
 <!-- shared:read-once:start -->
 **Read each file once**, taking the needed slice on large files and retaining it for later steps. Re-read only if you have written to it since. A later reference to that file or a desire to double-check does not justify another read.
@@ -64,8 +64,8 @@ For example, dev-only dependency bumps can share one low-risk entry that lands f
 ### Gather and judge
 
 Read:
-1. Backlog rows: Open, Needs-decision and Planned; omit Done/Dropped. `esq state --rows` lists them all; when its answer carries `file`, Read that file — by `offset`/`limit` ranges if one read is refused — and never re-run the command through a filter.
-2. Plans under `docs/plans/`, excluding `*.brief.md` and `*.log.md`: title, Epic and Execution log.
+1. Backlog rows: Open, Needs-decision and Planned; omit Done/Dropped. `esq state --rows` lists them all; when its answer carries `file`, Read that file whole — every `offset`/`limit` range its `ranges` names, in one batch; a single Read cuts a long file silently — and never re-run the command through a filter.
+2. Plans: `esq state`'s `plans` (file and state, every plan), never a directory listing; read title, Epic and Execution log only of a plan that is not complete or that an entry cites.
 3. Epics: Status, Goal, Scope. Active next slices usually rise; paused/done epics' items sink.
 4. Existing decisions that constrain ordering.
 5. Only candidate items' detail sections.
@@ -112,7 +112,7 @@ Generate rollups from the covered work:
 - **in flight:** execution started and unfinished according to a plan's log, excluding paused or explicitly parked work. Planned alone means a plan association, not execution; a log is not proof of a currently running worker.
 - Otherwise retain the known condition: planned, not started, paused with its cause, plan missing, or plan complete with acceptance outstanding; never infer execution from priority, horizon or plan-file recency.
 
-For explicitly deferred work, preserve `parked — <reason>; resume when <condition>` in the existing state prose, alongside canonical statuses. Use the summary/detail, why-now and acceptance already read; load only a relevant item's detail when needed. Missing reason/condition stays unspecified, not a new question. Later alone does not mean parked. Apply this per covered item: a parked member does not hide another member's execution or blocker. No new status, field or status mutation; a ready/paused plan retains its own phase classification.
+For explicitly deferred work, preserve `parked — <reason>; resume when <condition>` in the existing state prose, alongside canonical statuses. Use the summary/detail, why-now and acceptance already read; load only a relevant item's detail when needed. Missing reason/condition stays unspecified, not a new question. Later alone does not mean parked. Apply this per covered item: a parked member does not hide another member's execution or blocker. **A deferral the user states is written, not only preserved:** when they answer a NEEDS YOU item with *not now* (not ready, later), write `parked — <their reason>; resume when <their condition, else "the user raises it">` into that entry's state prose, committed with this pass's bookkeeping, and never put it to them again while parked. No new status, field or status mutation; a ready/paused plan retains its own phase classification.
 
 **Plan completion is not item acceptance.** For an unclosed item (Open, Planned or Needs-decision) on a complete plan, compare its summary and detail (including any explicit post-plan completion condition) with the retained evidence before recommending a disposition. Read each relevant detail once; do not scan the detail tail or invent a new acceptance schema. Record `plan complete; acceptance unmet: <condition>` or `acceptance unproved: <missing evidence>` when appropriate. Keep the entry in its horizon, with its needs edges effective. Missing evidence is not a user decision and does not authorize a research run. If the whole outcome is evidenced, report `acceptance evidenced; backlog disposition pending` and offer `/esq:sweep` to reconcile it; the entry remains until the row is actually closed. Never present sweep as a closure formality merely because phases completed. These rules also apply in A/C.
 
@@ -162,7 +162,7 @@ Commit changed roadmap/backlog together as `roadmap: <what changed>`; never stag
 Number user-owned asks, action first with exact commands; omit on ✔. Preserve genuine 🔴 option sets and verbatim manual steps with bracketed starting state. Then show factual results with evidence: ✔ happened, ○ deliberately not, ✖ failed. Collapse empty categories, but retain the entire ordered queue and every why-now. Name unperformed work the reader would otherwise assume ran.
 <!-- conclusion:end -->
 
-Render Now/Next/Later, continuous positional numbers, slug, covers, state, why-now and applicable dependency lines; show recent shipped entries. NEEDS YOU counts entries blocked on a user call. Show confirmed priority in brackets only when it disagrees with placement (e.g. hi in Later). Use relative paths.
+Render Now/Next/Later, continuous positional numbers, slug, covers, state, why-now and applicable dependency lines; show recent shipped entries. NEEDS YOU counts entries blocked on a user call, never a parked one. Show confirmed priority in brackets only when it disagrees with placement (e.g. hi in Later). Use relative paths.
 
 **Next action:**
 - Use the entry the user is discussing (argument or conversation, resolved by slug or covered reference); otherwise use the top Now entry. An explicit request to walk all Now keeps the global route. Apply the following entry rules to that focus without changing the queue's order or promoting it.

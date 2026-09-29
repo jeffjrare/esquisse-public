@@ -8,7 +8,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { LOG_ENTRY_SCHEMA, addDecisions, addRow, appendLog, briefDepth, briefPending, briefPlan, evidence, planContext, priForType, rankEdges, rankOrder, rankPlace, renderAppendLogHelp, renderEvidence, derive, reserveId, setPri, setStatus, state, validate } from '../../plugin/lib/cli.mjs';
+import { LOG_ENTRY_SCHEMA, addDecisions, addRow, appendLog, briefDepth, briefPending, briefPlan, evidence, planContext, priForType, rankEdges, rankOrder, rankPlace, readRanges, renderAppendLogHelp, renderEvidence, derive, reserveId, setPri, setStatus, state, validate } from '../../plugin/lib/cli.mjs';
 import { nextPhase, parsePlan, parseVerified } from '../../plugin/lib/markdown.mjs';
 import { DIRECT_SEGMENTS_NOTE, EXCLUDED_RUNS, RUN_ROW_KEYS, INTERRUPTED_RUNS_NOTE, MIN_SAMPLE_RUNS, PLUGIN_DATA_ENV_IGNORED_NOTE, TELEMETRY_OPT_OUT_NOTE, discoverTelemetryFiles, renderTelemetrySummary, spawnModelVerdict, summarizeTelemetry } from '../../plugin/lib/telemetry.mjs';
 
@@ -2574,6 +2574,14 @@ test('decisions add creates the registry, then keeps each table order and makes 
   assert.deepEqual(JSON.parse(piped.stdout).added, [{ id: 'D-l-apostrophe', title: "L'apostrophe" }]);
 });
 
+test('readRanges cuts a file into consecutive line ranges that each fit the budget', () => {
+  const text = `${Array.from({ length: 10 }, (_, index) => `${index}`.padEnd(9, 'x')).join('\n')}\n`;
+  assert.deepEqual(readRanges(text, 30), [{ offset: 1, limit: 3 }, { offset: 4, limit: 3 }, { offset: 7, limit: 3 }, { offset: 10, limit: 1 }]);
+  assert.deepEqual(readRanges('one\ntwo\n'), [{ offset: 1, limit: 2 }]);
+  // A single line over the budget is still one range of its own, never an empty one.
+  assert.deepEqual(readRanges(`${'y'.repeat(50)}\nz\n`, 30), [{ offset: 1, limit: 1 }, { offset: 2, limit: 1 }]);
+});
+
 // `esq state` on a long history: complete plans by file and state only, and past the inline budget
 // the whole answer goes to one file under the git dir, with the scalars and counts kept inline.
 test('state lists complete plans by file and state, and spills a long answer under the git dir', async () => {
@@ -2605,8 +2613,13 @@ test('state lists complete plans by file and state, and spills a long answer und
   assert.equal(spilled.file, path.join(await realpath(root), '.git', 'esq', 'state.json'));
   assert.equal(spilled.backlog.counts.Open, 200);
   assert.equal(spilled.backlog.rows, undefined);
-  const whole = JSON.parse(await readFile(spilled.file, 'utf8'));
+  const text = await readFile(spilled.file, 'utf8');
+  const whole = JSON.parse(text);
   assert.equal(whole.backlog.rows.length, 200);
+  // The ranges tile the file: every line read once, in order.
+  const last = spilled.ranges.at(-1);
+  assert.equal(spilled.ranges[0].offset, 1);
+  assert.equal(last.offset + last.limit - 1, text.trimEnd().split('\n').length);
   assert.equal((await git('status', '--porcelain')).stdout, '');
 
   // Named rows stay inline even when the rest spills.

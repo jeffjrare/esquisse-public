@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -102,6 +102,26 @@ async function recordClean(root, relative, slug, at) {
 const subjects = (scope) => scope.commits.map((entry) => entry.subject);
 const paths = (scope) => scope.paths.map((entry) => entry.path);
 const candidate = (scope, source) => scope.candidates.find((entry) => entry.source === source);
+
+// ── A long diff ──────────────────────────────────────────────────────────────
+
+test('a diff past the inline budget is written under the git dir with the ranges that read it whole', async () => {
+  const root = await repo();
+  const { relative } = await plan(root, 'widget');
+  const small = await reviewScope(root, relative);
+  assert.equal(small.diffFile, undefined);
+  await writeFile(path.join(root, 'src/big.js'), Array.from({ length: 2000 }, (_, index) => `export const value${index} = '${'x'.repeat(40)}';`).join('\n') + '\n');
+  commit(root, 'feat(app): a long file');
+
+  const scope = await reviewScope(root, relative);
+  assert.equal(scope.diffFile, path.join(git(root, 'rev-parse', '--absolute-git-dir'), 'esq', `review-${scope.base.slice(0, 7)}-${scope.head.slice(0, 7)}.diff`));
+  const text = await readFile(scope.diffFile, 'utf8');
+  assert.ok(text.includes('+export const value1999'));
+  assert.ok(scope.ranges.length > 1);
+  const last = scope.ranges.at(-1);
+  assert.equal(last.offset + last.limit - 1, text.trimEnd().split('\n').length);
+  assert.equal(git(root, 'status', '--porcelain'), '');
+});
 
 // ── The initial review ───────────────────────────────────────────────────────
 

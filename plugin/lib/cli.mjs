@@ -2014,6 +2014,29 @@ export function readableJson(value, indent = '') {
   return `{\n${keys.map((key) => `${inner}${JSON.stringify(key)}: ${readableJson(value[key], inner)}`).join(',\n')}\n${indent}}`;
 }
 
+// The Read tool cuts a long file without refusing it: a 169 KB state.json (`--rows`, events-tracker,
+// 2026-09-28, v2.1.283) came back as its first ~43 KB, and the reader re-filtered the rest with jq.
+// So a spilled answer names the line ranges that each fit one read, and the reader sends them together.
+const READ_RANGE_BUDGET = 32_000;
+
+export function readRanges(text, budget = READ_RANGE_BUDGET) {
+  const lines = text.endsWith('\n') ? text.slice(0, -1).split('\n') : text.split('\n');
+  const ranges = [];
+  let offset = 1;
+  let bytes = 0;
+  lines.forEach((line, index) => {
+    const size = Buffer.byteLength(line) + 1;
+    if (bytes > 0 && bytes + size > budget) {
+      ranges.push({ offset, limit: index + 1 - offset });
+      offset = index + 1;
+      bytes = 0;
+    }
+    bytes += size;
+  });
+  if (lines.length >= offset) ranges.push({ offset, limit: lines.length + 1 - offset });
+  return ranges;
+}
+
 export async function stateAnswer(root, { rows = false } = {}) {
   const answer = await state(root, { rows });
   if (Buffer.byteLength(JSON.stringify(answer, null, 2)) <= INLINE_OUTPUT_BUDGET) return answer;
@@ -2022,13 +2045,14 @@ export async function stateAnswer(root, { rows = false } = {}) {
   const target = path.join(gitDir, 'esq', 'state.json');
   await mkdir(path.dirname(target), { recursive: true });
   const temporary = `${target}.${process.pid}.tmp`;
-  await writeFile(temporary, `${readableJson(answer)}\n`, 'utf8');
+  const body = `${readableJson(answer)}\n`;
+  await writeFile(temporary, body, 'utf8');
   await rename(temporary, target);
   const { root: top, branch, dirty, activePlan, landing, idBlock, inFlight } = answer;
   // Rows the caller named by ID stay inline: they are few, and they are why it called.
   const { counts, openPri, error, notOpen } = answer.backlog ?? {};
   const named = Array.isArray(rows) ? { rows: answer.backlog?.rows } : {};
-  return { file: target, root: top, branch, dirty, activePlan, backlog: answer.backlog && { counts, openPri, error, ...named, notOpen }, landing, idBlock, inFlight };
+  return { file: target, ranges: readRanges(body), root: top, branch, dirty, activePlan, backlog: answer.backlog && { counts, openPri, error, ...named, notOpen }, landing, idBlock, inFlight };
 }
 
 export async function state(root, { rows: allRows = false } = {}) {
@@ -3646,7 +3670,7 @@ export async function reviewScope(root, planPath, { full = false } = {}) {
 // Everything a review needs once a base and a head are settled, whichever way they were settled — a
 // plan's own history, or a range the caller named. `answer` carries the shape's defaults plus
 // whatever the resolution already knows.
-function reviewRangeFacts(repository, base, head, answer) {
+async function reviewRangeFacts(repository, base, head, answer) {
   const log = gitTry(repository, ['log', `${base}..${head}`, `--format=%H${FIELD_US}%s`]);
   if (log === null) {
     return { ...answer, base, reason: `git could not list ${base.slice(0, 7)}..${head.slice(0, 7)} — review the whole change and say so`, mode: 'unresolved' };
@@ -3676,7 +3700,35 @@ function reviewRangeFacts(repository, base, head, answer) {
     bookkeepingOnly: commits.length === 0 && contracts.length === 0,
     paths: [...reviewPaths(changed), ...contracts],
     diff: `git diff ${base} ${head} -- ${pathspec}${contractDiff}`,
+    ...(await spillReviewDiff(repository, base, head, contracts)),
   };
+}
+
+// A diff past the inline budget came back as a 2 KB preview, and the reviewer spent four turns
+// grepping and re-reading the persisted blob (events-tracker, 2026-09-28: a 100 KB diff, v2.1.283).
+// So a long diff is written once under the git dir, never the working tree, and named by `diffFile`
+// with the line ranges that each fit one Read. A diff git cannot produce here adds nothing: the
+// `diff` command still stands.
+async function spillReviewDiff(repository, base, head, contracts) {
+  const run = (paths) => {
+    try {
+      return execFileSync('git', ['-C', repository, 'diff', base, head, '--', ...paths], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 256 * 1024 * 1024 });
+    } catch { return null; }
+  };
+  if (process.env.NODE_ENV === 'test' && process.env.ESQ_TEST_GIT_ROOT) return {};
+  const main = run(['.', ...REVIEW_EXCLUDED]);
+  const plans = contracts.length === 0 ? '' : run(contracts.map(({ path: file }) => `:(literal)${file}`));
+  if (main === null || plans === null) return {};
+  const text = main + plans;
+  if (Buffer.byteLength(text) <= INLINE_OUTPUT_BUDGET) return {};
+  const gitDir = gitTry(repository, ['rev-parse', '--absolute-git-dir']);
+  if (!gitDir) return {};
+  const target = path.join(gitDir, 'esq', `review-${base.slice(0, 7)}-${head.slice(0, 7)}.diff`);
+  await mkdir(path.dirname(target), { recursive: true });
+  const temporary = `${target}.${process.pid}.tmp`;
+  await writeFile(temporary, text, 'utf8');
+  await rename(temporary, target);
+  return { diffFile: target, ranges: readRanges(text) };
 }
 
 // `esq review scope <A>..<B>` / `<ref>` — the same facts for a change that has no plan file.
