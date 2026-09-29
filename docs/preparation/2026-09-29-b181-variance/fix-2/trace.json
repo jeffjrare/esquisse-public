@@ -1,0 +1,465 @@
+[
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-24-vitrine-fonctions-recentes-multi-membre.brief.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "*.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "docs/**/*"
+    }
+  },
+  {
+    "result_characters": 10971,
+    "result_sha256": "7f3c369d5387f94ac4250a1ff18960769392ae09c95b08a3dbc34e6f43f96ebb",
+    "is_error": false
+  },
+  {
+    "result_characters": 1712,
+    "result_sha256": "16d460022f1aa53a7ae8aa881bb2bc5ae32cbbe2ef6cbe356dd6d9794d382f85",
+    "is_error": false
+  },
+  {
+    "result_characters": 252,
+    "result_sha256": "e4a97fac5a214f62a658d0d4ce62197daa9f60d69aed48ec07c2f92d0b4e53a2",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/plugin/skills/plan/references/screens-and-manual-steps.md"
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/CLAUDE.md"
+    }
+  },
+  {
+    "result_characters": 5675,
+    "result_sha256": "2381d0461da07588c430a9d6bf7b4f1cd4641d1d605287d1f09be368a7407ac9",
+    "is_error": false
+  },
+  {
+    "result_characters": 7554,
+    "result_sha256": "14a21115142100aebc7da2147d2fd2217cb24ea035e6b4dda071b4407f6bafe3",
+    "is_error": false
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "landing/**/*.{astro,json,mjs,ts,md}"
+    }
+  },
+  {
+    "result_characters": 3342,
+    "result_sha256": "c998a1c68ff6b427bc5d15cfc30d08d4fb53b09392fed53aa3459ac02c4c983f",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-24-minimum-spacing-warning.brief.md"
+    }
+  },
+  {
+    "result_characters": 9823,
+    "result_sha256": "df4e4a3de8c1ddc8e8a5fb416388eb16960b6ae7e301da25915190e2d8a79d5d",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-21-filtrer-un-sujet-par-option.brief.md"
+    }
+  },
+  {
+    "result_characters": 12287,
+    "result_sha256": "9c8becfd0c06d74489f48f40c1d2c0fc476814fe551f17abc3614abbc128c3de",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/Features.astro"
+    }
+  },
+  {
+    "result_characters": 4893,
+    "result_sha256": "b50df0fe0bc7ee56fe1dd80a9c82f93f62a65264250e1e10e46438ba0addfda5",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/index.astro"
+    }
+  },
+  {
+    "result_characters": 3516,
+    "result_sha256": "3eca5f5028e0c7911f8869ca997f62bd74ff0b6205892d2d5dcdc853719c8649",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/en/index.astro"
+    }
+  },
+  {
+    "result_characters": 2723,
+    "result_sha256": "499906ddaecc3891de1c670dc216b04c830029f8b88666a4c7eee36c99d7b340",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/fragments/SwitcherFragment.astro"
+    }
+  },
+  {
+    "result_characters": 3514,
+    "result_sha256": "d0d667d386ef86d9b0ded867dbcd2a90f557655718c9b3c64d57a1e6b044cc01",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "limit|5 ?100|5100",
+      "path": "<case>/landing/scripts/audit.mjs",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 898,
+    "result_sha256": "5785878b2dc1e3449888fc99eb44a59668bb6659b0cc9cdd1761b2eb3b017f0f",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing|écart|Enregistrer quand même|quand même|chips|pastille|récurrent",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 19508,
+    "result_sha256": "0d7e47407c73f00c37a3c321e5aad7623d93b1eca18729bfd53d80444d883261",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "quand même|anyway|spacing|Spacing",
+      "path": "<case>/frontend/src/locales",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 2111,
+    "result_sha256": "50a0f8887fab9785cdf5a93faf0c114a483f34a2b824001a53819a19e589275f",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "B-530|recurring-quantity|filtrer-un-sujet|minimum-spacing|welcome-for",
+      "path": "<case>/docs",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 6830,
+    "result_sha256": "8cae58a3a5e844aaa2e53afc282c2a2969ef96485a39a3ca4ce67a17c718be85",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(hero|features|lookingBack|steps)\"\\s*:",
+      "path": "<case>/landing/src/copy/fr.json",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 74,
+    "result_sha256": "ca0d8cf46f4e08672e29a81cafac6784fa75d57cce347350d1af8406071e85de",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/fr.json",
+      "offset": 466,
+      "limit": 48
+    }
+  },
+  {
+    "result_characters": 2215,
+    "result_sha256": "e444ce93f291db9a6aa0302010d255f761fa49729a944174c891f06b82b3ceae",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/en.json",
+      "offset": 470,
+      "limit": 34
+    }
+  },
+  {
+    "result_characters": 1526,
+    "result_sha256": "491fa45e8e10003dfa44e317fb6e130f05803eddc09bded96542c201b694ed16",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "espacement|Espacement|quantités? (récurrent|habituel)|valeurs? récurrent|pastilles? de (quantité|valeur)",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 278,
+    "result_sha256": "9a7a2611a2d5cc0bca0b2e446d10c6427c6ae3dc86767723d60c076502bca2df",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 1,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 2113,
+    "result_sha256": "ac3fde2bb97f540803ff282e689478cf08e3261a61fbb03f0951aba213a6f1ee",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing\\.(gap|day)\\.|quantity-chips|RecurringChips|recurringValues|QuantityChips",
+      "path": "<case>/frontend/src",
+      "output_mode": "files_with_matches"
+    }
+  },
+  {
+    "result_characters": 275,
+    "result_sha256": "e7a4ff405fbf96e8c1a47eb4c6631cde6d12494c136002b252ef7f55f8244e6a",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 151,
+      "limit": 90
+    }
+  },
+  {
+    "result_characters": 3131,
+    "result_sha256": "716f9b7f4bdea9d1f2d4785b4caab09f68d80de03fe68c0ee04b37211abd8bf6",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 353,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 1992,
+    "result_sha256": "b96d0075ffd34cf425749bc529aff3a3127afac3d360e5b25717c688377af5c7",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 505,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 2182,
+    "result_sha256": "e32f6b06e8d7fe74936b9b4764cae768fcdcc385f69e59ee04122ac9f5ffb8a5",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing|chips|Chip|confirmAction",
+      "path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "output_mode": "content",
+      "-C": 2
+    }
+  },
+  {
+    "result_characters": 3407,
+    "result_sha256": "8c641a67ebbec5cc532ea939a81e6ae691c5a6a29f947c5b6625a2ec65d2f4d6",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "chip|Chip|recurring",
+      "path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "output_mode": "content",
+      "-C": 2,
+      "head_limit": 80
+    }
+  },
+  {
+    "result_characters": 2068,
+    "result_sha256": "aefda2b4561a71ae7501ed9b0b55c61aec5dad65428ab012e10ee79e11e6e85c",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/mockups/QuickLogMock.astro"
+    }
+  },
+  {
+    "result_characters": 5339,
+    "result_sha256": "b3934681b4fb47a1750068aa549c22f22fe1245aeff78edab9bfb4c4f03a6002",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "offset": 776,
+      "limit": 40
+    }
+  },
+  {
+    "result_characters": 1361,
+    "result_sha256": "90ea7b7af905452664aa2e93681f192232444ad236216dfb092d29fba98a08d3",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "--color-due|due-text|--color-due",
+      "path": "<case>/landing",
+      "output_mode": "content",
+      "head_limit": 10
+    }
+  },
+  {
+    "result_characters": 929,
+    "result_sha256": "e559dd133de4680efaa5614bf69f42b89ab4e604d2e4c9bc4af0a7c94adce826",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^### D-(le-changement-de-maisonnee-se-montre-dans-sa-section|le-budget-de-hauteur-passe-a-5-100)",
+      "path": "<case>/docs/DECISIONS.md",
+      "output_mode": "content",
+      "-A": 14
+    }
+  },
+  {
+    "result_characters": 16,
+    "result_sha256": "4b4d7ac22cee34f92cd16fbe4193b0eb106e185100ea38f72b0190e1affaf933",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(subhead|fieldLabel|fieldValue|heading|lead|first|second|third|fourth)\":",
+      "path": "<case>/landing/src/copy/en.json",
+      "output_mode": "content",
+      "head_limit": 0
+    }
+  },
+  {
+    "result_characters": 4972,
+    "result_sha256": "64ac9a6cf5f32654f0258f73097e6534980c00b7d54c03455d795ec0016f21c9",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "D-le-changement-de-maisonnee-se-montre-dans-sa-section|D-le-budget-de-hauteur-passe-a-5-100",
+      "path": "<case>/docs/DECISIONS.md",
+      "output_mode": "content",
+      "-A": 12
+    }
+  },
+  {
+    "result_characters": 10737,
+    "result_sha256": "b2e13482bb7f28ba64eec1346408947318f67522aff96c2cc54f6afc90027240",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "5 ?100",
+      "path": "<case>",
+      "glob": "{docs/ARCHITECTURE.md,landing/DESIGN.md,landing/README.md,.claude/skills/**/*.md,landing/scripts/*.mjs}",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 519,
+    "result_sha256": "31332b8376099af51f4b63619ee0527273e01495c7e0b72dcfb38de868932128",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/package.json"
+    }
+  },
+  {
+    "result_characters": 984,
+    "result_sha256": "b3420a700d293a5002738af5c1709b0f1a68cfc87c3d5cf89d38e330cdde4ada",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "landing|4321|audit",
+      "path": "<case>/.claude/skills/run-tamialog/SKILL.md",
+      "output_mode": "content",
+      "head_limit": 15
+    }
+  },
+  {
+    "result_characters": 776,
+    "result_sha256": "3e67cb991411953603caed31bc65c78d50df3a30650e292ed259ed4e7adb7fad",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/scripts/audit.mjs",
+      "offset": 1,
+      "limit": 50
+    }
+  },
+  {
+    "result_characters": 3375,
+    "result_sha256": "34ca8a28a2e9705dae9e4ae316fa6a1fce7275b71d1672fa1762485d73ab3789",
+    "is_error": false
+  }
+]
