@@ -46,8 +46,13 @@ description: Rules for the esq CLI and hooks — read before editing plugin/bin,
   `docs/DECISIONS.md` and, inside the plan section, leaves out exactly `**Reviewed at:**` and `**Abandoned:**`). Never merge
   them and never widen either for convenience — a path added to a harmless list is verification `/esq:land` silently skips.
   `tests/cli/landing.test.mjs` and `gate.test.mjs` pin the invalidations; extend them with the list.
-- **Node built-ins only; `git` is the one external process** — the plugin is dependency-free by contract; the
-  `NODE_ENV=test` + `ESQ_TEST_GIT_ROOT` seam replaces git in tests.
+- **Node built-ins only; `git` is the one external process** — the CLI is dependency-free by contract; the
+  `NODE_ENV=test` + `ESQ_TEST_GIT_ROOT` seam replaces git in tests. The opt-in `codex` call lives in `/esq:plan`'s reference,
+  never here.
+- **An answer over `INLINE_OUTPUT_BUDGET` (24 KB) spills to `<git-dir>/esq/`, never the working tree**, keeping scalars,
+  counts and verdicts inline and naming `ranges` that each fit one `Read` — *why:* Claude Code persists a large result and
+  `Read` truncates near 43 KB, each costing turns. A new verb that can grow with history reuses that path; a file it writes
+  in the tree is a dirty file the Stop hook and the gate then judge.
 - **Every file write goes through `atomicWrite`** (temp file beside the target, same mode, rename) — a half-written ledger is a
   broken stop for every later session.
 - **Output is JSON, one object, via `output()`; errors are `{error}` on stderr with exit 2; `validate` exits 1 on findings.** A
