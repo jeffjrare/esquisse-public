@@ -4,6 +4,8 @@
 
 **Origin:** esq/b181-closing-evidence
 
+**Reviewed at:** c8da128b3eacaa58baeae18038775d23a4318d62
+
 ## Context
 B-181 (carry the user's outcome from grill to plan without a re-grill) has had three bounded attempts, each judged on
 **one** run: the invented invoice case (2026-09-24), the Tamialog before/after pair (2026-09-25) and the fidelity trial
