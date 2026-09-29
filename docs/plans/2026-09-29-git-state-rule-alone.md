@@ -119,3 +119,30 @@ the plan the user already approved.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-29
+
+**Plan committed at:** 7181c1f
+
+**Commits:** 32404b4, ab478cb, 2520048, c0c4456
+
+**Verified:** c0c4456b804571b92e07b6b362cb29775cdfbf06
+- `grep -c "branch not observed" plugin/skills/plan/SKILL.md`
+- `grep -c "preparation/2026-09-29-b189-alone-tamialog.md" docs/BACKLOG.md`
+- `./scripts/audit.sh`
+
+**What got built:** The C7 observed-Git-state rule was re-applied alone (identical to 44f5ff6), judged on one bounded set of 3 Tamialog runs, and reverted under the pre-written rule because C6 stayed at 1/3; the retained evidence and French report are in docs/preparation/2026-09-29-b189-alone-tamialog*, and B-189 is back to Open with a dated note.
+
+**Verification:**
+- (auto) grep -c "branch not observed" plugin/skills/plan/SKILL.md — 0 (exit 1): Task 1.1 reverted, matching the report's regression verdict; SKILL.md back to 8f505624… byte-identical
+- (auto) grep -c "preparation/2026-09-29-b189-alone-tamialog.md" docs/BACKLOG.md — 1 (B-189's detail note)
+- (auto) ./scripts/audit.sh — exit 0, Clean — 7 checks (product), 28 s
+
+**Surprises / decisions made during execution:** - Run set (3 runs, 180/135/157 s, 3.63 USD reported list price, ≤ 9 USD bound): C7 3/3 (6/6 across both sets, from 1/3), C1 2/3 (recovered), C2 3/3, C3 3/3, C4 3/3, C5 2/3 (outside the rule), but C6 1/3 (baseline 2/3) — the rule reads regression, so the edit was reverted. C6 fails identically with or without C7 (build, then audit without --no-build), so C7-caused vs n = 3 noise is not settled.
+- Run 1 finished at 178.8 s, 1.2 s under the kill limit; it delivered and was judged.
+- Task 1.3's correction.diff was captured after the run as git diff HEAD~1 at 32404b4, as planned.
+- Verification criterion corrected in the plan before build: "branch not observed" occurs 3 times when kept (the plan said so); 0 now.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. B-189 is now promised by two units with no fix kept; landing esq/git-state-and-copy-fidelity needs the user's disposition of B-189 (accept C7 despite C6 at 1/3, re-run to test noise, or drop). No rollout is owed: nothing is kept in plugin/.
