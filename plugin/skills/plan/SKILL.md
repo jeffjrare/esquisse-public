@@ -127,11 +127,8 @@ Use this exact structure. The `## Execution log` section MUST be present (initia
 
 **Shipping-unit headers are this command's responsibility.** At the commit step, read
 `git branch --show-current` once for `**Origin:**`, then create `esq/<slug>` for
-`**Branch:**`. Put both above the first `##` heading. A Git state is named only from
-the output of a command that ran: empty output is detached HEAD, a non-zero exit is no
-repository. Either way, or when the command did not run (no shell, a read-only run),
+`**Branch:**`. Put both above the first `##` heading. Detached HEAD or no repository:
 omit both, create no branch, and report legacy behavior (build may run; land cannot).
-A command that did not run is "branch not observed": name no state and no consequence of one.
 
 For corrective input, use `esq branch resolve <slug>` instead of choosing a branch:
 `reuse` copies its branch/origin without creating anything; `new` cuts from the stem's
@@ -345,10 +342,8 @@ After writing the plan file and updating DECISIONS.md (if applicable):
 0. **`ESQ_CODEX=on` only:** run the pre-mortem, judge it and make the accepted plan edits before anything is staged, per § 2–3 of `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`. Its § 4 `Adversary` block becomes step 3's commit body, and its count line joins step 4's report.
 1. **Cut the shipping unit, and fill both fields from it**, here and not earlier.
    `git branch --show-current`, run once: that is `**Origin:**`. Then `git switch -c esq/<slug>`
-   from it, and that name is `**Branch:**`. Write both into the plan file's header before staging. A Git state is named only from the output of a command that ran: empty output means
-   detached HEAD, and a non-zero exit means no git repository. When the command did not run (no shell, a read-only
-   run), the state is "branch not observed": name no state and no consequence of one. In all three cases create no
-   branch, omit both fields, and carry the reason into step 4. A corrective plan does
+   from it, and that name is `**Branch:**`. Write both into the plan file's header before staging. Empty output means detached HEAD, and a non-zero exit means no git repository: in both
+   cases create no branch, omit both fields, and carry the reason into step 4. A corrective plan does
    what `esq branch resolve <slug>` answered — `reuse` copies the two fields and creates nothing, `new`
    cuts from the stem's `**Origin:**`; an `esq/<slug>` that already exists stops the command here.
 2. **Stage this command's whole tail in one call**, naming only the files this run actually wrote: `git add docs/plans/<filename>` always, plus `docs/DECISIONS.md` if you updated it and `docs/BACKLOG.md` if preflight step 9 flipped any row to `Planned`. Never stage a file this run did not write — with one exception. **A corrective brief you planned is retired in this same commit.** From the `*-fixes*.brief.md` you planned, strike the `## 🟡 Needs a plan` section and every 🔴 item this run resolved through `AskUserQuestion`; when no 🟢, 🟡 or 🔴 item remains, `git rm` the brief, otherwise `git add` it with the rest intact — an unapplied 🟢 is still `/esq:fix`'s and an open 🔴 is still the user's. Never a grill brief, and never a brief this run did not plan. The why is `D-plan-retires-the-brief-it-plans`: `unit.findings` counts every corrective brief still on disk.
@@ -356,8 +351,8 @@ After writing the plan file and updating DECISIONS.md (if applicable):
 4. Tell the user:
    - The file path
    - **The shipping unit it created** — two lines, `Branch: esq/<slug>` and `Origin: <name>` — or,
-     when the fields were omitted, which condition omitted them (detached HEAD, no git
-     repository, or branch not observed) and that `/esq:build` will therefore treat the plan as legacy: it refuses
+     when the fields were omitted, which condition omitted them (detached HEAD, or no git
+     repository) and that `/esq:build` will therefore treat the plan as legacy: it refuses
      nothing, and it never lands.
    - One-sentence summary of the recommendation
    - With `ESQ_CODEX=on`: the `Codex:` count line from step 0
