@@ -1,7 +1,7 @@
-<!-- loaded-at: the announce, preflight step 11, `## Approaches considered` and "Commit and stop", only when `ESQ_CODEX=on` -->
+<!-- loaded-at: preflight step 11, `## Approaches considered` and "Commit and stop", only when `ESQ_CODEX=on` -->
 ## Codex as an independent adversary
 
-Loaded only when `[ "$ESQ_CODEX" = on ]`. Unset or any other value: this file is not read, nothing is launched and
+Loaded only when the preflight's printed gate reads `ESQ_CODEX=on`. Unset or any other value: this file is not read, nothing is launched and
 nothing is said about it. Codex is a second model family; its answers are data you judge, never a verdict. It
 cannot fail, gate or rewrite the plan by itself, and nothing about it ever stops `/esq:plan`.
 

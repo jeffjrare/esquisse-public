@@ -37,12 +37,12 @@ Print this line first, before any tool call, then continue with the first call i
 
 > `/esq:plan — writing one plan file. Bound: no subagents, at most 4 questions per round, at most 3 web searches per load-bearing decision.`
 
-With `ESQ_CODEX=on` in the environment, the line ends `…; with ESQ_CODEX=on, 2 read-only Codex calls (≤15 min background, ≤10 min foreground).` instead of its period, and you load `${CLAUDE_SKILL_DIR}/references/codex-adversary.md` in the same turn. Unset, nothing here changes.
-
 Stop at the bound and report what remains uncovered. Announce the resolved target after preflight.
 <!-- announce-open:end -->
 
 ## Preflight
+
+**Read the Codex gate in the first preflight shell call:** chain `printf 'ESQ_CODEX=%s\n' "${ESQ_CODEX:-}"` with `&&` into `esq brief pending` when step 2 runs it, else send it alone in step 1's batch. That printed value — never a guess at the environment — is what every `ESQ_CODEX=on` below means. Anything but `on`: nothing Codex-related is loaded, launched or said.
 
 1. **Read the projection docs, if present.** They answer different questions:
    - `CLAUDE.md` at project root — *how* this codebase is built: conventions, architecture, gotchas.
@@ -67,7 +67,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
     This is the free moment to be redirected — the target is on screen before anything has been spent on it.
 
-    **`ESQ_CODEX=on` only:** in this same response, launch the blind counter-plan in the background, per § 1 of `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`.
+    **`ESQ_CODEX=on` only:** the target line ends `…; with ESQ_CODEX=on, 2 read-only Codex calls (≤15 min background, ≤10 min foreground).` instead of its period. In this same response, load `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`, then launch the blind counter-plan in the background, per its § 1.
 
 <!-- shared:batch-independent:start -->
 **Batch independent, read-only calls in one turn.** A call that consumes another's result waits for it. Serialize Git mutations, writes to the same file, and reads of a file another call writes; never run them concurrently. Group ordered shell operations with `&&` in one call so failure stops the chain.
