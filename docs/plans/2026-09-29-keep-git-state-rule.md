@@ -4,6 +4,8 @@
 
 **Origin:** esq/git-state-rule-alone
 
+**Reviewed at:** 02b249f236c18176d7ebade37c5ea9848fab8f72
+
 ## Context
 The rule "a Git state is named only from the output of a command that ran; otherwise *branch not observed*"
 (`44f5ff6`) held C7 in 6 of 6 runs across two run sets. Without it, C7 held 1/3 (reports
