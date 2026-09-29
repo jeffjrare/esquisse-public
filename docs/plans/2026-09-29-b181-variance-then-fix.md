@@ -137,3 +137,29 @@ None. The user authorized the spending on 2026-09-29. The criteria, rules and bo
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-29
+
+**Plan committed at:** 62eb89b
+
+**Commits:** 23eb35f
+
+**Verified:** 23eb35f5c8294203d3dfc49abe394acb90222bd3
+- `test -s docs/preparation/2026-09-29-b181-variance.md`
+
+**What got built:** The variance baseline (3 runs of the unchanged plugin on the Tamialog case) is retained under docs/preparation/2026-09-29-b181-variance/ with its French report and C1–C7 × run table. Reliable failures: C1, C5, C6 (0/3 each). Done rule not met, B-181 stays Open.
+
+**Verification:**
+- (auto) test -s docs/preparation/2026-09-29-b181-variance.md — PASS
+
+**Surprises / decisions made during execution:** - Run 1 was killed at 180 s (exit 137) with no proposal. Diagnosed as not infrastructure: all rate_limit_event allowed, no auth/DNS error, 54 tool calls and still investigating. Per the plan's relaunch rule (infrastructure only), it was not relaunched and counts as delivering nothing (fails every criterion). The report also gives the 2-delivered-run view (C1/C5/C6 0/2, others 2/2), which reaches the same verdict.
+- C6 fails because both delivered runs call `node landing/scripts/audit.mjs` without `--no-build` after `pnpm -r build`. That criterion comes from judgment.md, not the brief, which never names `--no-build`.
+- C2 (the drawer-notice regression that led to withdrawing a5e1666) holds 2/2 on delivered runs, so that regression looks like noise. C5 fails 2/2, so it is a reliable failure, not noise.
+- Task 1.3 was skipped (Done rule not met). Reported cost: 1.86 USD for runs 2 and 3; run 1 unknown (≤ 3 USD cap). Wall-clock was 180 s for the concurrent batch.
+- The case /tmp/b181-variance-case (484 files, unchanged) is kept for Task 2.2. Raw results were deleted after normalization, and no /tmp/esq-headless-auth.* remains.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. The case /tmp/b181-variance-case is still built (437 sources, plugin at 62eb89b). Task 2.2 recopies only plugin/ after removing the old one, then re-checks the 437 sources; the normalizer shape is in the report (trace/metrics/messages/proposal per run).
+2. The reliable failures are C1 (chips added beside a kept `1 comprimé`, no conflict named), C5 (EN drops "powdered") and C6 (audit without `--no-build`). The Recommendation's candidate wording covers C1 and C5 (explicit replace + quoted copy). It does not cover C6, which is not a brief instruction. Scoping the fix to C6 too means wording about reusing an existing build (a verification-economy point), which the plan did not draft: decide it inside Task 2.1's one-item bound or leave C6 targeted-but-unfixed and say so in the report.
+3. The keep rule needs every targeted criterion to gain ≥ 1 run over the baseline (0/3 here), and a timeout run counts as failing everything. One timeout in the fix arm therefore costs a run on every criterion; judge it as written.
