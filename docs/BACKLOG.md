@@ -203,7 +203,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-184 | 2026-09-25 | 🐛 bug | med? |  | Reconcile duplicate tail ranks when independently captured backlog rows merge. | observed: B-003 retained-branch regression; independent rows both carry Rank 100 · Done by merge-rank-collisions |  |  | Done |
 | B-185 | 2026-09-25 | 🐛 bug | hi |  | Preserve significant whitespace in auto commands through Markdown extraction and landing proof reuse. | observed: events-tracker landing plan 2026-09-24-vitrine-fonctions-recentes-multi-membre, command line 232 and proof line 295 · Done by preserve-command-whitespace |  |  | Done |
 | B-186 | 2026-09-29 | ⚠️ debt | med? |  | No end-to-end proof that an opted-in /esq:plan run launches the Codex counter-plan, kills it when late, and records the Adversary block and Codex: line | fix: codex-adversary-in-plan · Planned by codex-adversary-in-plan-fixes · Done by codex-adversary-in-plan-fixes |  |  | Done |
-| B-187 | 2026-09-29 | ⚠️ debt | med? | 3300 | Probe-codex-plan cannot prove the skill stopped the late counter-plan (host teardown looks the same), and its one-line task now trips /esq:plan's small-task exit | fix: codex-adversary-in-plan-fixes |  |  | Open |
+| B-187 | 2026-09-29 | ⚠️ debt | med? | 3300 | Probe-codex-plan cannot prove the skill stopped the late counter-plan (host teardown looks the same), and its one-line task now trips /esq:plan's small-task exit | fix: codex-adversary-in-plan-fixes · Planned by codex-adversary-in-plan-fixes-fixes |  |  | Planned |
 
 ---
 
