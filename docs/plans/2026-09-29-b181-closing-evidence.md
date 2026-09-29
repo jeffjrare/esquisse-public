@@ -118,3 +118,32 @@ None — scope, bound, protocol, closing criterion and failure handling are sett
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-29
+
+**Plan committed at:** 2eb54d6
+
+**Commits:** 5031a4a, 554a79b, a5e1666, cc67a60
+
+**Verified:** cc67a6042235f19dbce9ff0203f2c01087eae2ee
+- `test -s docs/preparation/2026-09-29-b181-fidelity.md`
+- `grep -c "preparation/2026-09-29-b181-fidelity.md" docs/BACKLOG.md`
+- `git diff main -- plugin/skills/plan/SKILL.md`
+- `./scripts/audit.sh`
+
+**What got built:** The brief-fidelity rule was committed, tried on one authorized Tamialog run (122 s, reported $0.9493406), and withdrawn because two retained gains regressed. docs/preparation/2026-09-29-b181-fidelity.md and its folder hold the protocol, hashes, the whole proposal, the normalized trace, metrics and the comparison. B-181 is back to Open, with a detail note.
+
+**Verification:**
+- (auto) test -s docs/preparation/2026-09-29-b181-fidelity.md — PASS
+- (auto) grep -c "preparation/2026-09-29-b181-fidelity.md" docs/BACKLOG.md — 1 (≥ 1) PASS
+- (auto) git diff main -- plugin/skills/plan/SKILL.md — empty (0 bytes; SHA-256 back to 4cd1d43e…), matching the withdrawal recorded in the evidence file — PASS
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), 27 s, ESQ_TELEMETRY unset — PASS
+
+**Surprises / decisions made during execution:** - Trial verdict: the quantity field is still not clearly replaced (fieldValue kept, chips added) and no conflict is flagged. Regressions against the after-arm: the drawer notice is again claimed absent and replaced by the spacing-confirm modal, although screens-and-manual-steps.md was loaded; the EN copy loses 'powdered'. Held: no SPEC gate, the order, one phase with --no-build, no invented Git state. The rule did fire once: the model openly named the brief-vs-app wording gap for the notice, but on a false reading. Attribution is uncertain (plugin 0.3.48 → 0.3.65, Claude Code 2.1.282 → 2.1.284, one run).
+- Task 1.4 ran (git revert, amended message), per the brief's regression rule.
+- `esq backlog set-status` accepts --by only with Done/Planned and --reason only with Dropped, so the Open flip carries no reason; the why is in the detail note.
+- The case rebuilt 437/437 from events-tracker blobs; 484 files, unchanged after the run; case and raw results deleted after sanitizing, and no auth temp dir left.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. B-181 stays Open with no further authorized run. The brief-fidelity defect and the drawer-notice regression are both inspectable in docs/preparation/2026-09-29-b181-fidelity.md.
