@@ -163,3 +163,32 @@ None. The user authorized the spending on 2026-09-29. The criteria, rules and bo
 **For Phase 2:** 1. The case /tmp/b181-variance-case is still built (437 sources, plugin at 62eb89b). Task 2.2 recopies only plugin/ after removing the old one, then re-checks the 437 sources; the normalizer shape is in the report (trace/metrics/messages/proposal per run).
 2. The reliable failures are C1 (chips added beside a kept `1 comprimé`, no conflict named), C5 (EN drops "powdered") and C6 (audit without `--no-build`). The Recommendation's candidate wording covers C1 and C5 (explicit replace + quoted copy). It does not cover C6, which is not a brief instruction. Scoping the fix to C6 too means wording about reusing an existing build (a verification-economy point), which the plan did not draft: decide it inside Task 2.1's one-item bound or leave C6 targeted-but-unfixed and say so in the report.
 3. The keep rule needs every targeted criterion to gain ≥ 1 run over the baseline (0/3 here), and a timeout run counts as failing everything. One timeout in the fix arm therefore costs a run on every criterion; judge it as written.
+
+### Phase 2 — completed 2026-09-29
+
+**Plan committed at:** 08bb418
+
+**Commits:** 538c7c8, a3b8993, 633793a
+
+**Verified:** 633793ae83365ede785319af143c37eb0314c8ce
+- `grep -c "preparation/2026-09-29-b181-variance.md" docs/BACKLOG.md`
+- `git diff main -- plugin/skills/plan/SKILL.md`
+- `./scripts/audit.sh`
+
+**What got built:** One read-back item (6) in /esq:plan's 'Right-size, then read it once' targets C1, C5 and C6. The fix arm (3 runs) is retained under docs/preparation/2026-09-29-b181-variance/fix-{1,2,3}/ with the diff, hashes and the extended report. The keep rule holds, so the fix is kept. The Done rule fails (C5 and C7 at 1/3), so B-181 is back to Open with a dated note.
+
+**Verification:**
+- (auto) grep -c "preparation/2026-09-29-b181-variance.md" docs/BACKLOG.md — 1 (≥ 1), PASS
+- (auto) git diff main -- plugin/skills/plan/SKILL.md — only the Task 2.1 item 6 (5 lines added), matching the report's 'kept' verdict, PASS
+- (auto) ./scripts/audit.sh (ESQ_TELEMETRY unset) — Clean, 7 checks (product), exit 0, 25 s, PASS
+
+**Surprises / decisions made during execution:** - C6 (audit without --no-build) is not a brief instruction, but it is a reliable failure. Task 2.1 targeted it with a second sentence in the same single item, since leaving it out would have made the Done rule unreachable. The keep rule therefore judged three targeted criteria.
+- Fix arm per criterion: C1 2/3, C2 2/3, C3 3/3, C4 3/3, C5 1/3, C6 2/3, C7 1/3. Keep rule: C1 +2, C5 +1, C6 +2, and no criterion loses 2 (C7 -1), so the fix is kept. Task 2.4 (revert) skipped. Done rule: C5 and C7 at 1/3, so B-181 is set to Open (from Planned).
+- fix-3 names the C1 conflict in its Disposition section, not in ## Risks as the item asks. The criterion ('or the conflict is flagged') counts it, and the report says so.
+- C7 regressed by one run: 2 of 3 proposals assert a detached HEAD the model could not observe (the case has no .git). It is untargeted, with the same failure seen on 2026-09-25 and in the fidelity trial, and it cannot be attributed to the fix. C2's modal misread recurs in fix-3 (1/3).
+- All 3 runs succeeded (129–149 s, no timeout). Reported total is 3.31 USD, under the 9 USD bound. All proposals still exceed 900 words (1219/1371/1353). The item costs +68 words per /esq:plan load. Wall-clock was about 150 s for the batch.
+- `esq backlog set-status … Open` refuses --reason (Dropped only), so the reason is in the dated detail note instead. The case and raw results were deleted after normalization, and no /tmp/esq-headless-auth.* remains.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** Last phase. B-181 stays Open and is still promised by this unit and by b181-closing-evidence, so /esq:land keeps refusing both. Per the plan's Risks, these were the last authorized runs: the next step is the user's (drop or re-scope B-181 via /esq:backlog). If the kept fix reaches main, publish it with ./scripts/update.sh (Rollout).
