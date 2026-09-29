@@ -3,9 +3,10 @@
 Source: /esq:review on codex-adversary-in-plan-fixes, 2026-09-28
 Reviewed at: 963dae1
 
-## 🟢 Fix now (safe)
-Mechanical, contained, one clearly-correct fix each. /esq:fix applies these.
+## 🟡 Needs a plan
+Substantive: own tradeoffs or a design choice. /esq:plan plans these.
 - Assertion 5 cannot tell the skill's stop from host teardown: it only checks that no marker process survives after `claude -p` exits, and an exiting headless session can reap its own background tasks (the execution log already scopes kill-on-late to "the headless host only"; the result dir holding the stream is deleted on success, so the green run cannot show which happened), so a later edit to `codex-adversary.md` that drops "stop its background task" (line 61) still passes 5/5 — while an interactive `ESQ_CODEX=on` user is left with a late counter-plan running (and spending Codex tokens) until its `timeout`. This is the regression the probe exists to catch (Done bullet 2: "was stopped"). — `scripts/probe-codex-plan.sh:168` (node block) and `:185` (assertion 5) — fix: in the node block also print whether any `assistant` message in `stream.jsonl` carries a `tool_use` named `TaskStop`, and make assertion 5 FAIL `the skill never called TaskStop` when it is absent, besides the existing no-leftover-process check — verify: `bash -n scripts/probe-codex-plan.sh && scripts/probe-codex-plan.sh` (background, outside the sandbox, ≈0.5 USD) exits 0 with five `PASS` lines, assertion 5 naming the TaskStop call
+  - Downgraded from 🟢 by /esq:fix 2026-09-28 — verification failed: the probe run (fix applied, tree 88db430) went 0/5 in 12 s, claude exit 0, 0.16 USD, because `/esq:plan` took its own small-task exit (`plugin/skills/plan/SKILL.md:102`, "much smaller than expected … suggest doing it directly") on the probe's one-line `--version` task: no plan file, no Codex call, final text "I'm stopping before writing a plan because this change is too small to need one". The first recorded run (66ffd73) did plan the same task, so the probe's target is nondeterministic under the current skill. Making it stable means changing the task Task 1.1 names (a larger target, or a task framed so the small-task exit cannot apply) — a probe design choice, not a mechanical fix. The TaskStop assertion itself parsed correctly offline on a synthetic stream; it was discarded unrecorded with the red run.
 
 ## For /esq:fix and /esq:plan
 <!-- Corrective brief. /esq:fix applies the 🟢 items; /esq:plan plans the 🟡 items;
