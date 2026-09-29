@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** e2a36d2db81716058b6883df9d2385796edf33fe
+
 ## Context
 Corrective plan (second generation, `esq brief depth` → `open`, 2/2) for `/esq:review` findings on
 `codex-adversary-in-plan-fixes` (brief `docs/plans/2026-09-28-codex-adversary-in-plan-fixes-fixes.brief.md`, B-187).
