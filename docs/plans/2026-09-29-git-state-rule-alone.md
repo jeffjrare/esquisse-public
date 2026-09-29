@@ -4,6 +4,8 @@
 
 **Origin:** esq/git-state-and-copy-fidelity
 
+**Reviewed at:** 6bc463bc6acf526c336b1543c8a3912d4ac4f2c1
+
 ## Context
 `2026-09-29-git-state-and-copy-fidelity` tested two `/esq:plan` wording fixes in one shared set of 3 Tamialog runs
 (`docs/preparation/2026-09-29-b188-b189-tamialog.md`). The Git-state rule (C7, commit `44f5ff6`) raised C7 from 1/3 to
