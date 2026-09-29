@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-codex-adversary-opt-in-input-only | 2026-09-29 | arch | plan | With ESQ_CODEX=on, /esq:plan runs `codex exec -s read-only` twice (blind counter-plan in the background, pre-mortem before the commit) and judges each answer itself; unset, nothing changes. | Active |
 | D-bounded-correction-exit-preserves-proof | 2026-09-24 | func | corrective-loop | Exhaustion limits new plans; safe prospective fixes and explicit dispositions preserve proof and owe review | Active |
 | D-standards-resolves-or-refuses | 2026-09-21 | arch | standards | `esq standards` serves a partial referent with a finding, but refuses when neither file yields text | Active |
 | D-001 | 2026-06-19 | arch | esquisse | Phase grouping by file for DX improvements plan | Active |
@@ -5381,3 +5382,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** One bounded plan repair and its commit replace a substitution that leaves the next invocation blocked. Ambiguous intent, an unproved tree and red output cannot authorize proof. The unrelated phase-suite narrowing exception remains, including its existing exact-command landing behavior.
 **Conséquences:** Supersedes D-an-unrunnable-auto-step-substitutes-once while retaining plan-time reading. Historical PASS blocks stay untouched and cannot transfer to an amended obligation. The model judges intent and criteria; the CLI enforces identity and freshness, not truthful execution claims.
 **Alternatives rejetées:** Permit equivalent substitutions in land — broadens its mandate and adds semantic reuse rules. Reject every recoverable typo — leaves a known repair for another session. Rewrite old proof or normalize commands — loses execution identity or freshness.
+
+## D-codex-adversary-opt-in-input-only — Codex is an opt-in, input-only adversary called from the plan skill
+
+**Scope:** arch
+**Topic:** plan
+**Date:** 2026-09-29
+**Statut:** Active
+**Fondement:** user — conversation of 2026-09-28 asking for items 1 and 2 (blind counter-plan, pre-mortem) with configurable model and effort
+
+**Contexte:** Plan defects cost the most in measured cycles, and /esq:plan only has Claude checking Claude. A second model is wanted before the plan is committed, without making esq depend on it.
+**Décision:** With ESQ_CODEX=on, /esq:plan runs `codex exec -s read-only` twice (blind counter-plan in the background, pre-mortem before the commit) and judges each answer itself; unset, nothing changes.
+**Raison:** The codex CLI gives read-only sandboxing and schema-checked JSON with no path into another plugin's versioned cache. Keeping the call in the skill leaves the esq CLI dependency-free, and an env var in .claude/settings.json already scopes it per project.
+**Tradeoff:** Gains an uncorrelated second opinion on the plan; costs a few minutes of wall-clock per plan and sends the goal and read code to OpenAI under the user's Codex login.
+**Conséquences:** Codex output is untrusted data: it never gates, fails or rewrites a plan, and no command in it runs. Judgments live in the plan commit body so build workers never read them. The feature is removed if 3 opted-in cycles show no accepted finding that changed a phase or criterion.
+**Alternatives rejetées:** The Codex plugin's codex-companion task (moving cache path, prose output, job polling); a Claude subagent adversary (correlated blind spots, breaks plan's no-subagent bound); resuming Codex's session for the pre-mortem (--last can pick an unrelated session).
