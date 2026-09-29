@@ -70,3 +70,27 @@ None. The user delegated the keep/revert call on 2026-09-29.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-29
+
+**Plan committed at:** abcab7b
+
+**Commits:** 5d4c995
+
+**Verified:** 5d4c9957b2de22824ac2c827ca4a2f44a885b827
+- `git diff --quiet 44f5ff6 -- plugin/skills/plan/SKILL.md`
+- `grep -c "branch not observed" plugin/skills/plan/SKILL.md`
+- `./scripts/audit.sh`
+
+**What got built:** plugin/skills/plan/SKILL.md carries the observed-Git-state rule again (revert of 2520048, byte-identical to 44f5ff6): a Git state is named only from command output that ran, otherwise "branch not observed".
+
+**Verification:**
+- (auto) git diff --quiet 44f5ff6 -- plugin/skills/plan/SKILL.md — exit 0, byte-identical
+- (auto) grep -c "branch not observed" plugin/skills/plan/SKILL.md — 3
+- (auto) ./scripts/audit.sh — exit 0, Clean — 7 checks (product), 27 s
+
+**Surprises / decisions made during execution:** D-keep-git-state-rule-despite-c6 already existed in docs/DECISIONS.md when the phase ran, so no registry entry was written. No run set was spent.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. B-189 closes on this entry; the unit lands into esq/git-state-rule-alone.
