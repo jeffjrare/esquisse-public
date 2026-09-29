@@ -1,5 +1,5 @@
 # Architecture — esquisse
-<!-- last-arch: 2026-09-28 @ e0b8c5963890580cc50fb9615c74a80fa144cf74 -->
+<!-- last-arch: 2026-09-29 @ a63e52d233288b30a218a18b957803494d9cf33a -->
 <!-- How this codebase is built. Maintained by /esq:arch. Features live in docs/SPEC.md. -->
 
 ## Overview
