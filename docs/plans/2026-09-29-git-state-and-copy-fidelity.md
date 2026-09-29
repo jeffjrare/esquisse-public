@@ -4,7 +4,7 @@
 
 **Origin:** main
 
-**Reviewed at:** a150a8be85790318a298518a0d99255914bf1e41
+**Reviewed at:** f8465d6d7a396110379467d56ad0a8bf9b516fd2
 
 ## Context
 B-181 was closed by re-scoping. Its two criteria that stayed unreliable on the 2026-09-29 variance trial
