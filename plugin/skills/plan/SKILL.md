@@ -300,9 +300,7 @@ Read the written plan once and correct these yourself:
 6. For a grill brief, reread each explicit instruction (replace, remove, reorder) and each
    quoted copy string against the plan. A replaced element does not survive beside its
    replacement, and quoted copy keeps every qualifier in each language the plan writes
-   it in: a translation renders each modifier of the source (« lait entier » → "whole
-   milk", not "milk") and is written in full, never as "the equivalent"; otherwise name
-   the conflict in `## Risks`. When a step rebuilds what an
+   it in; otherwise name the conflict in `## Risks`. When a step rebuilds what an
    earlier step of the phase already built, pass the runner's no-build option.
 
 Size by deliverable and session context, not a task-count cap. Each task is one atomic
