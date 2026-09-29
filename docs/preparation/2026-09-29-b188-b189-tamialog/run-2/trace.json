@@ -1,0 +1,540 @@
+[
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-24-vitrine-fonctions-recentes-multi-membre.brief.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "*.md"
+    }
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "docs/**/*.md"
+    }
+  },
+  {
+    "result_characters": 10971,
+    "result_sha256": "7f3c369d5387f94ac4250a1ff18960769392ae09c95b08a3dbc34e6f43f96ebb",
+    "is_error": false
+  },
+  {
+    "result_characters": 252,
+    "result_sha256": "e4a97fac5a214f62a658d0d4ce62197daa9f60d69aed48ec07c2f92d0b4e53a2",
+    "is_error": false
+  },
+  {
+    "result_characters": 1712,
+    "result_sha256": "5bb8206413438127dd7e568b3b02909757fdaf63069c4328795a9ed66d247ecb",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/plugin/skills/plan/references/screens-and-manual-steps.md"
+    }
+  },
+  {
+    "result_characters": 7554,
+    "result_sha256": "14a21115142100aebc7da2147d2fd2217cb24ea035e6b4dda071b4407f6bafe3",
+    "is_error": false
+  },
+  {
+    "name": "Glob",
+    "input": {
+      "pattern": "landing/src/**/*"
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/scripts/audit.mjs"
+    }
+  },
+  {
+    "result_characters": 21839,
+    "result_sha256": "e92c6c46738cd6862017052580d19a6ac82204470c54791905e1419fdbf63f17",
+    "is_error": false
+  },
+  {
+    "result_characters": 3087,
+    "result_sha256": "6322794dc91e1eb16b34a74c09b3fe8ec4d5ae6b9af80257b16c93568733db47",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "5[  ,.]?100",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 2855,
+    "result_sha256": "022be28efb9b2548909d7451b0ca2d93d4719d7fb09fb016517fb48e40438fa2",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/Features.astro"
+    }
+  },
+  {
+    "result_characters": 4893,
+    "result_sha256": "b50df0fe0bc7ee56fe1dd80a9c82f93f62a65264250e1e10e46438ba0addfda5",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/index.astro"
+    }
+  },
+  {
+    "result_characters": 3516,
+    "result_sha256": "3eca5f5028e0c7911f8869ca997f62bd74ff0b6205892d2d5dcdc853719c8649",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/pages/en/index.astro"
+    }
+  },
+  {
+    "result_characters": 2723,
+    "result_sha256": "499906ddaecc3891de1c670dc216b04c830029f8b88666a4c7eee36c99d7b340",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/fragments/SwitcherFragment.astro"
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/mockups/QuickLogMock.astro"
+    }
+  },
+  {
+    "result_characters": 3514,
+    "result_sha256": "d0d667d386ef86d9b0ded867dbcd2a90f557655718c9b3c64d57a1e6b044cc01",
+    "is_error": false
+  },
+  {
+    "result_characters": 5339,
+    "result_sha256": "b3934681b4fb47a1750068aa549c22f22fe1245aeff78edab9bfb4c4f03a6002",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/components/LookingBack.astro"
+    }
+  },
+  {
+    "result_characters": 5410,
+    "result_sha256": "6db05df06a23ee0b1929d6f6f41619bc179932b143ce6055cb37067aaef66e51",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "nothing may come between|pair|Features",
+      "path": "<case>/landing/src/components",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 1521,
+    "result_sha256": "864d8a7bce97e4790e728bd1f52e5fdc9b01f56b3899ad7f4205becacc6d208e",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^\\| D-.*\\| landing \\|",
+      "path": "<case>/docs/DECISIONS.md",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 13972,
+    "result_sha256": "3199d82a610c0598217b91f4deeefa3da9deeb8a54616c9d8e64997239104533",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/types.ts"
+    }
+  },
+  {
+    "result_characters": 49408,
+    "result_sha256": "7b72ed07ce6d06a2bce4189aad9102e7a7d2394cfdb82380ed635ddfbb096407",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(subhead|headline)\"|\"two\"|\"sheet\"|\"fieldLabel\"|\"fieldValue\"|\"household\"|\"lookingBack\"|\"points\"|\"first\"|\"second\"|\"third\"|\"fourth\"|\"lead\"|\"heading\"|\"switcher\"",
+      "path": "<case>/landing/src/copy/fr.json",
+      "output_mode": "content",
+      "head_limit": 120
+    }
+  },
+  {
+    "result_characters": 5762,
+    "result_sha256": "9f09253fb6d088c2f8608e57a7426083f597582802a2560e645ebdf9d8eccc41",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "[Éé]cart minimum|minSpacing|minimum.spacing|anyway|quand même",
+      "path": "<case>/frontend/src/locales",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 1173,
+    "result_sha256": "586d1df50785f5d8e28fd7025f886172fc52cbf4fc9f51f9d3988fab86156a7b",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/fr.json",
+      "offset": 460,
+      "limit": 60
+    }
+  },
+  {
+    "result_characters": 2838,
+    "result_sha256": "3448870f8974038fcad8966cd41fb5d112aa23a64bf830345644bb0970c2e2df",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/locales/en.json",
+      "offset": 460,
+      "limit": 30
+    }
+  },
+  {
+    "result_characters": 1454,
+    "result_sha256": "9ef54ab5ef963b5cb70bb5fdba26b4ed5f2997d4bd835b59f567b23f90b7eb58",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/docs/plans/2026-09-24-minimum-spacing-warning.brief.md"
+    }
+  },
+  {
+    "result_characters": 9823,
+    "result_sha256": "df4e4a3de8c1ddc8e8a5fb416388eb16960b6ae7e301da25915190e2d8a79d5d",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing\\.gap|spacing\\.confirmTitle",
+      "path": "<case>/frontend/src",
+      "output_mode": "content",
+      "-n": true
+    }
+  },
+  {
+    "result_characters": 367,
+    "result_sha256": "19c9b9b3cdb5569e3e8acf35dbeb39f121a0ec87b66a7369009aa4b5b82a3669",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "^#+ .*(pastille|récurrent|Espacement|écart|par option|Filtr|maisonnée|Saisie rapide)",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 214,
+    "result_sha256": "bcad68a707fcd5da7f6c0f86b948b253eef97bb9ff73e16dc6b6301c440811c0",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacingNotice|spacing-rule|SpacingNotice|confirmAction|quand même",
+      "path": "<case>/frontend/src/components/features/topics",
+      "output_mode": "content",
+      "-n": true
+    }
+  },
+  {
+    "result_characters": 4463,
+    "result_sha256": "35f3c33a5be3d8fb66b61a6def0d17f57bebd991bbfd396f7953291b34c2e6e1",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "(espacement|écart minimal|au moins .* entre|pastille|valeurs? récurrente|par option|filtr)",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true,
+      "-n": true
+    }
+  },
+  {
+    "result_characters": 10432,
+    "result_sha256": "3bc4d91d613ec110889c0ca4d6b13d86f517c18a3290951b9e782428d9b5ffc7",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "quand même|récurrente|valeurs? habituelle|plusieurs membres|prévenu",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-n": true
+    }
+  },
+  {
+    "result_characters": 2017,
+    "result_sha256": "248a37e5cf4c71b6713565345bb7e0a3ea3cfc9a5cdab23be9cbbbaf5ff73050",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/QuickLogSheet.tsx",
+      "offset": 560,
+      "limit": 120
+    }
+  },
+  {
+    "result_characters": 6135,
+    "result_sha256": "47745ac5d19223e95fec825ec5e7af6c0694f30603e2f56f3f469c865a3b67a3",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurringValues|recurring",
+      "path": "<case>/frontend/src/components/features/topics/EventFields.tsx",
+      "output_mode": "content",
+      "-n": true,
+      "-C": 3
+    }
+  },
+  {
+    "result_characters": 158,
+    "result_sha256": "d4df767a9f7d7e6126a423336b904cf9e0247543169b6c2c30e2143b962cb823",
+    "is_error": true
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "--color-due|--color-primary|due-text",
+      "path": "<case>/landing/src/styles/landing.css",
+      "output_mode": "content",
+      "-n": true
+    }
+  },
+  {
+    "result_characters": 894,
+    "result_sha256": "29a148dcd7c1f638210c769ef76993f84d5bd641acd3a08c5754aff4668c91cb",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing|recurring|quantit",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "count",
+      "-i": true
+    }
+  },
+  {
+    "result_characters": 58,
+    "result_sha256": "e91689ae68bfcfac961e0c5d1c09a82ba045a763974ebc4522572b7dee015a53",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurringValues",
+      "path": "<case>/frontend/src",
+      "output_mode": "files_with_matches"
+    }
+  },
+  {
+    "result_characters": 219,
+    "result_sha256": "06195d1ca668baed3b712f11c5ea60173a607d3f25e0c2cbbb0d6e50db8fb10f",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "spacing|recurring|quantit",
+      "path": "<case>/docs/SPEC.md",
+      "output_mode": "content",
+      "-i": true,
+      "-n": true
+    }
+  },
+  {
+    "result_characters": 2957,
+    "result_sha256": "0dec81f0987c5d5f361b2a069d8d72a5de45f2fa1b1c9a58ef9c88d993b5fe66",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurring|chip|rounded|aria-pressed",
+      "path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "output_mode": "content",
+      "-n": true
+    }
+  },
+  {
+    "result_characters": 1156,
+    "result_sha256": "da6d38eefcce9728aa1040da9ffd47e15a0c531629fed640e6b3b4cdca102abb",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "recurring",
+      "path": "<case>/frontend/src/locales/fr.json",
+      "output_mode": "content",
+      "-n": true,
+      "-A": 4
+    }
+  },
+  {
+    "result_characters": 171,
+    "result_sha256": "7a30188392b75c4801699a50b26feab0893aa8b769889859dca389680de6b4b2",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "offset": 575,
+      "limit": 30
+    }
+  },
+  {
+    "result_characters": 1417,
+    "result_sha256": "c9ccc063542cb05c354d5551a60d56aaea3df88ed8f0b39058a261c62822f3b0",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/frontend/src/components/features/topics/event-answers.tsx",
+      "offset": 758,
+      "limit": 60
+    }
+  },
+  {
+    "result_characters": 2019,
+    "result_sha256": "dbbb1f2880477c0b33116883c4bfffe793479ec6a3661c2498e8a78c08732b0c",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/fr.json",
+      "offset": 194,
+      "limit": 36
+    }
+  },
+  {
+    "result_characters": 1251,
+    "result_sha256": "32afd47cec9abd1844f7e8ca70fc71a08b376afd1a5cc8d29a4d7efad830a848",
+    "is_error": false
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/src/copy/en.json",
+      "offset": 8,
+      "limit": 6
+    }
+  },
+  {
+    "result_characters": 435,
+    "result_sha256": "74e167a4a28d38bda64e8a2ba81cf72fc70c01d4737bd2141c0bba87bdb7639b",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(lead|first|second|third|fourth|heading|fieldLabel|fieldValue|label|current|other)\": \"",
+      "path": "<case>/landing/src/copy/en.json",
+      "output_mode": "content",
+      "-n": true,
+      "offset": 0,
+      "head_limit": 0,
+      "glob": "en.json"
+    }
+  },
+  {
+    "result_characters": 5717,
+    "result_sha256": "b1f3190c30910bcb25e9be837d43a0b35981ba182b60937dc307a5992cccefc3",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "360|390|1280",
+      "path": "<case>/.claude/skills/run-tamialog/SKILL.md",
+      "output_mode": "content",
+      "-n": true
+    }
+  },
+  {
+    "name": "Read",
+    "input": {
+      "file_path": "<case>/landing/DESIGN.md",
+      "offset": 78,
+      "limit": 25
+    }
+  },
+  {
+    "result_characters": 1749,
+    "result_sha256": "bfc4591bbf2d44396cbed0345e3f1bb73d18669e63bdecc6ed5e68e6a8951f03",
+    "is_error": false
+  },
+  {
+    "result_characters": 84,
+    "result_sha256": "888d6ac6cfaa07c1405e41546a2cf85761aeb2c675638272536e5bfd60b90141",
+    "is_error": false
+  },
+  {
+    "name": "Grep",
+    "input": {
+      "pattern": "\"(test|build|check:locales|check)\":",
+      "path": "<case>/landing/package.json",
+      "output_mode": "content"
+    }
+  },
+  {
+    "result_characters": 164,
+    "result_sha256": "521852c9d0cf0c26345ed26ccb9950c9cd780c9572ccfeaa12179f080501e4eb",
+    "is_error": false
+  }
+]
