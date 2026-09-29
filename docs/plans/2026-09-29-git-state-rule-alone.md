@@ -4,7 +4,7 @@
 
 **Origin:** esq/git-state-and-copy-fidelity
 
-**Reviewed at:** 6bc463bc6acf526c336b1543c8a3912d4ac4f2c1
+**Reviewed at:** 43f3e66508e10d717a2dbc441692e1c36d053b0e
 
 ## Context
 `2026-09-29-git-state-and-copy-fidelity` tested two `/esq:plan` wording fixes in one shared set of 3 Tamialog runs
