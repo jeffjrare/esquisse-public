@@ -393,6 +393,25 @@ CLI behavior from this checkout, use `./plugin/bin/esq`.
 Set `ESQ_TELEMETRY=off` in the environment before starting Claude Code to disable
 telemetry writes. Telemetry never authorizes or blocks delivery.
 
+## Codex as a plan adversary (opt-in)
+
+With `ESQ_CODEX=on`, `/esq:plan` asks the local `codex` CLI for a second opinion: a blind
+counter-plan built from the goal alone (in the background, ≤15 min), then a pre-mortem
+of the written plan before it is committed (foreground, ≤10 min). Claude judges each
+answer against the code; the verdicts go in the plan commit's body and one count line
+in the report. Set it per project in `.claude/settings.json`:
+
+```json
+{ "env": { "ESQ_CODEX": "on", "ESQ_CODEX_MODEL": "gpt-6-astra", "ESQ_CODEX_EFFORT": "high" } }
+```
+
+`ESQ_CODEX_MODEL` and `ESQ_CODEX_EFFORT` are optional; unset, `~/.codex/config.toml`
+applies. **Opting in sends the goal text and whatever Codex reads in the repository to
+OpenAI under your own Codex login.** Codex runs read-only and its output is stored under
+the git dir, never the working tree. A missing, failing, slow or unauthenticated `codex`
+costs one `Codex: not run — <reason>` line and never stops the plan; unset, `/esq:plan`
+behaves and costs exactly as before.
+
 ## Contributing
 
 Read [CLAUDE.md](CLAUDE.md) for the project's goals and editing rules. Source lives
