@@ -55,7 +55,7 @@ Two phases, with the decision rules fixed here, before spending:
   brief says exists, and each quoted copy string is honored as written, or the conflict is named in `## Risks`; saying a
   state the brief describes is absent requires the render lines that show it missing.* Trim it to the criteria that
   actually fail. The boundary not crossed: nothing is added to the CLI, the audit or the reference files.
-- **Budget:** each run is bounded at 3 USD / 180 s (the `docs/headless-trial.md` block). That gives ≤ 9 USD per phase and
+- **Budget:** amounts are the CLI's list-price estimates; the user is on a Claude Code subscription, so a run consumes plan usage, not billed dollars, and `--max-budget-usd` acts as a usage cap. Each run is bounded at 3 USD / 180 s (the `docs/headless-trial.md` block). That gives ≤ 9 USD per phase and
   ≤ 18 USD in total, with ~1 USD/run expected (2026-09-29: 0.949 USD / 122 s). Print it before each phase's launch. No
   retry of a finished run; an infrastructure failure (auth, DNS) is diagnosed, and only that run is relaunched once.
 
