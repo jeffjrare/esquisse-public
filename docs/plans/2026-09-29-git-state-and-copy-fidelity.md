@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** a150a8be85790318a298518a0d99255914bf1e41
+
 ## Context
 B-181 was closed by re-scoping. Its two criteria that stayed unreliable on the 2026-09-29 variance trial
 (`docs/preparation/2026-09-29-b181-variance.md`, fix arm) became B-189 (C7, 1/3) and B-188 (C5, 1/3). **B-189:** in a
