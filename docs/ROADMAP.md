@@ -13,9 +13,9 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ### autonomy-remainder
 **covers:** B-169, epic:esq-decides-implementation-detail
-**why now:** Resume after the concrete queue defects, on an observed specialist need. Within the epic, preserve A/D -> B -> C: A and standards arbitration B shipped, and B-179 delivered D's exit locally. For C, select one unmet need before adding guidance or role skills, keeping beautiful design part of delivery.
+**why now:** parked — specialist back-end guidance isn't needed yet: Tamialog (backend-api skill) and assets-prospection (data-model, database-safety, job-queue, security-rules) already cover back-end choices with their own skills; resume when a run asks or builds badly on something no project skill covers
 **acceptance:** A real selected case proceeds without an implementation-detail question, with evidence of correct behavior and design quality; guidance stays on demand and within a stated cost bound.
-**state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no plan; not started; domain defaults in standards Part 2 remain empty, C not implemented. No concrete specialist case selected yet; no generic role framework commissioned.
+**state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no plan; not started. parked — specialist guidance (the epic's last unbuilt part) has no unmet need: observed projects' own skills settle back-end choices, and the plugin already ships front-end/design guidance; resume when a run asks or builds badly on something no project skill covers. Standards Part 2 (domain defaults) stays empty.
 
 ## Next
 
