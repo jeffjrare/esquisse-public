@@ -140,3 +140,29 @@ None. The mandate names the case, the bound, the criteria and one run set. The v
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-30
+
+**Plan committed at:** 3c01751
+
+**Commits:** c566df9, 7cc436c, 93d408b, 84d80ff
+
+**Verified:** 84d80ffb0a234d9c75522c2ad7b5822996dd5ac5
+- `grep -c "preparation/2026-09-30-b182-word-bound.md" docs/BACKLOG.md`
+- `./scripts/audit.sh`
+
+**What got built:** The bounded-length budgeting rule was added to plan § Style (c566df9), judged on one bounded set of 3 Tamialog runs, and reverted under the pre-stated verdict (outcome 3); the French report and inspectable runs are in docs/preparation/2026-09-30-b182-word-bound*, and B-182 is Dropped as an accepted limit with a dated note.
+
+**Verification:**
+- (auto) grep -c "preparation/2026-09-30-b182-word-bound.md" docs/BACKLOG.md — 2 (row provenance + dated detail note); B-182 is Dropped, matching the report's outcome 3
+- (auto) ./scripts/audit.sh — exit 0, Clean — 7 checks (product), 26 s
+
+**Surprises / decisions made during execution:** - Run set (3 runs, 118/137/151 s, 2.71 USD reported list price, ≤ 9 USD bound): 0/3 ≤ 900 words — 1,435 / 1,471 / 1,411, median up 10% from the 1,305 baseline. The separate inventory vanished in all three, but its words went to layout, copy and verification.
+- C1 2/3, C3 3/3, C4 3/3, C5 2/3 (1/3 literal), C6 1/3, C7 3/3 held their baseline. C2 fell 3/3 → 1/3; not attributable: runs 1–2 never read the notice in QuickLogSheet (only grepped it for chips) and described the spacing-confirm dialog, the modal-instead-of-drawer mode the verdict names.
+- Verdict outcome 3 applied as written: Task 1.4 reverted c566df9 (SKILL.md back to 8ce6b924… byte-identical), B-182 Dropped via esq backlog set-status.
+- Confounds: Claude Code 2.1.284 → 2.1.285; db82592 (+~110 words in the same SKILL.md) since the baseline. The /esq:plan skill text is not in stream-json, so the rule's load is inferred from the case's plugin hash, not the stream.
+- Metrics/trace/messages were extracted by a scratch script in the sibling sets' shape; case and raw results deleted after sanitizing, no /tmp/esq-headless-auth.* left.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. No rollout is owed: the edit was reverted, so plugin/ is unchanged from Origin and ./scripts/update.sh has nothing to publish for this unit.
