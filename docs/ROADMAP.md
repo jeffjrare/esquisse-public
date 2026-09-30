@@ -11,18 +11,11 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ## Now
 
-### verdict-under-mandate
-**covers:** B-190
-**why now:** A block on a question reachable by reasoning breaks the first constraint (never block): B-189's n=3 keep/revert rule misfired and bought three units and a user 🔴. B-182 is judged by the same bounded run sets, so settling verdicts under mandate first keeps its next candidate from stopping the same way; it is a rule change, cheaper and more certain than the concision work it precedes.
-**acceptance:** A keep/revert verdict after a stated run set is settled under the mandate with a one-line reason and never reaches the user as a decision; research still never gates a demonstrated fix.
-**shrinks:** preparation-concision
-**state:** <!-- GENERATED --> B-190 Open [med?]; no plan; not started. Observed on docs/plans/2026-09-29-keep-git-state-rule.md (complete).
-
 ### preparation-concision
 **covers:** B-182
 **why now:** Same preparation path and same retained case, so it lands right after fidelity: the 2026-09-25 source split was withdrawn precisely because a shorter plan lost "powdered" again, so length cuts are judged against a stable fidelity baseline, not beside a moving one.
 **acceptance:** Output within its word bound with no loss on the fidelity criteria; record what improves and what does not, without equating shorter instructions with better proposals.
-**state:** <!-- GENERATED --> B-182 Open [hi]; no plan; not started. Fidelity baseline shipped 2026-09-29 (B-189 Done, B-188 Dropped). Four bounded observations retained, none meets concision acceptance; last candidate withdrawn 2026-09-25.
+**state:** <!-- GENERATED --> B-182 Open [hi]; no plan; not started. Fidelity baseline shipped 2026-09-29 (B-189 Done, B-188 Dropped); verdict-under-mandate shipped 2026-09-30 (B-190 Done), so a bounded run set now closes under the mandate. Four bounded observations retained, none meets concision acceptance; last candidate withdrawn 2026-09-25.
 
 ## Next
 
@@ -71,8 +64,8 @@ The remaining ranked backlog work has no committed implementation position: B-07
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-30 · verdict-under-mandate — B-190 (done)
 - 2026-09-29 · preparation-fidelity — B-189, B-188 (done)
 - 2026-09-29 · b181-closing — B-181 closed by re-scope: kept `/esq:plan` read-back item 6 (`538c7c8`) makes C1–C4 and C6 reliable (≥2/3); C5 → B-188, C7 → B-189. Fidelity-trial fix withdrawn (`a5e1666`). Evidence: `docs/preparation/2026-09-29-b181-variance.md`.
 - 2026-09-29 · durable-ui-evidence — B-076 (done)
 - 2026-09-29 · verification-commands — B-107, B-163 (done)
-- 2026-09-25 · plan preparation experiment — B-182 stays Open. Authorized Tamialog retry is faster and cheaper but still over 900 words and loses required English copy; candidate split withdrawn, B-181 source restored exactly. Reference never rerun, no new trial or full audit. Evidence: `docs/preparation/2026-09-25-b182-tamialog.md`. No publication or queue change.
