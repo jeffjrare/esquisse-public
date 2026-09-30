@@ -7,18 +7,24 @@ Initial order proposed by [PRIORITY-REVIEW.md](PRIORITY-REVIEW.md), checked agai
 
 **Objective:** useful features shipped quickly, fewer unnecessary interruptions, reliable verification and beautiful, thoughtful design. Spend tokens, tool turns and elapsed time in proportion to that value. The CLI owns deterministic structure; the model owns judgment. A guard must detect a defect, resolve a reference or protect a parsed format. Optional telemetry and research never gate delivery. Deployment remains outside ESQ's scope.
 
-The sequence below is the remaining execution proposal, not a claim that work has started. Re-derived 2026-09-29 after B-181 closed by re-scope into B-188/B-189: Now carries the two preparation criteria its kept fix left unreliable, on the retained Tamialog case. Order is positional unless a `needs:` edge is written. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the active sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
+The sequence below is the remaining execution proposal, not a claim that work has started. Re-derived 2026-09-29 after preparation-fidelity shipped (B-189 Done, B-188 Dropped): Now carries B-190, the measurement-verdict block that cost B-189 a user 🔴, ahead of preparation-concision on the same retained Tamialog case. Order is positional unless a `needs:` edge is written. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the active sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
 
 ## Now
 
-## Next
+### verdict-under-mandate
+**covers:** B-190
+**why now:** A block on a question reachable by reasoning breaks the first constraint (never block): B-189's n=3 keep/revert rule misfired and bought three units and a user 🔴. B-182 is judged by the same bounded run sets, so settling verdicts under mandate first keeps its next candidate from stopping the same way; it is a rule change, cheaper and more certain than the concision work it precedes.
+**acceptance:** A keep/revert verdict after a stated run set is settled under the mandate with a one-line reason and never reaches the user as a decision; research still never gates a demonstrated fix.
+**shrinks:** preparation-concision
+**state:** <!-- GENERATED --> B-190 Open [med?]; no plan; not started. Observed on docs/plans/2026-09-29-keep-git-state-rule.md (complete).
 
 ### preparation-concision
 **covers:** B-182
 **why now:** Same preparation path and same retained case, so it lands right after fidelity: the 2026-09-25 source split was withdrawn precisely because a shorter plan lost "powdered" again, so length cuts are judged against a stable fidelity baseline, not beside a moving one.
 **acceptance:** Output within its word bound with no loss on the fidelity criteria; record what improves and what does not, without equating shorter instructions with better proposals.
-**needs:** preparation-fidelity
-**state:** <!-- GENERATED --> B-182 Open [hi]; no plan; not started. needs preparation-fidelity satisfied (Shipped 2026-09-29: B-189 Done, B-188 Dropped). Four bounded observations retained, none meets concision acceptance; last candidate withdrawn 2026-09-25.
+**state:** <!-- GENERATED --> B-182 Open [hi]; no plan; not started. Fidelity baseline shipped 2026-09-29 (B-189 Done, B-188 Dropped). Four bounded observations retained, none meets concision acceptance; last candidate withdrawn 2026-09-25.
+
+## Next
 
 ### autonomy-remainder
 **covers:** B-169, epic:esq-decides-implementation-detail
