@@ -7,26 +7,19 @@ Initial order proposed by [PRIORITY-REVIEW.md](PRIORITY-REVIEW.md), checked agai
 
 **Objective:** useful features shipped quickly, fewer unnecessary interruptions, reliable verification and beautiful, thoughtful design. Spend tokens, tool turns and elapsed time in proportion to that value. The CLI owns deterministic structure; the model owns judgment. A guard must detect a defect, resolve a reference or protect a parsed format. Optional telemetry and research never gate delivery. Deployment remains outside ESQ's scope.
 
-The sequence below is the remaining execution proposal, not a claim that work has started. Re-derived 2026-09-29 after preparation-fidelity shipped (B-189 Done, B-188 Dropped): Now carries B-190, the measurement-verdict block that cost B-189 a user 🔴, ahead of preparation-concision on the same retained Tamialog case. Order is positional unless a `needs:` edge is written. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the active sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
+The sequence below is the remaining execution proposal, not a claim that work has started. Re-derived 2026-09-30 after preparation-concision closed (B-182 Dropped as an accepted limit, `docs/preparation/2026-09-30-b182-word-bound.md`): autonomy-remainder rises to Now; the conditional Later queue keeps its order. Order is positional unless a `needs:` edge is written. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the active sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
 
 ## Now
-
-### preparation-concision
-**covers:** B-182
-**why now:** Same preparation path and same retained case, so it lands right after fidelity: the 2026-09-25 source split was withdrawn precisely because a shorter plan lost "powdered" again, so length cuts are judged against a stable fidelity baseline, not beside a moving one.
-**acceptance:** Output within its word bound with no loss on the fidelity criteria; record what improves and what does not, without equating shorter instructions with better proposals.
-**state:** <!-- GENERATED --> B-182 Open [hi]; no plan; not started. Fidelity baseline shipped 2026-09-29 (B-189 Done, B-188 Dropped); verdict-under-mandate shipped 2026-09-30 (B-190 Done), so a bounded run set now closes under the mandate. Four bounded observations retained, none meets concision acceptance; last candidate withdrawn 2026-09-25.
-
-## Next
 
 ### autonomy-remainder
 **covers:** B-169, epic:esq-decides-implementation-detail
 **why now:** Resume after the concrete queue defects, on an observed specialist need. Within the epic, preserve A/D -> B -> C: A and standards arbitration B shipped, and B-179 delivered D's exit locally. For C, select one unmet need before adding guidance or role skills, keeping beautiful design part of delivery.
 **acceptance:** A real selected case proceeds without an implementation-detail question, with evidence of correct behavior and design quality; guidance stays on demand and within a stated cost bound.
-**state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no tagged plans in this snapshot; domain defaults in standards Part 2 remain empty, C not implemented. No concrete specialist case selected yet; no generic role framework commissioned.
+**state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no plan; not started; domain defaults in standards Part 2 remain empty, C not implemented. No concrete specialist case selected yet; no generic role framework commissioned.
+
+## Next
 
 ## Later
-
 
 ### background-acceptance
 **covers:** B-085, B-087
@@ -64,8 +57,8 @@ The remaining ranked backlog work has no committed implementation position: B-07
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-30 · preparation-concision — B-182 (done: Dropped as accepted limit)
 - 2026-09-30 · verdict-under-mandate — B-190 (done)
 - 2026-09-29 · preparation-fidelity — B-189, B-188 (done)
 - 2026-09-29 · b181-closing — B-181 closed by re-scope: kept `/esq:plan` read-back item 6 (`538c7c8`) makes C1–C4 and C6 reliable (≥2/3); C5 → B-188, C7 → B-189. Fidelity-trial fix withdrawn (`a5e1666`). Evidence: `docs/preparation/2026-09-29-b181-variance.md`.
 - 2026-09-29 · durable-ui-evidence — B-076 (done)
-- 2026-09-29 · verification-commands — B-107, B-163 (done)
