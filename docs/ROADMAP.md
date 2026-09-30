@@ -11,6 +11,11 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ## Now
 
+### sigpipe-site-check
+**covers:** B-078
+**why now:** cheap, certain defect check while larger work is parked
+**state:** <!-- GENERATED --> B-078 Open [med?]; no plan; not started.
+
 ## Next
 
 ## Later
@@ -50,11 +55,6 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 **why now:** Externally conditional integration follows product delivery until the partner workflow is selected. Do not research connector capabilities merely to keep this row warm.
 **acceptance:** Revalidate both the need and connector capability at selection time; the historical missing-connector claim is not a current market finding.
 **state:** <!-- GENERATED --> Open; historically parked, not executing.
-
-### sigpipe-site-check
-**covers:** B-078
-**why now:** cheap, certain defect check while larger work is parked
-**state:** <!-- GENERATED --> B-078 Open [med?]; no plan; not started.
 
 B-149 is Dropped in this public checkout: the historical briefs were intentionally omitted, so no local cleanup remains. This is not evidence that their findings were fixed; B-179 keeps the generic correction/disposition requirement.
 
