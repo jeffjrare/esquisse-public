@@ -54,11 +54,6 @@ REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" \
 REPO_NAME="$(basename "$REPO_ROOT")"
 WT_BASE="$(dirname "$REPO_ROOT")/${REPO_NAME}.worktrees"
 
-main_worktree() {
-  # git lists the main working tree first in --porcelain output.
-  git worktree list --porcelain | sed -n 's/^worktree //p' | head -n1
-}
-
 default_branch() {
   local d
   d="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@')" || true
