@@ -92,7 +92,7 @@ export const RUN_SLACK_MS = 60_000;
 export const runBoundMs = (n) => n * ROW_DEADLINE_MS + RUN_SLACK_MS;
 
 // The only cost figure in this file, and it is a *reading* rather than a rate
-// card: README § Model recommendations, 2026-08-19 — ten runs, ~75 s, ~$1.50
+// card: docs/MAINTAINING.md § Measured cost per command, 2026-08-19 — ten runs, ~75 s, ~$1.50
 // total. Re-measure it, do not adjust it.
 export const COST_READING = '2026-08-19 reading: ten runs, ~75 s, ~$1.50 total';
 export const COST_PER_RUN = 0.15;

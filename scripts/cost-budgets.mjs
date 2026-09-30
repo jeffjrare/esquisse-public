@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 // cost-budgets.mjs — is today's telemetry still inside the regression budgets
-// the README states?
+// docs/MAINTAINING.md states?
 //
-// `README.md § Model recommendations` carries a dated "Measured cost per
+// `docs/MAINTAINING.md § Operations` carries a dated "Measured cost per
 // command" table whose subagent rows each hold a budget cell on the two figures
 // `esq telemetry summary --json` can re-derive: median output tokens and median
 // duration (`43.5k / 10m45s · n=33 · 2026-08-19`). This reads that column —
-// the README table is the single source, so the doc and the checker cannot
+// that table is the single source, so the doc and the checker cannot
 // drift — and compares it against the live summary, one line per group.
 //
 //   node scripts/cost-budgets.mjs                          # live store
 //   node scripts/cost-budgets.mjs --summary <file.json>    # replay a saved summary
-//   node scripts/cost-budgets.mjs --readme <file.md>       # a table other than this repo's
+//   node scripts/cost-budgets.mjs --table <file.md>        # a table other than this repo's
+//                                                          # (--readme is the older spelling)
 //
 // Exit 0 every compared group is inside its budget, 1 a breach (or a table that
 // cannot be parsed, naming the offending line), 2 nothing to check — no budget
@@ -47,7 +48,7 @@ export function parseDuration(text) {
   return ((+(m[1] || 0) * 60 + +(m[2] || 0)) * 60 + +(m[3] || 0)) * 1000;
 }
 
-// The summary keys its groups `esq:<command>`; the README writes the slash
+// The summary keys its groups `esq:<command>`; the table writes the slash
 // command (`/esq:build`) and marks one row that is not a slash command with a
 // footnote dagger. Parse on the backticked token, never on the whole cell.
 export function commandKey(cell) {
@@ -109,7 +110,7 @@ export function parseBudgets(readme) {
 // One verdict per budgeted group. A group the summary cannot speak to — absent,
 // no token sample, or back below the confirmed threshold — is skipped with its
 // reason, never counted as ok and never as a breach: a provisional median is a
-// figure, not evidence, which is the same rule the README table states.
+// figure, not evidence, which is the same rule the budget table states.
 export function compare(rows, summary) {
   const groups = (summary && summary.byCommand) || {};
   return rows.filter((r) => r.budget).map((row) => {
@@ -186,10 +187,10 @@ function arg(argv, flag) {
 
 export function main(argv) {
   if (argv.includes('--help') || argv.includes('-h')) {
-    console.log('usage: cost-budgets.mjs [--summary <summary.json>] [--readme <README.md>]\n  compares the README\'s budget column against esq telemetry summary --json\n  exit 0 inside budget · 1 breach or unparsable table · 2 nothing to check');
+    console.log('usage: cost-budgets.mjs [--summary <summary.json>] [--table <MAINTAINING.md>]\n  compares docs/MAINTAINING.md\'s budget column against esq telemetry summary --json\n  exit 0 inside budget · 1 breach or unparsable table · 2 nothing to check');
     return 0;
   }
-  const readmePath = arg(argv, '--readme') || resolve(ROOT, 'README.md');
+  const readmePath = arg(argv, '--table') || arg(argv, '--readme') || resolve(ROOT, 'docs/MAINTAINING.md');
   const summaryPath = arg(argv, '--summary');
 
   let rows;

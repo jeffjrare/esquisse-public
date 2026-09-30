@@ -1,44 +1,43 @@
 # esquisse
 
 *Esquisse* is French for the sketch before construction. It is a Claude Code
-plugin for shipping features people actually value, with beautiful, thoughtful
-design and a reviewable trail. It aims to keep the full cost of delivery — model
-tokens and calls, tool turns, elapsed time and user interruptions — proportionate
-to that value, while preserving correctness and user authority. Plans and work
-records live in your repository, so a fresh session can pick up where the last
+plugin that takes a feature from idea to merged code — **plan → build → review →
+land** — with thoughtful design and a reviewable trail. Plans, backlog and decisions
+live as Markdown in your repository, so a fresh session picks up where the last
 one stopped.
 
-**The usual path:** `/esq:plan` → `/esq:build` → `/esq:review` → `/esq:land`.
-Corrections happen when the review finds them. Smaller work can use `/esq:work`
-without a plan; uncertain scope can start with `/esq:grill`. Nothing pushes.
+- **It asks only what only you can answer.** Intent, priority and tradeoffs on your
+  constraints come to you; anything it can find by reading, running or reasoning, it
+  settles itself.
+- **Design is part of the feature.** UI work is planned with its empty, loading,
+  error and success states, and reviewed as part of the delivery.
+- **Every phase is verified.** Each plan phase has a deliverable and an explicit
+  check, and the result is recorded in the plan.
+- **Nothing pushes.** Work lands with a local merge into the branch it started from.
+  Publishing stays in your hands.
 
 ## Install
 
-Requirements: Claude Code with plugin support, Node.js and Git. The plugin CLI
-uses Node built-ins and has no npm dependencies. Bash and GNU `timeout` are also
-needed for this repository's development and release scripts.
+You need Claude Code with plugin support, Node.js and Git. The plugin has no npm
+dependencies.
 
-Clone this repository locally, then register its marketplace in Claude Code:
-
-```bash
-git clone https://github.com/jeffjrare/esquisse-public.git ~/code/esquisse
-```
+In Claude Code:
 
 ```text
-/plugin marketplace add ~/code/esquisse
+/plugin marketplace add jeffjrare/esquisse-public
 /plugin install esq@esquisse
 ```
 
-The marketplace contains one plugin, `esq`. Claude Code installs `plugin/` and
-exposes its skills as `/esq:<name>`. Restart Claude Code after an update to load
-the installed version in a fresh session. For development, preview the checkout
-without installing it with `claude --plugin-dir ./plugin`. Maintainer updates are
-described under [Updating the local installation](#updating-the-local-installation).
+Restart Claude Code. The commands appear as `/esq:<name>`. To pick up a new
+version later, run `/plugin marketplace update esquisse`, then restart.
 
-## Getting started
+Want to hack on esquisse itself? Clone the repository and see
+[docs/MAINTAINING.md](docs/MAINTAINING.md).
 
-For a feature with clear scope, run these in your project (use the plan path that
-`plan` actually returns):
+## Your first feature
+
+Run these in your project, clearing context between steps. Use the plan path that
+`plan` reports:
 
 ```text
 /esq:plan add CSV export to the invoices screen
@@ -46,146 +45,63 @@ For a feature with clear scope, run these in your project (use the plan path tha
 /esq:build docs/plans/<date>-invoice-export.md
 ```
 
-Repeat `build` in fresh sessions for the remaining phases, or use
-`/esq:autopilot <plan>` to delegate them. Each phase has a deliverable and explicit
-verification. A plan records its `Branch` and `Origin`; work is built on that
-branch and later lands where it started.
+`plan` reads the codebase, writes a plan with verifiable phases and commits it on a
+new branch. `build` implements **one** phase, runs its verification and records
+what it proved. Repeat `build` for the remaining phases, or hand them all to
+`/esq:autopilot <plan>`.
 
-For observed UI states, build keeps reusable captures or rendered excerpts linked
-from the execution log so review can reopen them later. Human confirmations remain
-valid without an extra screenshot; missing evidence is reported separately from a
-visually incorrect result.
-
-After implementation:
+Then review and land:
 
 ```text
 /clear
 /esq:review docs/plans/<date>-invoice-export.md
-```
-
-Follow the review's next action: fix mechanical findings, plan substantive work,
-or settle a decision that needs your authority. Once the unit is ready:
-
-```text
 /clear
 /esq:land docs/plans/<date>-invoice-export.md
 ```
 
-For uncertain scope, run `/esq:grill <idea>` first. It turns a vague idea into a
-brief — who the user is, what friction goes away, what is in and out of scope — and
-`plan` picks it up. For a new product with no UI yet, grill suggests
-`/esq:ui --greenfield` to put two rendered directions on screen before any code.
+`review` checks both that the goal was delivered and that the code is sound.
+`land` confirms the whole branch is ready, then merges it locally into the branch
+the plan started from.
 
-On an unfamiliar codebase, `/esq:status` orients you, and `harvest`, `spec` and
-`arch` build the decision registry, product spec and architecture map on demand;
-none is a required setup step. A tiny edit that needs no record can use ordinary
-Claude Code.
+**Not sure what to build yet?** Start with `/esq:grill <idea>`. It questions you
+until the scope is clear and writes a brief that `plan` picks up. For a product with
+no UI yet, it suggests `/esq:ui --greenfield` to put rendered design directions on
+screen before any code.
 
-### Small changes without a plan
+**Small change?** `/esq:work fix the typo in the sign-in error` records the item,
+sizes it, and — when it is truly small — makes the change, verifies it and commits,
+with no plan. Anything bigger gets the exact next command instead. A real run:
 
-Run `/esq:work B-007` or `/esq:work fix the typo in the sign-in error`. Free text
-is captured in the backlog before sizing. Trivial work is verified and committed,
-then closed in a separate backlog commit. `/esq:work … route` captures and sizes
-an item without implementing it.
+```text
+✔  work — B-078 · ⚠️ debt [med?] · verdict: inline · done · 59s
 
-For an independent review, use `/esq:review <full-code-commit-hash>` or a
-`<base>..<tip>` range. Do not use bare `HEAD` after the backlog close: it names
-the bookkeeping commit. If review finds 🟢 items, `/esq:fix <brief>` verifies
-them and returns a range ending at its last fix commit; 🔴 needs your decision,
-while 🟡 goes to `plan`. A clean plan-less review ends there: it records no plan
-coverage and does not offer `land`, which operates on planned shipping units.
+  ✔ reads as    The only head pipeline left under pipefail was an unused function in scripts/worktree.sh.
+  ✔ sizing      One file, four lines deleted, no design choice.
+  ✔ applied     ccff966               removed the unused main_worktree()
+  ✔ verified    bash -n passes, no references left, ./scripts/audit.sh clean (7 checks)
+  ✔ closed      B-078 → Done
+  ○ if you disagree  keep the function and rewrite it without head, if you plan to call it soon
 
-## How esquisse works
+→ Next: /esq:work
+```
 
-Esquisse is a plugin, not a service or a separate database. **Models handle
-judgment:** which problem matters, what experience to design, how to implement
-it, what a test proves and when a decision belongs to the user. **Local code
-handles repeatable facts:** parsing records, assigning IDs, checking branch and
-verification state, and enforcing merge boundaries. Its runtime has four pieces:
-
-| Piece | Where | Responsibility |
-|---|---|---|
-| Model-driven skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, and decide when user authority is needed. |
-| Deterministic CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, preserve verification evidence, and perform safe local merges. It answers structured questions rather than making product choices. |
-| Project records | `docs/plans/`, `docs/BACKLOG.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md` and Git | Keep the plan, decisions, committed work and execution log available to the next session. |
-| Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Protect the installed plugin, validate changed ledgers on stop, and record optional usage counters. They do not decide whether a feature is good. |
-
-Skills pre-approve exactly one tool: the plugin's own CLI (`allowed-tools: Bash(esq *)`), so
-structural bookkeeping never waits on a permission prompt. Every other tool stays under your
-permission settings.
-
-In a planned run, `plan` commits the plan on a new shipping branch. `build`
-implements one phase and records what its verification proved. `review` assesses
-the delivered goal and code independently; findings may enter a bounded
-correction loop. `land` checks the *whole* branch's unit, reuses valid proof or
-runs what is still owed, then merges locally into the plan's recorded origin.
-It may first commit backlog closures whose delivery it can cite. It never
-publishes or pushes.
-
-`scripts/audit.sh` tests this repository during development and is not a step
-every project must run. See
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the detailed component and
-flow contracts.
-
-## What esquisse optimizes for
-
-**Ship high-value features with beautiful, thoughtful design.** Prioritize work
-that solves a meaningful user problem, improves an experience people actually use,
-or unlocks a valuable capability. Judge success by the value delivered and the
-quality of the experience. Visual hierarchy, typography, coherent styling,
-interaction and feedback are part of that outcome.
-
-Time and model budgets should go toward that product value. esq aims to make
-delivery faster, simpler and less interruptive by removing unnecessary process
-and repeated work. Correctness, data integrity and user authority remain required.
-
-- **Treat tokens like money.** Count the whole workflow: model calls, context
-  loaded and re-sent, tool round trips, subagents, elapsed time and repeated work.
-  A shorter prompt helps, but so does avoiding a redundant agent or a second
-  verification of an unchanged result. Each extra step must justify its cost.
-- **Do not buy the same answer twice.** Reuse valid verification evidence; read
-  only the context the task needs and retain it; batch independent reads; carry
-  durable state between fresh sessions. Announce bounds before spending. Resolve
-  a known blocker before paying another worker to rediscover it.
-- **Use code for deterministic work, models for judgment.** The CLI owns parsing,
-  IDs, ledger cells and structural invariants. The model owns scope, design,
-  severity and implementation choices. Repeating a mechanical operation through
-  model reasoning spends more and makes its result less predictable.
-- **Keep progress within the agent's mandate.** Read, run and investigate what the
-  repository can answer. Ask the user for missing intent, priority or authorization
-  that changes the outcome, scope, constraints or consequential cost/risk. Technical
-  uncertainty alone is work to do. A user decision gets distinct options, their
-  consequences and an executable next action. Safety refusals remain explicit;
-  telemetry, model probes and research registries never gate delivery.
-- **Make verification earn its cost.** Match checks to the change and the failure
-  they can catch. Do not stack reviews or audits of audits for reassurance, or
-  enforce wording for its own sake. Test behavior and parsed contracts; retire
-  controls whose purpose disappeared. A different implementation is a finding
-  only when it loses an outcome or causes a current failure.
-- **Invest in the experience; trim unnecessary generality.** Plan and build
-  polished, accessible interfaces with clear flows and considered loading, empty,
-  error and success states. Give design work an observable outcome and review it
-  as part of the feature. Use the smallest workflow that delivers that outcome;
-  fewer words, tests or agents help only when product quality holds.
-
-This is why the normal path has one review, `check` is optional, inline fixes need
-no plan artifact, and corrective work has a bound. These are design commitments,
-not a claim of measured savings for every task. [CLAUDE.md](CLAUDE.md) carries the
-contributor rules that apply this philosophy to changes in esq itself.
+**New to a codebase?** `/esq:status` orients you without changing anything.
+`/esq:spec`, `/esq:arch` and `/esq:harvest` write a product spec, an architecture
+map and a decision record on demand; none is a required setup step.
 
 ## Commands
 
 | Command | Purpose | Main result |
 |---|---|---|
 | `/esq:grill <idea>` | Resolve scope and consequential choices before planning | A brief in `docs/plans/` |
-| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases | A plan committed on its shipping branch |
+| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases | A plan committed on its own branch |
 | `/esq:build <plan>` | Implement and verify one phase, then stop | Task commits and an execution-log entry |
 | `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, correctness, security, UX and design | Review findings; a corrective brief when needed |
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings |
-| `/esq:land <plan>` | Verify readiness and merge the unit into its recorded origin | A local merge or an explained refusal; never a push |
+| `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
-| `/esq:work [item-or-text] [route]` | Investigate one item; execute it if trivial, otherwise recommend its method | Capture if needed; code commit and backlog close for inline work |
-| `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks; `publish` exports them | `docs/BACKLOG.md` |
+| `/esq:work [item-or-text] [route]` | Investigate one item; do it now if trivial, otherwise recommend the method | Code commit and backlog close for small work; otherwise the next command |
+| `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
 | `/esq:sweep` | Reconcile backlog items against evidence of delivery | Backlog closures; questions only for unresolved cases |
 | `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order | `docs/ROADMAP.md`; backlog priority/rank updates when ordering |
 | `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items and plan substantive work | Inline fixes and plans; stops before building |
@@ -199,129 +115,94 @@ contributor rules that apply this philosophy to changes in esq itself.
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
 | `/esq:ui [--greenfield <brief-or-copy>]` | Inspect an existing interface, or explore one before implementation | A rendered recommended direction (two in `--greenfield`, or when the choice is yours), a comparison page and a planning brief |
 
-These commands run in your project. They are not this repository's development
-audit scripts. In every example, use the actual paths reported by the preceding
-command. `review` and `check` require an explicit target and ask for one when
-omitted.
+In every example, use the actual paths the previous command reported. `review` and
+`check` need an explicit target and ask for one when it is missing.
 
-Corrections are bounded: a unit gets at most two corrective plans. Past that, safe
-fixes still go through `fix` → `review` → `land`, and `fix --accept B-NNN,...` records
-your explicit decision to leave named findings unfixed — as `Dropped`, never `Done`,
-and without bypassing verification.
+## How it works
 
-## Sessions and models
+esquisse is a plugin, not a service or a database. **The model handles judgment:**
+which problem matters, what experience to design, how to implement it, what a test
+proves and when a decision belongs to you. **A small local CLI handles the
+repeatable facts:** parsing records, assigning IDs, checking branch and
+verification state, and merging safely.
 
-### Mode discipline
+| Piece | Where | Responsibility |
+|---|---|---|
+| Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed |
+| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges. It answers structured questions; it makes no product choices |
+| Project records | `docs/` in your project, and Git | Keep plans, decisions, committed work and the execution log available to the next session |
+| Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
 
-Use a fresh context between planning, implementation and assessment. The skills
-write their own artifacts; Claude Code's plan mode can prevent those writes and
-is not required to run the esq planning skill. Follow each command's mode guidance.
+Skills pre-approve exactly one tool: the plugin's own CLI (`Bash(esq *)`), so
+bookkeeping never waits on a permission prompt. Every other tool stays under your
+permission settings.
 
-### Model recommendations
+### What lands in your repository
 
-Workers request Opus. `status`, `backlog`, `epic`, `sweep` and `worktree` declare
-Sonnet; `autopilot`, `converge` and `advance` inherit the session model and request
-Opus for their workers. A requested model is not proof of the effective model:
-if the host does not honor it, the worker may inherit the session model.
-
-No model probe, telemetry record or `docs/EVIDENCE.md` file is a prerequisite for
-using esq. A fresh project can start without any of them.
-
-## Review, correction and landing
-
-Review covers the original objective as well as the code. `check` is available
-when you need a deeper phase-by-phase reconciliation, but it cannot certify that
-a review occurred.
-
-| Finding | Next action |
+| File | Role |
 |---|---|
-| 🔴 Missing user authority | Choose an option first; red takes precedence over other findings |
-| 🟢 Mechanical, contained correction | `fix` applies and verifies it |
-| 🟡 Substantive change | `plan` defines the work |
-| Clean | Report the result and, for a planned unit, proceed toward landing |
-
-### Closing the loop — `/esq:converge`
-
-A plan entry runs **review → fix**, with at most two itinerary workers. Fix is
-skipped when there are no 🟢 findings. An existing brief resumes at fix. Decision
-application may spend an additional worker, announced separately.
-
-| Entry and result | What converge may report |
-|---|---|
-| Review is clean | Review coverage recorded; ready to land if the remaining readiness checks pass |
-| A review brief's fixes are verified and nothing remains open | Correction coverage recorded under `plan(converged):`; ready to land, without claiming a second review |
-| A check brief, or a brief with unreadable provenance | Fixes applied, no review coverage; `/esq:review <plan>` is still owed |
-
-Open decisions or substantive findings prevent a ready verdict. Converge never
-merges. It does not re-review its fix commits: verified correction coverage and
-an independent reading of corrected code are different claims.
-
-### Landing — `/esq:land`
-
-Landing checks the whole branch's shipping unit, not just the named plan. Plans
-must be complete or explicitly abandoned; live findings and promised backlog
-work must be disposed of; review coverage must be valid. Branch ownership,
-recorded origin and working-tree cleanliness are checked before merging.
-
-`esq gate verify` reuses recorded PASS results only while their provenance still
-holds, then identifies what must run. The merge engine reads `Branch` and `Origin`
-from the plan itself and checks the destination checkout again before writing.
-Conflicts needing judgment are handed back with an attended recovery action.
-Nothing pushes or publishes a release.
-
-When the feature needs more than the merge to reach users — a migration, an environment
-variable, a restart, a flag — the plan's `## Rollout` section and any step a build phase
-recorded are listed in the landing report, in order, under **To reach users**. esq shows
-them; it never runs them.
-
-A remaining limitation: if verification succeeds but the merge is refused, the
-next landing attempt may run that verification again.
-
-Build can repair an unrunnable verification command when the step unambiguously states its artifact and criterion. It preserves that criterion, records the amendment and proves the corrected command; land does not substitute commands or transfer old proofs.
-
-### Manual verification and interrupted work
-
-A manual step needs an observation of the stated behavior, not a rewritten test
-or a promise to check later. An unconfirmed step leaves the phase paused. An open
-same-unit defect can also pause a phase; neither is a completed phase.
-
-Resume with `/esq:build <plan>`. It uses the durable log and existing commits to
-finish what remains. A diagnosed blocker is resolved through the CLI's pause
-protocol; a failed check is investigated, not turned into a question about which
-technical cause the user prefers.
-
-## Keeping track of work
-
-| Artifact | Role |
-|---|---|
-| `docs/plans/*.brief.md` | Scope and corrective findings passed between commands |
-| `docs/plans/*.md` | Goal, completion conditions, phases, verification and execution log |
+| `docs/plans/*.brief.md` | Scope and review findings passed between commands |
+| `docs/plans/*.md` | Goal, phases, verification and the execution log |
 | `docs/BACKLOG.md` | Tasks with permanent `B-NNN` IDs |
-| `docs/DECISIONS.md` | Decisions and the cited authority behind them |
-| `docs/ROADMAP.md` | Ordered `Now`, `Next`, `Later` work and the reason for that order |
+| `docs/DECISIONS.md` | Decisions and the authority behind each one |
+| `docs/ROADMAP.md` | Ordered `Now`, `Next` and `Later` work, with the reason for each position |
 | `docs/epics/<slug>.md` | A theme joining several plans and backlog items |
 | `docs/SPEC.md` | The live product as users experience it |
 | `docs/ARCHITECTURE.md` | Components, boundaries and implementation rules |
 
 Backlog statuses are `Open`, `Planned`, `Needs-decision`, `Done` and `Dropped`.
-Use `backlog` to capture or edit an item and `sweep` to reconcile delivery.
-`work` takes one item; without an argument it prefers actionable work from the
-roadmap, then falls back to backlog priority.
 
-`/esq:roadmap plan` derives the order; bare `/esq:roadmap` refreshes state without
-re-planning it. A completed plan does not by itself close the items it covers: sweep
-closes one only with evidence of its whole outcome. Parked work shows its reason and
-restart condition; `Planned` means tied to a plan, not running.
+## Review, fixes and landing
 
-`/esq:advance` walks the roadmap's `Now` items, or one named entry: one worker per
-eligible item, at most one new plan per entry, then one roadmap refresh. It stops
-before building, returns to the starting branch between items, and never runs two
-writers on the same working tree.
+Review covers the original goal as well as the code. Each finding is sorted by who
+has to act on it:
 
-`/esq:epic new <title>` creates a theme. Tag work with `epic:<slug>` and use
-`/esq:epic <slug>` to see the current plans and backlog rows joined by that slug.
+| Finding | What happens next |
+|---|---|
+| 🔴 Needs your decision | You pick one of the options it presents; red comes first |
+| 🟢 Mechanical, contained fix | `/esq:fix` applies and verifies it |
+| 🟡 Substantive change | `/esq:plan` defines the work |
+| Clean | The work moves on toward landing |
 
-## Parallel sessions — worktrees
+`/esq:converge <plan>` runs review → fix for you and reports whether the work is
+ready; it never merges. `/esq:check` is an optional, deeper phase-by-phase
+reconciliation; it does not count as a review.
+
+Corrections are bounded: a piece of work gets at most two corrective plans. Past
+that, safe fixes still go through `fix` → `review` → `land`, and
+`fix --accept B-NNN,...` records your decision to leave named findings unfixed — as
+`Dropped`, never `Done`, and without skipping verification.
+
+**Landing** checks the whole branch, not just the named plan: plans complete or
+explicitly abandoned, findings dealt with, review done, working tree clean. It
+reuses verification that still holds and runs only what is owed, then merges
+locally. Conflicts that need judgment come back to you with a recovery action.
+When the feature needs more than a merge to reach users — a migration, an
+environment variable, a restart — the plan's rollout steps are listed in the
+landing report under **To reach users**. esquisse shows them; it never runs them.
+
+**Manual checks** need an actual observation of the stated behavior. An
+unconfirmed manual step leaves the phase paused; resume with `/esq:build <plan>`,
+which picks up from the log and existing commits.
+
+**Reviewing work without a plan:** `/esq:review <full-commit-hash>` or
+`<base>..<tip>`. Avoid bare `HEAD` after `/esq:work`: the last commit is then the
+backlog update, not the change. A plan-less review ends at its findings; `land`
+only operates on planned work.
+
+## Backlog, roadmap and epics
+
+- `/esq:backlog <text>` captures an item; `/esq:work` takes one item at a time and,
+  with no argument, picks the top of the roadmap.
+- `/esq:roadmap plan` orders the open work and records why each item sits where it
+  does; bare `/esq:roadmap` refreshes state without reordering. A finished plan does
+  not close its items by itself: `/esq:sweep` closes one only with evidence of its
+  whole outcome.
+- `/esq:advance` works the roadmap's `Now` items — one worker per item, at most one
+  new plan per entry — and stops before building.
+- `/esq:epic new <title>` creates a theme; tag work with `epic:<slug>`.
+
+## Parallel sessions
 
 Use separate Git worktrees for independent sessions:
 
@@ -331,215 +212,68 @@ Use separate Git worktrees for independent sessions:
 ```
 
 Open the reported directory in another terminal. Each tree has its own working
-files and a reserved backlog ID block. IDs are permanent; neither allocation nor
-merge renumbers existing citations.
-Removing a worktree keeps any block witnessed by backlog IDs on a retained local
-branch unavailable to new worktrees. Reopening that branch reserves a fresh block
-for new items; existing IDs stay unchanged. An unused block can be reused.
+files and its own block of backlog IDs, so two sessions never hand out the same ID.
+Merge with `/esq:worktree merge feature-b` from the destination checkout, or use
+`land` for planned work. The merge reconciles the backlog and decision records; other
+conflicts stay ordinary Git conflicts.
 
-For an attended merge, run `/esq:worktree merge feature-b` from the intended
-destination checkout, or name the destination with `into <branch>`. Planned units
-can use `land`, which locates the checkout holding the recorded origin.
+## Sessions and models
 
-The merge engine reconciles backlog and decision ledgers. It distinguishes an
-existing item edited on both branches from two independently allocated items with
-the same ID; the latter requires user resolution. Other conflicting files remain
-ordinary Git conflicts. It does not regenerate `arch` or `spec` during a merge.
+### Mode discipline
 
-The repository's `scripts/worktree.sh` provides terminal `new`, `ls` and `rm`
-operations; `/esq:worktree` also works in projects without that helper script.
+Use a fresh context (`/clear`) between planning, building and reviewing. The skills
+write their own files, so Claude Code's plan mode is not needed and can block those
+writes.
 
-## Deterministic CLI
+### Model recommendations
 
-The distributed `plugin/bin/esq` supplies structured reads and mutations:
+Workers request Opus. `status`, `backlog`, `epic`, `sweep` and `worktree` declare
+Sonnet; `autopilot`, `converge` and `advance` use your session's model and request
+Opus for their workers. A requested model is not a guarantee: if the host does not
+honor it, the worker runs on your session's model.
 
-```bash
-esq state
-esq validate
-esq review scope docs/plans/<plan>.md
-esq review scope <base>..<tip>
-esq brief plan docs/plans/<fixes>.brief.md
-esq telemetry summary
-```
+## Privacy and options
 
-These examples use placeholders; supply actual paths or Git refs. `review scope`
-takes a positional plan, range or commit, not `--range` or `--commit` flags.
-`brief plan` resolves `plan`, `range` and `finder` from the brief's provenance;
-`brief depth` separately answers the corrective generation and its bound.
+- **Telemetry** is local and optional: counters and validated identifiers only —
+  never prompts, responses, tool inputs or source code. Set `ESQ_TELEMETRY=off`
+  before starting Claude Code to turn it off. It never blocks or authorizes anything.
+- **Hooks** protect the installed plugin from direct edits and, when a session stops
+  after changing a record, validate it once.
+- **Codex as a second opinion (opt-in).** With `ESQ_CODEX=on`, `/esq:plan` asks the
+  local `codex` CLI for a blind counter-plan and a pre-mortem of the written plan.
+  Claude judges both against the code; they never block the plan. **Opting in sends
+  the goal text and whatever Codex reads in your repository to OpenAI under your own
+  Codex login.** Set it per project in `.claude/settings.json`:
 
-`state` reports plans, backlog, roadmap and epics from the live ledgers in one read; it
-never refreshes a projection. An answer too long to print — `state`'s, or `review scope`'s diff — is written under
-the git dir and named by `file` / `diffFile`, with the `ranges` that read it whole.
+  ```json
+  { "env": { "ESQ_CODEX": "on", "ESQ_CODEX_MODEL": "gpt-6-astra", "ESQ_CODEX_EFFORT": "high" } }
+  ```
 
-The CLI owns ledger IDs, status cells, plan logs, branch checks and merge safety.
-Most results are JSON; `telemetry summary` defaults to a human-readable report
-and also accepts `--json`.
+  The model and effort are optional; unset, `~/.codex/config.toml` applies. A missing
+  or failing `codex` costs one `Codex: not run — <reason>` line.
 
-Skills resolve `esq` from the plugin's `PATH`, then use
-`"$CLAUDE_PLUGIN_ROOT/bin/esq"` if needed. If neither runs they report the problem
-and stop; they do not reconstruct deterministic operations by hand. To inspect
-CLI behavior from this checkout, use `./plugin/bin/esq`.
+## Design principles
 
-## Native hooks
+- **Value first.** Judge success by the value delivered and the quality of the
+  experience — hierarchy, typography, interaction and feedback included.
+- **Treat tokens like money.** Count the whole workflow: model calls, context,
+  tool round trips, subagents, elapsed time and repeated work. Reuse verification
+  that still holds; never pay twice for the same answer.
+- **Code for facts, models for judgment.** The CLI owns IDs, records and structural
+  checks; the model owns scope, design and implementation choices.
+- **Ask only for real authority.** Technical uncertainty is work to do, not a
+  question. A decision that is yours comes with options, consequences and a runnable
+  next step.
+- **Verification earns its cost.** Checks match the change and the failure they can
+  catch — no audits of audits.
 
-- **PreToolUse:** protects the installed plugin from direct edits.
-- **Stop:** first checks whether structured ledgers changed. Only then does it
-  validate them; it does not run the development audit. Its blocking correction
-  opportunity is bounded, and active background work prevents this validation.
-- **PostToolUse / SubagentStop / Stop / SessionEnd:** record optional local usage
-  telemetry. Stored records contain counters and validated identifiers, not
-  prompts, responses, tool inputs or source content.
-
-Set `ESQ_TELEMETRY=off` in the environment before starting Claude Code to disable
-telemetry writes. Telemetry never authorizes or blocks delivery.
-
-## Codex as a plan adversary (opt-in)
-
-With `ESQ_CODEX=on`, `/esq:plan` asks the local `codex` CLI for a second opinion: a blind
-counter-plan built from the goal alone (in the background, ≤15 min), then a pre-mortem
-of the written plan before it is committed (foreground, ≤10 min). Claude judges each
-answer against the code; the verdicts go in the plan commit's body and one count line
-in the report. Set it per project in `.claude/settings.json`:
-
-```json
-{ "env": { "ESQ_CODEX": "on", "ESQ_CODEX_MODEL": "gpt-6-astra", "ESQ_CODEX_EFFORT": "high" } }
-```
-
-`ESQ_CODEX_MODEL` and `ESQ_CODEX_EFFORT` are optional; unset, `~/.codex/config.toml`
-applies. **Opting in sends the goal text and whatever Codex reads in the repository to
-OpenAI under your own Codex login.** Codex runs read-only and its output is stored under
-the git dir, never the working tree. A missing, failing, slow or unauthenticated `codex`
-costs one `Codex: not run — <reason>` line and never stops the plan; unset, `/esq:plan`
-behaves and costs exactly as before.
+These are design commitments, not a claim of measured savings on every task.
 
 ## Contributing
 
-Read [CLAUDE.md](CLAUDE.md) for the project's goals and editing rules. Source lives
-in `plugin/`; installed files are not source. Preview with
-`claude --plugin-dir ./plugin` rather than editing the plugin cache.
-
-Run checks proportionate to the change and one final audit:
-
-```bash
-./scripts/audit.sh
-```
-
-This includes structural references, package validation, the no-push contract,
-parsed-format conformance, manifest agreement, the bounded runner and the CLI,
-hook and corpus-helper tests. Node suites are discovered by convention and run
-inside the audit; do not run them a second time alongside it on the same tree.
-A pending release is reported, not treated as a product regression.
-
-For release or packaging changes, add `--release`. For research tools or their
-fixtures, add `--lab`. Flags add checks without repeating the base pass:
-
-```bash
-./scripts/audit.sh --release --lab
-```
-
-Release tests use disposable repositories and isolated configuration; they do not
-update your real installation. The lab pass uses fixtures and replay, not billed
-model calls. See [docs/AUDIT.md](docs/AUDIT.md) for semantic reading and
-[docs/CONFORMANCE.md](docs/CONFORMANCE.md) for the small set of parsed formats.
-Checks enforce working references and code contracts, not preferred prose.
-
-## Updating the local installation
-
-After the intended changes are verified, committed and on `main`, run from this
-repository:
-
-```bash
-./scripts/update.sh
-```
-
-The router refuses a dirty tree or a branch other than `main`. It asks
-`check-release-version.sh` whether the plugin changed since its version bump:
-
-- **A release is needed:** `release-local.sh --patch` requires a primary checkout,
-  checks that Claude's `esquisse` marketplace resolves to this local checkout,
-  bumps both manifests, proves that only their versions changed, commits the bump,
-  then invokes the official Claude plugin updater. It verifies installed version,
-  release commit and bytes. Restart Claude Code after success.
-- **No release is needed:** show `release-local.sh --check` and exit without
-  installing. This does **not** mean the installed plugin matches the checkout;
-  read the reported version, commit and byte comparison.
-- **The verdict is missing, malformed or its command fails:** refuse. Report and
-  release failures propagate instead of printing a success message.
-
-The router runs no audit; verification must already have passed. It never pushes,
-switches branches or commits unrelated work. The release's only installation
-write is the official `claude --bare plugin update esq@esquisse --scope user --yes`
-call, with closed stdin and a timeout. Nothing edits `~/.claude/` directly.
-
-For a read-only installation report at any time:
-
-```bash
-./scripts/release-local.sh --check
-```
-
-This report exits zero even when the installation differs or cannot be read; its
-exit code is not an installation certificate. If an install fails after a bump
-commit, that commit remains. Follow the updater's printed retry command rather
-than making another release to retry the same installation.
-
-If you move or clone the repository, Claude may still use the old directory.
-The release refuses before changing versions when that happens; `--check` also
-reports the registered source. From the intended checkout, reconnect it and
-install the version already committed:
-
-```bash
-claude --bare plugin marketplace add "$PWD" --scope user </dev/null
-claude --bare plugin update esq@esquisse --scope user --yes </dev/null
-./scripts/release-local.sh --check
-```
-
-## Operations
-
-| Tool | Use |
-|---|---|
-| `scripts/audit.sh [--release] [--lab]` | Development verification with optional release and research-fixture passes |
-| `scripts/check-plugin.sh` | Official plugin validation, syntax, hooks and skill frontmatter |
-| `scripts/check-structure.sh` | Command, section, brief and reference-path resolution |
-| `scripts/check-conformance.sh` | Template tokens consumed by retained parsers |
-| `scripts/check-release-version.sh . --json` | Manifest agreement and whether source changes need a release |
-| `scripts/update.sh` | Route a verified local checkout to release, or report without installing |
-| `scripts/release-local.sh --check` | Read source and installation state without changing either |
-
-Research remains optional. `probe-model-pins.mjs`, `smoke-work-capture.mjs` and
-`smoke-journeys.mjs` have live paths that make billed model calls; run them only
-intentionally. `measure-wait-cost.mjs`, `measure-rereads.mjs` and
-`cost-budgets.mjs` inspect local usage. None is a product prerequisite or part of
-the default audit. Historical harness observations live in
-[docs/EVIDENCE.md](docs/EVIDENCE.md); they are not fresh runtime guarantees.
-
-A bounded, read-only headless trial recipe for maintainers lives in
-[docs/headless-trial.md](docs/headless-trial.md).
-
-### Measured cost per command — 2026-08-19
-
-Historical subagent baseline, retained because `scripts/cost-budgets.mjs` reads
-its budget column. **These measurements predate the simplified workflow and
-prompt compression. They do not measure the current release or promise savings.**
-“Confirmed” here means at least five token-bearing runs in that historical
-sample, not a current model or behavior certification.
-
-**Subagent runs** — historical sample:
-
-| Command group | Runs | Status | Median out tok | Median duration | Budget (out tok / duration) |
-|---|---|---|---|---|---|
-| `esq:apply` | 3 | provisional | 8.1k | 2m09s | — |
-| `/esq:build` | 33 | confirmed | 28.9k | 7m02s | 43.5k / 10m45s · n=33 · 2026-08-19 |
-| `/esq:check` | 13 | confirmed | 6.7k | 2m03s | 10.5k / 3m15s · n=13 · 2026-08-19 |
-| `/esq:fix` | 11 | confirmed | 5.5k | 2m08s | 8.5k / 3m15s · n=11 · 2026-08-19 |
-| `/esq:review` | 13 | confirmed | 13.6k | 3m24s | 20.5k / 5m15s · n=13 · 2026-08-19 |
-| `/esq:roadmap` | 1 | provisional | 194 | 6s | — |
-| `/esq:work` | 5 | confirmed | 14.4k | 4m43s | 22.0k / 7m15s · n=5 · 2026-08-19 |
-
-Budgets are 1.5 times the historical median, rounded upward. The tool compares
-current confirmed subagent samples with those budgets; a breach needs
-interpretation, not an automatic product stop. Direct-session durations include
-human waits and are not compared. `esq:apply` is an internal worker label, not a
-slash command. Missing or provisional samples do not establish a cost claim.
+Read [CLAUDE.md](CLAUDE.md) for the project's goals and editing rules, and
+[docs/MAINTAINING.md](docs/MAINTAINING.md) for the audit, release and research tools.
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) describes how the pieces fit.
 
 ## License
 

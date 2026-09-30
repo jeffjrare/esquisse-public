@@ -34,7 +34,8 @@ official `claude plugin update` alone. Read `docs/ARCHITECTURE.md § Boundaries 
   research instruments (probes, measures, captures), reached only by `--lab`.
 - `tests/`: node suites discovered by convention. Product: `{cli,hooks,audit}`; lab: the rest. Each owns its `fixtures/`.
 - `docs/`: SPEC (what it does for users, `/esq:spec`), ARCHITECTURE (how it is built, `/esq:arch`), DECISIONS, BACKLOG, ROADMAP,
-  `epics/`, `plans/`, CONFORMANCE (formats the code parses), AUDIT (the reading pass). EVIDENCE, `evidence/`, `preparation/`,
+  `epics/`, `plans/`, CONFORMANCE (formats the code parses), AUDIT (the reading pass), MAINTAINING (audit, release and research tools;
+  its cost table is what `cost-budgets.mjs` reads). EVIDENCE, `evidence/`, `preparation/`,
   `baselines/`, PRIORITY-REVIEW and headless-trial are maintainer material that no skill or gate reads.
 
 ## Verification

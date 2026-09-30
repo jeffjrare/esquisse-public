@@ -1,4 +1,4 @@
-// The budget checker's own guard: the README table is the single source of the
+// The budget checker's own guard: the MAINTAINING.md table is the single source of the
 // ceilings, so a table shape it silently misreads would report ok on a group it
 // never compared. Every exit code the tool promises is asserted here against a
 // fixture, and the parser is asserted against a table it must not read (the
@@ -68,8 +68,8 @@ test('a table with no budget column at all is a finding, not an empty pass', () 
   assert.match(r.err, /no Budget column/);
 });
 
-test('the repo README parses, and every budget it carries sits on a confirmed row', () => {
-  const rows = parseBudgets(readFileSync(path.join(ROOT, 'README.md'), 'utf8'));
+test('the repo budget table parses, and every budget it carries sits on a confirmed row', () => {
+  const rows = parseBudgets(readFileSync(path.join(ROOT, 'docs', 'MAINTAINING.md'), 'utf8'));
   const budgeted = rows.filter((r) => r.budget);
   assert.ok(budgeted.length >= 5, `expected the confirmed rows to carry budgets, got ${budgeted.length}`);
   for (const row of budgeted) {
