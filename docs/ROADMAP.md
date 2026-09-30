@@ -11,15 +11,15 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ## Now
 
+## Next
+
+## Later
+
 ### autonomy-remainder
 **covers:** B-169, epic:esq-decides-implementation-detail
 **why now:** parked — specialist back-end guidance isn't needed yet: Tamialog (backend-api skill) and assets-prospection (data-model, database-safety, job-queue, security-rules) already cover back-end choices with their own skills; resume when a run asks or builds badly on something no project skill covers
 **acceptance:** A real selected case proceeds without an implementation-detail question, with evidence of correct behavior and design quality; guidance stays on demand and within a stated cost bound.
 **state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no plan; not started. parked — specialist guidance (the epic's last unbuilt part) has no unmet need: observed projects' own skills settle back-end choices, and the plugin already ships front-end/design guidance; resume when a run asks or builds badly on something no project skill covers. Standards Part 2 (domain defaults) stays empty.
-
-## Next
-
-## Later
 
 ### background-acceptance
 **covers:** B-085, B-087
@@ -51,9 +51,14 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 **acceptance:** Revalidate both the need and connector capability at selection time; the historical missing-connector claim is not a current market finding.
 **state:** <!-- GENERATED --> Open; historically parked, not executing.
 
+### sigpipe-site-check
+**covers:** B-078
+**why now:** cheap, certain defect check while larger work is parked
+**state:** <!-- GENERATED --> B-078 Open [med?]; no plan; not started.
+
 B-149 is Dropped in this public checkout: the historical briefs were intentionally omitted, so no local cleanup remains. This is not evidence that their findings were fixed; B-179 keeps the generic correction/disposition requirement.
 
-The remaining ranked backlog work has no committed implementation position: B-078 (one remaining SIGPIPE site), B-158 (a demonstrated dead reference before a new guard), B-141 (concrete contradictory decisions), B-130 (a needed minor/major release), B-096 (a repeated observable failure). Each keeps its individual current scope and earns selection through that trigger; they are not one project or a guard campaign.
+The remaining ranked backlog work has no committed implementation position: B-158 (a demonstrated dead reference before a new guard), B-141 (concrete contradictory decisions), B-130 (a needed minor/major release), B-096 (a repeated observable failure). Each keeps its individual current scope and earns selection through that trigger; they are not one project or a guard campaign.
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
