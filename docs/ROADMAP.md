@@ -11,11 +11,6 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ## Now
 
-### sigpipe-site-check
-**covers:** B-078
-**why now:** cheap, certain defect check while larger work is parked
-**state:** <!-- GENERATED --> B-078 Open [med?]; no plan; not started.
-
 ## Next
 
 ## Later
@@ -62,8 +57,8 @@ The remaining ranked backlog work has no committed implementation position: B-15
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-09-30 · sigpipe-site-check — B-078 (done)
 - 2026-09-30 · preparation-concision — B-182 (done: Dropped as accepted limit)
 - 2026-09-30 · verdict-under-mandate — B-190 (done)
 - 2026-09-29 · preparation-fidelity — B-189, B-188 (done)
 - 2026-09-29 · b181-closing — B-181 closed by re-scope: kept `/esq:plan` read-back item 6 (`538c7c8`) makes C1–C4 and C6 reliable (≥2/3); C5 → B-188, C7 → B-189. Fidelity-trial fix withdrawn (`a5e1666`). Evidence: `docs/preparation/2026-09-29-b181-variance.md`.
-- 2026-09-29 · durable-ui-evidence — B-076 (done)
