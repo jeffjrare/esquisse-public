@@ -110,3 +110,32 @@ None. The user delegated this class of call on 2026-09-29, recorded as the new d
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-30
+
+**Plan committed at:** 78812f7
+
+**Commits:** db82592, 6811111, b5254ba
+
+**Verified:** b5254ba8e674eda7c587636b7eaa574f5e076c26
+- `grep -c "a-measurement-verdict-is-settled-under-mandate" plugin/skills/plan/SKILL.md plugin/skills/build/references/decisions-and-backlog.md plugin/skills/land/SKILL.md`
+- `grep -c "^## D-a-measurement-verdict-is-settled-under-mandate " docs/DECISIONS.md`
+- `grep -c "Never drop a row here" plugin/skills/build/references/decisions-and-backlog.md`
+- `esq validate`
+- `./scripts/audit.sh`
+
+**What got built:** Plan, build and land each carry the run-set verdict rule where they act, citing D-a-measurement-verdict-is-settled-under-mandate. Plan states it with an attribution test before spending, build records it without handing back a disposition, and land routes a named lever or drops the row as an accepted limit.
+
+**Verification:**
+- (auto) grep -c a-measurement-verdict-is-settled-under-mandate in the three skill files — 1 each
+- (auto) grep -c '^## D-a-measurement-verdict-is-settled-under-mandate ' docs/DECISIONS.md — 1
+- (auto) grep -c 'Never drop a row here' decisions-and-backlog.md — 1
+- (auto) esq validate — valid: true, no findings
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), exit 0, 29 s
+
+**Surprises / decisions made during execution:** - Task 1.1's plan-dictated subject starts with `plan:`, a prefix build's reconciliation filters out as metadata. It is harmless here because the phase logged in the same run, but a future plan should not name an implementation commit `plan:`.
+- The land rule is a new bullet after the delivered/undelivered bullets, not a clause inside them, so the existing split-evidence choice still applies to rows without a verdict.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. B-190 is closed by this run. The rule stays unproved until the next B-182 run set exercises it.
