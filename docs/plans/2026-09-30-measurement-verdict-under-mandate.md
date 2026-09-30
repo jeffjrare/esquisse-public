@@ -6,6 +6,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 4ff8d8e6f20866c02e21ee2e33f055a88208028a
+
 ## Context
 B-189 needed three shipping units and a 🔴 at `/esq:land`. `docs/plans/2026-09-29-git-state-rule-alone.md` wrote its own
 keep/revert rule before spending: any criterion below 2/3 means revert. C6 fell from 2/3 to 1/3, but it fails the same way
