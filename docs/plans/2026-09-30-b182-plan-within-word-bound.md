@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 733d4585f3758528839768ecf58d3ffd54b6bba5
+
 ## Context
 On the retained Tamialog case (brief `2026-09-24-vitrine-fonctions-recentes-multi-membre`, 437 sources at
 `events-tracker` `33e750a1`), the prompt caps the proposal at 900 words. Every retained run overran it. The shipped
