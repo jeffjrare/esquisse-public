@@ -73,4 +73,4 @@ The CLI creates `docs/DECISIONS.md` from the standard header when it is missing,
    - **Partly delivered, or verified only by a manual step still unconfirmed** → leave it as it stands and report one zone-3 line naming what is missing. Partial completion is not completion.
    - Never drop a row here, and never close one to make a later gate pass.
 
-A row you left open is not a request to the user unless a real decision remains — whether the missing part is still wanted. Then it is one NEEDS YOU line with its options; otherwise it is a fact in zone 3. An unclosed row costs far less than a wrongly-closed one.
+A row you left open is not a request to the user unless a real decision remains — whether the missing part is still wanted. Then it is one NEEDS YOU line with its options; otherwise it is a fact in zone 3. An unclosed row costs far less than a wrongly-closed one. A row the plan's run-set verdict left unmet is not such a decision: record the verdict, its one-line reason and any named next lever as a zone-3 fact and in the log's handoff, and never write a user disposition for it — land disposes of it (`D-a-measurement-verdict-is-settled-under-mandate`).
