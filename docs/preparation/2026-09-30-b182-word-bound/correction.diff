@@ -1,0 +1,18 @@
+diff --git a/plugin/skills/plan/SKILL.md b/plugin/skills/plan/SKILL.md
+index 8202994..6992b8b 100755
+--- a/plugin/skills/plan/SKILL.md
++++ b/plugin/skills/plan/SKILL.md
+@@ -252,6 +252,13 @@ each fact once and reference it elsewhere. Do not narrate the investigation, fil
+ sections with generic advice, invent alternatives, or repeat the plan in the final
+ response. Keep a written plan's required headings and parsed fields intact. Cut repeated rationale, not acceptance or implementation detail.
+ 
++When the invocation bounds the response's length, the bound is a requirement: budget
++before writing, never trim the end. Place protected content first: the brief's
++replace/remove instructions or the conflict it names, its quoted copy in every language
++written, acceptance, and each verification command with its property. The rest shares
++what remains. Mark a verified fact by its `path:line` where it is used, never in a
++separate inventory of findings.
++
+ ## Verification discipline
+ 
+ **Every step names an observable property and is tagged `(auto)` or `(manual)`.** Tests passing is evidence only for what they actually check.
