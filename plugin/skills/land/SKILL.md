@@ -65,6 +65,7 @@ List each owed row's id, status and source. Membership is the plans sharing Bran
   `esq backlog set-status <id> Done --by <delivering-plan-slug> --resolution "<delivery and verification citation>"`.
   The canonical value is `Done`; the CLI writes Status, provenance and Resolution together. Never call the user-reserved backlog skill.
 - Clearly undelivered/partial → keep open and name `/esq:plan implement <id>: <summary>`. Only evidence genuinely split after research earns a delivered/not-delivered user choice; state the split. No closure from inference or to clear a gate.
+- A row whose unit plan recorded a run-set verdict follows it, never a delivered/not-delivered choice (`D-a-measurement-verdict-is-settled-under-mandate`): a named next lever → `/esq:plan implement <id>: <lever>`; no lever within the stated bound → `esq backlog set-status <id> Dropped --reason "accepted limit: <verdict citation>"`, in the same backlog commit as proved rows.
 
 Close all proved rows in ordered CLI calls, then one commit:
 `git add docs/BACKLOG.md && git commit -m "backlog: close <n> row(s) delivered by <slug>"`.
