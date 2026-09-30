@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-a-measurement-verdict-is-settled-under-mandate | 2026-09-30 | func | escalation | A keep/revert verdict after a stated run set, and the disposition of the row it decides, is applied under mandate with a one-line reason: only a fall the edit can cause is a regression, and further paid runs remain the user's authorization. | Active |
 | D-keep-git-state-rule-despite-c6 | 2026-09-29 | func | esq-plan | Keep the observed-Git-state rule (44f5ff6) in /esq:plan and accept C6 at 1/3, with no further run set. | Active |
 | D-codex-adversary-opt-in-input-only | 2026-09-29 | arch | plan | With ESQ_CODEX=on, /esq:plan runs `codex exec -s read-only` twice (blind counter-plan in the background, pre-mortem before the commit) and judges each answer itself; unset, nothing changes. | Active |
 | D-bounded-correction-exit-preserves-proof | 2026-09-24 | func | corrective-loop | Exhaustion limits new plans; safe prospective fixes and explicit dispositions preserve proof and owe review | Active |
@@ -5413,3 +5414,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: shell-less plans stop inventing Git state. Accepted: ~95 words per /esq:plan load, and a no-regression rule overridden for C6 on this change only.
 **Conséquences:** A later C6 drop is not evidence against this rule; C6 is its own fragility, to be fixed on its own. The pre-written no-regression rule still applies to other changes.
 **Alternatives rejetées:** A third 3-run set (≈3.6 USD list price, cannot separate noise at n = 3); dropping B-189 as a known limit (loses a 6/6 fix).
+
+## D-a-measurement-verdict-is-settled-under-mandate — A measurement verdict is settled under mandate
+
+**Scope:** func
+**Topic:** escalation
+**Date:** 2026-09-30
+**Statut:** Active
+**Fondement:** user — delegated in chat on 2026-09-29 (B-189 keep/revert: "you decide"; B-188 fix-or-drop: "jtai demandé de décider tantot ce genre de trucs")
+
+**Contexte:** B-189 cost three shipping units and a 🔴 at /esq:land because a plan's pre-written keep/revert rule reverted a fix on a C6 fall the edit could not cause, and the resulting disposition was put to the user.
+**Décision:** A keep/revert verdict after a stated run set, and the disposition of the row it decides, is applied under mandate with a one-line reason: only a fall the edit can cause is a regression, and further paid runs remain the user's authorization.
+**Raison:** Reading measured evidence is diagnosis, not a user preference, and the user has said three times they do not want to arbitrate it. Counting non-attributable falls as regressions reverts demonstrated fixes on noise at n = 3.
+**Tradeoff:** Gained: no user stop on evidence reading, and no revert on a fall the baseline arm shows identically. Accepted: roughly 150 words across plan, build and land, and attribution judgments that must name a baseline arm or mechanism.
+**Conséquences:** Plan states the rule with its attribution test before spending; build records the verdict and never hands back its disposition; land routes a named next lever to /esq:plan or drops the row as an accepted limit citing the verdict. A spend beyond the stated bound, or a user-visible product tradeoff, still asks.
+**Alternatives rejetées:** Editing the shared ask-altitude block (absent from build and land, where the stops happened); an esq verdict CLI (attribution is judgment, and no second consumer exists).
