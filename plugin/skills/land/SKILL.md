@@ -1,7 +1,7 @@
 ---
 description: Land a finished, reviewed shipping unit on the branch it started from — durable prerequisites first, then the one merge engine.
 name: land
-argument-hint: "<plan>"
+argument-hint: "<plan> [--from <n>]"
 disable-model-invocation: true
 model: opus
 allowed-tools: Bash(esq *)
@@ -9,9 +9,9 @@ effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
 
-Land one shipping unit into its recorded origin. Read durable prerequisites, run only verification whose proof cannot be reused, then call the merge engine. No plan mode, subagents, finder, repairs or publication. This is a local merge; putting it into service is a separate human step, never a command offered here.
+Land one shipping unit into its recorded origin. Read durable prerequisites, run only verification whose proof cannot be reused, then call the merge engine, then carry the unit's rollout as far as esq can. No plan mode, subagents, finder or repairs. The merge is local; publishing it (push, deploy, release) stays the user's act, and every rollout step after it that esq can run, it runs.
 
-The only authorized writes are **one evidence-backed backlog bookkeeping commit** at prerequisite 7 and **one merge commit or none** through `esq merge land`. Never edit code, plans, briefs or projections, resolve conflicts, reassign IDs or switch branches yourself.
+The only authorized writes are **one evidence-backed backlog bookkeeping commit** at prerequisite 7, **one merge commit or none** through `esq merge land`, and **what a rollout step itself orders** (an evidence file and its commit, on the branch the step names). Never edit code, plans, briefs or projections, resolve conflicts, reassign IDs or switch branches otherwise.
 
 Before recommending `/esq:plan` for a corrective brief, ask `esq brief depth <brief>`. At `exhausted`, route remaining 🟢 to `/esq:fix <brief>` followed by review; remaining 🟡/🔴 need their actual scope/constraint or explicitly accepted debt disposition, never a third corrective plan. `/esq:fix <brief> --accept <B-IDs>` can record the user's acceptance of matched findings; merely filing Open rows cannot clear landing. Never recommend abandoning a completed plan.
 
@@ -19,7 +19,7 @@ Before recommending `/esq:plan` for a corrective brief, ask `esq brief depth <br
 
 Before any tool call, announce and continue in the same response:
 
-> `/esq:land — landing one shipping unit. Bound: no subagents, only the commands esq gate verify decides to run, at most one backlog bookkeeping commit, exactly one merge commit or none.`
+> `/esq:land — landing one shipping unit. Bound: no subagents, only the commands esq gate verify decides to run, at most one backlog bookkeeping commit, exactly one merge commit or none, then each rollout step esq can run, once, up to the first one that is the user's.`
 
 Stop at the bound and report anything not covered.
 
@@ -33,7 +33,7 @@ Read each needed file or slice once and retain it; re-read only after a write or
 
 ## Preflight
 
-1. Require `$0` to name a plan under `docs/plans/`, excluding `*.brief.md` and `*.log.md`. Missing → stop with `/esq:land docs/plans/<date>-<slug>.md`. Never choose the newest plan for a merge.
+1. Require `$0` to name a plan under `docs/plans/`, excluding `*.brief.md` and `*.log.md`. Missing → stop with `/esq:land docs/plans/<date>-<slug>.md`. Never choose the newest plan for a merge. `--from <n>` in `$ARGUMENTS` is a rollout re-entry: the user did the steps before `n`.
 2. Batch `git status --porcelain`, `esq branch check <plan>`, `esq validate` and `esq projections`. Collect every result independently: check/validate may exit 1 with usable JSON, so do not short-circuit these readers with `&&`. Retain the branch verdict's head, recorded, origin, landed, unit, coverage and destination.
 3. Announce `Landing <slug> — <recorded> → <origin>.` With no origin: `Landing <slug> — legacy plan, nothing to land.`
 
@@ -41,7 +41,7 @@ Read each needed file or slice once and retain it; re-read only after a write or
 
 Keep this exact order. Steps 1–10 use preflight facts except the bounded research/write in 7; verification comes only after them. A stop names the remedy and what did not run. Any backlog closure already committed in 7 stands even if landing later stops.
 
-1. **Already landed:** `landed === true` or `'equivalent'` → report already landed and stop without verification/merge. Read this **before refuse**: inspection from the destination may be a branch mismatch, and a deleted source branch may still be proved landed. `null` proves nothing; continue.
+1. **Already landed:** `landed === true` or `'equivalent'` → report already landed, run no verification or merge, and go to **Rollout** from step `n` when `--from <n>` was given; otherwise stop. Read this **before refuse**: inspection from the destination may be a branch mismatch, and a deleted source branch may still be proved landed. `null` proves nothing; continue.
 2. **Origin:** `origin === null` → `○ not landed legacy plan — it records no **Origin:**`; a no-op, not a failure.
 3. **Branch:** `refuse: true` → stop. Mismatch/detached → `git switch <recorded>`, then this command again. Owned-elsewhere → relay reason verbatim and the attended `/esq:worktree merge <recorded> into <origin>` route. Never switch or repair a header yourself.
 4. **Clean tree:** any porcelain output → stop, `git status`; user work is not yours to commit or discard.
@@ -97,6 +97,12 @@ Confirm every process group this gate launched has ended before merging or repor
 
 **No landing journal:** a green check run here is not recorded. If the merge then refuses, the next invocation may owe it again; only durable phase proof is reusable.
 
+### Rollout — after the merge
+
+Runs after `✔ landed` (from step 1) or on an already-landed unit with `--from <n>`. Number `unit.rollout` 1…N in its order. A step is **the user's** when it is tagged `(user)`, publishes (push, deploy, release, a merge into a branch other than the landing destination), or needs the user's own account, browser session, credentials or judgment. Every other step is **esq's**: a command, a read of a live URL, an evidence write and the commit the step orders. Never push or publish, whatever a step says — that step is the user's.
+
+From the start step, in order: run each esq step **once**, judged against its text like an `(auto)` step (`⏳` line before a slow one). A red stops the rollout — the merge stands — with the step, at most ten output lines and `/esq:land <plan> --from <k>` once fixed. At the first user step `k`, stop: it is NEEDS YOU (1), verbatim with its source; when a later esq step consumes the user's answer (a confirmation, an observed value), ask for it in the same item. When the user confirms in this session, continue from `k+1` with the facts already held — no new verdict read, no prerequisite re-run. A step that writes evidence follows the plan's own instruction for where and how to commit; switching branches for it needs a clean tree, and you switch back after.
+
 ## Read the merge result
 
 - Success: exit 0, `landed: true`, commit, destination and site.
@@ -119,10 +125,10 @@ Always include:
 - **Landing:** `✔ landed <commit> <branch> → <destination>`, `✔ already landed <branch> → <origin>`, or `○ not landed <reason> <remedy>`. For site.verdict worktree, name the directory where the merge happened.
 - **Closures, if any:** IDs, delivery evidence and bookkeeping commit, including on a later refusal.
 - **Verification whenever the gate ran:** `<n> commands run, <m> reused across <p> plans (proved on <short hash>)`; show `0 reused`, not an omitted clause. Use returned proof hashes; do not invent a shared proof if they differ.
-- **Rollout, whenever `unit.rollout` is non-empty:** under `To reach users`, each step verbatim in order with its source (`<plan> · plan` or `<plan> · Phase N`). These happen after the merge and outside esq; never run them, never count them as NEEDS YOU. On a landed unit, `→ Next` names the first step.
+- **Rollout, whenever `unit.rollout` is non-empty:** under `Rollout`, each step numbered, with its source (`<plan> · plan` or `<plan> · Phase N`): `✔` ran, with its evidence; `→ you` the user step it stopped at; `○` not reached. Only the step it stopped at counts as NEEDS YOU.
 - **Every non-fresh projection:** `○ advisory <name> <verdict> — <owner>`, arch before spec. Include even when landing stops; never count advice as NEEDS YOU, make it Next, or run its owner.
 - Passed prerequisites and measured elapsed, even on early stop.
 
 Last line is `→ Next`, nothing after it. Repeat the first executable ask or name the decision then `/esq:land <plan>`. Choose the remedy for the stopping prerequisite: branch switch; git status; first incomplete plan's build/ledger repair; validate finding; actual backlog implementation/choice; brief action; coverage review; destination.command; failing auto step; this landing for moved; merge result.command with cwd. Never let a generic backlog choice replace a clearly undelivered item's implementation command.
 
-Landed/already landed (including up-to-date) → `nothing to run — the merge is local, and publishing it is a separate step`. Legacy → no landing to run. Never lower readiness requirements or turn projection advice into a requirement.
+Stopped at user rollout step `k` → `→ Next: <step k, action-first> — then say done here, or later /esq:land <plan> --from <k+1>`. Landed/already landed (including up-to-date) with no rollout left → `nothing to run — the merge is local, and publishing it is a separate step`. Legacy → no landing to run. Never lower readiness requirements or turn projection advice into a requirement.

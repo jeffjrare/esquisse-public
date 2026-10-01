@@ -98,7 +98,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:build <plan>` | Implement and verify one phase, then stop | Task commits and an execution-log entry |
 | `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, correctness, security, UX and design | Review findings; a corrective brief when needed |
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings |
-| `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal; never a push |
+| `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
 | `/esq:work [item-or-text] [route]` | Investigate one item; do it now if trivial, otherwise recommend the method | Code commit and backlog close for small work; otherwise the next command |
 | `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
@@ -179,7 +179,10 @@ reuses verification that still holds and runs only what is owed, then merges
 locally. Conflicts that need judgment come back to you with a recovery action.
 When the feature needs more than a merge to reach users — a migration, an
 environment variable, a restart — the plan's rollout steps are listed in the
-landing report under **To reach users**. esquisse shows them; it never runs them.
+landing report under **Rollout**, and the landing runs every step it can itself.
+It stops only at a step that is yours — a push, a deploy, an action in your own
+accounts — and once you have done it, `/esq:land <plan> --from <n>` (or saying
+done in the same session) carries on. esquisse never pushes.
 
 **Manual checks** need an actual observation of the stated behavior. An
 unconfirmed manual step leaves the phase paused; resume with `/esq:build <plan>`,

@@ -226,7 +226,10 @@ shipped feature. Keep the promised outcome intact when splitting the work.
 <!-- Only when merging is not enough for users to get the result; omit the section otherwise.
 One imperative line per step, in order: a migration to run, an env var or secret to set,
 config, a restart, a backfill, a flag to flip, an install, a third-party setup.
-`/esq:land` shows these lines verbatim after the merge. -->
+`/esq:land` runs each step itself after the merge, up to the first one tagged `(user)`:
+tag only what needs the user — publishing (push, deploy, release) or their own accounts.
+Write every other step so esq can run and judge it: a command with its pass criterion,
+the evidence to write and where it is committed. Prefer a command to a browser check. -->
 - <step>
 
 ## Risks
@@ -284,8 +287,8 @@ Read the written plan once and correct these yourself:
    after shipping belongs among the outstanding observations, not a promised green
    from code completion. Preserve the user's actual acceptance condition.
 3. Name widened public schemas/data and existing consumers; put any install, migration,
-   config, restart or release the result needs to reach users in `## Rollout`; do not
-   silently promise activation.
+   config, restart or release the result needs to reach users in `## Rollout`, tagging
+   `(user)` only the steps esq cannot run; do not silently promise activation.
 4. Try to falsify the recommendation with a legitimate existing case from the inspected
    code or data, not just the defect it fixes. Trace the proposed rule through both;
    correct it if it rejects valid behavior or changes the meaning of a source field.

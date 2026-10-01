@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-land-runs-the-rollout-it-can | 2026-10-01 | prod | safe-shipping | After the merge `/esq:land` runs every rollout step esq can, once and in order, and stops only at the first step that is the user's (`(user)`, a push, deploy or release, their own accounts); the user's confirmation in the session or `/esq:land <plan> --from <n>` resumes after it, with no rollout state recorded | Active |
 | D-shipped-since-derive-is-read-from-git | 2026-10-01 | arch | roadmap | `esq state` reports `roadmap.shipped.sinceDerive` as the Shipped lines (keyed `date · slug`) absent from `docs/ROADMAP.md` at the newest commit whose subject starts `roadmap: derive`, or null when none exists; the notice falls back to the retained count on null. | Active |
 | D-a-measurement-verdict-is-settled-under-mandate | 2026-09-30 | func | escalation | A keep/revert verdict after a stated run set, and the disposition of the row it decides, is applied under mandate with a one-line reason: only a fall the edit can cause is a regression, and further paid runs remain the user's authorization. | Active |
 | D-keep-git-state-rule-despite-c6 | 2026-09-29 | func | esq-plan | Keep the observed-Git-state rule (44f5ff6) in /esq:plan and accept C6 at 1/3, with no further run set. | Active |
@@ -5445,3 +5446,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: no marker for the model to maintain and no drift. Accepted: the derive commit subject becomes a parsed format, and a no-op derive (no commit) leaves the older baseline.
 **Conséquences:** Changing Mode A's commit subject is a contract change (CONFORMANCE). The notice is silent right after a derive and returns after three new shipments.
 **Alternatives rejetées:** A marker or cumulative counter in ROADMAP.md that derive resets (model-maintained state, forgettable); prose date comparison (day-granular, re-reads history every run).
+
+## D-land-runs-the-rollout-it-can — The landing runs the rollout it can
+
+**Scope:** prod
+**Topic:** safe-shipping
+**Date:** 2026-10-01
+**Statut:** Active
+**Fondement:** user — 2026-10-01: « esq is giving todo to the users which it could make more simple… the user need to be the one that push or tell to push, but esq should be ready then to finish and complete the validation »
+
+**Contexte:** `/esq:land` printed a unit's rollout as a five-step *To reach users* list and never ran any of it, so a landing ended with a production audit command, a docs evidence write and its commit handed to the user, when only the push and an action in their own search-engine accounts needed them.
+**Décision:** After the merge, and on an already-landed unit called with `--from <n>`, the landing runs each step of `unit.rollout` that esq can, once, in order, judged against its text. A step is the user's when tagged `(user)`, when it publishes (push, deploy, release, a merge into a branch other than the destination), or when it needs the user's own accounts, browser session, credentials or judgment; the landing stops there with that one step as its only ask. A confirmation in the same session continues from the next step on the facts already held; `--from <n>` resumes in a later one. `/esq:plan` tags `(user)` steps and writes the rest so esq can run and judge them.
+**Raison:** Never block: a step reachable by running a command is not the user's to do. The push stays the user's (D-esquisse-never-pushes), so the landing has to stop there — but only there.
+**Tradeoff:** Gained: one ask per user act, and the evidence step closes itself. Accepted: no rollout state is recorded, so `--from` is the user's word for where they are, and a re-entry before the step it names re-runs nothing.
+**Conséquences:** A rollout step is judged like an `(auto)` step; a red stops the rollout with the merge standing. The CLI still only extracts `unit.rollout`. A step that writes evidence follows the plan's own commit instruction.
+**Alternatives rejetées:** Recording each step's completion in the plan (a post-landing write to a landed file, on a branch the landing does not own); letting the landing push when told (D-esquisse-never-pushes); keeping the list and naming steps the user could paste (still a to-do the run could settle).
