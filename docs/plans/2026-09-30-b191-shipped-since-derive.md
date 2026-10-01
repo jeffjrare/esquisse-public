@@ -63,3 +63,28 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-09-30
+
+**Plan committed at:** cca6e71
+
+**Commits:** 796a5e4, 5ed0ee0
+
+**Verified:** 5ed0ee079e41da88ab2a85dd37171beb13c623d6
+- `node -e "import('./plugin/lib/cli.mjs').then(async (m) => { const s = (await m.state('.')).roadmap.shipped; console.log(JSON.stringify(s)); if (s.sinceDerive !== 0) process.exit(1); })"`
+- `./scripts/audit.sh`
+
+**What got built:** `esq state` answers `roadmap.shipped: { retained, sinceDerive }`. `sinceDerive` counts the `## Shipped` lines (keyed on `date · slug`) that the newest `roadmap: derive` commit's copy of docs/ROADMAP.md did not hold, and is null when there is no such commit. `/esq:roadmap`'s re-derive notice now counts `sinceDerive ?? retained` plus this run's evictions, and Mode A never prints it.
+
+**Verification:**
+- (auto) node -e state(...).roadmap.shipped on this repo — {"retained":5,"sinceDerive":0}, exit 0
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), exit 0, ~30 s wall-clock; includes tests/cli/roadmap-shipped.test.mjs (7 cases) and the new P-05 conformance clauses
+
+**Surprises / decisions made during execution:** - The CONFORMANCE scenario (P-05) also got two `need` clauses in `scripts/check-conformance.sh`. The plan's file list left that script out, but CONFORMANCE says it is the scenario's evaluator: one clause pins the Shipped line template `- <today> · <slug> — ` and the other the `roadmap: derive` commit subject in the roadmap skill.
+- The derive commit is found by splitting each `%H %s` line on its first space rather than at a fixed 40-character offset, so a SHA-256 repository also works.
+- Mutation check: dropping the subject filter makes case 6 fail (a body line `roadmap: derive …` would have become the baseline). The source was restored and the tree confirmed clean.
+- The tests use the `state()` export directly, with real git and ESQ_TEST_GIT_ROOT unset. Under the test seam, `git show` throws and so answers null, which leaves the existing projection-state tests unchanged.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. The skill side (Mode A silent, `??` rather than `||`, evictions counted once) is prose only; it can be observed on the next bare `/esq:roadmap` after a derive.
