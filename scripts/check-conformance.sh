@@ -141,6 +141,10 @@ need P-03 review '-fixes.brief.md' 'the same suffix on the other finder, since e
 # --- `/esq:backlog` writes the row `backlogTable` parses ---------------------
 need P-04 backlog '| B-NNN | <today>' 'the quick-add row shape the backlog table parser reads, ID column first'
 
+# --- `/esq:roadmap` writes the Shipped line and derive subject `roadmapState` counts from
+need P-05 roadmap '- <today> · <slug> — ' 'the Shipped line shape `roadmapState` keys on `date · slug` for `roadmap.shipped`'
+need P-05 roadmap 'git commit -m "roadmap: derive ' 'the Mode A commit subject `roadmapState` takes as the `sinceDerive` baseline'
+
 # --- the pass ---------------------------------------------------------------
 # Every target file is read once into memory and every clause is answered with
 # index(), which is the fixed-string, line-scoped compare `grep -F` performed.

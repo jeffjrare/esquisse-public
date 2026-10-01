@@ -122,9 +122,9 @@ Move done entries to Shipped as `- <today> · <slug> — <covered ids> (done)`; 
 
 Report, without fixing, a needs target positioned below its dependent and a blocked Now entry. Offer the exact edit that would resolve each contradiction; ordering remains the user's call.
 
-Report this run's evictions and current blocked count. If the retained Shipped tail plus this run's evictions totals **three or more** (count each once, before trimming), say: `Order derived against an older state — /esq:roadmap plan to re-derive.` This is a notice, never authorization to re-derive.
+Report this run's evictions and current blocked count. Count what shipped since the last derive: `esq state`'s `roadmap.shipped.sinceDerive`, or its `retained` when `sinceDerive` is `null` (`??`, never `||`: `0` is an answer), plus this run's evictions, each counted once, before trimming. At **three or more**, say: `Order derived against an older state — /esq:roadmap plan to re-derive.` This is a notice, never authorization to re-derive. Mode A never prints it: its own run is the derive.
 
-If the file changed, commit only `docs/ROADMAP.md`: `roadmap: refresh state (<what moved>)`. No change → no commit. In A/C reuse these refresh rules, but leave the commit to that mode.
+If the file changed, commit only `docs/ROADMAP.md`: `roadmap: refresh state (<what moved>)`. No change → no commit. In A/C reuse these refresh rules, except the re-derive notice in A, but leave the commit to that mode.
 
 ## Mode C — Edit
 

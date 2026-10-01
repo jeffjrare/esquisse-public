@@ -54,3 +54,11 @@ named some other way resolves to nothing, silently.
 `/esq:backlog`'s quick-add writes `| B-NNN | <today> | …`. `backlogTable` reads the ID column first
 and every consumer filters on the `Status` cell; a row that does not start this way is invisible to
 the whole set.
+
+## Scenario P-05 — the Shipped line and the derive subject `esq state` counts from
+
+`/esq:roadmap` writes Shipped entries as `- <today> · <slug> — …` and commits Mode A under the
+subject `roadmap: derive …`. `roadmapState` keys each `## Shipped` line on its `date · slug`, finds
+the newest commit whose subject opens with `roadmap: derive`, and answers `roadmap.shipped.sinceDerive`
+from that commit's copy of the file. Rename either and the refresh notice silently falls back to the
+whole retained tail, nagging after every derive (B-191).

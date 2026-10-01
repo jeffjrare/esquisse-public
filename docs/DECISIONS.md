@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-shipped-since-derive-is-read-from-git | 2026-10-01 | arch | roadmap | `esq state` reports `roadmap.shipped.sinceDerive` as the Shipped lines (keyed `date · slug`) absent from `docs/ROADMAP.md` at the newest commit whose subject starts `roadmap: derive`, or null when none exists; the notice falls back to the retained count on null. | Active |
 | D-a-measurement-verdict-is-settled-under-mandate | 2026-09-30 | func | escalation | A keep/revert verdict after a stated run set, and the disposition of the row it decides, is applied under mandate with a one-line reason: only a fall the edit can cause is a regression, and further paid runs remain the user's authorization. | Active |
 | D-keep-git-state-rule-despite-c6 | 2026-09-29 | func | esq-plan | Keep the observed-Git-state rule (44f5ff6) in /esq:plan and accept C6 at 1/3, with no further run set. | Active |
 | D-codex-adversary-opt-in-input-only | 2026-09-29 | arch | plan | With ESQ_CODEX=on, /esq:plan runs `codex exec -s read-only` twice (blind counter-plan in the background, pre-mortem before the commit) and judges each answer itself; unset, nothing changes. | Active |
@@ -5429,3 +5430,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: no user stop on evidence reading, and no revert on a fall the baseline arm shows identically. Accepted: roughly 150 words across plan, build and land, and attribution judgments that must name a baseline arm or mechanism.
 **Conséquences:** Plan states the rule with its attribution test before spending; build records the verdict and never hands back its disposition; land routes a named next lever to /esq:plan or drops the row as an accepted limit citing the verdict. A spend beyond the stated bound, or a user-visible product tradeoff, still asks.
 **Alternatives rejetées:** Editing the shared ask-altitude block (absent from build and land, where the stops happened); an esq verdict CLI (attribution is judgment, and no second consumer exists).
+
+## D-shipped-since-derive-is-read-from-git — Shipped since derive is read from the last derive commit
+
+**Scope:** arch
+**Topic:** roadmap
+**Date:** 2026-10-01
+**Statut:** Active
+**Fondement:** mandate — CLAUDE.md rule 3: the CLI owns structure, the model owns judgment
+
+**Contexte:** The roadmap refresh notice counted the whole retained Shipped tail, which the derive preserves, so it fired right after every derive (B-191).
+**Décision:** `esq state` reports `roadmap.shipped.sinceDerive` as the Shipped lines (keyed `date · slug`) absent from `docs/ROADMAP.md` at the newest commit whose subject starts `roadmap: derive`, or null when none exists; the notice falls back to the retained count on null.
+**Raison:** The derive already commits under a fixed subject, so git holds the boundary without a new file format or writer obligation. Dates are day-granular and cannot separate same-day derive and shipments.
+**Tradeoff:** Gained: no marker for the model to maintain and no drift. Accepted: the derive commit subject becomes a parsed format, and a no-op derive (no commit) leaves the older baseline.
+**Conséquences:** Changing Mode A's commit subject is a contract change (CONFORMANCE). The notice is silent right after a derive and returns after three new shipments.
+**Alternatives rejetées:** A marker or cumulative counter in ROADMAP.md that derive resets (model-maintained state, forgettable); prose date comparison (day-granular, re-reads history every run).
