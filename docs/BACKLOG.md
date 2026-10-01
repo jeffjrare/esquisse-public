@@ -207,7 +207,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-188 | 2026-09-29 | ✨ improvement | hi? |  | Grill-plan copy keeps every qualifier across FR/EN (e.g. powdered-formula) | observed: 2026-09-29-b181-variance-then-fix Phase 2 · Planned by 2026-09-29-git-state-and-copy-fidelity · Dropped: accepted as a known limit (user-delegated, 2026-09-29): the only tested fix regressed C1/C6 and was reverted; blocking main on one dropped qualifier is not worth it |  |  | Dropped |
 | B-189 | 2026-09-29 | 🐛 bug | hi? |  | Preparation must not assert unobserved Git state (e.g. detached HEAD) | observed: 2026-09-29-b181-variance-then-fix Phase 2 · Planned by 2026-09-29-git-state-and-copy-fidelity · Planned by 2026-09-29-git-state-rule-alone · Planned by 2026-09-29-keep-git-state-rule · Done by 2026-09-29-keep-git-state-rule |  |  | Done |
 | B-190 | 2026-09-29 | 🐛 bug | hi |  | Measurement verdicts (keep/revert after a run set) gate delivery and reach the user as a decision instead of being settled under mandate | observed: 2026-09-29-keep-git-state-rule — B-189 took 3 units and a user 🔴 after an n=3 revert rule misfired · Planned by measurement-verdict-under-mandate · Done by measurement-verdict-under-mandate | esq-decides-implementation-detail |  | Done |
-| B-191 | 2026-10-01 | 🐛 bug | med? | 1600 | Roadmap refresh notice fires on retained Shipped tail even right after a derive | work |  |  | Open |
+| B-191 | 2026-10-01 | 🐛 bug | med? | 1600 | Roadmap refresh notice fires on retained Shipped tail even right after a derive | work · Planned by 2026-09-30-b191-shipped-since-derive |  |  | Planned |
 
 ---
 
