@@ -24,12 +24,20 @@ function deny() {
   };
 }
 
+// A command that only *reads* a plugin file (codex's `--output-schema <refs>/…`) beside a
+// mutation elsewhere (`rm -f "$d/…"` under .git) is not an edit of the cache.
+const TAINT = /^\s*(cd|pushd|for)\b|^\s*(export\s+)?[A-Za-z_]\w*=/;
+
 // A shell command reaches plugin files either by absolute path or by cd-ing near the
-// root and using a relative `plugin/...` path — match both, mutations only.
+// root and using a relative `plugin/...` path — match both, mutations only. Deny when one
+// simple command both cites the plugin and mutates, or when a `cd`, loop or assignment
+// carries the plugin path to a mutation further on.
 function bashTouchesPlugin(command, pluginRoot) {
-  const cites = command.includes(pluginRoot) || command.includes(canonical(pluginRoot))
-    || (command.includes(path.dirname(pluginRoot)) && /(^|[\s'"/=])plugin\//.test(command));
-  return cites && MUTATION.test(command);
+  const cites = text => text.includes(pluginRoot) || text.includes(canonical(pluginRoot))
+    || (text.includes(path.dirname(pluginRoot)) && /(^|[\s'"/=])plugin\//.test(command));
+  if (!cites(command) || !MUTATION.test(command)) return false;
+  const segments = command.replace(/\\\n/g, ' ').split(/&&|\|\||;|\n/);
+  return segments.some(segment => cites(segment) && (MUTATION.test(segment) || TAINT.test(segment)));
 }
 
 export function protectInstalled(input, environment = process.env) {

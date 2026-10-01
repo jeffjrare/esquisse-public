@@ -53,6 +53,17 @@ test('bash mutations of the installed cache are denied, reads and dev-tree edits
   assert.equal(bash('grep -n snapshot /config/plugins/cache/esquisse/esq/1.0/skills/status/SKILL.md'), null);
   assert.equal(bash('sed -i s/a/b/ /work/app/src/index.js'), null);
 
+  // /esq:plan's Codex counter-plan reads a schema from the plugin and clears its own output under .git.
+  const codex = 'd="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/codex-x-counter.json" && \\\n'
+    + 'timeout 900 codex exec -s read-only --output-schema "/config/plugins/cache/esquisse/esq/1.0/skills/plan/references/codex-counter-plan.schema.json" - <<\'PROMPT\'\ngoal\nPROMPT';
+  assert.equal(bash(codex), null);
+  const carried = [
+    'd=/config/plugins/cache/esquisse/esq/1.0 && rm -rf "$d/skills"',
+    'for f in /config/plugins/cache/esquisse/esq/1.0/skills/*; do rm "$f"; done',
+    'ls /config/plugins/cache/esquisse/esq/1.0 | xargs rm'
+  ];
+  for (const command of carried) assert.equal(bash(command)?.hookSpecificOutput.permissionDecision, 'deny', command);
+
   const dev = protectInstalled(
     { cwd: '/work/esquisse', tool_name: 'Bash', tool_input: { command: 'sed -i s/a/b/ /work/esquisse/plugin/skills/status/SKILL.md' } },
     { CLAUDE_PROJECT_DIR: '/work/esquisse', CLAUDE_PLUGIN_ROOT: '/work/esquisse/plugin' }
