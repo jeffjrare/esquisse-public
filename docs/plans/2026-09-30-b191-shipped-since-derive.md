@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 04f5bee3aa4732317aabbd40dec90754437fa097
+
 ## Context
 `/esq:roadmap`'s bare refresh prints `Order derived against an older state — /esq:roadmap plan to re-derive.` when "the retained Shipped tail plus this run's evictions totals three or more" (`plugin/skills/roadmap/SKILL.md:125`). Mode A keeps the previous Shipped tail (line 80), and the tail holds five lines, so once five entries have shipped every refresh nags, including the one right after a derive. Real case: derive `11a445e` (2026-09-30) committed a 5-line tail, and a refresh straight after it counts 5 ≥ 3. The notice is computed by the model from prose. Nothing records which Shipped lines the last derive already took into account. B-191 is the backlog row.
 
