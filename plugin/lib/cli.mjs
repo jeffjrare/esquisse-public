@@ -1958,7 +1958,34 @@ async function roadmapState(repository, lookup) {
     const ids = [...new Set(item.covers?.match(/\bB-\d+\b/g) ?? [])];
     item.live = ids.map(lookup);
   }
-  return { file, head, entries, freshness: 'unassessed' };
+  return { file, head, entries, freshness: 'unassessed', shipped: shippedSinceDerive(repository, file, text) };
+}
+
+// The `## Shipped` lines as `date · slug` keys: the prose after the slug may be edited without the
+// entry becoming new.
+function shippedKeys(text) {
+  const keys = [];
+  let inShipped = false;
+  for (const line of text.split('\n')) {
+    if (/^## /.test(line)) { inShipped = /^## Shipped\s*$/.test(line); continue; }
+    const match = inShipped && line.match(/^- (\d{4}-\d{2}-\d{2}) · (\S+)/);
+    if (match) keys.push(`${match[1]} · ${match[2]}`);
+  }
+  return keys;
+}
+
+// What the refresh notice counts (B-191): Shipped entries the last derive did not already hold. The
+// baseline is the newest commit whose subject — `--grep` also matches a body line — opens with Mode
+// A's `roadmap: derive`; no path filter, since a derive may commit only the backlog. No such commit,
+// or no file in it, is `sinceDerive: null`, and the skill falls back to the retained count.
+function shippedSinceDerive(repository, file, text) {
+  const current = shippedKeys(text);
+  const log = gitTry(repository, ['log', '--format=%H %s', '--grep=^roadmap: derive']) ?? '';
+  const sha = log.split('\n').map((line) => line.split(' ')).find(([, ...subject]) => subject.join(' ').startsWith('roadmap: derive'))?.[0];
+  const derived = sha ? gitTry(repository, ['show', `${sha}:${file}`]) : null;
+  if (derived === null) return { retained: current.length, sinceDerive: null };
+  const held = new Set(shippedKeys(derived));
+  return { retained: current.length, sinceDerive: current.filter((key) => !held.has(key)).length };
 }
 
 // Epic's generated Backlog bullets have an explicit final status cell. Compare only
