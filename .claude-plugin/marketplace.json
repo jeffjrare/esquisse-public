@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "esq",
-      "version": "0.3.69",
+      "version": "0.3.70",
       "source": "./plugin",
       "description": "Plan, build, review and land features in Claude Code, with thoughtful design and a reviewable trail in your repository.",
       "category": "productivity"
