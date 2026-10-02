@@ -6,12 +6,27 @@ land** — with thoughtful design and a reviewable trail. Plans, backlog and dec
 live as Markdown in your repository, so a fresh session picks up where the last
 one stopped.
 
-- **It asks only what only you can answer.** You decide product, architecture and
-  design; intent, priority and tradeoffs on your constraints come to you. Anything it
-  can find by reading, running or reasoning, it settles itself — and you are never its
-  tester.
+## What it optimizes for
+
+**The most shipped features you actually value.** Everything else is a constraint
+on that, never a rival to it:
+
+- **Value first.** A plan is written against what the feature is for, and review
+  checks that this goal was delivered, not only that the code is sound.
+- **Cost is a requirement.** Tokens, agent calls, tool turns and wall-clock stay
+  proportionate to the value. Work that already succeeded is never paid for twice.
+- **It never blocks on what it can settle.** You decide product, architecture and
+  design; intent, priority and tradeoffs on your constraints come to you. Anything
+  it can find by reading, running or reasoning, it settles itself — and you are
+  never its tester.
 - **Design is part of the feature.** UI work is planned with its empty, loading,
-  error and success states, and reviewed as part of the delivery.
+  error and success states, and reviewed as part of the delivery. Right-sizing
+  trims generality, never design.
+- **Deterministic where it can be.** A dependency-free CLI owns structure, IDs and
+  invariants; the model spends tokens only on judgment.
+
+And two guarantees on how work gets done:
+
 - **Every phase is verified.** Each plan phase has a deliverable and an explicit
   check, and the result is recorded in the plan.
 - **Nothing pushes.** Work lands with a local merge into the branch it started from.
