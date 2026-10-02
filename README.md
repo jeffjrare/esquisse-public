@@ -6,9 +6,10 @@ land** — with thoughtful design and a reviewable trail. Plans, backlog and dec
 live as Markdown in your repository, so a fresh session picks up where the last
 one stopped.
 
-- **It asks only what only you can answer.** Intent, priority and tradeoffs on your
-  constraints come to you; anything it can find by reading, running or reasoning, it
-  settles itself.
+- **It asks only what only you can answer.** You decide product, architecture and
+  design; intent, priority and tradeoffs on your constraints come to you. Anything it
+  can find by reading, running or reasoning, it settles itself — and you are never its
+  tester.
 - **Design is part of the feature.** UI work is planned with its empty, loading,
   error and success states, and reviewed as part of the delivery.
 - **Every phase is verified.** Each plan phase has a deliverable and an explicit
@@ -184,9 +185,12 @@ It stops only at a step that is yours — a push, a deploy, an action in your ow
 accounts — and once you have done it, `/esq:land <plan> --from <n>` (or saying
 done in the same session) carries on. esquisse never pushes.
 
-**Manual checks** need an actual observation of the stated behavior. An
-unconfirmed manual step leaves the phase paused; resume with `/esq:build <plan>`,
-which picks up from the log and existing commits.
+**Manual checks** need an actual observation of the stated behavior, and the
+build makes it with a browser tool when one is available: a "phone" check runs at a
+phone-sized viewport. It comes to you only when no instrument can reach the result —
+a native phone behavior (install, push, camera) or access only you hold. A step left
+unobserved pauses the phase; resume with `/esq:build <plan>`, which picks up from the
+log and existing commits.
 
 **Reviewing work without a plan:** `/esq:review <full-commit-hash>` or
 `<base>..<tip>`. Avoid bare `HEAD` after `/esq:work`: the last commit is then the
