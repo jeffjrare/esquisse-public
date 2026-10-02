@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-hat-decisions-are-logged-never-gated | 2026-10-02 | prod | autonomy | A reversible hat-owned call is logged as `decisions` (`<product\|architecture\|design>: what — why — undo: how`) in the phase entry, collected by esq branch check and esq review scope, and shown grouped by hat in review and land, never as a finding, a gate or a NEEDS YOU. | Active |
 | D-a-user-request-in-the-conversation-is-a-mandate | 2026-10-02 | arch | skills | The in-body "No mandate, no run." refusal also accepts a run the user requested in their own words in this conversation, naming the command and its target. A description match or the model's own initiative still stops and prints the invocation. | Active |
 | D-land-runs-the-rollout-it-can | 2026-10-01 | prod | safe-shipping | After the merge `/esq:land` runs every rollout step esq can, once and in order, and stops only at the first step that is the user's (`(user)`, a push, deploy or release, their own accounts); the user's confirmation in the session or `/esq:land <plan> --from <n>` resumes after it, with no rollout state recorded | Active |
 | D-shipped-since-derive-is-read-from-git | 2026-10-01 | arch | roadmap | `esq state` reports `roadmap.shipped.sinceDerive` as the Shipped lines (keyed `date · slug`) absent from `docs/ROADMAP.md` at the newest commit whose subject starts `roadmap: derive`, or null when none exists; the notice falls back to the retained count on null. | Active |
@@ -5477,3 +5478,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** The mandate is judged by the model from the conversation rather than proven by an orchestrator's invoking turn.
 **Conséquences:** Six SKILL.md guard lines change; roadmap keeps its narrower advance-only refusal; check-plugin.sh and test-plugin-guards.sh are unchanged, since the guard sentence stays.
 **Alternatives rejetées:** Keep the orchestrator-only rule (a user retypes what they asked for); restore disable-model-invocation (breaks the orchestrators, D-orchestrated-skills-guard-in-body).
+
+## D-hat-decisions-are-logged-never-gated — Calls made for a hat are logged and shown, never gated
+
+**Scope:** prod
+**Topic:** autonomy
+**Date:** 2026-10-02
+**Statut:** Active
+**Fondement:** user — decisions-routed-by-hat brief, 2026-10-02 (abandoned-plan inclusion answered the same day)
+
+**Contexte:** Build settled product, architecture and design calls within the mandate with no trace the owning hat reads; the only states were a 🔴 stop or silence.
+**Décision:** A reversible hat-owned call is logged as `decisions` (`<product|architecture|design>: what — why — undo: how`) in the phase entry, collected by esq branch check and esq review scope, and shown grouped by hat in review and land, never as a finding, a gate or a NEEDS YOU.
+**Raison:** It adds the missing 'decided for you, open to reversal' state without adding a stop, by reusing the rollout route. The CLI checks only the hat prefix and single-line shape, because readers group on the hat and extract one line per item.
+**Tradeoff:** Visibility at about one line per decision and no added call; the hat is self-declared and the bar is model judgment, with no cap.
+**Conséquences:** One-way doors keep build's existing missing-authority stop. Decisions from an abandoned plan's built phases are still shown, unlike rollout, because their code lands.
+**Alternatives rejetées:** Structured {hat,what,why,undo} objects (validates prose, larger payload); a per-hat ledger file (new docs file, second writer); a blocking ratification step (violates never-block).
