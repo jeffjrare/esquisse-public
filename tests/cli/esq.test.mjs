@@ -1594,6 +1594,31 @@ test('a paused entry differs from a completed one by the results heading alone',
   assert.equal(normalized, completed);
 });
 
+// A hat decision is the one prose list whose prefix the CLI parses: review and land group on it.
+test('append-log refuses a decision whose hat is not product, architecture or design, byte-identically', async () => {
+  const root = await fixture();
+  const file = path.join(root, 'docs/plans/work.md');
+  const before = await readFile(file);
+  await assert.rejects(appendLog(file, JSON.stringify({ ...NINE_KEY, decisions: ['finance: x — y — undo: z'] })), (error) => {
+    assert.match(error.message, /"finance: x — y — undo: z"/);
+    assert.match(error.message, /product:, architecture:, design:/);
+    return true;
+  });
+  // One line per item: a second line would be dropped by the bullet extractor.
+  await assert.rejects(appendLog(file, JSON.stringify({ ...NINE_KEY, decisions: ['design: x — y\nundo: z'] })), /one line/);
+  await assert.rejects(appendLog(file, JSON.stringify({ ...NINE_KEY, decisions: [] })), /non-empty array/);
+  assert.deepEqual(await readFile(file), before);
+});
+
+test('an accepted decision renders under **Decided for you:**, on a completed and a blocked entry alike', async () => {
+  const decisions = ['product: refunds round down — matches the ledger — undo: round half-up in pricing.mjs', 'design: empty state shows a CTA — first-run users — undo: drop the button'];
+  const completed = await entryFor({ ...NINE_KEY, rollout: ['Restart the worker'], decisions });
+  assert.match(completed, /\*\*Rollout:\*\*\n- Restart the worker\n\n\*\*Decided for you:\*\*\n- product: refunds round down — matches the ledger — undo: round half-up in pricing\.mjs\n- design: empty state/);
+  const paused = await entryFor({ phase: 1, status: 'paused', commits: ['abc1234'], whatBuilt: 'x', verification: ['ok'], blockedBy: ['B-201'], decisions: ['architecture: one table — simpler joins — undo: split it'] });
+  assert.match(paused, /\*\*Blocked by:\*\*\n- B-201/);
+  assert.match(paused, /\*\*Decided for you:\*\*\n- architecture: one table — simpler joins — undo: split it/);
+});
+
 test('an empty commits array renders none rather than an empty field', async () => {
   assert.match(await entryFor({ ...NINE_KEY, commits: [] }), /^\*\*Commits:\*\* none$/m);
 });

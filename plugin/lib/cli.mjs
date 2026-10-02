@@ -969,6 +969,7 @@ export const LOG_ENTRY_SCHEMA = [
   { key: 'manualOutstanding', type: 'stringArray', label: 'non-empty array of non-empty strings', completed: 'refused', paused: 'optional', note: 'a paused entry carries this, blockedBy, or both — never neither' },
   { key: 'blockedBy', type: 'stringArray', label: 'non-empty array of non-empty strings', completed: 'refused', paused: 'optional', note: 'the same-unit backlog rows that stopped the phase, as `esq branch check` names them' },
   { key: 'rollout', type: 'stringArray', label: 'non-empty array of non-empty strings', completed: 'optional', paused: 'optional', note: 'steps beyond the merge this phase made necessary for users to get the result, which the plan\'s ## Rollout does not list; esq branch check collects them for /esq:land' },
+  { key: 'decisions', type: 'decisions', label: 'array of "<hat>: <what> — <why> — undo: <how>" strings', completed: 'optional', paused: 'optional', note: 'the product, architecture or design calls this phase made for a hat, open to reversal; <hat> is product, architecture or design, one line per item; esq branch check and esq review scope collect them' },
   { key: 'surprises', type: 'string', label: 'non-empty string', completed: 'optional', paused: 'optional' },
   { key: 'backlogCandidates', type: 'string', label: 'non-empty string', completed: 'optional', paused: 'optional' },
   { key: 'forNextPhase', type: 'string', label: 'non-empty string', completed: 'optional', paused: 'refused', note: 'a paused entry writes no hand-off note' },
@@ -1031,6 +1032,21 @@ function validateVerified(value) {
   // newline in the value would break the round trip the gate reads.
   const offender = value.commands.find((command) => command.includes('`') || command.includes('\n'));
   if (offender !== undefined) throw new Error(`verified command ${JSON.stringify(offender)} may not contain a backtick or a newline — each renders as one inline-code span`);
+}
+
+// The hat is what review and land group on, so it is the one part of a decision the CLI parses: the
+// prefix must name one of the three hats, and the item must be one line, because the extractor reads
+// one bullet per item and a second line (the undo, typically) would be dropped. The rest is prose.
+export const DECISION_HATS = ['product', 'architecture', 'design'];
+const DECISION_ITEM = new RegExp(`^(${DECISION_HATS.join('|')}): \\S`);
+
+function validateDecisions(value, status) {
+  if (!Array.isArray(value) || value.length === 0) refuse('log entry key "decisions" must be a non-empty array of strings', status);
+  for (const item of value) {
+    if (typeof item !== 'string' || /[\r\n]/.test(item) || !DECISION_ITEM.test(item) || !fieldText(item)) {
+      refuse(`decision ${JSON.stringify(item)} must be one line opening with one of the hats ${DECISION_HATS.map((hat) => `${hat}:`).join(', ')}`, status);
+    }
+  }
 }
 
 // A field value is interpolated straight into markdown that `parsePlan` and `nextPhase` read
@@ -1101,6 +1117,7 @@ export function validateLogEntry(entry) {
     }
     if (row[status] === 'refused') refuse(`log entry key "${row.key}" is not accepted on a ${status} entry`, status);
     else if (row.type === 'verified') validateVerified(value);
+    else if (row.type === 'decisions') validateDecisions(value, status);
     else if (!LOG_ENTRY_CHECKS[row.type](value, row)) {
       if (structuralOffender(value)) refuse(`log entry key "${row.key}" ${STRUCTURAL_REFUSAL}`, status);
       refuse(`log entry key "${row.key}" must be ${row.label}`, status);
@@ -1148,6 +1165,7 @@ function renderLogEntry(entry) {
     if (entry.manualOutstanding) lines.push('', '**Manual verification outstanding:**', ...entry.manualOutstanding.map((item) => `- ${item}`));
   }
   if (entry.rollout) lines.push('', '**Rollout:**', ...entry.rollout.map((item) => `- ${item}`));
+  if (entry.decisions) lines.push('', '**Decided for you:**', ...entry.decisions.map((item) => `- ${item}`));
   if (entry.surprises) lines.push('', `**Surprises / decisions made during execution:** ${entry.surprises}`);
   if (entry.backlogCandidates) lines.push('', `**Backlog candidates:** ${entry.backlogCandidates}`);
   if (entry.forNextPhase) lines.push('', `**For Phase ${phase + 1}:** ${entry.forNextPhase}`);
