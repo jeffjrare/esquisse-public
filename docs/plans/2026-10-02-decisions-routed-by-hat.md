@@ -176,3 +176,27 @@ None.
 **Backlog candidates:** None.
 
 **For Phase 2:** 1. The payload key is decisions (array of "<hat>: <what> — <why> — undo: <how>"), rendered after **Rollout:**; esq.test.mjs replays build/SKILL.md append-log literals, so the example item added in Task 2.1 must use a valid hat prefix and one line. 2. Readers get objects {plan, source: "Phase N", hat, decision} from esq branch check (unit.decisions) and esq review scope (decisions); decision excludes the hat prefix. 3. /esq:status landing projection deliberately does not carry the field.
+
+### Phase 2 — completed 2026-10-02
+
+**Plan committed at:** d1cda70
+
+**Commits:** 69bf0f9, 234d96a, 14c34a2, 778cf21, 1580193
+
+**Verified:** 15801933a4db1a2257efc40c49167813a81cd112
+- `./scripts/audit.sh`
+
+**What got built:** Build states the bar for recording a call made for a hat (decide, record, continue; a one-way door keeps the existing missing-authority route) with a **Decided for you:** field in both templates and a validated example item; review shows the scope answer's decisions grouped by hat at the end of zone 3, land lists unit.decisions once in its facts, work names the hat on its disagree line, and the README mentions the list in the review row and the landing paragraph.
+
+**Verification:**
+- (auto) node --test --test-name-pattern='every payload shape a real caller sends' tests/cli/esq.test.mjs — 1 pass after Task 2.1 (build example literal with a decisions item accepted by the validator)
+- (auto) ./scripts/audit.sh — Clean, 7 checks (structure, package, no push, conformance, version, bounded runner, product suites), 28 s wall-clock
+
+**Decided for you:**
+- design: review shows Decided for you as the last row group of zone 3 (○ decided for you, then one line per hat), not as a fourth zone — the shared conclusion contract allows three zones and nothing after → Next — undo: move the block in plugin/skills/review/SKILL.md § Report to its own section before → Next
+
+**Surprises / decisions made during execution:** None — phase executed as planned. The paused template carries **Decided for you:** after **Manual verification outstanding:** rather than beside **Rollout:**, which that template has none of; it follows the renderer's order.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** Last phase: the unit is ready for /esq:review. Whether workers apply the bar can only be seen on later real units, as the plan's Risks state.
