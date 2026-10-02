@@ -34,7 +34,7 @@ Read each needed file or slice once and retain it; re-read only after a write or
 ## Preflight
 
 1. Require `$0` to name a plan under `docs/plans/`, excluding `*.brief.md` and `*.log.md`. Missing → stop with `/esq:land docs/plans/<date>-<slug>.md`. Never choose the newest plan for a merge. `--from <n>` in `$ARGUMENTS` is a rollout re-entry: the user did the steps before `n`.
-2. Batch `git status --porcelain`, `esq branch check <plan>`, `esq validate` and `esq projections`. Collect every result independently: check/validate may exit 1 with usable JSON, so do not short-circuit these readers with `&&`. Retain the branch verdict's head, recorded, origin, landed, unit, coverage and destination.
+2. Batch `git status --porcelain`, `esq branch check <plan>`, `esq validate` and `esq projections`. Collect every result independently: check/validate may exit 1 with usable JSON, so do not short-circuit these readers with `&&`. Retain the branch verdict's head, recorded, origin, landed, unit (its `decisions` included), coverage and destination.
 3. Announce `Landing <slug> — <recorded> → <origin>.` With no origin: `Landing <slug> — legacy plan, nothing to land.`
 
 ## Prerequisites — first failure stops
@@ -126,6 +126,7 @@ Always include:
 - **Closures, if any:** IDs, delivery evidence and bookkeeping commit, including on a later refusal.
 - **Verification whenever the gate ran:** `<n> commands run, <m> reused across <p> plans (proved on <short hash>)`; show `0 reused`, not an omitted clause. Use returned proof hashes; do not invent a shared proof if they differ.
 - **Rollout, whenever `unit.rollout` is non-empty:** under `Rollout`, each step numbered, with its source (`<plan> · plan` or `<plan> · Phase N`): `✔` ran, with its evidence; `→ you` the user step it stopped at; `○` not reached. Only the step it stopped at counts as NEEDS YOU.
+- **Decided for you, whenever `unit.decisions` is non-empty:** once, under `Decided for you`, grouped Product / Architecture / Design (empty hats omitted), one `○` line each `<decision> · <plan> Phase N`, its `undo:` kept as written. It never stops, gates or adds to NEEDS YOU, and lands exactly as without it: silence is consent, because the merge is local and reversible. A reversal the user asks for is ordinary work, `/esq:work "<the undo>"`.
 - **Every non-fresh projection:** `○ advisory <name> <verdict> — <owner>`, arch before spec. Include even when landing stops; never count advice as NEEDS YOU, make it Next, or run its owner.
 - Passed prerequisites and measured elapsed, even on early stop.
 
