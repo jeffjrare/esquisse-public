@@ -13,24 +13,31 @@ on that, never a rival to it:
 
 - **Value first.** A plan is written against what the feature is for, and review
   checks that this goal was delivered, not only that the code is sound.
-- **Cost is a requirement.** Tokens, agent calls, tool turns and wall-clock stay
-  proportionate to the value. Work that already succeeded is never paid for twice.
+- **Cost is a requirement.** The whole workflow counts — model calls, context, tool
+  round trips, subagents, elapsed time and repeated work — and stays proportionate
+  to the value. Verification that still holds is reused; the same answer is never
+  paid for twice.
 - **It never blocks on what it can settle.** You decide product, architecture and
   design; intent, priority and tradeoffs on your constraints come to you. Anything
   it can find by reading, running or reasoning, it settles itself — and you are
-  never its tester.
-- **Design is part of the feature.** UI work is planned with its empty, loading,
-  error and success states, and reviewed as part of the delivery. Right-sizing
-  trims generality, never design.
+  never its tester. A decision that is yours comes with options, consequences and a
+  runnable next step.
+- **Design is part of the feature.** Hierarchy, typography, interaction and
+  feedback count as value. UI work is planned with its empty, loading, error and
+  success states, and reviewed as part of the delivery. Right-sizing trims
+  generality, never design.
 - **Deterministic where it can be.** A dependency-free CLI owns structure, IDs and
   invariants; the model spends tokens only on judgment.
 
 And two guarantees on how work gets done:
 
-- **Every phase is verified.** Each plan phase has a deliverable and an explicit
-  check, and the result is recorded in the plan.
+- **Every phase is verified, at the cost it earns.** Each plan phase has a
+  deliverable and an explicit check matched to the failure it can catch — no audits
+  of audits — and the result is recorded in the plan.
 - **Nothing pushes.** Work lands with a local merge into the branch it started from.
   Publishing stays in your hands.
+
+These are design commitments, not a claim of measured savings on every task.
 
 ## Install
 
@@ -273,23 +280,6 @@ honor it, the worker runs on your session's model.
 
   The model and effort are optional; unset, `~/.codex/config.toml` applies. A missing
   or failing `codex` costs one `Codex: not run — <reason>` line.
-
-## Design principles
-
-- **Value first.** Judge success by the value delivered and the quality of the
-  experience — hierarchy, typography, interaction and feedback included.
-- **Treat tokens like money.** Count the whole workflow: model calls, context,
-  tool round trips, subagents, elapsed time and repeated work. Reuse verification
-  that still holds; never pay twice for the same answer.
-- **Code for facts, models for judgment.** The CLI owns IDs, records and structural
-  checks; the model owns scope, design and implementation choices.
-- **Ask only for real authority.** Technical uncertainty is work to do, not a
-  question. A decision that is yours comes with options, consequences and a runnable
-  next step.
-- **Verification earns its cost.** Checks match the change and the failure they can
-  catch — no audits of audits.
-
-These are design commitments, not a claim of measured savings on every task.
 
 ## Contributing
 
