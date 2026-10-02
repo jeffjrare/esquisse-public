@@ -210,6 +210,13 @@ place included, is `build: <slug> Phase N`: it blocks, and is fixed or paused on
 regression or an unfulfilled promise around `unit.open`, and never drop or re-file a row to get a phase
 past its gate. A 💡 idea never blocks, and neither does a row a finder filed (`check:`, `review:`).
 
+## A call made for a hat is recorded, never asked
+
+The user wears three hats: product (business rules, scope), architecture (structure, dependencies, data model, boundaries) and design (UX, states, wording, visual direction). A call this phase settles within the mandate is recorded for its hat when both hold: **(a)** that hat could reasonably have chosen otherwise, **and (b)** the result is visible to the end user or constrains later work. Everything else is ordinary work and is recorded nowhere.
+
+- **Reversible → decide, record, continue.** Payload `decisions`, one line each: `<hat>: <what> — <why> — undo: <how>`, the hat `product`, `architecture` or `design`, the undo a concrete path (the file to change, the command to run). It renders under `**Decided for you:**`, and `/esq:review` and `/esq:land` show it to that hat. It is not repeated under *Surprises*, which keeps the divergences from the plan.
+- **A one-way door (data loss, a public contract, money, an irreversible external effect) is never recorded as decided.** A call with no feasible undo is one by definition. It takes the existing missing-authority route unchanged: a 🔴 under "On failure", or the paused entry with `blockedBy` when a same-unit row names it (the section above). This adds no stop and no pause cause.
+
 ## Append to execution log
 
 **Six steps, in this order** — rows are filed before the entry so the gate sees them.
@@ -257,6 +264,8 @@ Otherwise load none of it; steps 1–5 still run exactly as written. A branch yo
 
 **Rollout:** <only when this phase made a step beyond the merge necessary — a migration, env var, config, restart, backfill, flag — that the plan's `## Rollout` does not list: payload `rollout`, one imperative line each, `(user)` on a step only the user can do. `/esq:land` runs the rest after the merge. Omit otherwise.>
 
+**Decided for you:** <only when this phase settled a call for a hat (see "A call made for a hat is recorded, never asked"): payload `decisions`, one line each `<hat>: <what> — <why> — undo: <how>`. Omit otherwise.>
+
 **For Phase N+1:** Hand-off note. Three things max:
 1. What's wired up that the next phase will rely on (files, deps, config)
 2. Decisions that diverge from the plan that the next phase should know
@@ -287,13 +296,15 @@ Otherwise load none of it; steps 1–5 still run exactly as written. A branch yo
 **Manual verification outstanding:** The `(manual)` steps a human or browser/app agent must observe before this phase is done. Copy each verbatim, INCLUDING its starting state:
 - [<starting state>] <step> → expected: <what the user should see>
 
+**Decided for you:** (same as completed format)
+
 **Surprises / decisions made during execution:** (same as completed format)
 ```
 
 **The payload, exactly.** One `completed` example and one `paused` one — copy the shape, not the values:
 
 ```bash
-esq plan append-log <plan-path> '{"phase":1,"status":"completed","date":"2026-08-22","planCommittedAt":"46771fd","commits":["8112bb3","6c4bbe8"],"whatBuilt":"The append-log payload is one schema constant the validator and --help both read.","verification":["(auto) node --test tests/cli/esq.test.mjs — 38 pass","(auto) ./scripts/audit.sh — exit 0"],"verified":{"at":"6c4bbe8f1a2b3c4d5e6f708192a3b4c5d6e7f809","commands":["node --test tests/cli/esq.test.mjs","./scripts/audit.sh"]},"rollout":["Run the schema migration before the new build serves traffic"],"surprises":"None — phase executed as planned.","backlogCandidates":"None.","forNextPhase":"Phase 2 enforces the schema this phase published."}'
+esq plan append-log <plan-path> '{"phase":1,"status":"completed","date":"2026-08-22","planCommittedAt":"46771fd","commits":["8112bb3","6c4bbe8"],"whatBuilt":"The append-log payload is one schema constant the validator and --help both read.","verification":["(auto) node --test tests/cli/esq.test.mjs — 38 pass","(auto) ./scripts/audit.sh — exit 0"],"verified":{"at":"6c4bbe8f1a2b3c4d5e6f708192a3b4c5d6e7f809","commands":["node --test tests/cli/esq.test.mjs","./scripts/audit.sh"]},"rollout":["Run the schema migration before the new build serves traffic"],"decisions":["architecture: --help reads the schema constant rather than a copy — one source cannot drift — undo: restore the hand-written help text in cli.mjs"],"surprises":"None — phase executed as planned.","backlogCandidates":"None.","forNextPhase":"Phase 2 enforces the schema this phase published."}'
 
 esq plan append-log <plan-path> '{"phase":1,"status":"paused","date":"2026-08-22","planCommittedAt":"46771fd","commits":["8112bb3"],"whatBuilt":"The settings panel renders the dark-mode toggle.","verification":["(auto) node --test tests/ui/panel.test.mjs — 12 pass"],"verified":{"at":"8112bb3f1a2b3c4d5e6f708192a3b4c5d6e7f809","commands":["node --test tests/ui/panel.test.mjs"]},"manualOutstanding":["[on /settings, logged in] toggle dark mode → expect: the panel repaints without a reload"],"surprises":"None — phase executed as planned."}'
 ```
