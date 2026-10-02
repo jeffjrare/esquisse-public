@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-a-user-request-in-the-conversation-is-a-mandate | 2026-10-02 | arch | skills | The in-body "No mandate, no run." refusal also accepts a run the user requested in their own words in this conversation, naming the command and its target. A description match or the model's own initiative still stops and prints the invocation. | Active |
 | D-land-runs-the-rollout-it-can | 2026-10-01 | prod | safe-shipping | After the merge `/esq:land` runs every rollout step esq can, once and in order, and stops only at the first step that is the user's (`(user)`, a push, deploy or release, their own accounts); the user's confirmation in the session or `/esq:land <plan> --from <n>` resumes after it, with no rollout state recorded | Active |
 | D-shipped-since-derive-is-read-from-git | 2026-10-01 | arch | roadmap | `esq state` reports `roadmap.shipped.sinceDerive` as the Shipped lines (keyed `date · slug`) absent from `docs/ROADMAP.md` at the newest commit whose subject starts `roadmap: derive`, or null when none exists; the notice falls back to the retained count on null. | Active |
 | D-a-measurement-verdict-is-settled-under-mandate | 2026-09-30 | func | escalation | A keep/revert verdict after a stated run set, and the disposition of the row it decides, is applied under mandate with a one-line reason: only a fall the edit can cause is a regression, and further paid runs remain the user's authorization. | Active |
@@ -576,7 +577,7 @@ agent frontmatter behavioral proof (does not exercise invocation, authority, or 
 **Scope:** arch
 **Topic:** skills
 **Date:** 2026-08-18
-**Statut:** Active — amended 2026-09-11 by [D-advance-preserves-units-and-its-branch]: `roadmap` joins the model-invocable set, for `/esq:advance`'s bare refresh only, behind the same in-body refusal — seven skills now.
+**Statut:** Active — amended 2026-09-11 by [D-advance-preserves-units-and-its-branch]: `roadmap` joins the model-invocable set, for `/esq:advance`'s bare refresh only, behind the same in-body refusal — seven skills now. Amended 2026-10-02 by [D-a-user-request-in-the-conversation-is-a-mandate]: the six also run when the user asks for the command and its target in their own words in the conversation.
 
 **Contexte:** The first production `/esq:autopilot` run after cutover proved the assumption
 in D-native-agents-cannot-compose-guarded-skills wrong one level down: `disable-model-invocation:
@@ -5461,3 +5462,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: one ask per user act, and the evidence step closes itself. Accepted: no rollout state is recorded, so `--from` is the user's word for where they are, and a re-entry before the step it names re-runs nothing.
 **Conséquences:** A rollout step is judged like an `(auto)` step; a red stops the rollout with the merge standing. The CLI still only extracts `unit.rollout`. A step that writes evidence follows the plan's own commit instruction.
 **Alternatives rejetées:** Recording each step's completion in the plan (a post-landing write to a landed file, on a branch the landing does not own); letting the landing push when told (D-esquisse-never-pushes); keeping the list and naming steps the user could paste (still a to-do the run could settle).
+
+## D-a-user-request-in-the-conversation-is-a-mandate — A user's own request in the conversation is a mandate for a guarded skill
+
+**Scope:** arch
+**Topic:** skills
+**Date:** 2026-10-02
+**Statut:** Active
+**Fondement:** mandate — the user asked for this change on 2026-10-02
+
+**Contexte:** The six model-invocable skills (build, check, review, fix, work, plan) refused any model invocation not delegated by a user-invoked orchestrator. A user who asked in chat for the model to run /esq:plan with a stated target got a printed command to retype instead.
+**Décision:** The in-body "No mandate, no run." refusal also accepts a run the user requested in their own words in this conversation, naming the command and its target. A description match or the model's own initiative still stops and prints the invocation.
+**Raison:** Retyping a command the user already asked for is a block that buys nothing; the guard exists against unrequested runs, and an explicit request in the user's words is not one.
+**Tradeoff:** The mandate is judged by the model from the conversation rather than proven by an orchestrator's invoking turn.
+**Conséquences:** Six SKILL.md guard lines change; roadmap keeps its narrower advance-only refusal; check-plugin.sh and test-plugin-guards.sh are unchanged, since the guard sentence stays.
+**Alternatives rejetées:** Keep the orchestrator-only rule (a user retypes what they asked for); restore disable-model-invocation (breaks the orchestrators, D-orchestrated-skills-guard-in-body).
