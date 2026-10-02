@@ -6,6 +6,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 7bcf118356b30840660ff427a06b2983914f4e76
+
 ## Context
 The user wears three hats with esq: product owner (business rules, scope), architect (structure, dependencies, data
 model, boundaries) and designer (UX, states, wording, visual direction), never developer or tester. Today a judgment
