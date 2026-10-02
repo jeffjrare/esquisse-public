@@ -40,7 +40,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    - **No argument → STOP and ask in one line:** `/esq:review <plan-path>` or `/esq:review <A>..<B>` (or one commit). Never choose the latest plan or offer a guessed plan menu.
 
 2. Read the plan file briefly, with the Read tool — `cat` of a plan past ~30 KB comes back as a preview and costs a second read — for what was supposedly built, plus any prospective contract correction the scope query returns. A commit range has no plan to read.
-3. Run **`esq review scope <target>` once**. Keep its pinned head, base/provenance, commits, paths, `bookkeepingOnly` and `diff`; route off `mode`, never reconstruct its answer.
+3. Run **`esq review scope <target>` once**. Keep its pinned head, base/provenance, commits, paths, `bookkeepingOnly`, `diff` and `decisions`; route off `mode`, never reconstruct its answer.
    - `delta`: report "Delta review since <base short hash> (<review brief | clean review>) — say 'full re-review' to override."
    - `full`: review the unit from its plan commit. Pass `--full` when the user explicitly asks for a full plan re-review.
    - `range`: review exactly the named range or single commit; no baseline is inferred.
@@ -201,6 +201,9 @@ No introductory or restating paragraph between these lines. If you cannot name d
   ⚠ spec        2 features behind     `SPEC.md › <feature> › <rule>` → /esq:spec
   ○ clean       edge cases · UX · quality — nothing that clears the bar
   ✔ strong      <one clause, omit unless genuinely remarkable>
+  ○ decided for you
+     Product       <decision, its undo kept> · <plan> Phase N
+     Design        <decision, its undo kept> · <plan> Phase N
 
 → Next: <computed — see below>
 ```
@@ -210,6 +213,8 @@ The headline's counter is the verdict itself: `ship it` · `ship after fixing <n
 Zone 2 is the three tiers, worst first; `NEEDS YOU (<n>)` counts every item across them. Omit empty tiers; none means `✔` and no zone 2.
 
 Zone 3 is the six review dimensions, and **it collapses hard**: clean dimensions merge into one `○ clean` line naming them; only a dimension with findings expands, one line per finding, several indented beneath its count. Never a `None found.` line per dimension. `✔ strong` is optional, one clause, only when genuinely remarkable. A clean review is short: "Ship it." plus three lines is the expected output for a small, competent change.
+
+**Decided for you** closes zone 3 when the scope answer's `decisions` is non-empty: the calls build made for a hat, grouped Product / Architecture / Design (empty hats omitted), one line each `<decision> · <plan> Phase N`, its `undo:` kept as written. Read it from that answer, never re-derived from the log; a range target carries none. It is never a finding, never a 🔴, never counted in NEEDS YOU and never changes the headline glyph or `→ Next`: the user ratifies by silence, and a reversal they ask for is ordinary work, `/esq:work "<the undo>"`.
 
 Compute **→ Next** as one of, always with the concrete path (`<brief-path>` is the corrective brief you write below; `<plan-path>` the plan reviewed) so the line is copy-pasteable, e.g. `→ Next: /esq:fix docs/plans/2026-07-12-<slug>-fixes.brief.md · run /clear first`. **🔴 outranks every other tier** and routes the whole brief even when greens are present — the same precedence `/esq:converge` honors.
 - 🔴 present, **plan target** → `"/clear, then run: /esq:converge <brief-path>"` — it puts each decision, applies the pick and strikes the answered 🔴, which clears the brief for landing; a `do:` run by hand leaves it standing. On a **plan-less** target → `"Run the `do:` of the option you pick on each 🔴 above, then: /esq:review <base>..HEAD"`, *after running the action you picked* — the real base and the literal `HEAD`, so the re-review contains what that action committed; never the original range, and never `/esq:fix` while a red stands. Either way, name the count (`1 decision`, `2 decisions`). Never `"answer the 🔴 items"` — the options are already written above.

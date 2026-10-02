@@ -166,7 +166,7 @@ One compact block. No preamble.
   ✔ applied     a3f21c9               <what changed>
   ✔ verified    <the runnable check and its result>
   ✔ closed      B-007 → Done
-  ○ if you disagree  <the runner-up method> — <the one condition that would flip it>
+  ○ if you disagree (<product|architecture|design>)  <the runner-up method> — <the one condition that would flip it>
 
 → Next: /esq:work   (next actionable item)
 ```
@@ -180,7 +180,7 @@ On a routing verdict the run stopped rather than finished, so the last three lin
   ✔ evidence    <2–4 clauses>
   ✔ sizing      <one line: why this is too big for inline>
   ○ not done    nothing applied — this needs a plan first
-  ○ if you disagree  <the runner-up method> — <the one condition that would flip it>
+  ○ if you disagree (<product|architecture|design>)  <the runner-up method> — <the one condition that would flip it>
 
 → Next: /esq:plan B-155: <the scoped task, in the words the plan should start from>
 ```
@@ -190,7 +190,7 @@ The headline's verdict token (`inline` · `fix` · `plan` · `grill` · `epic`) 
 Rules for the output:
 
 - **`→ Next` carries the verdict's command, and it must be copy-pasteable** — real paths, real item text, no placeholders. An executed inline verdict has no command to hand off, so its `→ Next` is the next item (`/esq:work`) and the change it made is stated on the `✔ applied` line. Before executing, it still prints the change it is about to make in one line (`applying now: <file> — <the change>`), so a bad call can be interrupted.
-- **The `○ if you disagree` line is mandatory**, on both verdicts, and must name a **falsifiable condition** ("if the retry ceiling is already decided, skip the grill and plan directly"), not a hedge.
+- **The `○ if you disagree (<hat>)` line is mandatory**, on both verdicts. It names the hat that owns the call (`product`, `architecture` or `design`) and a **falsifiable condition** ("if the retry ceiling is already decided, skip the grill and plan directly"), not a hedge.
 - Use relative paths throughout (strip `/home/…/` and cwd prefixes).
 - Prefix `→ Next` with `/clear` when the verdict starts a fresh cognitive phase (`/esq:grill`, `/esq:plan`, `/esq:build`) — those want a clean session. Not for an inline fix.
 - Never emit two verdicts. Pick one; the runner-up lives in the `○ if you disagree` line.

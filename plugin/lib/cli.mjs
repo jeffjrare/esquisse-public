@@ -969,6 +969,7 @@ export const LOG_ENTRY_SCHEMA = [
   { key: 'manualOutstanding', type: 'stringArray', label: 'non-empty array of non-empty strings', completed: 'refused', paused: 'optional', note: 'a paused entry carries this, blockedBy, or both — never neither' },
   { key: 'blockedBy', type: 'stringArray', label: 'non-empty array of non-empty strings', completed: 'refused', paused: 'optional', note: 'the same-unit backlog rows that stopped the phase, as `esq branch check` names them' },
   { key: 'rollout', type: 'stringArray', label: 'non-empty array of non-empty strings', completed: 'optional', paused: 'optional', note: 'steps beyond the merge this phase made necessary for users to get the result, which the plan\'s ## Rollout does not list; esq branch check collects them for /esq:land' },
+  { key: 'decisions', type: 'decisions', label: 'array of "<hat>: <what> — <why> — undo: <how>" strings', completed: 'optional', paused: 'optional', note: 'the product, architecture or design calls this phase made for a hat, open to reversal; <hat> is product, architecture or design, one line per item; esq branch check and esq review scope collect them' },
   { key: 'surprises', type: 'string', label: 'non-empty string', completed: 'optional', paused: 'optional' },
   { key: 'backlogCandidates', type: 'string', label: 'non-empty string', completed: 'optional', paused: 'optional' },
   { key: 'forNextPhase', type: 'string', label: 'non-empty string', completed: 'optional', paused: 'refused', note: 'a paused entry writes no hand-off note' },
@@ -1031,6 +1032,21 @@ function validateVerified(value) {
   // newline in the value would break the round trip the gate reads.
   const offender = value.commands.find((command) => command.includes('`') || command.includes('\n'));
   if (offender !== undefined) throw new Error(`verified command ${JSON.stringify(offender)} may not contain a backtick or a newline — each renders as one inline-code span`);
+}
+
+// The hat is what review and land group on, so it is the one part of a decision the CLI parses: the
+// prefix must name one of the three hats, and the item must be one line, because the extractor reads
+// one bullet per item and a second line (the undo, typically) would be dropped. The rest is prose.
+export const DECISION_HATS = ['product', 'architecture', 'design'];
+const DECISION_ITEM = new RegExp(`^(${DECISION_HATS.join('|')}): \\S`);
+
+function validateDecisions(value, status) {
+  if (!Array.isArray(value) || value.length === 0) refuse('log entry key "decisions" must be a non-empty array of strings', status);
+  for (const item of value) {
+    if (typeof item !== 'string' || /[\r\n]/.test(item) || !DECISION_ITEM.test(item) || !fieldText(item)) {
+      refuse(`decision ${JSON.stringify(item)} must be one line opening with one of the hats ${DECISION_HATS.map((hat) => `${hat}:`).join(', ')}`, status);
+    }
+  }
 }
 
 // A field value is interpolated straight into markdown that `parsePlan` and `nextPhase` read
@@ -1101,6 +1117,7 @@ export function validateLogEntry(entry) {
     }
     if (row[status] === 'refused') refuse(`log entry key "${row.key}" is not accepted on a ${status} entry`, status);
     else if (row.type === 'verified') validateVerified(value);
+    else if (row.type === 'decisions') validateDecisions(value, status);
     else if (!LOG_ENTRY_CHECKS[row.type](value, row)) {
       if (structuralOffender(value)) refuse(`log entry key "${row.key}" ${STRUCTURAL_REFUSAL}`, status);
       refuse(`log entry key "${row.key}" must be ${row.label}`, status);
@@ -1148,6 +1165,7 @@ function renderLogEntry(entry) {
     if (entry.manualOutstanding) lines.push('', '**Manual verification outstanding:**', ...entry.manualOutstanding.map((item) => `- ${item}`));
   }
   if (entry.rollout) lines.push('', '**Rollout:**', ...entry.rollout.map((item) => `- ${item}`));
+  if (entry.decisions) lines.push('', '**Decided for you:**', ...entry.decisions.map((item) => `- ${item}`));
   if (entry.surprises) lines.push('', `**Surprises / decisions made during execution:** ${entry.surprises}`);
   if (entry.backlogCandidates) lines.push('', `**Backlog candidates:** ${entry.backlogCandidates}`);
   if (entry.forNextPhase) lines.push('', `**For Phase ${phase + 1}:** ${entry.forNextPhase}`);
@@ -2545,7 +2563,7 @@ function planStanding(text) {
 // the list is the same whichever unit plan the caller was handed. `abandoned` is the recorded way out,
 // and it retracts only unbuilt phases: `promised` and `findings` still count the abandoned plan.
 async function shippingUnit(repository, branch, headers) {
-  const unit = { branch: branch ?? null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [] };
+  const unit = { branch: branch ?? null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [], decisions: [] };
   if (!unit.branch) return unit;
   const slugs = new Set();
   for (const header of headers) {
@@ -2559,6 +2577,9 @@ async function shippingUnit(repository, branch, headers) {
     if (standing.abandoned) unit.abandoned.push({ plan: header.relative, ...standing.abandoned });
     else if (standing.state !== 'complete') unit.incomplete.push({ plan: header.relative, state: standing.state, phase: standing.phase });
     if (!standing.abandoned) unit.rollout.push(...planRollout(header.text).map((step) => ({ plan: header.relative, ...step })));
+    // Unlike rollout, an abandoned plan's decisions still count: abandoning retracts only unbuilt
+    // phases, so the built ones land and the calls they made ship with them.
+    unit.decisions.push(...planDecisions(header.text).map((decision) => ({ plan: header.relative, ...decision })));
   }
   unit.findings = await unitFindings(repository, slugs);
   let parsed;
@@ -2606,6 +2627,32 @@ function planRollout(text) {
   return steps;
 }
 
+// The calls a build phase made for a hat, as its log entries recorded them under `**Decided for you:**`,
+// tagged with the phase and split on the hat prefix so review and land group without parsing. Only
+// the execution-log span is read — `## Execution log` to the next `#`/`##` heading, as `parsePlan`
+// bounds it — and a list ends on the next bold field line or heading. Extraction only.
+const DECISION_BULLET = new RegExp(`^- (${DECISION_HATS.join('|')}): (\\S.*)$`);
+
+function planDecisions(text) {
+  const decisions = [];
+  const lines = text.split('\n');
+  const log = lines.findIndex((line) => line.trim() === '## Execution log');
+  if (log < 0) return decisions;
+  let collecting = false;
+  let phase = null;
+  for (const line of lines.slice(log + 1)) {
+    if (/^#{1,2} /.test(line)) break;
+    const heading = /^### Phase (\d+)\b/.exec(line);
+    if (heading) phase = Number(heading[1]);
+    if (/^#{1,6} /.test(line) || /^\*\*[^*]+:\*\*/.test(line)) collecting = line.trim() === '**Decided for you:**';
+    else if (collecting) {
+      const bullet = DECISION_BULLET.exec(line.trimEnd());
+      if (bullet) decisions.push({ source: `Phase ${phase ?? '?'}`, hat: bullet[1], decision: bullet[2] });
+    }
+  }
+  return decisions;
+}
+
 // What a caller that is about to write a `completed` execution-log entry needs, derived from the plan
 // file's own path rather than from git: a plan lives at `<root>/docs/plans/<name>.md`, so its root is
 // two directories up from the one holding it. `appendLog` has no repository argument and must not
@@ -2616,7 +2663,7 @@ async function unitForPlan(planPath, planText = null) {
   let text = planText;
   if (text === null) {
     try { text = await readText(file); }
-    catch { return { branch: null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [] }; }
+    catch { return { branch: null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [], decisions: [] }; }
   }
   return shippingUnit(repository, parseBranch(text), await planHeaders(repository));
 }
@@ -3631,14 +3678,26 @@ function reviewPaths(record) {
   return paths;
 }
 
+// The hat decisions a review of this plan shows: its `**Branch:**` unit's, abandoned plans included,
+// as `esq branch check` collects them — or, for a legacy plan recording no branch, its own log's.
+// The unit is found from the plan's path, like `unitForPlan`, so the answer needs no git.
+async function reviewDecisions(file, text) {
+  const repository = path.resolve(path.dirname(file), '../..');
+  const branch = parseBranch(text);
+  const headers = branch ? unitHeaders(await planHeaders(repository), branch) : [{ relative: path.relative(repository, file), text }];
+  return headers.flatMap((header) => planDecisions(header.text).map((decision) => ({ plan: header.relative, ...decision })));
+}
+
 export async function reviewScope(root, planPath, { full = false } = {}) {
   const text = await readText(path.resolve(root, planPath));
+  // Computed once, before any early return, so every plan-mode answer carries the field.
+  const decisions = await reviewDecisions(path.resolve(root, planPath), text);
   let repository = null;
   try { repository = git(root, ['rev-parse', '--show-toplevel']); } catch { repository = null; }
   const file = repository ? (path.relative(repository, path.resolve(root, planPath)) || planPath) : planPath;
   const slug = planSlug(file);
   const head = repository ? gitTry(repository, ['rev-parse', '--verify', '--quiet', 'HEAD']) : null;
-  const answer = { root: repository, file, slug, head, mode: 'unresolved', base: null, provenance: null, reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null };
+  const answer = { root: repository, file, slug, head, mode: 'unresolved', base: null, provenance: null, reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null, decisions };
   if (!repository || !head) return { ...answer, reason: 'git could not be read here, so no commit range can be resolved — review the whole change and say so' };
   if (!REVIEW_SLUG.test(slug)) {
     return { ...answer, reason: `\`${slug}\` is not a plan slug this can search history for — review the whole change and say so` };

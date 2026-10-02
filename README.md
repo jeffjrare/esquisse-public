@@ -119,7 +119,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:grill <idea>` | Resolve scope and consequential choices before planning | A brief in `docs/plans/` |
 | `/esq:plan <brief-or-task>` | Design the work and its verifiable phases | A plan committed on its own branch |
 | `/esq:build <plan>` | Implement and verify one phase, then stop | Task commits and an execution-log entry |
-| `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, correctness, security, UX and design | Review findings; a corrective brief when needed |
+| `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, correctness, security, UX and design | Review findings, the calls build decided for you by hat; a corrective brief when needed |
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings |
 | `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
@@ -199,7 +199,8 @@ that, safe fixes still go through `fix` → `review` → `land`, and
 **Landing** checks the whole branch, not just the named plan: plans complete or
 explicitly abandoned, findings dealt with, review done, working tree clean. It
 reuses verification that still holds and runs only what is owed, then merges
-locally. Conflicts that need judgment come back to you with a recovery action.
+locally, listing once, by hat, the calls build decided for you with how to undo
+each; silence is consent. Conflicts that need judgment come back to you with a recovery action.
 When the feature needs more than a merge to reach users — a migration, an
 environment variable, a restart — the plan's rollout steps are listed in the
 landing report under **Rollout**, and the landing runs every step it can itself.
