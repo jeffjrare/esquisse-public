@@ -39,7 +39,7 @@ Improvising a path is the most expensive thing an unattended phase does — reso
 
 ### 3. Ask — only about the result, and only once item 2 is spent
 
-**An absent or broken instrument reaches this step as an engineering question never, and as a *result* only once item 2 is spent — the complement exceeded this phase's mandate or failed inside the bound it already had — and the user can reach what this run could not.** Genuine personal judgment, and access only the user holds, are asked about the *result* — never about how to build an instrument. An absent resource is an uncovered link handled by item 2 above, and it is never converted into an engineering questionnaire put to the user.
+**An absent or broken instrument reaches this step as an engineering question never, and as a *result* only once item 2 is spent — the complement exceeded this phase's mandate or failed inside the bound it already had — and the user can reach what this run could not.** The user decides product, architecture and design and is never the run's tester: a result a driver can observe, or a technical check, is never put to them. Genuine personal judgment (design taste on a rendered screen), and access only the user holds (a device-native result), are asked about the *result* — never about how to build an instrument. An absent resource is an uncovered link handled by item 2 above, and it is never converted into an engineering questionnaire put to the user.
 
 Present each step verbatim with its starting state. Use `AskUserQuestion`, one question per step, options PASS / FAIL / couldn't get there. **This is the only case in the whole command where you ask the user about a verification result.**
 
