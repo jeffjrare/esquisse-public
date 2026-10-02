@@ -595,6 +595,42 @@ test('an unresolved answer is never a delta, and a resolved one always carries a
   await rm(root, { recursive: true, force: true });
 });
 
+// The hat decisions ride on the one call review already makes: the plan's Branch unit's, the same
+// list `esq branch check` returns, on every plan-mode answer — resolved or not.
+test('review scope carries the plan unit-s decisions, and an empty list when none were logged', async () => {
+  const root = await repo();
+  const { relative } = await plan(root, 'widget');
+  const decided = '\n**Decided for you:**\n- product: refunds round down — ledger — undo: round half-up\n\n**Rollout:**\n- Restart the worker\n';
+  await writeFile(path.join(root, relative), `${await readFile(path.join(root, relative), 'utf8')}${decided}`);
+  // A second plan of the same unit, and one of another unit that must not appear.
+  await writeFile(path.join(root, 'docs/plans/2026-09-15-widget-fixes.md'), '# fixes\n\n**Branch:** esq/unit\n\n## Execution log\n\n### Phase 2 — completed 2026-09-15\n\n**Decided for you:**\n- design: grey badge — calm — undo: red\n');
+  await writeFile(path.join(root, 'docs/plans/2026-09-15-other.md'), '# other\n\n**Branch:** esq/other\n\n## Execution log\n\n### Phase 1 — completed 2026-09-15\n\n**Decided for you:**\n- design: not this unit — x — undo: y\n');
+  commit(root, 'feat(app): log decisions');
+  const expected = [
+    { plan: relative, source: 'Phase 1', hat: 'product', decision: 'refunds round down — ledger — undo: round half-up' },
+    { plan: 'docs/plans/2026-09-15-widget-fixes.md', source: 'Phase 2', hat: 'design', decision: 'grey badge — calm — undo: red' },
+  ];
+  assert.deepEqual((await reviewScope(root, relative)).decisions, expected);
+  assert.deepEqual((await reviewScope(root, relative, { full: true })).decisions, expected);
+
+  const bare = await repo();
+  const { relative: plain } = await plan(bare, 'widget');
+  assert.deepEqual((await reviewScope(bare, plain)).decisions, []);
+  await rm(root, { recursive: true, force: true });
+  await rm(bare, { recursive: true, force: true });
+});
+
+test('an unresolved review scope still carries the decisions, from the plan-s own log when it records no branch', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'esq-review-scope-nogit-'));
+  await mkdir(path.join(root, 'docs/plans'), { recursive: true });
+  const relative = 'docs/plans/2026-09-14-widget.md';
+  await writeFile(path.join(root, relative), '# widget\n\n## Phases\n\n## Execution log\n\n### Phase 1 — completed 2026-09-14\n\n**Decided for you:**\n- architecture: one table — joins — undo: split\n');
+  const scope = await reviewScope(root, relative);
+  assert.equal(scope.mode, 'unresolved');
+  assert.deepEqual(scope.decisions, [{ plan: relative, source: 'Phase 1', hat: 'architecture', decision: 'one table — joins — undo: split' }]);
+  await rm(root, { recursive: true, force: true });
+});
+
 // ── The CLI surface ──────────────────────────────────────────────────────────
 
 test('esq review scope refuses an unknown flag and a second path, and exits 0 on an answer', async () => {

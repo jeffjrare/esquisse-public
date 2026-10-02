@@ -3678,14 +3678,26 @@ function reviewPaths(record) {
   return paths;
 }
 
+// The hat decisions a review of this plan shows: its `**Branch:**` unit's, abandoned plans included,
+// as `esq branch check` collects them — or, for a legacy plan recording no branch, its own log's.
+// The unit is found from the plan's path, like `unitForPlan`, so the answer needs no git.
+async function reviewDecisions(file, text) {
+  const repository = path.resolve(path.dirname(file), '../..');
+  const branch = parseBranch(text);
+  const headers = branch ? unitHeaders(await planHeaders(repository), branch) : [{ relative: path.relative(repository, file), text }];
+  return headers.flatMap((header) => planDecisions(header.text).map((decision) => ({ plan: header.relative, ...decision })));
+}
+
 export async function reviewScope(root, planPath, { full = false } = {}) {
   const text = await readText(path.resolve(root, planPath));
+  // Computed once, before any early return, so every plan-mode answer carries the field.
+  const decisions = await reviewDecisions(path.resolve(root, planPath), text);
   let repository = null;
   try { repository = git(root, ['rev-parse', '--show-toplevel']); } catch { repository = null; }
   const file = repository ? (path.relative(repository, path.resolve(root, planPath)) || planPath) : planPath;
   const slug = planSlug(file);
   const head = repository ? gitTry(repository, ['rev-parse', '--verify', '--quiet', 'HEAD']) : null;
-  const answer = { root: repository, file, slug, head, mode: 'unresolved', base: null, provenance: null, reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null };
+  const answer = { root: repository, file, slug, head, mode: 'unresolved', base: null, provenance: null, reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null, decisions };
   if (!repository || !head) return { ...answer, reason: 'git could not be read here, so no commit range can be resolved — review the whole change and say so' };
   if (!REVIEW_SLUG.test(slug)) {
     return { ...answer, reason: `\`${slug}\` is not a plan slug this can search history for — review the whole change and say so` };
