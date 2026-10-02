@@ -1,5 +1,5 @@
 # esquisse — CLAUDE.md
-<!-- last-arch: 2026-09-30 @ d5cd4c4ff662e8c89414a505011f96c72fa7a156 -->
+<!-- last-arch: 2026-10-02 @ 4877e55efed7564dcdad62b9e512bcedd3c34dcd -->
 
 esquisse is a Claude Code plugin (`esq`): twenty-one skills, a dependency-free CLI and four hook handlers (five events) running a
 plan → build → review cycle over Markdown ledgers in `docs/`. This repo is also its marketplace. How it is built, and the why
@@ -11,8 +11,8 @@ behind every rule below, is `docs/ARCHITECTURE.md`.
 values.** That is the maximand. The rest are constraints on it, never rivals to it:
 
 1. **Never block.** A stop is earned only when the answer lives in the user's head (intent, priority, a tradeoff on their
-   constraints), never when it is reachable by reading, running or reasoning. **No research instrument, measurement registry or
-   telemetry reading ever gates delivery.**
+   constraints), never when reading, running or reasoning reaches it: the user decides, never tests. **No research instrument,
+   measurement registry or telemetry reading ever gates delivery.**
 2. **Spend tokens like money.** See § Cost below.
 3. **Deterministic where it can be, model where it must be.** The CLI owns structure, IDs, cells and invariants; the model owns
    judgment. Work a script could settle but left to the model is paid again on every run.
@@ -34,9 +34,8 @@ official `claude plugin update` alone. Read `docs/ARCHITECTURE.md § Boundaries 
   research instruments (probes, measures, captures), reached only by `--lab`.
 - `tests/`: node suites discovered by convention. Product: `{cli,hooks,audit}`; lab: the rest. Each owns its `fixtures/`.
 - `docs/`: SPEC (what it does for users, `/esq:spec`), ARCHITECTURE (how it is built, `/esq:arch`), DECISIONS, BACKLOG, ROADMAP,
-  `epics/`, `plans/`, CONFORMANCE (formats the code parses), AUDIT (the reading pass), MAINTAINING (audit, release and research tools;
-  its cost table is what `cost-budgets.mjs` reads). EVIDENCE, `evidence/`, `preparation/`,
-  `baselines/`, PRIORITY-REVIEW and headless-trial are maintainer material that no skill or gate reads.
+  `epics/`, `plans/`, CONFORMANCE (formats the code parses), AUDIT (the reading pass), MAINTAINING (its cost table feeds
+  `cost-budgets.mjs`). EVIDENCE, `evidence/`, `preparation/`, `baselines/`, PRIORITY-REVIEW, headless-trial: no skill reads them.
 
 ## Verification
 
