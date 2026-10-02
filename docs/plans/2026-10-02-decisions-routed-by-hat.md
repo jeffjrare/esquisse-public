@@ -154,3 +154,25 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-10-02
+
+**Plan committed at:** dc75c64
+
+**Commits:** 35c3aed, db61b78, 9888d04
+
+**Verified:** 9888d042567af1460a0a7639a99a83ec884b2dcb
+- `node --test tests/cli/esq.test.mjs tests/cli/branch.test.mjs tests/cli/review-scope.test.mjs`
+- `./scripts/audit.sh`
+
+**What got built:** esq plan append-log accepts a hat-prefixed decisions array (product|architecture|design, one line each), refuses any other hat byte-identically and renders it under **Decided for you:**; esq branch check returns unit.decisions (abandoned unit plans included) and esq review scope carries the same list on every plan-mode answer.
+
+**Verification:**
+- (auto) node --test tests/cli/esq.test.mjs tests/cli/branch.test.mjs tests/cli/review-scope.test.mjs — 135 pass, 0 fail, 5 s; covers refusal (finance:, multi-line, empty), rendering on completed and blocked entries, unit collection with abandoned plan and other-branch exclusion, post-log ## heading excluded, rollout/decisions not swallowing each other, review scope parity (delta, --full, no-git legacy), empty list
+- (blast radius) ./scripts/audit.sh — Clean, 7 checks, product suites within 120 s, 27 s wall-clock; cli.mjs is a shared core module so the whole product pass ran here
+
+**Surprises / decisions made during execution:** None — phase executed as planned. Tests (1)(2) and the multi-line refusal live in tests/cli/esq.test.mjs beside the other append-log payload tests; the decisions validator is its own schema type (decisions) so its refusal names the offending item and the three hats.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. The payload key is decisions (array of "<hat>: <what> — <why> — undo: <how>"), rendered after **Rollout:**; esq.test.mjs replays build/SKILL.md append-log literals, so the example item added in Task 2.1 must use a valid hat prefix and one line. 2. Readers get objects {plan, source: "Phase N", hat, decision} from esq branch check (unit.decisions) and esq review scope (decisions); decision excludes the hat prefix. 3. /esq:status landing projection deliberately does not carry the field.
