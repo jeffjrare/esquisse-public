@@ -519,7 +519,7 @@ test('a plan recording no Branch belongs to no unit, and a missing backlog block
   await backlog(root, [['B-201', '🐛 bug', 'build: orphan Phase 1', 'Open']]);
   const verdict = await branchCheck(root, orphan);
   assert.equal(verdict.verdict, 'unrecorded');
-  assert.deepEqual(verdict.unit, { branch: null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [] });
+  assert.deepEqual(verdict.unit, { branch: null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [], decisions: [] });
 
   // A unit whose repository has no docs/BACKLOG.md at all: nothing to read is nothing to block on.
   const bare = await repo({ branches: ['esq/stem'], checkout: 'esq/stem' });
@@ -551,4 +551,44 @@ test('branch check collects the unit rollout from plan sections and execution-lo
     { plan: 'docs/plans/2026-09-26-feat.md', source: 'plan', step: 'Set `EXPORT_BUCKET` in production' },
     { plan: 'docs/plans/2026-09-26-feat.md', source: 'Phase 1', step: 'Restart the worker so it picks up the new queue' },
   ]);
+});
+
+// A unit's decisions are the calls its build phases made for a hat: every unit plan's
+// `**Decided for you:**` lists, abandoned plans included (their built phases still land), in plan
+// then phase order, with the hat split out — nothing from another unit, nothing after the log.
+test('branch check collects unit.decisions by hat from every unit plan, abandoned ones included', async () => {
+  const root = await repo({ branches: ['esq/feat'], checkout: 'esq/feat' });
+  const plans = path.join(root, 'docs/plans');
+  const skeleton = (title, extra = []) => [
+    `# ${title}`, '', '**Branch:** esq/feat', '**Origin:** main', ...extra, '',
+    '## Phases', '', '### Phase 1 — one', '- **Tasks:**', '  - Task 1.1: a task', '', '### Phase 2 — two', '- **Tasks:**', '  - Task 2.1: a task', '',
+    '### Phase 3 — three', '- **Tasks:**', '  - Task 3.1: a task', '',
+    '## Execution log', '<!-- Appended by /esq:build -->', '',
+  ].join('\n');
+  const first = path.join(plans, '2026-09-26-feat.md');
+  const second = path.join(plans, '2026-09-27-feat-fixes.md');
+  await writeFile(first, skeleton('Feat'));
+  await writeFile(second, skeleton('Feat fixes', ['', '**Abandoned:** 2026-09-28 — superseded']));
+  const entry = (phase, extra) => JSON.stringify({ phase, status: 'completed', commits: ['abc1234'], whatBuilt: 'a thing', verification: ['ok'], ...extra });
+  await appendLog(first, entry(1, { decisions: ['product: refunds round down — matches the ledger — undo: round half-up'], rollout: ['Restart the worker'] }));
+  await appendLog(first, entry(2, { rollout: ['Set FLAG'], decisions: ['design: the empty state shows a CTA — first run — undo: drop it', 'architecture: one table — simpler joins — undo: split it'] }));
+  await appendLog(second, entry(1, { decisions: ['design: red badge — urgency — undo: grey it'], rollout: ['Never collected'] }));
+  // After the log, under a `##` heading: not the log, so not collected.
+  await writeFile(first, `${await readFile(first, 'utf8')}\n## Appendix\n\n**Decided for you:**\n- product: not a log entry — x — undo: y\n`);
+  await plan(root, '2026-09-26-other.md', { branch: 'esq/other', origin: 'main', body: '\n## Execution log\n\n### Phase 1 — completed 2026-09-26\n\n**Decided for you:**\n- product: another unit — x — undo: y\n' });
+
+  const verdict = await branchCheck(root, path.relative(root, first));
+  assert.deepEqual(verdict.unit.decisions, [
+    { plan: 'docs/plans/2026-09-26-feat.md', source: 'Phase 1', hat: 'product', decision: 'refunds round down — matches the ledger — undo: round half-up' },
+    { plan: 'docs/plans/2026-09-26-feat.md', source: 'Phase 2', hat: 'design', decision: 'the empty state shows a CTA — first run — undo: drop it' },
+    { plan: 'docs/plans/2026-09-26-feat.md', source: 'Phase 2', hat: 'architecture', decision: 'one table — simpler joins — undo: split it' },
+    { plan: 'docs/plans/2026-09-27-feat-fixes.md', source: 'Phase 1', hat: 'design', decision: 'red badge — urgency — undo: grey it' },
+  ]);
+  // Rollout and decisions do not swallow each other, and the abandoned plan's rollout stays out.
+  assert.deepEqual(verdict.unit.rollout.map((step) => step.step), ['Restart the worker', 'Set FLAG']);
+
+  // A unit whose log records no decision answers an empty list.
+  const bare = await repo({ branches: ['esq/stem'], checkout: 'esq/stem' });
+  const file = await plan(bare, 'p.md', { branch: 'esq/stem', origin: 'main' });
+  assert.deepEqual((await branchCheck(bare, file)).unit.decisions, []);
 });

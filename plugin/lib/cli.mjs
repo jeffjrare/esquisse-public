@@ -2563,7 +2563,7 @@ function planStanding(text) {
 // the list is the same whichever unit plan the caller was handed. `abandoned` is the recorded way out,
 // and it retracts only unbuilt phases: `promised` and `findings` still count the abandoned plan.
 async function shippingUnit(repository, branch, headers) {
-  const unit = { branch: branch ?? null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [] };
+  const unit = { branch: branch ?? null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [], decisions: [] };
   if (!unit.branch) return unit;
   const slugs = new Set();
   for (const header of headers) {
@@ -2577,6 +2577,9 @@ async function shippingUnit(repository, branch, headers) {
     if (standing.abandoned) unit.abandoned.push({ plan: header.relative, ...standing.abandoned });
     else if (standing.state !== 'complete') unit.incomplete.push({ plan: header.relative, state: standing.state, phase: standing.phase });
     if (!standing.abandoned) unit.rollout.push(...planRollout(header.text).map((step) => ({ plan: header.relative, ...step })));
+    // Unlike rollout, an abandoned plan's decisions still count: abandoning retracts only unbuilt
+    // phases, so the built ones land and the calls they made ship with them.
+    unit.decisions.push(...planDecisions(header.text).map((decision) => ({ plan: header.relative, ...decision })));
   }
   unit.findings = await unitFindings(repository, slugs);
   let parsed;
@@ -2624,6 +2627,32 @@ function planRollout(text) {
   return steps;
 }
 
+// The calls a build phase made for a hat, as its log entries recorded them under `**Decided for you:**`,
+// tagged with the phase and split on the hat prefix so review and land group without parsing. Only
+// the execution-log span is read — `## Execution log` to the next `#`/`##` heading, as `parsePlan`
+// bounds it — and a list ends on the next bold field line or heading. Extraction only.
+const DECISION_BULLET = new RegExp(`^- (${DECISION_HATS.join('|')}): (\\S.*)$`);
+
+function planDecisions(text) {
+  const decisions = [];
+  const lines = text.split('\n');
+  const log = lines.findIndex((line) => line.trim() === '## Execution log');
+  if (log < 0) return decisions;
+  let collecting = false;
+  let phase = null;
+  for (const line of lines.slice(log + 1)) {
+    if (/^#{1,2} /.test(line)) break;
+    const heading = /^### Phase (\d+)\b/.exec(line);
+    if (heading) phase = Number(heading[1]);
+    if (/^#{1,6} /.test(line) || /^\*\*[^*]+:\*\*/.test(line)) collecting = line.trim() === '**Decided for you:**';
+    else if (collecting) {
+      const bullet = DECISION_BULLET.exec(line.trimEnd());
+      if (bullet) decisions.push({ source: `Phase ${phase ?? '?'}`, hat: bullet[1], decision: bullet[2] });
+    }
+  }
+  return decisions;
+}
+
 // What a caller that is about to write a `completed` execution-log entry needs, derived from the plan
 // file's own path rather than from git: a plan lives at `<root>/docs/plans/<name>.md`, so its root is
 // two directories up from the one holding it. `appendLog` has no repository argument and must not
@@ -2634,7 +2663,7 @@ async function unitForPlan(planPath, planText = null) {
   let text = planText;
   if (text === null) {
     try { text = await readText(file); }
-    catch { return { branch: null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [] }; }
+    catch { return { branch: null, plans: [], incomplete: [], abandoned: [], open: [], promised: [], findings: [], rollout: [], decisions: [] }; }
   }
   return shippingUnit(repository, parseBranch(text), await planHeaders(repository));
 }
