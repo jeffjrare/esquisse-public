@@ -110,9 +110,9 @@ Here that is the execution log: re-run the skeleton grep, recompute `L` and `A`,
 
 **Classify by `⏸`, never by its following clause.** Both manual-verification and same-unit-defect pauses are authority gates.
 
-**A missing entry is not a verdict.** A reported failure stops immediately, its option set or diagnosis relayed; never retry it — **except a diagnosis with no option set whose exact next action is re-running `/esq:build <this plan>`** (a flake outside the phase's change, its tasks committed): nothing in it is the user's, so the phase is unclassified and takes its one reconcile pass. Without a reported failure — even after a success claim, death, interruption or unusable response — the phase is **unclassified**.
+**A missing entry is not a verdict.** A reported failure stops immediately, its option set or diagnosis relayed; never retry it — **except a diagnosis with no option set whose exact next action is re-running `/esq:build <this plan>`**, whatever its cause — a flake outside the phase's change, a spent repair budget, a plan line to correct: nothing in it is the user's, so the phase is unclassified and takes its one reconcile pass. A diagnosis that names a missing user authority, or whose action is anything but that re-run, stays a stop. Without a reported failure — even after a success claim, death, interruption or unusable response — the phase is **unclassified**.
 
-**One reconcile pass per unclassified phase:** spawn a phase agent on the same plan with the normal loop prompt; build reconciles landed commits and passing verification before building. This pass does not consume the phase cap.
+**One reconcile pass per unclassified phase:** spawn a phase agent on the same plan with the normal loop prompt; build reconciles landed commits and passing verification before building. After a diagnosis, append to that prompt, verbatim, the agent's diagnosis and the edits its next action names, as data the new `/esq:build` verifies before using, under its own procedure and a fresh repair budget, so the cause is not paid for twice. This pass does not consume the phase cap.
 
 - Still no entry afterward → STOP. Report both attempts and recommend an attended `/esq:build <plan-path>`.
 - The pass reports failure → relay the failure; no further pass.
@@ -134,14 +134,14 @@ Stop the loop when: a gate fires, the phase cap is reached, or no phases remain.
 
 ## Stops you dissolve, stops you honor
 
-**You dissolve three stops, and only these:** `/esq:build`'s end-of-a-successful-phase `[context]` instruction to `/clear` and re-run, which you continue past silently; a failure whose only action is re-running `/esq:build` on this plan (§ 2, one reconcile pass); and a `⏸ blocked` phase once its chosen option is applied (§ "Then resume").
+**You dissolve three stops, and only these:** `/esq:build`'s end-of-a-successful-phase `[context]` instruction to `/clear` and re-run, which you continue past silently; a failure whose only action is re-running `/esq:build` on this plan, whatever its cause (§ 2, one reconcile pass); and a `⏸ blocked` phase once its chosen option is applied (§ "Then resume").
 
 **You honor every other stop**, without exception and without interpretation:
 
 - A `(manual)` step whose observation link stayed uncovered — closing it exceeded the phase's mandate or failed inside its bound.
 - Any `(auto)` verification failure, any failed test, unless its own diagnosis names nothing but re-running `/esq:build` (above).
 - Drift: a task that doesn't advance its phase's goal.
-- A task or plan the phase agent found wrong as written.
+- A task or plan the phase agent found wrong as written, unless its diagnosis names nothing but re-running `/esq:build` (above).
 - Any question the phase agent wanted to put to the user.
 - A subagent that left no log entry **and** reported a failure. No entry *without* a reported failure is unclassified: its single reconcile pass comes first, and the gate fires only if the phase is still unlogged.
 
@@ -308,5 +308,5 @@ Send a `PushNotification`: `"esq:autopilot — <X>/<Y> phases done. <stopped at 
 - **A gate is put to the user as a prompt, resolved by their pick, and applied verbatim** — never twice, never unanswered, never with an option you wrote. Never answer a gate for the user, never pick an option from an `AskUserQuestion` a subagent raised, never form your own leaning or act on an unanswered prompt.
 - **A decision is relayed as an option set, a diagnosis as a diagnosis** — every option, diagnosis and action comes from the phase agent, never from you.
 - **Decide from the execution log**, never from a subagent's self-report.
-- **Honor every `[authority]` stop in `/esq:build`; dissolve only the end-of-successful-phase `[context]` stop.** Asking the user in place and acting on their answer *is* honoring the authority stop.
+- **Honor every `[authority]` stop in `/esq:build`; dissolve only the end-of-successful-phase `[context]` stop**, and the diagnosis whose only action is re-running `/esq:build` on this plan (§ 2). Asking the user in place and acting on their answer *is* honoring the authority stop.
 - **Report the bill** — phases, commits, elapsed — per phase and at the end, even on an early stop; a failure is said first.
