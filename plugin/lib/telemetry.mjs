@@ -410,6 +410,13 @@ export async function summarizeTelemetry(files, options = {}) {
     spawnModel: { requested: 0, honored: 0, mismatch: 0, unrequested: 0 },
     skipped: { historicalNoise: 0, malformed: 0, duplicates: 0, supersededFallbacks: 0, excluded: 0 },
     direct: { segments: 0, sessions: 0, open: 0, superseded: 0, byCommand: {} },
+    // What the reader kept: one project (`repoKey`) or every one (`null`), from `since` on or from the
+    // start. Rows left out are counted, never silently dropped: `unkeyed` rows predate the key (B-121).
+    scope: {
+      repoKey: options.repoKey ?? null,
+      since: options.since == null ? null : new Date(options.since).toISOString(),
+      outside: { otherRepo: 0, unkeyed: 0, beforeSince: 0 },
+    },
     notes: [INTERRUPTED_RUNS_NOTE, DIRECT_SEGMENTS_NOTE],
   };
   const records = new Map(); // agentId → record (one per run; the whole-run row represents it)
@@ -444,7 +451,18 @@ export async function summarizeTelemetry(files, options = {}) {
         }
         continue;
       }
+      // Scoped before anything else counts the row, so the window, the labels and every group speak
+      // of the kept rows alone. A label and its run both carry the key and a timestamp, so they leave
+      // together.
+      if (options.repoKey && row.repoKey !== options.repoKey) {
+        summary.scope.outside[typeof row.repoKey === 'string' ? 'otherRepo' : 'unkeyed'] += 1;
+        continue;
+      }
       const at = timestamp(row.recordedAt);
+      if (options.since != null && (at === null || at < options.since)) {
+        summary.scope.outside.beforeSince += 1;
+        continue;
+      }
       if (at !== null) {
         if (first === null || at < first) first = at;
         if (last === null || at > last) last = at;
@@ -679,6 +697,19 @@ function home(file) {
   return root && file.startsWith(`${root}${path.sep}`) ? `~${file.slice(root.length)}` : file;
 }
 
+function scopeLine(scope) {
+  if (!scope) return 'every file named';
+  const { otherRepo, unkeyed, beforeSince } = scope.outside;
+  const parts = [scope.repoKey ? `this project only (key ${scope.repoKey.slice(0, 8)}) — --all pools every project` : 'every project'];
+  if (scope.since) parts.push(`since ${shortDate(scope.since)}`);
+  const left = [];
+  if (otherRepo) left.push(`${otherRepo} of other projects`);
+  if (unkeyed) left.push(`${unkeyed} predating the project key`);
+  if (beforeSince) left.push(`${beforeSince} before the window`);
+  if (left.length) parts.push(`rows left out: ${left.join(', ')}`);
+  return parts.join(' · ');
+}
+
 export function renderTelemetrySummary(summary) {
   const { total: withoutUsage, fallbackOnly, noUsage, zeroUsage } = summary.withoutUsage;
   const withUsage = summary.runs - withoutUsage;
@@ -687,6 +718,7 @@ export function renderTelemetrySummary(summary) {
   const out = ['esq telemetry summary'];
   out.push(`  files:    ${files[0]}`);
   for (const file of files.slice(1)) out.push(`            ${file}`);
+  out.push(`  scope:    ${scopeLine(summary.scope)}`);
   out.push(`  window:   ${shortDate(summary.window.first)} → ${shortDate(summary.window.last)}`);
   out.push(`  runs:     ${summary.runs} recorded · ${withUsage} with usage · ${withoutUsage} without usage (${fallbackOnly} fallback-only / ${noUsage} no usage / ${zeroUsage} zero usage) · ${historicalNoise + malformed + duplicates + supersededFallbacks + excluded} skipped (${historicalNoise} noise / ${malformed} malformed / ${duplicates} duplicates / ${supersededFallbacks} superseded fallbacks / ${excluded} excluded)`);
   // The session writer's rows: one segment per esq command run in a main session, cumulative per

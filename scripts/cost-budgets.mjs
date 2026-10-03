@@ -168,7 +168,7 @@ export function render(results, summary) {
 }
 
 export function liveSummary(root = ROOT) {
-  const res = spawnSync(process.execPath, [resolve(root, 'plugin', 'bin', 'esq'), 'telemetry', 'summary', '--json'], {
+  const res = spawnSync(process.execPath, [resolve(root, 'plugin', 'bin', 'esq'), 'telemetry', 'summary', '--all', '--json'], {
     encoding: 'utf8',
     maxBuffer: 32 * 1024 * 1024,
   });

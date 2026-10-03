@@ -5574,18 +5574,28 @@ export async function main(args) {
   if (group === 'telemetry' && action === 'summary') {
     const json = rest.includes('--json');
     const rows = rest.includes('--rows');
-    const named = rest.filter((arg) => arg !== '--json' && arg !== '--rows');
     // `--rows` is a machine surface — the per-run join keys a caller attributes against a window
     // outside telemetry — and the report has no line for them. Refused rather than silently ignored,
     // so a caller that forgot `--json` learns it here instead of from an empty join.
     if (rows && !json) throw new Error('usage: esq telemetry summary --rows requires --json (the per-run rows are a machine surface, not part of the report)');
+    // The store is machine-wide; a person asks about the project they stand in. So the discovered
+    // store is scoped to this checkout's `repoKey` (worktrees included) unless `--all` pools it, and
+    // outside a git repository there is no project to scope to. Named files are read as given.
+    const all = rest.includes('--all');
+    const sinceAt = rest.indexOf('--since');
+    const sinceValue = sinceAt < 0 ? null : rest[sinceAt + 1];
+    if (sinceAt >= 0 && !/^\d{4}-\d{2}-\d{2}$/.test(sinceValue ?? '')) throw new Error('usage: esq telemetry summary --since <YYYY-MM-DD>');
+    const named = rest.filter((arg, index) => !['--json', '--rows', '--all', '--since'].includes(arg) && !(sinceAt >= 0 && index === sinceAt + 1));
     const discovered = named.length ? null : await discoverTelemetryFiles();
     const options = discovered ? { searchedRoot: discovered.root } : {};
     if (rows) options.rows = true;
+    if (sinceValue) options.since = Date.parse(`${sinceValue}T00:00:00Z`);
+    const key = discovered && !all ? repoKey(root) : null;
+    if (key) options.repoKey = key;
     const summary = await summarizeTelemetry(named.length ? named : discovered.files, options);
     if (json) return output(summary);
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
 }

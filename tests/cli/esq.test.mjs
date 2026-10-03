@@ -1482,6 +1482,41 @@ test('esq telemetry summary reads the named file, prints text by default and JSO
   await assert.rejects(run(process.execPath, [bin, 'telemetry']), (error) => error.code === 2 && /telemetry summary/.test(error.stderr));
 });
 
+test('summarizeTelemetry scopes to one project and a start date, and counts every row it left out', async () => {
+  const { file } = await telemetryFixture();
+  const objects = TELEMETRY_ROWS.filter((row) => typeof row !== 'string');
+  const keyed = objects.filter((row) => row.repoKey === KEY_A);
+  const scoped = await summarizeTelemetry([file], { repoKey: KEY_A });
+  // Only KEY_A's rows survive: one build run, the window theirs alone.
+  assert.equal(scoped.runs, 1);
+  assert.equal(scoped.byCommand['esq:build'].runs, 1);
+  assert.equal(scoped.scope.repoKey, KEY_A);
+  const other = objects.filter((row) => typeof row.repoKey === 'string' && row.repoKey !== KEY_A).length;
+  assert.deepEqual(scoped.scope.outside, { otherRepo: other, unkeyed: objects.length - keyed.length - other, beforeSince: 0 });
+  assert.equal(scoped.window.first, keyed.map((row) => row.recordedAt).sort()[0]);
+  // A start date drops earlier rows by their own timestamp; unscoped, the key plays no part.
+  const since = Date.parse('2026-08-19T06:00:00.000Z');
+  const dated = await summarizeTelemetry([file], { since });
+  assert.equal(dated.scope.repoKey, null);
+  assert.equal(dated.scope.since, '2026-08-19T06:00:00.000Z');
+  assert.equal(dated.scope.outside.beforeSince, objects.filter((row) => Date.parse(row.recordedAt) < since).length);
+  assert.ok(Date.parse(dated.window.first) >= since);
+  assert.match(renderTelemetrySummary(scoped), /scope:\s+this project only \(key [0-9a-f]{8}\) — --all pools every project · rows left out: /);
+  assert.match(renderTelemetrySummary(await summarizeTelemetry([file])), /scope:\s+every project\n/);
+});
+
+test('esq telemetry summary refuses a --since that is not a date, and reads named files whole', async () => {
+  const run = (file, args, options = {}) => promisify(execFile)(file, args, { timeout: 10_000, ...options });
+  const bin = fileURLToPath(new URL('../../plugin/bin/esq', import.meta.url));
+  const isolated = { ...process.env, CLAUDE_CONFIG_DIR: await mkdtemp(path.join(os.tmpdir(), 'esq-cli-isolated-')), CLAUDE_PLUGIN_DATA: '' };
+  await assert.rejects(run(process.execPath, [bin, 'telemetry', 'summary', '--since', '10-01'], { env: isolated }), (error) => error.code === 2 && /--since <YYYY-MM-DD>/.test(error.stderr));
+  const { file } = await telemetryFixture();
+  const parsed = JSON.parse((await run(process.execPath, [bin, 'telemetry', 'summary', '--json', '--since', '2026-08-19', file], { env: isolated })).stdout);
+  assert.equal(parsed.scope.repoKey, null);
+  assert.equal(parsed.scope.since, '2026-08-19T00:00:00.000Z');
+  assert.ok(parsed.scope.outside.beforeSince > 0);
+});
+
 // ── assert-model (B-042) ──────────────────────────────────────────────────────────────────────────
 const label = (agentId, requestedModel, esqCommand = 'build') => ({ recordedAt: '2026-08-19T09:00:00.000Z', source: 'AgentLabel', sessionId: 's9', agentId, agentType: 'general-purpose', esqCommand, ...(requestedModel === undefined ? {} : { requestedModel }) });
 const stop = (agentId, models) => ({ recordedAt: '2026-08-19T09:01:00.000Z', source: 'SubagentStop', sessionId: 's9', agentId, agentType: 'general-purpose', models, durationMs: 10, toolUseCount: 1, apiRequests: 1, runUsage: { input_tokens: 1, output_tokens: 2, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 }, transcriptComplete: true });
