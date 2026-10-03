@@ -415,7 +415,8 @@ export async function summarizeTelemetry(files, options = {}) {
     scope: {
       repoKey: options.repoKey ?? null,
       since: options.since == null ? null : new Date(options.since).toISOString(),
-      outside: { otherRepo: 0, unkeyed: 0, beforeSince: 0 },
+      until: options.until == null ? null : new Date(options.until).toISOString(),
+      outside: { otherRepo: 0, unkeyed: 0, beforeSince: 0, afterUntil: 0 },
     },
     notes: [INTERRUPTED_RUNS_NOTE, DIRECT_SEGMENTS_NOTE],
   };
@@ -424,6 +425,7 @@ export async function summarizeTelemetry(files, options = {}) {
   const anonymous = []; // run records without an agentId — nothing to join or dedupe on
   const labels = new Map(); // agentId → { slug, requestedModel } (a repeat for one agentId is one label)
   const excluded = new Set(); // agentIds in EXCLUDED_RUNS actually seen — counted once per run, not per row
+  const outsideWindow = new Set(); // agentIds whose run rows fell outside since/until — their labels stay silent
   const runRows = options.rows === true ? [] : null; // `--rows` only; null means the surface is off
   let legacyRows = 0;
   let first = null;
@@ -452,18 +454,22 @@ export async function summarizeTelemetry(files, options = {}) {
         continue;
       }
       // Scoped before anything else counts the row, so the window, the labels and every group speak
-      // of the kept rows alone. A label and its run both carry the key and a timestamp, so they leave
-      // together.
+      // of the kept rows alone. A label and its run carry the same key, so the project scope drops them
+      // together; their timestamps differ, so the window is the run's: a label is kept whatever its own
+      // time and joins only a run inside the window, and is reported unrecorded only from inside it.
       if (options.repoKey && row.repoKey !== options.repoKey) {
         summary.scope.outside[typeof row.repoKey === 'string' ? 'otherRepo' : 'unkeyed'] += 1;
         continue;
       }
       const at = timestamp(row.recordedAt);
-      if (options.since != null && (at === null || at < options.since)) {
-        summary.scope.outside.beforeSince += 1;
+      const beforeSince = options.since != null && (at === null || at < options.since);
+      const afterUntil = options.until != null && at !== null && at >= options.until;
+      if ((beforeSince || afterUntil) && row.source !== 'AgentLabel') {
+        summary.scope.outside[beforeSince ? 'beforeSince' : 'afterUntil'] += 1;
+        if (typeof row.agentId === 'string') outsideWindow.add(row.agentId);
         continue;
       }
-      if (at !== null) {
+      if (at !== null && !beforeSince && !afterUntil) {
         if (first === null || at < first) first = at;
         if (last === null || at > last) last = at;
       }
@@ -474,6 +480,7 @@ export async function summarizeTelemetry(files, options = {}) {
             requestedModel: typeof row.requestedModel === 'string' && row.requestedModel !== '' ? row.requestedModel : null,
             repoKey: row.repoKey,
             planSlug: row.planSlug,
+            inWindow: !beforeSince && !afterUntil,
           });
         }
         continue;
@@ -562,7 +569,7 @@ export async function summarizeTelemetry(files, options = {}) {
     }
   }
   for (const [agentId, label] of labels) {
-    if (records.has(agentId)) continue;
+    if (records.has(agentId) || !label.inWindow || outsideWindow.has(agentId)) continue;
     summary.labelledWithoutRecord.total += 1;
     const key = `esq:${label.slug}`;
     summary.labelledWithoutRecord.byCommand[key] = (summary.labelledWithoutRecord.byCommand[key] || 0) + 1;
@@ -697,6 +704,84 @@ function home(file) {
   return root && file.startsWith(`${root}${path.sep}`) ? `~${file.slice(root.length)}` : file;
 }
 
+// ── Change against the previous period ────────────────────────────────────────────────────────────
+// Arithmetic, never a verdict: per command, the window's medians beside the same-length window just
+// before it, and the change in percent. Which change matters, and why, is the reader's to judge.
+export const TREND_DEFAULT_DAYS = 7;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function percentChange(now, before) {
+  if (!finite(now) || !finite(before) || before === 0) return null;
+  return Math.round(((now - before) / before) * 100);
+}
+
+function compareGroups(now, before) {
+  const out = {};
+  for (const key of [...new Set([...Object.keys(now), ...Object.keys(before)])].sort()) {
+    const a = now[key];
+    const b = before[key];
+    const pair = (read) => {
+      const current = a ? read(a) : null;
+      const previous = b ? read(b) : null;
+      return { now: current, before: previous, changePercent: percentChange(current, previous) };
+    };
+    out[key] = {
+      runs: { now: a ? a.runs : 0, before: b ? b.runs : 0 },
+      // Either side under the sample threshold makes the comparison provisional, the same rule as a group.
+      provisional: !a || !b || a.provisional || b.provisional,
+      medianOutput: pair((group) => group.tokens.medianOutput),
+      medianDurationMs: pair((group) => group.durationMs.median),
+      medianTrips: pair((group) => group.apiRequests.median),
+    };
+  }
+  return out;
+}
+
+export async function compareTelemetry(files, { repoKey: key = null, from, to }) {
+  const span = to - from;
+  const scope = key ? { repoKey: key } : {};
+  const now = await summarizeTelemetry(files, { ...scope, since: from, until: to });
+  const before = await summarizeTelemetry(files, { ...scope, since: from - span, until: from });
+  return {
+    now: { from: new Date(from).toISOString(), to: new Date(to).toISOString() },
+    before: { from: new Date(from - span).toISOString(), to: new Date(from).toISOString() },
+    byCommand: compareGroups(now.byCommand, before.byCommand),
+    direct: compareGroups(now.direct.byCommand, before.direct.byCommand),
+  };
+}
+
+export function trendWindow(since, at = Date.now()) {
+  return since == null ? { from: at - TREND_DEFAULT_DAYS * DAY_MS, to: at } : { from: since, to: at };
+}
+
+function trendTable(trend) {
+  const change = (pair, render) => {
+    if (pair.now === null) return '—';
+    if (pair.before === null) return `${render(pair.now)} (new)`;
+    const sign = pair.changePercent > 0 ? '+' : '';
+    return `${render(pair.now)} (${pair.changePercent === null ? 'n/a' : `${sign}${pair.changePercent}%`})`;
+  };
+  const header = ['command', 'runs now/before', 'out tok med', 'dur med', 'trips med'];
+  const rows = [
+    ...Object.entries(trend.byCommand).map(([key, row]) => [key, row]),
+    ...Object.entries(trend.direct).map(([key, row]) => [`${key} (direct)`, row]),
+  ].map(([key, row]) => [
+    key,
+    `${row.runs.now}/${row.runs.before}${row.provisional ? '*' : ''}`,
+    change(row.medianOutput, humanCount),
+    change(row.medianDurationMs, humanDuration),
+    change(row.medianTrips, humanCount),
+  ]);
+  if (rows.length === 0) rows.push(['(none)', '—', '—', '—', '—']);
+  const widths = header.map((_, column) => Math.max(...[header, ...rows].map((row) => [...row[column]].length)));
+  const render = (row) => row.map((cell, column) => (column === 0 ? cell.padEnd(widths[column]) : cell.padStart(widths[column]))).join('  ').trimEnd();
+  return [
+    `change vs the previous period · ${shortDate(trend.now.from)} → ${shortDate(trend.now.to)} against ${shortDate(trend.before.from)} → ${shortDate(trend.before.to)} (medians; * either side under ${MIN_SAMPLE_RUNS} runs)`,
+    `  ${render(header)}`,
+    ...rows.map((row) => `  ${render(row)}`),
+  ];
+}
+
 function scopeLine(scope) {
   if (!scope) return 'every file named';
   const { otherRepo, unkeyed, beforeSince } = scope.outside;
@@ -748,5 +833,6 @@ export function renderTelemetrySummary(summary) {
     { header: 'model', cell: (group) => group.models },
     { header: 'typed/skill', cell: (group) => `${group.via.typed}/${group.via['skill-tool']}` },
   ]));
+  if (summary.trend) out.push('', ...trendTable(summary.trend));
   return `${out.join('\n')}\n`;
 }

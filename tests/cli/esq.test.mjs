@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { LOG_ENTRY_SCHEMA, addDecisions, addRow, appendLog, briefDepth, briefPending, briefPlan, evidence, planContext, priForType, rankEdges, rankOrder, rankPlace, readRanges, renderAppendLogHelp, renderEvidence, derive, reserveId, setPri, setStatus, state, validate } from '../../plugin/lib/cli.mjs';
 import { nextPhase, parsePlan, parseVerified } from '../../plugin/lib/markdown.mjs';
-import { DIRECT_SEGMENTS_NOTE, EXCLUDED_RUNS, RUN_ROW_KEYS, INTERRUPTED_RUNS_NOTE, MIN_SAMPLE_RUNS, PLUGIN_DATA_ENV_IGNORED_NOTE, TELEMETRY_OPT_OUT_NOTE, discoverTelemetryFiles, renderTelemetrySummary, spawnModelVerdict, summarizeTelemetry } from '../../plugin/lib/telemetry.mjs';
+import { DIRECT_SEGMENTS_NOTE, EXCLUDED_RUNS, RUN_ROW_KEYS, INTERRUPTED_RUNS_NOTE, MIN_SAMPLE_RUNS, PLUGIN_DATA_ENV_IGNORED_NOTE, TELEMETRY_OPT_OUT_NOTE, compareTelemetry, discoverTelemetryFiles, renderTelemetrySummary, spawnModelVerdict, summarizeTelemetry } from '../../plugin/lib/telemetry.mjs';
 
 // `esq lane` appends a plan-identity declaration under `pluginDataRoot(environment)`, and this suite
 // calls it dozens of times on fixture plans. Pin the whole file's default environment at a throwaway
@@ -1492,17 +1492,38 @@ test('summarizeTelemetry scopes to one project and a start date, and counts ever
   assert.equal(scoped.byCommand['esq:build'].runs, 1);
   assert.equal(scoped.scope.repoKey, KEY_A);
   const other = objects.filter((row) => typeof row.repoKey === 'string' && row.repoKey !== KEY_A).length;
-  assert.deepEqual(scoped.scope.outside, { otherRepo: other, unkeyed: objects.length - keyed.length - other, beforeSince: 0 });
+  assert.deepEqual(scoped.scope.outside, { otherRepo: other, unkeyed: objects.length - keyed.length - other, beforeSince: 0, afterUntil: 0 });
   assert.equal(scoped.window.first, keyed.map((row) => row.recordedAt).sort()[0]);
   // A start date drops earlier rows by their own timestamp; unscoped, the key plays no part.
   const since = Date.parse('2026-08-19T06:00:00.000Z');
   const dated = await summarizeTelemetry([file], { since });
   assert.equal(dated.scope.repoKey, null);
   assert.equal(dated.scope.since, '2026-08-19T06:00:00.000Z');
-  assert.equal(dated.scope.outside.beforeSince, objects.filter((row) => Date.parse(row.recordedAt) < since).length);
+  // Labels are not counted: the window is the run's, and a label follows its run.
+  assert.equal(dated.scope.outside.beforeSince, objects.filter((row) => row.source !== 'AgentLabel' && Date.parse(row.recordedAt) < since).length);
   assert.ok(Date.parse(dated.window.first) >= since);
   assert.match(renderTelemetrySummary(scoped), /scope:\s+this project only \(key [0-9a-f]{8}\) — --all pools every project · rows left out: /);
   assert.match(renderTelemetrySummary(await summarizeTelemetry([file])), /scope:\s+every project\n/);
+});
+
+test('compareTelemetry sets a window beside the same-length one before it, per command, in percent', async () => {
+  const { file } = await telemetryFixture();
+  // 2026-08-19 05:00 → 07:00 holds a-build-2 (and a-build-1); 03:00 → 05:00 holds none of them.
+  const trend = await compareTelemetry([file], { from: Date.parse('2026-08-19T05:00:00Z'), to: Date.parse('2026-08-19T07:00:00Z') });
+  assert.equal(trend.before.from, '2026-08-19T03:00:00.000Z');
+  const build = trend.byCommand['esq:build'];
+  assert.ok(build.runs.now > 0);
+  assert.equal(build.runs.before, 0);
+  assert.equal(build.provisional, true);
+  assert.equal(build.medianOutput.before, null);
+  assert.equal(build.medianOutput.changePercent, null);
+  // The previous window is the half-open span just before: a run on its edge belongs to the later one.
+  const wider = await compareTelemetry([file], { from: Date.parse('2026-08-19T05:20:00Z'), to: Date.parse('2026-08-19T07:00:00Z') });
+  assert.equal(wider.byCommand['esq:build'].runs.before, 1);
+  assert.equal(wider.byCommand['esq:build'].medianOutput.changePercent, Math.round(((7975 - 72) / 72) * 100));
+  const text = renderTelemetrySummary({ ...(await summarizeTelemetry([file])), trend: wider });
+  assert.match(text, /change vs the previous period · 2026-08-19 → 2026-08-19 against 2026-08-19 → 2026-08-19/);
+  assert.match(text, /esq:build\s+1\/1\*\s+8\.0k \(\+\d+%\)/);
 });
 
 test('esq telemetry summary refuses a --since that is not a date, and reads named files whole', async () => {

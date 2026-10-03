@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseVerified, readText, splitTableRow, tableAt } from './markdown.mjs';
 import { canonicalPlanSlug, telemetryOptedOut } from '../scripts/hook-io.mjs';
-import { MIN_SAMPLE_RUNS, discoverTelemetryFiles, renderTelemetrySummary, repoKey, summarizeTelemetry } from './telemetry.mjs';
+import { MIN_SAMPLE_RUNS, compareTelemetry, discoverTelemetryFiles, renderTelemetrySummary, repoKey, summarizeTelemetry, trendWindow } from './telemetry.mjs';
 
 const STATUSES = new Set(['Open', 'Needs-decision', 'Planned', 'Done', 'Dropped']);
 
@@ -5592,7 +5592,10 @@ export async function main(args) {
     if (sinceValue) options.since = Date.parse(`${sinceValue}T00:00:00Z`);
     const key = discovered && !all ? repoKey(root) : null;
     if (key) options.repoKey = key;
-    const summary = await summarizeTelemetry(named.length ? named : discovered.files, options);
+    const files = named.length ? named : discovered.files;
+    const summary = await summarizeTelemetry(files, options);
+    // The same window against the one just before it (the last seven days when no --since names one).
+    summary.trend = await compareTelemetry(files, { repoKey: options.repoKey ?? null, ...trendWindow(options.since ?? null) });
     if (json) return output(summary);
     process.stdout.write(renderTelemetrySummary(summary));
     return;
