@@ -1,7 +1,7 @@
 {
   "name": "esq",
   "displayName": "esquisse",
-  "version": "0.3.76",
+  "version": "0.3.77",
   "description": "Plan, build, review and land features in Claude Code, with thoughtful design and a reviewable trail in your repository.",
   "author": {
     "name": "Esquisse contributors"
