@@ -26,6 +26,11 @@ values.** That is the maximand. The rest are constraints on it, never rivals to 
 `claude --plugin-dir ./plugin`. The one sanctioned exception, `./scripts/update.sh`, publishes a verified `main` through the
 official `claude plugin update` alone. Read `docs/ARCHITECTURE.md § Boundaries not to cross` before anything reaches `~/.claude`.
 
+## README is public and never left behind
+
+This repo is published: `README.md` is its user documentation. **Any change to what a command does, takes or returns updates
+the README — its table row and every paragraph about it — in the same commit**, checked before every commit and release.
+
 ## Map
 
 - `plugin/`: `skills/<name>/SKILL.md` (source of truth), `bin/esq` + `lib/` (the CLI), `hooks/` + `scripts/` (hook handlers),

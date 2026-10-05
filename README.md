@@ -91,6 +91,11 @@ until the scope is clear and writes a brief that `plan` picks up. For a product 
 no UI yet, it suggests `/esq:ui --greenfield` to put rendered design directions on
 screen before any code.
 
+**A screen someone misread?** `/esq:ui B-NNN` (or a sentence saying what went wrong)
+captures the screen as they met it, renders the fix — two directions when the choice
+is yours — on a comparison page, and writes the brief `plan` picks up. `/esq:work`
+routes such an item there itself.
+
 **Small change?** `/esq:work fix the typo in the sign-in error` records the item,
 sizes it, and — when it is truly small — makes the change, verifies it and commits,
 with no plan. Anything bigger gets the exact next command instead. A real run:

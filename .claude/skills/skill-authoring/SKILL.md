@@ -56,8 +56,9 @@ What `./scripts/audit.sh` will fail you on when a skill changes. Reasoning: `doc
   apply agent on `route: apply` alone; `relay` prints the command flush-left and stops the gate — never invoking the restricted
   skill and never reaching the same end by its CLI call, a hand edit or a manual merge; `stop` spawns nothing. An apply worker
   commits only after its verification passes.
-- **Adding a skill = one README table row.** Changing behavior means re-reading that command's prose section by hand — a table
-  proves presence, not truth.
+- **Adding a skill = one README table row.** Changing behavior, arguments or output means updating that row and re-reading
+  every README paragraph about the command by hand, in the same commit — the README is public, and a table proves presence,
+  not truth.
 - **Ship it:** run the checks the change earns → commit → validate with `claude --plugin-dir ./plugin`. The plan's final phase
   runs `./scripts/audit.sh` and records its PASS. Never test the plugin by installing it.
 
