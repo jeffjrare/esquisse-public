@@ -12,7 +12,7 @@ Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first p
 
 You make the visual direction of a product choosable by rendering it, in one of two modes. Bare, you are auditing the interface of an app that already exists, before anyone redesigns it — the whole surface, or, when the target names a problem (see `## A targeted run`), the one screen where someone hit it. With `--greenfield`, there is no app yet: you render two directions for one named screen out of content someone actually wrote — see `## Greenfield mode`, which is the whole contract for that run. The output is the same either way: a brief `/esq:plan` consumes, plus one comparison page showing the proposed direction(s) — with what the app looks like today beside them whenever there is an app. The page is published with the `Artifact` tool when the session has it, and is otherwise a standalone HTML file committed beside the brief; either is a finished deliverable.
 
-Do NOT toggle plan mode. The discipline is enforced by this prompt: read the code, drive the app, look at it, research outside, write ONE brief, produce ONE comparison page, commit, stop. Plan mode would block the write.
+Do NOT toggle plan mode. The discipline is enforced by this prompt: read the code, drive the app, look at it, research outside, write ONE brief, produce ONE comparison page with its live directions, commit, stop. Plan mode would block the write.
 
 **This is not `/esq:review`.** That command judges a diff against a bar — a state that renders blank, an action with no feedback. This one judges the *whole surface* against where the product should go, which is a direction, not a defect list. Where the direction is the user's call, you make it choosable by rendering it, not by describing it; where the mandate already fixed or delegated it, you render the one you recommend.
 
@@ -86,23 +86,24 @@ A named path that does not exist, and a brief carrying no `## User-facing flow`,
 
 **Pass 2 is skipped**, and you say so on screen once. There is no running app, so there is no capture of today, no per-screen reading, and no Today section on the published page.
 
-**Pass 3 runs unchanged, and it carries more of the weight** — with no app anchoring the directions, the outside read is the only thing standing between the user and your own habits presented as the state of the art. Pass 3 tells you to name the two or three questions where the answer is load-bearing; in this mode they are named for you, and they are these three:
+**Pass 3 runs unchanged, and it carries more of the weight** — with no app anchoring the directions, the outside read is the only thing standing between the user and your own habits presented as the state of the art. Pass 3 tells you to name the two or three questions where the answer is load-bearing; in this mode they are named for you, and they are these four:
 
 1. **The layout pattern this class of app has settled on** — what a product of this kind you would hold up as well-built puts where, today, rather than what one did when your training ended.
 2. **What the stack the source names made idiomatic in its current major version** — and when the source names no stack, what the ecosystem currently defaults to for this class of app, because that is the choice the implementer will otherwise make by reflex.
-3. **Which accessibility criteria are now table stakes** for this class of screen, beyond the five items that gate each direction below.
+3. **Which accessibility criteria are now table stakes** for this class of screen, beyond the six items that gate each direction below.
+4. **The craft this class of product now ships** — the motion, micro-interactions and visual signatures of the products you would hold up as delightful today, and which of them the target browsers run natively, without a script.
 
 **The source-and-date form is mandatory here, not incidental.** Every load-bearing choice a direction rests on carries **at least one source with its date**, in the brief, in one line — and a choice you could not source says so in the same place. Elsewhere that line lets a reader tell a checked answer from a remembered one; here it is the only evidence the run has, because nothing was ever looked at.
 
 **The budget is reallocated, never raised.** Pass 2's captures are gone: this mode takes **at most 4 captures** — one per rendered direction per theme — and Pass 2's share of the search allowance moves to Pass 3. Four is still a reallocation of Pass 2's own share and still well under the announced ceiling of 8; the announced bound at the top of this file does not go up.
 
-**Pass 4 renders on the one screen the source names** — not the busiest, since nothing has traffic yet. Everything else about Pass 4 holds unchanged except the direction count: **exactly 2 directions, whatever the source fixes or delegates** — starting a product is the choice this mode exists to put on screen — the tension named in one sentence before you build, the real labels and data shape from the source, tokens declared explicitly, `artifact-design` loaded before the first direction, and the five-item gate a direction has to pass before you show it.
+**Pass 4 renders on the one screen the source names** — not the busiest, since nothing has traffic yet. Everything else about Pass 4 holds unchanged except the direction count: **exactly 2 directions, whatever the source fixes or delegates** — starting a product is the choice this mode exists to put on screen — the tension named in one sentence before you build, the real labels and data shape from the source, tokens declared explicitly, `artifact-design` loaded before the first direction, and the six-item gate a direction has to pass before you show it.
 
 **Both themes ship, unconditionally.** Nothing in this mode is conditional on an app existing, so Pass 4's "if the app has them" does not apply here: each rendered direction is shown in **light and dark** on the comparison page. A direction with only one theme is not finished, whatever the stack turns out to be later.
 
 **Pass 4 sets up its own browser driver.** Pass 2 is skipped here, so there is no browser tooling to inherit and none is assumed: use the session's browser tooling at Pass 4 — the `run` skill when it is listed, otherwise a browser-driving MCP server or a headless browser the machine has — and drive the rendered HTML files with it. Pass 4's "no browser driver is available" branch is reached **only** when none of those works — never by default because Pass 2 did not run. When it does fail, say so once and carry the absence through to the brief and the page.
 
-**Pass 4's five-item gate runs here in full.** With no app to compare against, it is the only thing standing between a direction that looks right in a screenshot and one that is usable; item 5, the rendered states, carries the most weight, since no code exists to have them.
+**Pass 4's six-item gate runs here in full.** With no app to compare against, it is the only thing standing between a direction that looks right in a screenshot and one that is usable; item 5, the rendered states, carries the most weight, since no code exists to have them.
 
 **The published page carries the evidence, or it carries the absence — there is no third possibility.** The page has one slot per rendered direction per theme, and every slot shows one of exactly two things: the **embedded capture** of that direction in that theme, or, in the place the capture would have occupied, the line `not rendered — no browser driver`. A slot showing neither is a page that invites the user to choose between two directions on nobody's word, which is the whole failure this mode exists to prevent. A run whose driver genuinely failed publishes stated absences and that is a finished page, not a violation; a run that simply did not look is neither. The same verdict goes in the brief, **beside the no-live-read line** and in the same shape — which slots carry a capture and which state the absence — so the brief `/esq:plan` consumes says what was actually opened without opening the page.
 
@@ -132,7 +133,7 @@ If the app cannot be launched — it needs credentials, a seeded database, a dev
 
 ## Pass 3 — The outside read
 
-"Ultra modern, 2026 techniques" is not in your head reliably — left unchecked you will produce your own habits, dated, presented as the state of the art. So name the two or three questions where the answer is genuinely load-bearing for this product — the layout pattern for this class of app, what the framework's current major version made idiomatic, the accessibility criteria that became table stakes — and go find out.
+"Ultra modern, 2026 techniques" is not in your head reliably — left unchecked you will produce your own habits, dated, presented as the state of the art. So name the two or three questions where the answer is genuinely load-bearing for this product — the layout pattern for this class of app, what the framework's current major version made idiomatic, the accessibility criteria that became table stakes, the motion and interaction craft the products you would hold up as delightful now ship — and go find out.
 
 ### Whose question is it
 
@@ -161,6 +162,8 @@ When there are two, they must differ in a way the user can *choose between*: not
 
 **The counted findings are the floor, not the direction.** Every direction closes Pass 1's counted defects and its accessibility floor — they are what is broken regardless, section 4 of the page. The direction answers a different question: what the screen should feel like to the people it is for and where their eye goes — hierarchy, colour, surfaces, imagery, motion, the one moment that rewards them. A direction that only closes the counted defects is a cleanup under a direction's name; do not show it as one.
 
+**Each direction carries its craft, rendered.** Creativity is part of the direction, never a polish pass left for later. Each one proposes its signature — a type, colour or composition move this class of product does not make by default, a shape or illustration language — and its motion: how the screen arrives, how a control answers a hover and a press, how one state becomes the next (empty to filled, closed to open, sent to confirmed), and one moment that rewards the person for the screen's main action. Motion is built in the direction's HTML, never described beside it. It serves the hierarchy — it moves the eye where the direction says the eye goes — stays short (most under ~300 ms, nothing that holds back reading), and reaches for what the stack allows before any script: CSS transitions, `@keyframes`, scroll-driven animations, view transitions, each with the support Pass 3 checked. The calmer of two directions may be quiet; it is never inert.
+
 **The app's visual rules are today's language, not constraints.** A rule the project's design docs or stylesheets impose — one accent, no gradient, no border, a cap on elevations, a font ban — binds a direction only when its stated reason is a stack, security, legal or performance fact you checked; read the reason it gives. Otherwise it is part of what is under review: at least one direction is free to break it, and names the rules it breaks. Pass 1's limit still holds — a direction that needs a different styling layer is a different project.
 
 Each direction:
@@ -168,17 +171,18 @@ Each direction:
 - Uses the real content from the capture — the same labels, the same data shape, the same number of rows. A direction rendered with lorem ipsum is a direction that hides how it handles the real thing.
 - Ships both themes, light and dark, if the app has them — in `--greenfield` there is no app to have them, so both themes ship unconditionally; see `## Greenfield mode`.
 - Declares its tokens explicitly at the top (colors, spacing scale, type scale, radii) — those become the plan's raw material.
-- **Passes the five-item gate below.** A direction that fails one is a draft, not a direction.
+- **Passes the six-item gate below.** A direction that fails one is a draft, not a direction.
 
-**Five named items gate every direction, in both modes, and a direction that fails one is fixed before it is shown.** Contrast is the first of five, not the whole floor — nothing else would stop a direction that looks right in a screenshot and is unusable. Before a direction reaches the published page it passes all of:
+**Six named items gate every direction, in both modes, and a direction that fails one is fixed before it is shown.** Contrast is the first of six, not the whole floor — nothing else would stop a direction that looks right in a screenshot and is unusable. Before a direction reaches the published page it passes all of:
 
 1. **Body text meets WCAG AA.** The ratio is computed from the direction's own declared tokens, for every body-text pair it uses — never eyeballed off the capture.
 2. **Every interactive element has a visible focus state.** Focus each focusable element in the driver session in turn and compare its computed `outline`, `box-shadow` and `border` against the same element's resting style; an element whose computed style does not change on focus does not have a focus state. A direction with no focusable elements passes this item with nothing to walk — that is a vacuous pass, not a failure.
 3. **Every touch target is at least 44 × 44 px.** Read each target's `getBoundingClientRect` on the rendered element in that session and compare both dimensions against 44 — never inferred from the padding you wrote. A link inline in a sentence is exempt, as WCAG 2.2 SC 2.5.8 exempts it.
 4. **At a ~400px viewport the screen has no horizontal scroll.** This item narrows the shared session, so its order is fixed: the captures are taken first, then set that session's viewport to ~400px and read `document.documentElement.scrollWidth` against its `clientWidth`, then restore the session to the capture width before any other read or capture runs. Anything wider is horizontal scroll, and a direction that only holds at desktop width is half a direction.
 5. **The screen's empty, loading and error states are present in the rendered direction.** Rendered, not described beside it — a direction that shows only the happy path leaves the states the implementer will otherwise invent unchosen.
+6. **Motion honours `prefers-reduced-motion`.** Emulate `reduce` in the driver session, let the page settle, and read `document.getAnimations()`: anything still animating a transform, a position or a size is a failure — an opacity fade may stay. Clear the emulation before any other read or capture. A direction with no motion passes this item with nothing to read.
 
-Items 2, 3 and 4 are **driver reads evaluated in the same driver session** as the captures — a computed style per focusable element, a measured rectangle per target, one scroll width at ~400px. Each returns a value rather than a screenshot to judge, so none of them renders an image and Pass 4's spend stays its 4 captures, with the announced ceiling of 8 untouched. A direction failing any item is **fixed and re-checked before it is shown**, never published with the failure annotated: that would hand the user a choice between a direction and a defect. If the driver failed, or came up without a way to evaluate script and resize the page, and the absence was stated, items 2, 3 and 4 are stated unchecked for that run rather than silently dropped.
+Items 2, 3, 4 and 6 are **driver reads evaluated in the same driver session** as the captures — a computed style per focusable element, a measured rectangle per target, one scroll width at ~400px, one animation list under reduced motion. Each returns a value rather than a screenshot to judge, so none of them renders an image and Pass 4's spend stays its 4 captures, with the announced ceiling of 8 untouched. A direction failing any item is **fixed and re-checked before it is shown**, never published with the failure annotated: that would hand the user a choice between a direction and a defect. If the driver failed, or came up without a way to evaluate script and resize the page, and the absence was stated, items 2, 3, 4 and 6 are stated unchecked for that run rather than silently dropped.
 
 Then **render each one and look at it**, the same way as pass 2 — on Pass 4's own reserved share of **at most 4 captures**, one per rendered direction per theme, **at the width its people mostly meet it on**: a phone (~390 px) for a public site, an app used on the go, or when the spec does not say; desktop for a tool the spec places at a desk. That share is reserved rather than drawn from what Pass 2 left, so a Pass 2 that spent its full allowance never starves this step. Screenshot the file through the browser tooling pass 2 already set up — except in `--greenfield`, where pass 2 never ran and Pass 4 sets up its own driver instead; see `## Greenfield mode`. If no browser driver is available, say so explicitly in the brief and in the report — an unrendered direction is a guess, and the user needs to know which they're being handed.
 
@@ -192,6 +196,8 @@ Build one page. When the session has the `Artifact` tool, publish it — `artifa
 4. **What is broken regardless of direction** — the findings from pass 1 that either direction inherits.
 
 Embed captures as `data:` URIs; downscale them so the page stays under 16 MB. If the budget is tight, drop *captures*, never findings.
+
+**A capture cannot show motion, so each direction ships live beside it.** Publish each direction's HTML with the page — through the `Artifact` tool's `files`, or locally in `docs/plans/<YYYY-MM-DD>-<slug>.ui/` committed with the brief — and embed it in the direction's section (an `iframe` at the capture width) with a link to open it full screen, so the user plays the hover, the press and the transitions before choosing.
 
 A published page is private on publish. Record its URL or file path — it goes in the brief.
 
@@ -251,7 +257,7 @@ will detect and consume this brief. Do not edit below this line. -->
 
 The `<!-- comment -->` is required — it marks the file as a consumable brief.
 
-Then: `git add docs/plans/<filename>` (plus the `.ui.html` page when it is local) and `git commit -m "brief: <slug>"`.
+Then: `git add docs/plans/<filename>` (plus the `.ui.html` page and its `.ui/` directions when they are local) and `git commit -m "brief: <slug>"`.
 
 ## Propose the leftovers into the backlog
 
@@ -289,7 +295,7 @@ Then stop. Do not plan, do not write code, do not touch a stylesheet.
 
 ## Constraints
 
-- Do NOT make code changes. You write one brief and one comparison page; the app's source is read-only here.
+- Do NOT make code changes. You write one brief and one comparison page with its live directions; the app's source is read-only here.
 - Do NOT write a plan — no phases, no approaches. That's `/esq:plan`'s job.
 - Do NOT spawn subagents. This command does its own reading, and a fleet of specialists would each re-derive the same audit from scratch.
 - Do NOT claim a visual finding you did not observe — see the failure mode at the top. No capture and no rendered direction means you say so, in the brief and in the report.
