@@ -91,6 +91,13 @@ until the scope is clear and writes a brief that `plan` picks up. For a product 
 no UI yet, it suggests `/esq:ui --greenfield` to put rendered design directions on
 screen before any code.
 
+**An interface that works but looks dull?** `/esq:ui` (or `/esq:ui <screen>`) drives the
+running app, checks current practice, and renders the directions on a comparison page at
+the width people use it. A direction answers what the screen should feel like, not just
+the defects it counted. It may break the app's own visual rules where only habit set them,
+and it ships only after it passes contrast, focus, 44 px targets, phone width and its
+empty, loading and error states.
+
 **A screen someone misread?** `/esq:ui B-NNN` (or a sentence saying what went wrong)
 captures the screen as they met it, renders the fix — two directions when the choice
 is yours — on a comparison page, and writes the brief `plan` picks up. `/esq:work`
@@ -141,7 +148,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:harvest` | Recover decisions from the code, history and discussion | `docs/DECISIONS.md` |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md` |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
-| `/esq:ui [screen-problem-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface or one screen a user misread, or explore one before implementation | A rendered recommended direction (two in `--greenfield`, or when the choice is yours), a comparison page and a planning brief |
+| `/esq:ui [screen-problem-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface or one screen a user misread, or explore one before implementation | A rendered recommended direction (two in `--greenfield`, or when the choice is yours), gated on contrast, focus, target size, phone width and states, a comparison page and a planning brief |
 
 In every example, use the actual paths the previous command reported. `review` and
 `check` need an explicit target and ask for one when it is missing.
