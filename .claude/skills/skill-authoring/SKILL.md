@@ -16,7 +16,7 @@ What `./scripts/audit.sh` will fail you on when a skill changes. Reasoning: `doc
   each. **There is no line cap and no skill count** — splitting into `references/` is a readability choice, not a way past a
   number.
 - **A skill that calls `esq` carries `allowed-tools: Bash(esq *)`** — the CLI is the plugin's own and reads or writes structure only, so a permission prompt on it is a block that buys nothing. Pre-approve nothing wider: every other tool stays under the user's permission settings.
-- **`build check review fix work plan roadmap` carry the "No mandate, no run." in-body refusal and must NOT carry
+- **`build check review fix work plan roadmap ui` carry the "No mandate, no run." in-body refusal and must NOT carry
   `disable-model-invocation`; every other skill MUST carry `disable-model-invocation: true`** — *why:* the flag blocks every
   Skill-tool call, including an orchestrator's delegated ones.
 - **A procedure moved into `references/` is loaded by name at every branch that routes to it.** The entrypoint keeps the

@@ -102,10 +102,11 @@ for file in "$SKILLS"/*/SKILL.md; do
   name=$(basename "$(dirname "$file")")
   grep -qF "name: $name" "$file" || fail "$name has no stable frontmatter name"
   # The unattended trio's subagents invoke these seven via the Skill tool — roadmap for
-  # /esq:advance's bare refresh only — and the harness offers no flag that permits explicit
-  # invocation while blocking implicit (verified against the docs 2026-08-18) — so their guard
-  # is the in-body mandate refusal instead.
-  if [[ " build check review fix work plan roadmap " == *" $name "* ]]; then
+  # /esq:advance's bare refresh only — and ui runs when the user asks for it in the
+  # conversation; the harness offers no flag that permits explicit invocation while blocking
+  # implicit (verified against the docs 2026-08-18) — so their guard is the in-body mandate
+  # refusal instead.
+  if [[ " build check review fix work plan roadmap ui " == *" $name "* ]]; then
     grep -qF 'disable-model-invocation' "$file" && fail "$name is orchestrator-invoked; the flag would break the unattended trio"
     grep -qF 'No mandate, no run.' "$file" || fail "$name is model-invocable but carries no in-body mandate guard"
   else

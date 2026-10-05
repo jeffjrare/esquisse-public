@@ -98,7 +98,7 @@ Gather:
 2. **Prior art in the workflow.** Glob `docs/plans/*.md`:
    - Is there an **active plan** whose scope already covers this item (especially one where the item is already `Status: Planned`)? Then the answer is `/esq:build`, not a new plan.
    - Is there a **`*-fixes.brief.md`** that still lists this item? If the item's `Source` is `fix: <slug>` and that brief exists, the item may already be triaged as 🟢/🟡/🔴 there — read it and honor that triage.
-   - Is there a **grill brief** already written for this item? Then it's ready to plan, not to grill again.
+   - Is there a **brief** already written for this item — by `/esq:grill`, or by `/esq:ui`, which writes the same shape? Then it's ready to plan, not to grill or render again.
 3. **The epic, if tagged.** If the `Epic` cell is filled, read `docs/epics/<slug>.md` for the theme's scope and status — it tells you whether this item is one slice of in-flight work or the start of something.
 4. **`docs/DECISIONS.md`** if present, but only when the item plausibly collides with a recorded decision. A conflict with a standing decision is a routing signal (it pushes toward `/esq:grill`, because the user has to re-open the call).
 
@@ -114,20 +114,21 @@ Evaluate in this order and take the **first** match. Ordering matters: the gates
 2. **Status is `Done` or `Dropped`** → say so and stop. Offer `/esq:backlog B-N reopen` if they meant to revive it.
 3. **Status is `Planned`, and a plan covering it exists** → verdict `/esq:build <plan-path>`. Name the phase it lands in if the plan makes that clear.
 4. **A `*-fixes.brief.md` lists this item as 🟢** → verdict `/esq:fix <brief-path>`. The triage is already done; re-planning it would be duplicated work.
-5. **A grill brief already exists for this item** → verdict `/esq:plan <brief-path>`. The ambiguity was already killed. Unless a plan beside that brief already carries its slug — the brief was planned, and a planned brief is never re-planned: the verdict is `/esq:build <plan-path>`. (`esq brief pending` is what answers which briefs still owe a plan.)
+5. **A brief already exists for this item** (from `/esq:grill` or `/esq:ui`) → verdict `/esq:plan <brief-path>`. The ambiguity was already killed. Unless a plan beside that brief already carries its slug — the brief was planned, and a planned brief is never re-planned: the verdict is `/esq:build <plan-path>`. (`esq brief pending` is what answers which briefs still owe a plan.)
 
 **Sizing — when no gate fires.**
 
 6. **Too big for one plan** — the item plainly spans several initiatives (multiple subsystems each needing their own phases, or a theme rather than a task) → verdict `/esq:epic new <title>`, then grill the first slice. Only call this when it's genuinely a theme; most items are not.
-7. **Ambiguous** — you cannot state, in one sentence, what "done" observably looks like; *or* there are two or more plausible readings of the summary that would produce materially different work; *or* it's an 💡 idea with no detail section; *or* it collides with a recorded decision → verdict `/esq:grill B-N: <summary>`. Name the specific ambiguity.
-8. **Clear but substantive** — scope is unambiguous, but the work touches multiple files, needs a design choice, changes an interface, or wants more than one commit to land safely → verdict `/esq:plan implement B-N: <summary>`. (`/esq:plan` will find the item and mark it `Planned` itself.)
-9. **Trivial and contained** — one file or a couple of adjacent lines, one clearly-correct change, no design decision, and a runnable verification exists or is obvious → verdict **inline — execute it now** (see "Executing an inline verdict" below). With `route`, print the verdict and stop instead: say what the change is and what would verify it.
+7. **A screen question a picture settles** — the item is about how a screen of the running app reads or behaves for the person using it (layout, navigation, hierarchy, an affordance someone misread, a section they could not find), and what is open is *which answer*: two plausible fixes that lead to materially different work, or a fix nobody can name without seeing it → verdict `/esq:ui B-N`. Rendering the options settles it where questions would describe them, and its brief is what `/esq:plan` consumes, so it replaces the grill rather than preceding it. Two cases stay elsewhere: the open question is product content or scope a drawing cannot answer ("what must be visible without a click?") → 8; the fix is already clear (a broken token, a missing state) → 9 or 10. A product with no UI code yet is 8 as well — `/esq:grill`'s own `→ Next` names `/esq:ui --greenfield` once a brief carries the screen.
+8. **Ambiguous** — you cannot state, in one sentence, what "done" observably looks like; *or* there are two or more plausible readings of the summary that would produce materially different work; *or* it's an 💡 idea with no detail section; *or* it collides with a recorded decision → verdict `/esq:grill B-N: <summary>`. Name the specific ambiguity.
+9. **Clear but substantive** — scope is unambiguous, but the work touches multiple files, needs a design choice, changes an interface, or wants more than one commit to land safely → verdict `/esq:plan implement B-N: <summary>`. (`/esq:plan` will find the item and mark it `Planned` itself.)
+10. **Trivial and contained** — one file or a couple of adjacent lines, one clearly-correct change, no design decision, and a runnable verification exists or is obvious → verdict **inline — execute it now** (see "Executing an inline verdict" below). With `route`, print the verdict and stop instead: say what the change is and what would verify it.
 
-**Calibration.** Steps 8 and 9 are where the judgment actually lives. Bias toward 8 when you're torn: a plan for a small task costs one session, whereas an unplanned change that turns out substantive costs a corrective loop. Bias toward 9 only when you have *read the code* and can point at the exact lines — "looks small" is not evidence. Execution raises the bar, it doesn't lower it: "I could probably do this now" is verdict 8, not 9.
+**Calibration.** Steps 9 and 10 are where the judgment actually lives. Bias toward 9 when you're torn: a plan for a small task costs one session, whereas an unplanned change that turns out substantive costs a corrective loop. Bias toward 10 only when you have *read the code* and can point at the exact lines — "looks small" is not evidence. Execution raises the bar, it doesn't lower it: "I could probably do this now" is verdict 9, not 10.
 
 ## Executing an inline verdict
 
-Only verdict 9 executes; every other verdict prints its command and stops. The sequence:
+Only verdict 10 executes; every other verdict prints its command and stops. The sequence:
 
 1. **Print the routing block first** (the Output format below) — the judgment stays visible even when you act on it, so the user can interrupt a bad call.
 2. **Apply the change.** Exactly the change you sized — the lines you pointed at in the evidence. If, mid-edit, the change turns out bigger than sized (a second design decision appears, the blast radius grows, a hidden coupling surfaces), **stop**: undo only this run's edits, preserve pre-existing work, explain the changed scope and re-route (usually `/esq:plan`). If your edits cannot be safely separated, leave them and name the affected files.
@@ -185,21 +186,21 @@ On a routing verdict the run stopped rather than finished, so the last three lin
 → Next: /esq:plan B-155: <the scoped task, in the words the plan should start from>
 ```
 
-The headline's verdict token (`inline` · `fix` · `plan` · `grill` · `epic`) and its outcome (`done` · `routed`) are the two facts a reader wants, and an item that routed is still `✔` — routing correctly is this command succeeding. Reserve `⚠` for a verdict you could not reach, and `NEEDS YOU` for an item that turned out to be `Needs-decision`.
+The headline's verdict token (`inline` · `fix` · `plan` · `ui` · `grill` · `epic`) and its outcome (`done` · `routed`) are the two facts a reader wants, and an item that routed is still `✔` — routing correctly is this command succeeding. Reserve `⚠` for a verdict you could not reach, and `NEEDS YOU` for an item that turned out to be `Needs-decision`.
 
 Rules for the output:
 
 - **`→ Next` carries the verdict's command, and it must be copy-pasteable** — real paths, real item text, no placeholders. An executed inline verdict has no command to hand off, so its `→ Next` is the next item (`/esq:work`) and the change it made is stated on the `✔ applied` line. Before executing, it still prints the change it is about to make in one line (`applying now: <file> — <the change>`), so a bad call can be interrupted.
 - **The `○ if you disagree (<hat>)` line is mandatory**, on both verdicts. It names the hat that owns the call (`product`, `architecture` or `design`) and a **falsifiable condition** ("if the retry ceiling is already decided, skip the grill and plan directly"), not a hedge.
 - Use relative paths throughout (strip `/home/…/` and cwd prefixes).
-- Prefix `→ Next` with `/clear` when the verdict starts a fresh cognitive phase (`/esq:grill`, `/esq:plan`, `/esq:build`) — those want a clean session. Not for an inline fix.
+- Prefix `→ Next` with `/clear` when the verdict starts a fresh cognitive phase (`/esq:ui`, `/esq:grill`, `/esq:plan`, `/esq:build`) — those want a clean session. Not for an inline fix.
 - Never emit two verdicts. Pick one; the runner-up lives in the `○ if you disagree` line.
 
 ## Constraints
 
 - **Only two mutation paths:** free-text capture writes and commits one backlog row before any verdict, including `route`; inline execution commits code, then the backlog close, separately. No plan artifact. Every other verdict is read-only: no brief, epic, decision, plan or status edit. Status-only requests belong to `/esq:backlog B-N planned`.
 - **no subagents** — routing is one judgment made by one reader; `/esq:advance` buys agents, and it buys this one as a subagent rather than the other way round.
-- **Never run another esq command.** A non-inline verdict prints its command; the user runs it. `/esq:fix`, `/esq:plan`, `/esq:grill`, `/esq:epic`, `/esq:build` are hand-offs, always.
+- **Never run another esq command.** A non-inline verdict prints its command; the user runs it. `/esq:fix`, `/esq:plan`, `/esq:ui`, `/esq:grill`, `/esq:epic`, `/esq:build` are hand-offs, always.
 - **`route` disables execution.** With the `route` keyword, even an inline verdict is offered, not applied.
 - **One item per pass.** Batching dilutes the judgment.
 - **Never plan.** Sizing evidence only — the moment you're describing *how* (an approach, phases, architecture, a file-by-file change list), you've overrun into `/esq:plan`'s job.

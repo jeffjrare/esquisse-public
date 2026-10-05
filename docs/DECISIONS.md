@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-ui-runs-on-request | 2026-10-04 | arch | skills | `/esq:work` routes a screen question a picture settles to `/esq:ui B-N` instead of `/esq:grill`; `/esq:ui` drops `disable-model-invocation` for the in-body mandate refusal, and a `B-NNN` or problem target makes it a targeted run on that screen. | Active |
 | D-hat-decisions-are-logged-never-gated | 2026-10-02 | prod | autonomy | A reversible hat-owned call is logged as `decisions` (`<product\|architecture\|design>: what — why — undo: how`) in the phase entry, collected by esq branch check and esq review scope, and shown grouped by hat in review and land, never as a finding, a gate or a NEEDS YOU. | Active |
 | D-a-user-request-in-the-conversation-is-a-mandate | 2026-10-02 | arch | skills | The in-body "No mandate, no run." refusal also accepts a run the user requested in their own words in this conversation, naming the command and its target. A description match or the model's own initiative still stops and prints the invocation. | Active |
 | D-land-runs-the-rollout-it-can | 2026-10-01 | prod | safe-shipping | After the merge `/esq:land` runs every rollout step esq can, once and in order, and stops only at the first step that is the user's (`(user)`, a push, deploy or release, their own accounts); the user's confirmation in the session or `/esq:land <plan> --from <n>` resumes after it, with no rollout state recorded | Active |
@@ -5493,3 +5494,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Visibility at about one line per decision and no added call; the hat is self-declared and the bar is model judgment, with no cap.
 **Conséquences:** One-way doors keep build's existing missing-authority stop. Decisions from an abandoned plan's built phases are still shown, unlike rollout, because their code lands.
 **Alternatives rejetées:** Structured {hat,what,why,undo} objects (validates prose, larger payload); a per-hat ledger file (new docs file, second writer); a blocking ratification step (violates never-block).
+
+## D-ui-runs-on-request — A screen question routes to `/esq:ui`, which the model may run on request
+
+**Scope:** arch
+**Topic:** skills
+**Date:** 2026-10-04
+**Statut:** Active
+**Fondement:** user — asked on 2026-10-04 that `/esq:work` route UI/UX items to `/esq:ui`, that the model may run it, and that it cover a single screen problem
+
+**Contexte:** `/esq:work` had no `ui` verdict, so a misread screen with two plausible fixes landed on `/esq:grill`; asked afterwards, the model agreed `/esq:ui` was the right entry and replaces the grill, then could not run it (`disable-model-invocation`). `/esq:ui` also rendered on the busiest screen rather than the one a reported problem was on.
+**Décision:** A sizing rung before "Ambiguous" routes a screen question whose open part is which answer to `/esq:ui B-N`. `/esq:ui` carries the "No mandate, no run." refusal in place of the flag. A `B-NNN` or problem-sentence target makes a targeted run: the report is evidence Pass 2 reproduces, the screens are the problem's flow, the directions answer the problem, the brief cites the row.
+**Raison:** A choice between layouts is settled by rendering it, and `/esq:ui`'s brief is the one `/esq:plan` consumes, so grill-then-ui paid for two briefs; a printed command the user then asks the model to run is a retype that buys nothing (D-a-user-request-in-the-conversation-is-a-mandate).
+**Tradeoff:** `esq apply route` now answers `apply` for a `/esq:ui` option an orchestrator gate puts, so a delegated run can render unattended; it ends on the page and both options instead of asking. `/esq:advance` still relays it.
+**Conséquences:** `check-plugin.sh` holds `ui` to the in-body guard; the work ladder renumbers to ten rungs; no new mode flag — the target's shape decides.
+**Alternatives rejetées:** A `--ux` flag (the target already says it); routing work → grill → ui (two briefs for one task); keeping ui user-only (the retype the user reported).

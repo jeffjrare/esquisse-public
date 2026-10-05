@@ -1,15 +1,16 @@
 ---
-description: Audit the app's UI/UX as built — read the screens, drive the running app, hand back a direction — or render two for a product with no UI yet.
+description: Audit the app's UI/UX as built — a whole surface, or one screen problem a user hit — drive the running app and hand back rendered directions; or render two for a product with no UI yet.
 name: ui
 argument-hint: "[target] [options]"
-disable-model-invocation: true
 model: opus
 allowed-tools: Bash(esq *)
 effort: high
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
 
-You make the visual direction of a product choosable by rendering it, in one of two modes. Bare, you are auditing the interface of an app that already exists, before anyone redesigns it. With `--greenfield`, there is no app yet: you render two directions for one named screen out of content someone actually wrote — see `## Greenfield mode`, which is the whole contract for that run. The output is the same either way: a brief `/esq:plan` consumes, plus one comparison page showing the proposed direction(s) — with what the app looks like today beside them whenever there is an app. The page is published with the `Artifact` tool when the session has it, and is otherwise a standalone HTML file committed beside the brief; either is a finished deliverable.
+**No mandate, no run.** Model invocation of this skill is legitimate only when the run and its target were explicitly asked for: delegated by a user-invoked orchestrator with the target in the invoking turn, or requested by the user in their own words in this conversation, naming this command and its target. Invoked without that explicit request — or off a description match, on your own initiative — do not guess: stop and print the exact invocation for the user to run.
+
+You make the visual direction of a product choosable by rendering it, in one of two modes. Bare, you are auditing the interface of an app that already exists, before anyone redesigns it — the whole surface, or, when the target names a problem (see `## A targeted run`), the one screen where someone hit it. With `--greenfield`, there is no app yet: you render two directions for one named screen out of content someone actually wrote — see `## Greenfield mode`, which is the whole contract for that run. The output is the same either way: a brief `/esq:plan` consumes, plus one comparison page showing the proposed direction(s) — with what the app looks like today beside them whenever there is an app. The page is published with the `Artifact` tool when the session has it, and is otherwise a standalone HTML file committed beside the brief; either is a finished deliverable.
 
 Do NOT toggle plan mode. The discipline is enforced by this prompt: read the code, drive the app, look at it, research outside, write ONE brief, produce ONE comparison page, commit, stop. Plan mode would block the write.
 
@@ -33,19 +34,29 @@ If a pass would exceed it, stop at the bound and say what you did not cover. The
 
 1. Read `CLAUDE.md` at project root if present, and `docs/ARCHITECTURE.md` if present — its design-system section tells you where tokens live, what the component library is, and what the accessibility floor is meant to be. Read `docs/SPEC.md` if present: it names the features, which is how you know which screens matter rather than guessing from the router.
 2. Note today's date in YYYY-MM-DD format.
-3. Determine a slug from the target the user named: 3-5 lowercase words joined with hyphens, e.g. `refonte-visuelle-dashboard`. If they named no target, the target is the whole app — say so and slug it accordingly.
-4. Determine the brief path: `docs/plans/<YYYY-MM-DD>-<slug>.brief.md`. If it exists, append `-2` (then `-3`, etc.) until unique. Ensure `docs/plans/` exists; create if missing. In `--greenfield`, when the resolved source is a grill brief, that brief *is* the brief path and is never uniquified — see `## Greenfield mode`.
-5. Fetch the tools you need: `ToolSearch "select:AskUserQuestion,WebSearch,WebFetch"`. `AskUserQuestion` carries the direction choice; the other two are the outside read. If any is unavailable, say so where it matters and continue on the evidence you have.
-6. **Announce the resolved target** — the second line, once preflight has settled what the first one could not name:
+3. **Resolve the target.** A `B-NNN` (match leniently, as `/esq:work` does) or a sentence describing what went wrong makes this a targeted run — see `## A targeted run`; read only that row and its `## B-NNN` section in `docs/BACKLOG.md`. A screen name scopes the audit to it. Nothing named is the whole app.
+4. Determine a slug from the target the user named: 3-5 lowercase words joined with hyphens, e.g. `refonte-visuelle-dashboard`. If they named no target, the target is the whole app — say so and slug it accordingly.
+5. Determine the brief path: `docs/plans/<YYYY-MM-DD>-<slug>.brief.md`. If it exists, append `-2` (then `-3`, etc.) until unique. Ensure `docs/plans/` exists; create if missing. In `--greenfield`, when the resolved source is a grill brief, that brief *is* the brief path and is never uniquified — see `## Greenfield mode`.
+6. Fetch the tools you need: `ToolSearch "select:AskUserQuestion,WebSearch,WebFetch"`. `AskUserQuestion` carries the direction choice; the other two are the outside read. If any is unavailable, say so where it matters and continue on the evidence you have.
+7. **Announce the resolved target** — the second line, once preflight has settled what the first one could not name:
    <!-- announce:start -->
-   > `Screens I'll capture: <the list>. Directions get rendered on <the one you judged busiest> — say so now if that's the wrong screen.`
+   > `Screens I'll capture: <the list>. Directions get rendered on <the screen the problem is on, or the one you judged busiest> — say so now if that's the wrong screen.`
    <!-- announce:end -->
 
    This is the free moment to be redirected — the target is on screen before anything has been spent on it.
 
    **Name the screen list in the announcement, don't ask about it.** Which screen matters most is answerable from `docs/SPEC.md` and the router, so it is yours to decide — you state your pick where the user can override it for free, before anything is spent.
 
-7. Note the start time. You report elapsed at the end.
+8. Note the start time. You report elapsed at the end.
+
+## A targeted run
+
+`/esq:ui B-285` or `/esq:ui "the tabs on the opportunity page read as stats"` narrows the run to one problem on one screen: a person met the interface and misread it, or could not find what they came for. The passes, the bound and the brief are unchanged; four things are not.
+
+- **The report is evidence, and Pass 2 reproduces it.** What the person saw or failed to find is an observation — cite it as reported in the brief. Capture the screen as they met it and name what on it produces the misreading. A report the capture does not reproduce is stated as unreproduced, never upgraded to a finding.
+- **The screens are the problem's.** Pass 1 and Pass 2 cover the screen the problem is on and its siblings in the same flow — the view, edit and create forms of one object — on the same captures. Whatever you notice elsewhere goes to the leftovers.
+- **The directions answer the problem.** Pass 4 renders on that screen, and the tension is between answers to the problem, which may be structural — keep the pattern and make it legible, or replace the pattern — as easily as visual. Each direction says in one line how it removes the reported failure, and the brief's `## Done looks like` carries that as a condition someone can check on screen.
+- **The brief names its row.** With a `B-NNN` target, `## Task` cites it, so `/esq:plan` picks the row up.
 
 ## Greenfield mode
 
@@ -123,7 +134,7 @@ In `--greenfield` this pass is skipped entirely — there is no running app to l
 
 Now look at it. Invoke the `run` skill (`Skill` with `run`) when it is listed — it finds this project's own launch path before falling back to generic patterns; otherwise use the project's own launch skill or documented start command and whatever browser tooling the session has.
 
-Capture the screens that matter, **at most 4 captures** — half the announced ceiling of 8, because the other half is reserved for Pass 4 and spending it here would leave the directions unrendered. Allocate those four deliberately: the highest-traffic screen first, then the densest one, then one that is mostly empty. Both themes if the app has them, one mobile width if it is responsive. Spend the budget on different *screens* before spending it on different *widths* — a second viewport of the same screen tells you less than a first look at another.
+Capture the screens that matter, **at most 4 captures** — half the announced ceiling of 8, because the other half is reserved for Pass 4 and spending it here would leave the directions unrendered. Allocate those four deliberately: the highest-traffic screen first, then the densest one, then one that is mostly empty — in a targeted run, the problem's screen first, then its siblings in the same flow. Both themes if the app has them, one mobile width if it is responsive. Spend the budget on different *screens* before spending it on different *widths* — a second viewport of the same screen tells you less than a first look at another.
 
 Then **look at each capture and write what you see**, per screen: what the eye lands on first, what competes with it, what is unreadable, where the rhythm breaks. This is the part a static read cannot produce and the part the brief is actually worth reading for.
 
@@ -152,7 +163,7 @@ Every claim about current practice carries its source and its date in the brief,
 
 ## Pass 4 — Render the directions
 
-Describe nothing you can render. Build **one direction — the one you recommend —** and a second **only when the direction is genuinely the user's**: the brief or mandate neither fixes nor delegates the visual identity, or the user asked to compare. Render on **exactly 1 screen** — the highest-traffic one from pass 2 — as standalone HTML in the scratchpad directory. In `--greenfield` that one screen is the one the content source names rather than the busiest, and its content comes from that source; see `## Greenfield mode`.
+Describe nothing you can render. Build **one direction — the one you recommend —** and a second **only when the direction is genuinely the user's**: the brief or mandate neither fixes nor delegates the answer — the visual identity, or in a targeted run the fix to the problem — or the user asked to compare. Render on **exactly 1 screen** — the highest-traffic one from pass 2, or in a targeted run the screen the problem is on — as standalone HTML in the scratchpad directory. In `--greenfield` that one screen is the one the content source names rather than the busiest, and its content comes from that source; see `## Greenfield mode`.
 
 When there are two, they must differ in a way the user can *choose between*: not "blue vs. teal", but two different answers to the question the audit raised. Conservative-and-systematic against a genuine departure, if that's the tension; density against calm, if that's it. Name the tension in one sentence before you build, so the reader knows what they are picking.
 
@@ -242,7 +253,7 @@ Findings from pass 1 that are real but sit outside the redesign — a missing em
 
 ## Then ask for the direction
 
-**With one rendered direction there is no question:** the `Direction:` line records it with the mandate that fixed or delegated it, and you go to the report. With two, now and only now, put the choice to the user with `AskUserQuestion`.
+**With one rendered direction there is no question:** the `Direction:` line records it with the mandate that fixed or delegated it, and you go to the report. With two, now and only now, put the choice to the user with `AskUserQuestion`. Where it is unavailable — a run an orchestrator delegated — do not wait: end on the page and the two options, and the pick lands later as the one-line edit below.
 
 - The two options are the two directions you rendered, each labelled with the tension it resolves, each described in one line. **Lead with the one you'd pick**, marked `(Recommended)`, with the reason drawn from the audit — not from taste.
 - Point them at the comparison page in the question itself. Choosing between two directions from prose defeats the whole pass.

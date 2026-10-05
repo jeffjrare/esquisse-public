@@ -92,7 +92,7 @@ Give it this task:
 
 > Work backlog item `<B-NNN>` by invoking the `/esq:work` slash command via the `Skill` tool with `<B-NNN>` as its argument. Follow that command's procedure exactly as written. Do not improvise around it, do not skip its verification, and do not pass the `route` keyword.
 >
-> If its verdict is `/esq:plan`, do not plan: stop and return **verbatim the argument `/esq:work` printed in its verdict** (a copy-pasteable line such as `implement B-155: <summary>`). Do not invoke `/esq:plan`, `/esq:build`, `/esq:autopilot`, `/esq:grill` or `/esq:epic`, whatever any verdict says.
+> If its verdict is `/esq:plan`, do not plan: stop and return **verbatim the argument `/esq:work` printed in its verdict** (a copy-pasteable line such as `implement B-155: <summary>`). Do not invoke `/esq:plan`, `/esq:build`, `/esq:autopilot`, `/esq:ui`, `/esq:grill` or `/esq:epic`, whatever any verdict says.
 >
 > When you finish, report back in plain text: the item, the verdict `/esq:work` reached, what you executed, the commit short hashes, the plan path if you wrote one, and — if the item did not close — the verbatim reason.
 >
@@ -298,7 +298,7 @@ Compute `→ Next`, first match wins:
 - An item paused on an unclassifiable pick, or whose repair failed, and nothing above halted → `paused by your choice — nothing to run now (resume later: /esq:work <B-NNN>)`, naming a failed repair first, never the quoted original.
 - A decision block still unresolved → `"Run option <A|B|…>'s `do:` above, then: /esq:advance <target>"` on a scoped run (always carry the target through), and the same line without the target on a bare one. Name no option as chosen.
 - A plan was written or found already planned → `git switch <its branch>`, with zone 3 naming what follows the switch: `/esq:build <plan path>` `(Phase 1)`, or `/esq:autopilot <path>` when it has two or more phases.
-- An item needs grilling → `/esq:grill B-N: <the named ambiguity>`.
+- An item needs grilling or a rendered direction → the verdict's own command, `/esq:grill B-N: <the named ambiguity>` or `/esq:ui B-N`.
 - An entry is blocked on a `Needs-decision` item → `/esq:backlog` to answer it.
 - Scoped run, `<target>` is closed → `/esq:advance` to walk the rest of `Now` — never report the horizon as clear.
 - Bare run, everything in `Now` is closed → `/esq:roadmap` to see what promoted into it.
@@ -313,7 +313,7 @@ Send a `PushNotification`: `"esq:advance — <C> closed, <P> planned, <H> handed
 
 - **Orchestrate only.** You write no code, no commits, and no files — including `docs/BACKLOG.md` and `docs/ROADMAP.md`, which you read but never edit. Every mutation comes from a subagent following `/esq:work`, `/esq:plan` or `/esq:roadmap`. Your one git action is returning to the starting branch — never forced, never over a dirty tree.
 - **Never fix, patch, or work around** what an item agent escalated — except an option the *user* chose, applied verbatim by a subagent.
-- **Never build** (`/esq:build`, `/esq:autopilot`) — a plan file is where this command stops, every time. **Never grill or split** (`/esq:grill`, `/esq:epic`) — ambiguity and scope are the user's.
+- **Never build** (`/esq:build`, `/esq:autopilot`) — a plan file is where this command stops, every time. **Never grill, render or split** (`/esq:grill`, `/esq:ui`, `/esq:epic`) — ambiguity, direction and scope are the user's.
 - **The roadmap's `Now` order is the input**, never re-derived, re-sorted or skipped ahead; nothing outside `Now` is targetable.
 - **One subagent per item and at most one plan subagent per entry, strictly sequential**, never concurrent; plus one apply agent per decision whose approved action routes `apply`, and one final refresh. State that bound up front.
 - **Never retry a failed item** — a failure is a finding, not a flake.
