@@ -41,7 +41,7 @@ No introductory or restating paragraph between these lines. If you cannot name d
 **Each `do:` settles only the present decision and runs as written.** Put deferred work in the consequence. Keeping existing state requires verifying it and recording acceptance against the specific decision entry, with the evidence named. A user-only command remains that command alone, never an equivalent edit or shell call. Give a justified leaning, or name why none is possible; the user chooses. Never apply an option while presenting it or present one as already decided.
 <!-- decision-block:end -->
 
-A criterion that cannot be met without loosening it is exactly this — `Why yours:` a stated constraint: `A · keep the criterion, re-plan the approach — do: /esq:plan <slug>-fixes` against `B · loosen the criterion — do: <plan-file>:<line> → <the new criterion>`. Two candidate causes of a red test are not: that is a diagnosis to settle by investigating.
+A check red the same way on the unit's `**Origin:**`, or red only on what a later phase changes, never reaches here: it is judged under `(auto)` steps step 4, and a 🔴 asking whether to block on pre-existing failures is the question that rule exists to remove. A criterion that cannot be met without loosening it is exactly this — `Why yours:` a stated constraint: `A · keep the criterion, re-plan the approach — do: /esq:plan <slug>-fixes` against `B · loosen the criterion — do: <plan-file>:<line> → <the new criterion>`. Two candidate causes of a red test are not: that is a diagnosis to settle by investigating.
 
 5. **Ask it, and act on the answer.**
 
