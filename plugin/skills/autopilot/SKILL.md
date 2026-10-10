@@ -207,14 +207,14 @@ One round per gate: if the same step gates again after an applied option, stop a
 The task, for the one route that spawns:
 <!-- orch-shared:apply-agent:end -->
 
-> Apply exactly this change and nothing else: `<the chosen do:, verbatim — on an approved repair the replacement, never the original>`. Do not improve on, widen, or second-guess it. Make the change and run the verification the plan's phase names — on an approved repair, by its `verify:` alone, never the phase suite. Only once that verification passes, commit it alone as `fix(<scope>): <the option's label>`. If the change cannot be applied as written, make no edit and report why. If it fails that verification, stop: commit nothing, reset, restore, clean or discard nothing, and report the failure and the edits left in the tree. On a repair, `<its deferred reminder>` is not yours to do, and if that verification already passes, change only the record.
+> Apply exactly this change and nothing else: `<the chosen do:, verbatim — on an approved repair the replacement, never the original>`. Do not improve on, widen, or second-guess it. Make the change and run the verification the plan's phase names — on an approved repair, by its `verify:` alone, never the phase suite. Only once that verification passes, commit it alone as `fix(<scope>): <the option's label>`. A `file:line` locator is an address, not the change: if those lines drifted and the text the replacement is meant for sits unambiguously a few lines away, apply it there and say so. If the change cannot be applied as written — that text absent or ambiguous — make no edit and report why. If it fails that verification, stop: commit nothing, reset, restore, clean or discard nothing, and report the failure and the edits left in the tree. On a repair, `<its deferred reminder>` is not yours to do, and if that verification already passes, change only the record.
 
 **Then resume — only when it costs nothing already paid for.** A phase that logged `⏸ blocked on an open same-unit defect` always resumes: spawn a normal phase agent, whose `/esq:build` resolves the block by re-running only the owed checks — no task is re-walked — then carries on; a second block stops the run (one round per gate). A gated phase with no entry cannot be reconciled, so resuming re-walks every task. Check the phase agent's report for commits made before it broke:
 
 - **It committed nothing** → re-run the phase through a normal phase agent, exactly as the loop does, and carry on.
 - **It committed some tasks** → stop and hand back, with `→ Next: /esq:build <plan-path>`. The option is applied and committed; the re-walk belongs to an attended `/esq:build`.
 
-If the apply agent could not apply or verify the change, do not resume — report that, with any edits it left, and stop.
+If the apply agent could not apply or verify the change, do not resume — report that, with any edits it left, and stop. The user's answer stands: quote it once beside `→ Next`, never ask it again.
 
 **A relayed option stops the run.** On `route: relay` nothing was spawned and nothing changed: print the command flush-left, hand back with `→ Next: /esq:build <plan-path>` for after they have run it, and stop.
 
@@ -276,6 +276,8 @@ Add one `○ worker model  asked opus · session on <model>` line only when this
 **Report reconciliation honestly.** A reconciled phase keeps `✔` with its logged `**Commits:**` hashes (counted in the total), `no entry → 1 reconcile pass, no task re-run`, and the pass's measured elapsed time. If the pass built the phase, say `built` instead. A phase still unclassified gets its own `✖` line: `no entry after its reconcile pass`, both agents' returns, and at most ten evidence lines. Invent no failing step where neither agent reported one.
 
 Zone 2 carries a gate **only while it is still unresolved** — unanswered, its option not applied, or raised with no `AskUserQuestion` available. Never reprint an answered gate's options.
+
+**Zone 2 never hands the user mechanical work.** An answered choice whose edit is still owed, a fix left uncommitted in the tree, checks to re-run: `/esq:build <plan-path>` does all of it over the tree as it stands, so the report names that one command, with the answered choice quoted once for it, and never a numbered to-do of edits, commits or line numbers. Nor does the run end on a confirmation (« je m'en occupe ? », "shall I continue?", "answer yes"): a stop with no open user authority ends on its `→ Next`, and a later "continue" from the user is that command's mandate.
 
 `✔ closed` / `○ still planned` lines appear only after every phase completed and the matching rows were read.
 
