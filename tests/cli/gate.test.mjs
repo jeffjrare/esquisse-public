@@ -1564,3 +1564,24 @@ test('an evidence asset beside the plan keeps the proof reusable', async () => {
   commit(root, 'plan(p): confirm phase 1 manual verification');
   assert.equal((await gateVerify(root, file)).commands[0].decision, 'reuse');
 });
+
+// A `## Capability inventory` row records where a capability went and names no command, so a row
+// added after a phase verified — the disposition a review asked for — stales none of its proofs.
+// Every other section above the log still does, the inventory's neighbour included.
+test('a capability inventory row added after verification keeps the proof; any other plan edit stales it', async (t) => {
+  const root = await repo();
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const file = await plan(root, [['`(auto)` `pnpm test src` — green']]);
+  await logPhase(root, file, 1, ['pnpm test src']);
+  const inventory = '## Capability inventory\n\n| Source | Capability | Disposition |\n|---|---|---|\n| `src/old.js` | live preview | dropped — user: 2026-10-10 review |\n\n';
+  const text = await readFile(file, 'utf8');
+  await writeFile(file, text.replace('## Phases', `${inventory}## Phases`));
+  commit(root, 'fix(plan): record where the live preview went');
+  assert.equal((await gateVerify(root, file)).commands[0].decision, 'reuse');
+
+  await writeFile(file, (await readFile(file, 'utf8')).replace('### Phase 1 — phase 1', '### Phase 1 — phase 1 rewritten'));
+  commit(root, 'chore: edit the plan above its log');
+  const [edited] = (await gateVerify(root, file)).commands;
+  assert.equal(edited.decision, 'run');
+  assert.match(edited.reason, /changed above its ## Execution log/);
+});

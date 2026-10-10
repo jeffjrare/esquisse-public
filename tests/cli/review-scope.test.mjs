@@ -631,6 +631,30 @@ test('an unresolved review scope still carries the decisions, from the plan-s ow
   await rm(root, { recursive: true, force: true });
 });
 
+// The removals ride on the same call, read from where the unit left its origin whatever range the
+// review narrowed to, so a delta re-review still sees a module no inventory names. A plan-less range
+// has no inventory: every removal it finds is uncovered.
+test('review scope carries the unit-s removals, and a range carries them all uncovered', async () => {
+  const root = await repo();
+  await writeFile(path.join(root, 'src/preview.js'), 'export const preview = 1;\n');
+  await writeFile(path.join(root, 'src/app.js'), "import { preview } from './preview.js';\nexport const one = 1;\n");
+  await writeFile(path.join(root, 'src/picker.js'), 'export const picker = 1;\n');
+  const base = commit(root, 'feat(app): preview and picker');
+  git(root, 'switch', '-q', '-c', 'esq/unit');
+  const { relative } = await plan(root, 'widget');
+  const text = await readFile(path.join(root, relative), 'utf8');
+  await writeFile(path.join(root, relative), text.replace('## Phases', '## Capability inventory\n\n- `src/picker.js` — map picker — dropped — user: 2026-10-10 plan\n\n## Phases'));
+  await rm(path.join(root, 'src/picker.js'));
+  await writeFile(path.join(root, 'src/app.js'), 'export const one = 1;\n');
+  const head = commit(root, 'feat(app): drop the old surface');
+
+  const scope = await reviewScope(root, relative);
+  assert.deepEqual(scope.removed, { base, deleted: ['src/picker.js'], orphaned: ['src/preview.js'], uncovered: ['src/preview.js'] });
+  const range = (await import('../../plugin/lib/cli.mjs')).reviewScopeRange;
+  assert.deepEqual((await range(root, `${base}..${head}`)).removed.uncovered, ['src/picker.js', 'src/preview.js']);
+  await rm(root, { recursive: true, force: true });
+});
+
 // ── The CLI surface ──────────────────────────────────────────────────────────
 
 test('esq review scope refuses an unknown flag and a second path, and exits 0 on an answer', async () => {

@@ -592,3 +592,48 @@ test('branch check collects unit.decisions by hat from every unit plan, abandone
   const file = await plan(bare, 'p.md', { branch: 'esq/stem', origin: 'main' });
   assert.deepEqual((await branchCheck(bare, file)).unit.decisions, []);
 });
+
+// What a unit removed since its branch left its origin: deleted source modules (renames and tests
+// excluded) and modules a removed import orphaned — imported at the base, by nothing but tests at
+// the head. `uncovered` is the subset no unit plan's `## Capability inventory` names.
+test('branch check reports what the unit removed and which of it no capability inventory names', async () => {
+  const root = await repo();
+  const write = async (file, text) => {
+    await mkdir(path.dirname(path.join(root, file)), { recursive: true });
+    await writeFile(path.join(root, file), text);
+  };
+  await write('src/components/LocationField.tsx', "import { preview } from '@/lib/computeLivePreview';\nimport { geo } from './geo';\nexport const L = 1;\n");
+  await write('src/components/geo.ts', 'export const geo = 1;\n');
+  await write('src/lib/computeLivePreview.ts', 'export const preview = 1;\n');
+  await write('src/lib/shared.ts', 'export const s = 1;\n');
+  await write('src/lib/renamed.ts', 'export const r = "a long enough body to be detected as a rename";\n');
+  await write('src/Form.tsx', "import { L } from './components/LocationField';\nimport { s } from './lib/shared';\n");
+  await write('src/Other.tsx', "import { s } from './lib/shared';\n");
+  await write('src/old.test.ts', 'import { geo } from "./components/geo";\n');
+  git(root, 'add', '.');
+  git(root, 'commit', '-q', '-m', 'app');
+  git(root, 'switch', '-q', '-c', 'esq/feat');
+  const file = await plan(root, '2026-10-10-feat.md', {
+    branch: 'esq/feat', origin: 'main',
+    body: '\n## Capability inventory\n\n| Source | Capability | Disposition |\n|---|---|---|\n| `src/components/LocationField.tsx` | city autocomplete | moved — `src/New.tsx` |\n',
+  });
+  git(root, 'rm', '-q', 'src/components/LocationField.tsx', 'src/old.test.ts');
+  git(root, 'mv', 'src/lib/renamed.ts', 'src/lib/moved.ts');
+  await write('src/Form.tsx', "import { s } from './lib/shared';\n");
+  await write('src/geo.test.ts', 'import { geo } from "./components/geo";\n');
+  git(root, 'add', '.');
+  git(root, 'commit', '-q', '-m', 'feat: replace the location field');
+
+  const verdict = await branchCheck(root, file);
+  assert.equal(verdict.removed.base, git(root, 'rev-parse', 'main'));
+  assert.deepEqual(verdict.removed.deleted, ['src/components/LocationField.tsx']);
+  // `geo` is imported only by a test now; `shared` still has `Other`; the rename is a move.
+  assert.deepEqual(verdict.removed.orphaned, ['src/components/geo.ts', 'src/lib/computeLivePreview.ts']);
+  assert.deepEqual(verdict.removed.uncovered, ['src/components/geo.ts', 'src/lib/computeLivePreview.ts']);
+
+  // Off the recorded branch the HEAD is not the unit's, so nothing is read; a legacy plan has no origin.
+  git(root, 'switch', '-q', '-c', 'elsewhere');
+  assert.equal((await branchCheck(root, file)).removed, null);
+  const legacy = await repo({ branches: ['esq/old'], checkout: 'esq/old' });
+  assert.equal((await branchCheck(legacy, await plan(legacy, 'p.md', { branch: 'esq/old' }))).removed, null);
+});
