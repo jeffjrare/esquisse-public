@@ -1,5 +1,5 @@
 ---
-description: Audit the app's UI/UX as built — a whole surface, or one screen problem a user hit — drive the running app and hand back rendered directions; or render two for a product with no UI yet.
+description: Audit the app's UI/UX as built — the journeys through a screen and every screen a change there reaches, sliced when the surface is large, or one problem a user hit — drive the running app and hand back rendered directions; or render two for a product with no UI yet.
 name: ui
 argument-hint: "[target] [options]"
 model: opus
@@ -10,7 +10,7 @@ Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first p
 
 **No mandate, no run.** Model invocation of this skill is legitimate only when the run and its target were explicitly asked for: delegated by a user-invoked orchestrator with the target in the invoking turn, or requested by the user in their own words in this conversation, naming this command and its target. Invoked without that explicit request — or off a description match, on your own initiative — do not guess: stop and print the exact invocation for the user to run.
 
-You make the visual direction of a product choosable by rendering it, in one of two modes. Bare, you are auditing the interface of an app that already exists, before anyone redesigns it — the whole surface, or, when the target names a problem (see `## A targeted run`), the one screen where someone hit it. With `--greenfield`, there is no app yet: you render two directions for one named screen out of content someone actually wrote — see `## Greenfield mode`, which is the whole contract for that run. The output is the same either way: a brief `/esq:plan` consumes, plus one comparison page showing the proposed direction(s) — with what the app looks like today beside them whenever there is an app. The page is published with the `Artifact` tool when the session has it, and is otherwise a standalone HTML file committed beside the brief; either is a finished deliverable.
+You make the visual direction of a product choosable by rendering it, in one of two modes. Bare, you are auditing the interface of an app that already exists, before anyone redesigns it — never one page alone, but a **slice**: the journeys through the screen in question, and the screens a change there would reach (see `## The slice`), or, when the target names a problem (see `## A targeted run`), the slice around the screen where someone hit it. With `--greenfield`, there is no app yet: you render two directions for one named screen out of content someone actually wrote — see `## Greenfield mode`, which is the whole contract for that run. The output is the same either way: a brief `/esq:plan` consumes, plus one comparison page showing the proposed direction(s) — with what the app looks like today beside them whenever there is an app. The page is published with the `Artifact` tool when the session has it, and is otherwise a standalone HTML file committed beside the brief; either is a finished deliverable.
 
 Do NOT toggle plan mode. The discipline is enforced by this prompt: read the code, drive the app, look at it, research outside, write ONE brief, produce ONE comparison page with its live directions, commit, stop. Plan mode would block the write.
 
@@ -25,37 +25,55 @@ Do NOT toggle plan mode. The discipline is enforced by this prompt: read the cod
 <!-- announce-open:start -->
 **Announce in one line, then keep working in the same response.** Print the line below before any tool call, with nothing of your own above it — and never end your response on it: the run's first tool call follows in that same response. A bound named after the spending is a bill.
 
-> `/esq:ui — rendering the visual direction. Bound: no subagents, at most 8 captures, at most 8 web searches.`
+> `/esq:ui — rendering the direction. Bound: no subagents, one slice (at most 3 journeys, 6 screens), at most 12 captures, at most 8 web searches.`
 
-If a pass would exceed it, stop at the bound and say what you did not cover. The resolved target lands in the second line, at the end of preflight.
+If a pass would exceed it, stop at the bound and say what you did not cover. The resolved slice lands in the second line, once Pass 1 has mapped the screens.
 <!-- announce-open:end -->
 
 ## Preflight
 
 1. Read `CLAUDE.md` at project root if present, and `docs/ARCHITECTURE.md` if present — its design-system section tells you where tokens live, what the component library is, and what the accessibility floor is meant to be. Read `docs/SPEC.md` if present: it names the features, which is how you know which screens matter rather than guessing from the router.
 2. Note today's date in YYYY-MM-DD format.
-3. **Resolve the target.** A `B-NNN` (match leniently, as `/esq:work` does) or a sentence describing what went wrong makes this a targeted run — see `## A targeted run`; read only that row and its `## B-NNN` section in `docs/BACKLOG.md`. A screen name scopes the audit to it. Nothing named is the whole app.
-4. Determine a slug from the target the user named: 3-5 lowercase words joined with hyphens, e.g. `refonte-visuelle-dashboard`. If they named no target, the target is the whole app — say so and slug it accordingly.
+3. **Resolve the target.** A `B-NNN` (match leniently, as `/esq:work` does) or a sentence describing what went wrong makes this a targeted run — see `## A targeted run`; read only that row and its `## B-NNN` section in `docs/BACKLOG.md`. A screen name centres the slice on it. Nothing named centres it on the journey a user takes most often. Either way the slice is sized in `## The slice`, once Pass 1 has mapped the screens.
+4. Determine a slug from the target the user named: 3-5 lowercase words joined with hyphens, e.g. `refonte-visuelle-dashboard`. If they named no target, slug the slice's centre journey and say so.
 5. Determine the brief path: `docs/plans/<YYYY-MM-DD>-<slug>.brief.md`. If it exists, append `-2` (then `-3`, etc.) until unique. Ensure `docs/plans/` exists; create if missing. In `--greenfield`, when the resolved source is a grill brief, that brief *is* the brief path and is never uniquified — see `## Greenfield mode`.
 6. Fetch the tools you need: `ToolSearch "select:AskUserQuestion,WebSearch,WebFetch"`. `AskUserQuestion` carries the direction choice; the other two are the outside read. If any is unavailable, say so where it matters and continue on the evidence you have.
 7. **Announce the resolved target** — the second line, once preflight has settled what the first one could not name:
    <!-- announce:start -->
-   > `Screens I'll capture: <the list>. Directions get rendered on <the screen the problem is on, or the one you judged busiest> — say so now if that's the wrong screen.`
+   > `Slice: <journeys> — screens <the list>, centred on <the screen>; a change there reaches <n> screens, <k> of them in this slice. Next slices: <their names, or none>. Directions get rendered across <the screens they change> — say so now if that's the wrong slice.`
    <!-- announce:end -->
 
    This is the free moment to be redirected — the target is on screen before anything has been spent on it.
 
-   **Name the screen list in the announcement, don't ask about it.** Which screen matters most is answerable from `docs/SPEC.md` and the router, so it is yours to decide — you state your pick where the user can override it for free, before anything is spent.
+   **Name the slice in the announcement, don't ask about it.** Which journey matters most and what a change reaches are answerable from `docs/SPEC.md`, the router and the importers, so they are yours to decide. State your pick where the user can override it for free, before anything is spent. Pass 1's static read is what sizes the slice, so this line goes out once Pass 1 has mapped the screens and before Pass 2 spends its first capture.
 
 8. Note the start time. You report elapsed at the end.
+
+## The slice
+
+A person never meets one screen alone. They arrive at it from somewhere and leave it for somewhere else. On other screens they meet the same controls, the same layout and the same tokens. An audit of one page misses where a journey breaks, and a direction rendered on one page hides what it does to the screens it also changes. So the run covers a **slice**, sized from what the run is for and from what a change would reach.
+
+**What the run is for sets the centre:**
+
+- **A targeted run.** The screen the problem is on.
+- **A named screen.** That screen.
+- **Nothing named.** The journey a user takes most often, read from `docs/SPEC.md`'s features and the router: first visit to first value, the main create–edit–view loop, a checkout. When a shell (navigation, layout, header) frames every journey, the shell is part of the centre.
+
+**Around the centre, three rings, added in this order until the slice is full:**
+
+1. **The journey through it.** The screen a person comes from and the one the main action leads to. Then the other screens of the same object: list, view, create and edit.
+2. **The blast radius.** For each component, layout or token a direction on the centre would plausibly change, list the other screens that render it. `git grep -l` the component's importers and follow a layout to the routes it wraps. A shared tab bar, form control or colour token reaches every screen that uses it, and those screens are where a change holds or breaks. Count them: the count goes in the brief whether or not they fit the slice.
+3. **The same pattern doing another job.** Tabs, a stat card or a status badge the centre uses, used elsewhere to mean something different. A misreading usually comes from here.
+
+**A slice holds at most 3 journeys and 6 screens.** A bigger surface is cut, never skimmed. This run takes the slice holding the centre. Every screen the rings reached beyond it goes in the brief's `## Out of scope`, grouped into next slices in the order you would run them. Each group carries the ring that reached it and the exact invocation that covers it (`/esq:ui "<journey or screen>"`). A finished slice with named next slices is a complete run, not a pass cut short. A blast-radius screen outside the slice is still named, so the plan's manual verification walks it.
 
 ## A targeted run
 
 `/esq:ui B-285` or `/esq:ui "the tabs on the opportunity page read as stats"` narrows the run to one problem on one screen: a person met the interface and misread it, or could not find what they came for. The passes, the bound and the brief are unchanged; four things are not.
 
 - **The report is evidence, and Pass 2 reproduces it.** What the person saw or failed to find is an observation — cite it as reported in the brief. Capture the screen as they met it and name what on it produces the misreading. A report the capture does not reproduce is stated as unreproduced, never upgraded to a finding.
-- **The screens are the problem's.** Pass 1 and Pass 2 cover the screen the problem is on and its siblings in the same flow — the view, edit and create forms of one object — on the same captures. Whatever you notice elsewhere goes to the leftovers.
-- **The directions answer the problem.** Pass 4 renders on that screen, and the tension is between answers to the problem, which may be structural — keep the pattern and make it legible, or replace the pattern — as easily as visual. Each direction says in one line how it removes the reported failure, and the brief's `## Done looks like` carries that as a condition someone can check on screen.
+- **The slice centres on the problem.** Pass 1 and Pass 2 cover the problem's screen and the rings of `## The slice` around it. A misreading often lives across screens: the same pattern means one thing here and another there (ring 3). A fix to a shared component lands on its whole blast radius (ring 2). So the fix is judged where it lands, not only where it was reported. Whatever you notice outside the slice goes to the leftovers.
+- **The directions answer the problem.** Pass 4 renders on that screen and on the screens of the slice its fix changes, and the tension is between answers to the problem, which may be structural — keep the pattern and make it legible, or replace the pattern — as easily as visual. Each direction says in one line how it removes the reported failure, and the brief's `## Done looks like` carries that as a condition someone can check on screen.
 - **The brief names its row.** With a `B-NNN` target, `## Task` cites it, so `/esq:plan` picks the row up.
 
 ## Greenfield mode
@@ -80,7 +98,7 @@ A named path that does not exist, and a brief carrying no `## User-facing flow`,
 
 **The second announcement line** in this mode names the mode, the resolved source and the one screen — named rather than measured, because there is no traffic to measure:
 
-> `Greenfield mode — directions from <the resolved source>. Rendering on <the one screen>, named from that source — say so now if that's the wrong screen.`
+> `Greenfield mode — directions from <the resolved source>. Rendering on <the one screen>, named from that source, with <the flow's other steps, or no other step> live — say so now if that's the wrong screen.`
 
 **Pass 1 is degraded, not skipped.** Read whatever stack and token material exists — the framework choice, a `tailwind.config`, a brand or token file, a component-library dependency — and let it constrain the directions. If there is none, **say there is none**; never report a count of zero as a finding. "No token file exists yet" is context; "0 hardcoded hex values across 0 components" is a measurement of nothing dressed as evidence.
 
@@ -95,9 +113,9 @@ A named path that does not exist, and a brief carrying no `## User-facing flow`,
 
 **The source-and-date form is mandatory here, not incidental.** Every load-bearing choice a direction rests on carries **at least one source with its date**, in the brief, in one line — and a choice you could not source says so in the same place. Elsewhere that line lets a reader tell a checked answer from a remembered one; here it is the only evidence the run has, because nothing was ever looked at.
 
-**The budget is reallocated, never raised.** Pass 2's captures are gone: this mode takes **at most 4 captures** — one per rendered direction per theme — and Pass 2's share of the search allowance moves to Pass 3. Four is still a reallocation of Pass 2's own share and still well under the announced ceiling of 8; the announced bound at the top of this file does not go up.
+**The budget is reallocated, never raised.** Pass 2's captures are gone: this mode takes **at most 4 captures** — one per rendered direction per theme — and Pass 2's share of the search allowance moves to Pass 3. Four is still a reallocation of Pass 2's own share and still well under the announced ceiling of 12; the announced bound at the top of this file does not go up.
 
-**Pass 4 renders on the one screen the source names** — not the busiest, since nothing has traffic yet. Everything else about Pass 4 holds unchanged except the direction count: **exactly 2 directions, whatever the source fixes or delegates** — starting a product is the choice this mode exists to put on screen — the tension named in one sentence before you build, the real labels and data shape from the source, tokens declared explicitly, `artifact-design` loaded before the first direction, and the six-item gate a direction has to pass before you show it.
+**Pass 4 renders on the one screen the source names** — not the busiest, since nothing has traffic yet. When the source carries a flow (a `## User-facing flow` of several steps), its other steps render too, as live screens linked in the flow's order. They are gated by driver reads and take no capture, so the 4 captures stay on the named screen, and on the page each of those steps says `live only`. `## The slice` does not apply here: there are no importers to follow, and the flow is the source's. Everything else about Pass 4 holds unchanged except the direction count: **exactly 2 directions, whatever the source fixes or delegates** — starting a product is the choice this mode exists to put on screen — the tension named in one sentence before you build, the real labels and data shape from the source, tokens declared explicitly, `artifact-design` loaded before the first direction, and the six-item gate a direction has to pass before you show it.
 
 **Both themes ship, unconditionally.** Nothing in this mode is conditional on an app existing, so Pass 4's "if the app has them" does not apply here: each rendered direction is shown in **light and dark** on the comparison page. A direction with only one theme is not finished, whatever the stack turns out to be later.
 
@@ -113,9 +131,9 @@ A named path that does not exist, and a brief carrying no `## User-facing flow`,
 
 Read the codebase for what the interface is *made of*. This pass is cheap and it sets up everything after it, so do it first — its independent reads go out together in one turn (parallel `Read` calls, or one chained command), never one file per turn. In `--greenfield` it is degraded rather than skipped — read whatever stack and token material exists, and say plainly when there is none; see `## Greenfield mode`.
 
-- **The screens.** Routes, pages, layouts. List them and mark which ones a user actually reaches often — the spec and the router disagree about this more often than you'd think.
+- **The screens and the journeys.** Routes, pages, layouts. List them and mark which ones a user actually reaches often — the spec and the router disagree about this more often than you'd think. Then map the rings of `## The slice` around the centre: the journeys through it, the importers of what a direction would change, and the patterns the centre shares. This map sizes the slice, so it comes before any capture.
 - **The system, if there is one.** Where colors, spacing, radii, type scale, shadows and breakpoints are defined. Then the gap between the system and its use: hardcoded hex and px where a token exists, near-duplicate values (four greys within 3% of each other, three "primary" buttons), one-off breakpoints. **Count them** — "17 hardcoded hex values across 9 components, against a token file defining 6 colors" is a finding; "colors are inconsistent" is a mood.
-- **The states.** For each significant screen: is there an empty state, a loading state, an error state, a partial state? A screen with no empty-state branch in the code has one — it's just blank. Note which are missing, not which are ugly.
+- **The states.** For each screen of the slice: is there an empty state, a loading state, an error state, a partial state? A screen with no empty-state branch in the code has one — it's just blank. Note which are missing, not which are ugly.
 - **The floor.** Focus styles, keyboard reachability of custom controls, labels on inputs, alt text, `aria-*` on anything hand-rolled, contrast pairs you can compute from the token file. Compute the contrast ratios rather than eyeballing them — write a throwaway script in the scratchpad and run it. A ratio is a fact and it does not need a source.
 - **The stack's own idioms.** What framework and version, what styling approach, what component library if any. This decides what "modern" can even mean here — a direction that requires abandoning the styling layer is a different project, and you should say so rather than propose it quietly.
 
@@ -125,9 +143,22 @@ In `--greenfield` this pass is skipped entirely — there is no running app to l
 
 Now look at it. Invoke the `run` skill (`Skill` with `run`) when it is listed — it finds this project's own launch path before falling back to generic patterns; otherwise use the project's own launch skill or documented start command and whatever browser tooling the session has.
 
-Capture the screens that matter, **at most 4 captures** — half the announced ceiling of 8, because the other half is reserved for Pass 4 and spending it here would leave the directions unrendered. Allocate those four deliberately: the highest-traffic screen first, then the densest one, then one that is mostly empty — in a targeted run, the problem's screen first, then its siblings in the same flow. Both themes if the app has them, and the screen the directions will render on is captured at the width they will be captured at (see Pass 4), so the comparison is like for like. Spend the budget on different *screens* before spending it on different *widths* — a second viewport of the same screen tells you less than a first look at another.
+Capture the slice, **at most 6 captures** — half the announced ceiling of 12, because the other half is reserved for Pass 4 and spending it here would leave the directions unrendered. One capture per screen of the slice, in journey order, the centre first. In a targeted run that means the problem's screen as the person met it. Both themes if the app has them, and the screen the directions will render on is captured at the width they will be captured at (see Pass 4), so the comparison is like for like. Spend the budget on different *screens* before spending it on different *widths* — a second viewport of the same screen tells you less than a first look at another.
 
 Then **look at each capture and write what you see**, per screen: what the eye lands on first, what competes with it, what is unreadable, where the rhythm breaks — and whether it has any character at all. A screen can be consistent, accessible and dull; "nothing draws the eye, three surfaces within 1.1 : 1 of each other, one accent spent once" is an observation, and the brief names it. This is the part a static read cannot produce and the part the brief is actually worth reading for.
+
+### Walk the journeys
+
+A capture shows a screen. It cannot show the step between two screens, and that step is where a journey breaks. In the same driver session, **walk each journey of the slice end to end as its person would**: click, type, submit, go back, reload. Each step is a driver read that returns a value rather than an image, so walking costs no capture. Record for each step the URL, what the step asks for, and what answers it. Then read the journey off what you recorded, with counts:
+
+- **Steps and detours.** The screens and actions from entry to done. A dead end: no way forward or back except the browser's. A round trip that lands the person somewhere other than where their work continues.
+- **Same thing, same name.** The label of each action and each object across the slice, collected from the DOM. "Save" on create and "Validate" on edit is a finding. So is "Event" on one screen and "Activity" on the next.
+- **Where am I.** Whether the navigation marks the current place (`aria-current`, an active state), and whether a heading names the screen.
+- **What answers an action.** What responds to a submit, and whether the next screen confirms it.
+- **What survives.** Input kept or lost on back and on reload. An error that keeps what was typed, or one that clears it.
+- **One pattern, one meaning.** A component from ring 3 doing two jobs, named with both screens.
+
+Each of these findings is observed in the same sense as a capture: it names the step and the read behind it. A journey the driver could not walk (a payment, an email link, a device step) is stated as unwalked at that step, never inferred.
 
 If the app cannot be launched — it needs credentials, a seeded database, a device, a running backend you don't have — **stop and ask the user for access or for screenshots.** That is not a question the repo can answer, and an audit that skips this pass is the code review this command refuses to be. Say plainly which screens you still need. If they hand you screenshots instead of access, that is fine: read those.
 
@@ -156,9 +187,9 @@ Every claim about current practice carries its source and its date in the brief,
 
 **Load `artifact-design` before the first direction is built**, when the session lists it (`Skill` with `artifact-design`), in both modes: it shapes what gets rendered, not only how the comparison page is packaged.
 
-Describe nothing you can render. Build **one direction — the one you recommend —** and a second **only when the direction is genuinely the user's**: the brief or mandate neither fixes nor delegates the answer — the visual identity, or in a targeted run the fix to the problem — or the user asked to compare. Render on **exactly 1 screen** — the highest-traffic one from pass 2, or in a targeted run the screen the problem is on — as standalone HTML in the scratchpad directory. In `--greenfield` that one screen is the one the content source names rather than the busiest, and its content comes from that source; see `## Greenfield mode`.
+Describe nothing you can render. Build **one direction — the one you recommend —** and a second **only when the direction is genuinely the user's**: the brief or mandate neither fixes nor delegates the answer — the visual identity, or in a targeted run the fix to the problem — or the user asked to compare. **Render the direction across the screens it changes**, never one page alone: the centre in full, plus each other screen of the slice the direction alters. A direction that restyles a shared shell, control or token alters every screen of the slice that renders it. A direction that restructures the journey alters the screens it rearranges: it merges two steps, moves an action, or puts an edit inline. The screens of one direction link to each other as the journey does, so the user walks the direction rather than looking at it. Build them as standalone HTML in the scratchpad directory, one file per screen or one file with its screens as states. A screen the direction leaves as it is gets no re-render, and the page says so. In `--greenfield` that one screen is the one the content source names rather than the busiest, and its content comes from that source; see `## Greenfield mode`.
 
-When there are two, they must differ in a way the user can *choose between*: not "blue vs. teal", but two different answers to the question the audit raised. Conservative-and-systematic against a genuine departure, if that's the tension; density against calm, if that's it. Name the tension in one sentence before you build, so the reader knows what they are picking. **A departure departs**: on a redesign it changes the palette or the surfaces, not the type alone — a direction that moves one axis is the conservative one under another name.
+When there are two, they must differ in a way the user can *choose between*: not "blue vs. teal", but two different answers to the question the audit raised. Conservative-and-systematic against a genuine departure, if that's the tension; density against calm, if that's it; fewer steps against clearer steps, when the walk found the journey is the problem. Name the tension in one sentence before you build, so the reader knows what they are picking. **A departure departs**: on a redesign it changes the palette or the surfaces, not the type alone — a direction that moves one axis is the conservative one under another name.
 
 **The counted findings are the floor, not the direction.** Every direction closes Pass 1's counted defects and its accessibility floor — they are what is broken regardless, section 4 of the page. The direction answers a different question: what the screen should feel like to the people it is for and where their eye goes — hierarchy, colour, surfaces, imagery, motion, the one moment that rewards them. A direction that only closes the counted defects is a cleanup under a direction's name; do not show it as one.
 
@@ -173,7 +204,7 @@ Each direction:
 - Declares its tokens explicitly at the top (colors, spacing scale, type scale, radii) — those become the plan's raw material.
 - **Passes the six-item gate below.** A direction that fails one is a draft, not a direction.
 
-**Six named items gate every direction, in both modes, and a direction that fails one is fixed before it is shown.** Contrast is the first of six, not the whole floor — nothing else would stop a direction that looks right in a screenshot and is unusable. Before a direction reaches the published page it passes all of:
+**Six named items gate every direction, in both modes, and a direction that fails one is fixed before it is shown.** Contrast is the first of six, not the whole floor — nothing else would stop a direction that looks right in a screenshot and is unusable. Before a direction reaches the published page, every screen it renders passes all of:
 
 1. **Body text meets WCAG AA.** The ratio is computed from the direction's own declared tokens, for every body-text pair it uses — never eyeballed off the capture.
 2. **Every interactive element has a visible focus state.** Focus each focusable element in the driver session in turn and compare its computed `outline`, `box-shadow` and `border` against the same element's resting style; an element whose computed style does not change on focus does not have a focus state. A direction with no focusable elements passes this item with nothing to walk — that is a vacuous pass, not a failure.
@@ -182,22 +213,23 @@ Each direction:
 5. **The screen's empty, loading and error states are present in the rendered direction.** Rendered, not described beside it — a direction that shows only the happy path leaves the states the implementer will otherwise invent unchosen.
 6. **Motion honours `prefers-reduced-motion`.** Emulate `reduce` in the driver session, let the page settle, and read `document.getAnimations()`: anything still animating a transform, a position or a size is a failure — an opacity fade may stay. Clear the emulation before any other read or capture. A direction with no motion passes this item with nothing to read.
 
-Items 2, 3, 4 and 6 are **driver reads evaluated in the same driver session** as the captures — a computed style per focusable element, a measured rectangle per target, one scroll width at ~400px, one animation list under reduced motion. Each returns a value rather than a screenshot to judge, so none of them renders an image and Pass 4's spend stays its 4 captures, with the announced ceiling of 8 untouched. A direction failing any item is **fixed and re-checked before it is shown**, never published with the failure annotated: that would hand the user a choice between a direction and a defect. If the driver failed, or came up without a way to evaluate script and resize the page, and the absence was stated, items 2, 3, 4 and 6 are stated unchecked for that run rather than silently dropped.
+Items 2, 3, 4 and 6 are **driver reads evaluated in the same driver session** as the captures — a computed style per focusable element, a measured rectangle per target, one scroll width at ~400px, one animation list under reduced motion. Each returns a value rather than a screenshot to judge, so none of them renders an image. They run on every screen a direction renders, while Pass 4's spend stays its 6 captures and the announced ceiling of 12 stays untouched. A direction failing any item is **fixed and re-checked before it is shown**, never published with the failure annotated: that would hand the user a choice between a direction and a defect. If the driver failed, or came up without a way to evaluate script and resize the page, and the absence was stated, items 2, 3, 4 and 6 are stated unchecked for that run rather than silently dropped.
 
-Then **render each one and look at it**, the same way as pass 2 — on Pass 4's own reserved share of **at most 4 captures**, one per rendered direction per theme, **at the width its people mostly meet it on**: a phone (~390 px) for a public site, an app used on the go, or when the spec does not say; desktop for a tool the spec places at a desk. That share is reserved rather than drawn from what Pass 2 left, so a Pass 2 that spent its full allowance never starves this step. Screenshot the file through the browser tooling pass 2 already set up — except in `--greenfield`, where pass 2 never ran and Pass 4 sets up its own driver instead; see `## Greenfield mode`. If no browser driver is available, say so explicitly in the brief and in the report — an unrendered direction is a guess, and the user needs to know which they're being handed.
+Then **render each one and look at it**, the same way as pass 2 — on Pass 4's own reserved share of **at most 6 captures** (at most 4 in `--greenfield`). Spend them on the centre first, one per direction per theme, then on the direction's other rendered screens in the primary theme, all **at the width its people mostly meet it on**: a phone (~390 px) for a public site, an app used on the go, or when the spec does not say; desktop for a tool the spec places at a desk. That share is reserved rather than drawn from what Pass 2 left, so a Pass 2 that spent its full allowance never starves this step. A rendered screen beyond the captures stays live on the page and passes the gate by driver reads, and its slot says `live only`. Screenshot the file through the browser tooling pass 2 already set up — except in `--greenfield`, where pass 2 never ran and Pass 4 sets up its own driver instead; see `## Greenfield mode`. If no browser driver is available, say so explicitly in the brief and in the report — an unrendered direction is a guess, and the user needs to know which they're being handed.
 
 ## Publish the artifact
 
 Build one page. When the session has the `Artifact` tool, publish it — `artifact-design` is already in hand from Pass 4, so it is not loaded a second time; otherwise write the same page as a standalone HTML file at `docs/plans/<YYYY-MM-DD>-<slug>.ui.html`, committed with the brief — never stop for a missing publisher. In `--greenfield` the page has no **Today** section, pass 2 never ran, so it opens on the tension and the comparison starts at Direction A; see `## Greenfield mode`. Its job is comparison, in this order:
 
-1. **Today** — the captures from pass 2, with your one-line reading under each.
+1. **Today** — per journey, the captures from pass 2 in journey order with your one-line reading under each, then the walk's counted reading: steps, detours, labels that disagree, what does not survive.
 2. **The tension** — with two directions, the sentence naming what they disagree about.
-3. **The direction(s)** — side by side when there are two — on the same screen, both themes, with their token sets and computed contrast ratios shown as numbers.
-4. **What is broken regardless of direction** — the findings from pass 1 that either direction inherits.
+3. **The direction(s)** — side by side when there are two — the centre in both themes, then the other screens each one changes, with their token sets and computed contrast ratios shown as numbers.
+4. **What is broken regardless of direction** — the findings from pass 1 and the walk that either direction inherits.
+5. **What else it reaches** — the blast-radius screens outside the slice, counted, and the next slices with their invocations.
 
 Embed captures as `data:` URIs; downscale them so the page stays under 16 MB. If the budget is tight, drop *captures*, never findings.
 
-**A capture cannot show motion, so each direction ships live beside it.** Publish each direction's HTML with the page — through the `Artifact` tool's `files`, or locally in `docs/plans/<YYYY-MM-DD>-<slug>.ui/` committed with the brief — and embed it in the direction's section (an `iframe` at the capture width) with a link to open it full screen, so the user plays the hover, the press and the transitions before choosing.
+**A capture cannot show motion, so each direction ships live beside it.** Publish each direction's HTML with the page — through the `Artifact` tool's `files`, or locally in `docs/plans/<YYYY-MM-DD>-<slug>.ui/` committed with the brief — and embed it in the direction's section (an `iframe` at the capture width, opening on the centre) with a link to open it full screen, so the user walks the journey and plays the hover, the press and the transitions before choosing.
 
 A published page is private on publish. Record its URL or file path — it goes in the brief.
 
@@ -211,17 +243,19 @@ Write the brief in the standard brief shape — `/esq:plan` already consumes thi
 # Brief: <Title in plain English, not a slug>
 
 ## Task
-One tight paragraph: what this redesign is, on which screens, ending in what the user
-will see that they don't today. Written as if the direction were already chosen — you
+One tight paragraph: what this redesign is, on which journeys and screens, ending in what
+the user will see that they don't today. Written as if the direction were already chosen — you
 update this sentence after the pick.
 
 ## In scope
-- The screens the redesign touches, named.
+- The slice: its journeys and the screens the redesign touches, named.
 - The system work it implies (token consolidation, component extraction) — but only what
   the chosen direction actually needs.
 
 ## Out of scope
 - Screens deliberately left alone, and why.
+- The next slices, in run order: the screens each holds, the ring that reached them, and
+  the invocation that covers them. Blast-radius screens outside the slice, counted.
 - Findings from the audit that are real but belong in the backlog, not this work.
 
 ## Resolved decisions
@@ -234,17 +268,21 @@ The audit itself, and it is the section this brief exists for:
 - **Visual evidence:** <page URL or docs/plans/…ui.html> — captures of today and the rendered direction(s).
 - **What the interface is made of today:** the counted findings from pass 1.
 - **What the app looks like today:** the per-screen reading from pass 2.
+- **What the journeys are like today:** the walk from pass 2, counted, step by step.
+- **Reach:** each shared component, layout or token the direction changes, and the
+  screens it reaches, in this slice and beyond it.
 - **What the stack allows:** the styling layer, the component library, what a direction
   cannot ask for without becoming a different project.
 - **Current practice, checked:** each claim with its source and date.
 
 ## User-facing flow
-The redesigned screen, step by step, including empty / loading / error. This is what the
+The redesigned journey(s), screen by screen, including empty / loading / error. This is what the
 plan turns into `(manual)` verification, so keep it observable.
 
 ## Done looks like
 What a person could confirm on screen. For a redesign this is unusually concrete — name
-the screens, the states, and the contrast floor as conditions someone can check.
+the screens, the journey's steps, the states, and the contrast floor as conditions someone
+can check, including on the blast-radius screens the change reaches.
 
 ## Deferred to planning
 Phasing, migration order, whether the token consolidation lands before or with the first
@@ -287,8 +325,8 @@ Tell the user, in this order:
 1. Whether the audit ran complete or a pass was cut short, and which.
 2. The direction they picked, and the brief path.
 3. The comparison page's URL or path.
-4. What still needs them: leftover findings worth a backlog entry, screens you could not reach.
-5. Elapsed time, and what it spent — captures taken, searches run, directions rendered.
+4. What still needs them: leftover findings worth a backlog entry, screens or journey steps you could not reach, and the next slices with their invocations.
+5. Elapsed time, and what it spent: screens covered, journeys walked, captures taken, searches run, directions rendered.
 6. Next step: "Review the brief in your editor. When ready, `/clear` and run `/esq:plan` — it will pick up this brief automatically."
 
 Then stop. Do not plan, do not write code, do not touch a stylesheet.
