@@ -91,9 +91,14 @@ until the scope is clear and writes a brief that `plan` picks up. For a product 
 no UI yet, it suggests `/esq:ui --greenfield` to put rendered design directions on
 screen before any code.
 
-**An interface that works but looks dull?** `/esq:ui` (or `/esq:ui <screen>`) drives the
-running app, checks current practice, and renders the directions on a comparison page at
-the width people use it. A direction answers what the screen should feel like, not just
+**An interface that works but looks dull?** `/esq:ui` (or `/esq:ui <screen>`) never reads
+one page alone. It covers a slice: the journeys through the screen, and the screens a
+change there would reach through a shared component, layout or token. It walks those
+journeys end to end in the running app (steps, dead ends, labels that disagree, input lost
+on back) and checks current practice. Then it renders the directions across every screen
+they change, linked so you walk the journey, on a comparison page at the width people use
+it. A surface too big for one run (more than 3 journeys or 6 screens) is cut into slices:
+the brief names the next ones, each with the command that covers it. A direction answers what the screen should feel like, not just
 the defects it counted: each carries its own signature and motion, built live on the page
 so you play the hover, the press and the transitions before choosing. It may break the
 app's own visual rules where only habit set them, and it ships only after it passes
@@ -101,8 +106,9 @@ contrast, focus, 44 px targets, phone width, reduced motion and its empty, loadi
 error states.
 
 **A screen someone misread?** `/esq:ui B-NNN` (or a sentence saying what went wrong)
-captures the screen as they met it, renders the fix — two directions when the choice
-is yours — on a comparison page, and writes the brief `plan` picks up. `/esq:work`
+captures the screen as they met it, along with the screens of its journey and the ones
+its fix would also change. It renders the fix where it lands (two directions when the
+choice is yours) on a comparison page, and writes the brief `plan` picks up. `/esq:work`
 routes such an item there itself.
 
 **Small change?** `/esq:work fix the typo in the sign-in error` records the item,
@@ -150,7 +156,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:harvest` | Recover decisions from the code, history and discussion | `docs/DECISIONS.md` |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md` |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
-| `/esq:ui [screen-problem-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface or one screen a user misread, or explore one before implementation | A rendered recommended direction (two in `--greenfield`, or when the choice is yours), live and animated, gated on contrast, focus, target size, phone width, reduced motion and states, a comparison page and a planning brief |
+| `/esq:ui [screen-problem-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), live, animated and walkable, gated on contrast, focus, target size, phone width, reduced motion and states, a comparison page and a planning brief naming the next slices |
 
 In every example, use the actual paths the previous command reported. `review` and
 `check` need an explicit target and ask for one when it is missing.
