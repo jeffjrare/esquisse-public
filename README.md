@@ -111,6 +111,22 @@ its fix would also change. It renders the fix where it lands (two directions whe
 choice is yours) on a comparison page, and writes the brief `plan` picks up. `/esq:work`
 routes such an item there itself.
 
+**Does the product do what it says?** `/esq:promise` collects every promise the product
+makes: the marketing site, pricing, onboarding and `docs/SPEC.md`. It walks each one in the
+running app as the person it was made to would, and gives it a verdict with its evidence:
+kept, partial, broken, absent, unverifiable here, or not testable at all ("the best").
+Verdicts live in `docs/PROMISES.md`, so a re-run walks only what is not already proven
+(`--all` re-proves everything). Each promise that does not hold becomes a backlog row
+naming both remedies, make the product do it or change the words, for you to pick.
+It never writes to a production instance.
+`/esq:promise --sense` sweeps the screens for what makes no sense: a button that does
+nothing, a count that disagrees with its list, "Cancel" that saves, a field asked for and
+never used, work lost on back. Each finding is filed with the step that shows it.
+`/esq:promise --copy [page]` writes or improves a site's page copy, claiming only what was
+proven, in the product's voice and its own names for things, checked to fit at phone
+width. It shows each page before and after; what you approve is written into the source,
+one commit per page.
+
 **Small change?** `/esq:work fix the typo in the sign-in error` records the item,
 sizes it, and — when it is truly small — makes the change, verifies it and commits,
 with no plan. Anything bigger gets the exact next command instead. A real run:
@@ -156,6 +172,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:harvest` | Recover decisions from the code, history and discussion | `docs/DECISIONS.md` |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md` |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
+| `/esq:promise [page-or-feature] [--sense \| --copy] [--all]` | Check that what the product promises works in the running app; sweep it for UX nonsense; write or improve page copy | `docs/PROMISES.md` verdicts with evidence and a backlog row per promise that does not hold; `--sense` backlog rows; `--copy` a before/after page, then approved copy committed page by page |
 | `/esq:ui [screen-problem-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), live, animated and walkable, gated on contrast, focus, target size, phone width, reduced motion and states, a comparison page and a planning brief naming the next slices |
 
 In every example, use the actual paths the previous command reported. `review` and
