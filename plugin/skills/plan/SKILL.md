@@ -97,13 +97,17 @@ For a feature, carry the brief's user, present friction and intended result into
 
 For an improvement, anchor the recommendation in the actual behavior or artifact that falls short. Compare the proposed result on that same need and constraints; a hypothetical example can explain a design but cannot prove an improvement. Plan the smallest observation that can settle the claimed outcome. When a bounded run set judges the edit, state its keep/revert rule before spending, attribution test included: a fall is a regression only when the edit can cause it, and a criterion failing the same way in the baseline arm, or through a mechanism the edit does not touch (named, never asserted), is reported and never reverts. The rule settles every outcome, a missed target and the promised row's disposition included (Done, Open with a named next lever, or no lever left): it is never an open question, and the executing session applies it with a one-line reason (`D-a-measurement-verdict-is-settled-under-mandate`). A paid run beyond the stated bound stays the user's authorization. A format check proves format, not feature usefulness or model behavior; leave any unobserved outcome explicitly unproved rather than buying a general evaluation campaign.
 
+**Replacing a surface owes an inventory of what it did.** When a phase will delete a file, remove an import of a feature module, or swap a screen, editor or form for another, read the old surface before writing phases: every sub-component, hook, handler and constant it consumes, one level down (`LocationFieldContent` → address autocomplete, city combobox, sector-by-city, geolocation, map picker, country). Write each capability the user has through it into `## Capability inventory` with its disposition: `kept` or `moved`, naming where it lives on the new surface, or `dropped`. Name too every module the change leaves with no importer. A module that powers no user capability still gets its row (`none — <what it was for>`): `/esq:land` refuses a deleted or orphaned module that no unit inventory names by path.
+
+**`dropped` is the user's call, asked before the plan is written** — never a recommendation you settle, never left for build to record as decided. A design whose undo would be "restore the old component" is a capability loss by definition. Put the drops to the user under **Resolve blocking decisions**, batched, each with the keep alternative and its cost, and record the answer in the row: `dropped — user: <date>, /esq:plan`. A drop the user's request or the brief's `## Resolved decisions` already states is that answer: cite it, do not re-ask. A capability not dropped is kept or moved, and a task builds it.
+
 If the task description is too vague to plan ("improve the codebase"), use `AskUserQuestion` to ask the user to scope it — offer 2–3 plausible interpretations you can infer from the codebase, plus the free-text escape (see *Resolve open questions*). If `AskUserQuestion` is unavailable, STOP and ask in plain text.
 
 If you find during investigation that the task is much smaller than expected — a one-line fix, a trivial rename — say so. Suggest doing it directly without the plan-file overhead.
 
 ## Resolve blocking decisions
 
-If your recommendation depends on a choice the ask-altitude block below marks **theirs**, use `AskUserQuestion` to resolve it before writing the plan. Present each option with its tradeoff as the description. One question maximum.
+If your recommendation depends on a choice the ask-altitude block below marks **theirs**, use `AskUserQuestion` to resolve it before writing the plan. Present each option with its tradeoff as the description. One question maximum, capability drops excepted: one each, in the same call.
 
 Anything else, make the call and note the reasoning in the plan.
 
@@ -195,6 +199,17 @@ a later session can tell a researched pick from a remembered one.
 The boundary this change crosses and how it's held: who is allowed to call it, what is
 validated and where, what must never be logged or returned. One short paragraph, concrete.
 
+## Capability inventory
+<!-- Include this section ONLY when a phase deletes a file, removes an import of a feature
+     module, or replaces a screen, editor or form with another. Omit it entirely otherwise.
+     `esq branch check` and `esq review scope` read it: a deleted or orphaned module counts as
+     covered only when its repo-relative path appears here. -->
+What the replaced surface let the user do, derived from the old code, one row per capability:
+
+| Source | Capability | Disposition |
+|---|---|---|
+| `<repo-relative path of the module it lives in today>` | <what the user can do, in their words> | kept — `<where>` · moved — `<where>` · dropped — user: <date, where they decided> · none — <what the module was for> |
+
 ## Phases
 
 Sequential and sized for one fresh execution session each. Prefer a first usable path
@@ -268,6 +283,7 @@ response. Keep a written plan's required headings and parsed fields intact. Cut 
 - **Use explicit `.mjs` files or quoted globs for `node --test`, never bare directories:** `node --test 'tests/cli/*.test.mjs'`.
 - **Make results independent of ambient tool variants.** Prefer explicit path operands to searching a root and filtering printed path prefixes. Account for wrapped text, locale-dependent sorting and differing tool flags; the same assertion must mean the same thing in an interactive shell and a script.
 - **`(reads)` declarations are optional promises.** After an auto step's property, `(reads)` may name its input paths so `esq gate verify` checks freshness against those paths. No declaration is the normal, complete case. Before writing any, load `${CLAUDE_SKILL_DIR}/references/reads-declaration.md`; never guess from memory or under-declare inputs. Plans without declarations do not load that reference.
+- **A removal check is paired with parity checks.** A step proving a surface is gone (`grep … — no match`) proves nothing about what replaced it: the same phase carries, for each `kept` or `moved` inventory row it touches, a step proving that capability works on the new surface — a test that names it, or the phase's `(manual)` step walking it from the new screen.
 - **No "deferred to live env" pass.** If a behavior cannot be verified within the phase, record it as a Risk or Open question; do not call the unverified change done.
 
 ## Right-size, then read it once
@@ -305,6 +321,9 @@ Read the written plan once and correct these yourself:
    replacement, and quoted copy keeps every qualifier in each language the plan writes
    it in; otherwise name the conflict in `## Risks`. When a step rebuilds what an
    earlier step of the phase already built, pass the runner's no-build option.
+7. Where a phase deletes, un-imports or replaces: every module it removes or leaves without an
+   importer has its inventory row, every `dropped` row carries the user's answer, and every
+   `kept`/`moved` row has its parity step.
 
 Size by deliverable and session context, not a task-count cap. Each task is one atomic
 commit; unrelated changes are separate tasks. Leave working code after each phase.

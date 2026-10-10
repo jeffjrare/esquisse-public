@@ -2730,8 +2730,13 @@ async function branchVerdict(root, planPath) {
   // to have a landing site for. Reported, never routed off *here*: no verdict below branches on it, and
   // `esq merge land` resolves it again in its own process rather than trusting this one (B-154).
   const destination = origin ? landingSite(repository, origin) : null;
+  // The sixth: what the unit removed since its branch left its origin, and which of it no unit plan's
+  // `## Capability inventory` names. Read only on the recorded branch — anywhere else HEAD is not the
+  // unit's — and `null` for a legacy plan, a detached HEAD or a git that cannot answer.
+  const removalBase = recorded && recorded === branch ? unitRemovalBase(repository, origin, head) : null;
+  const removed = removalBase ? removedModules(repository, removalBase, head, members.map((member) => capabilityInventory(member.text))) : null;
   const verdict = (name, refuse, reason, owners = []) =>
-    ({ root: repository, file, branch, head, recorded, origin, dirty, verdict: name, owners, unit, landed, coverage, destination, refuse, reason });
+    ({ root: repository, file, branch, head, recorded, origin, dirty, verdict: name, owners, unit, landed, coverage, destination, removed, refuse, reason });
 
   // First match wins, in this order.
   if (!branch) {
@@ -2861,14 +2866,22 @@ const GATE_LEDGERS = new Set(['docs/BACKLOG.md', 'docs/DECISIONS.md']);
 // line `esq plan set-reviewed` writes and the `**Abandoned:**` line `esq plan abandon` writes, each
 // with the blank line its writer inserts above it. Recording that a review covered this tree, or that
 // a plan will not be built, changes nothing a completed phase claims, so neither may stale the
-// evidence already recorded. Every other byte above `## Execution log` still invalidates.
-function planSection(text) {
+// evidence already recorded. Every other byte above `## Execution log` still invalidates — but one
+// section, on the gate's side alone.
+//
+// The gate passes `inventory: false`: a `## Capability inventory` row records where a capability
+// went, and names no command, so a row added after a phase verified stales none of its proofs. A
+// review still reads it — `changedPlanContracts` keeps the section — because a disposition is a claim.
+function planSection(text, { inventory = true } = {}) {
   const lines = text.split('\n');
   const index = lines.findIndex((line) => line.trim() === '## Execution log');
   const section = index < 0 ? lines : lines.slice(0, index);
   const header = section.findIndex((line) => /^##\s/.test(line));
   const kept = [];
+  let skipping = false;
   for (const [position, line] of section.entries()) {
+    if (/^#{1,2} /.test(line)) skipping = !inventory && line.trim() === CAPABILITY_INVENTORY;
+    if (skipping) continue;
     if ((header < 0 || position < header) && (REVIEWED_AT_LINE.test(line) || ABANDONED_LINE.test(line))) {
       if (kept.length > 0 && kept.at(-1) === '') kept.pop();
       continue;
@@ -3060,7 +3073,7 @@ export async function gateVerify(root, planPath, { workersMoved = false, phase =
         // A `(reads)` declaration lives above that line, so editing one stales this plan's own
         // proofs right here — which is why no declaration may narrow this case away.
         const before = gitTry(repository, ['show', `${block.at}:${occurrence.plan}`]);
-        if (before === null || planSection(before) !== planSection(occurrence.text)) return run(`${occurrence.plan} changed above its ## Execution log since ${name} verified`);
+        if (before === null || planSection(before, { inventory: false }) !== planSection(occurrence.text, { inventory: false })) return run(`${occurrence.plan} changed above its ## Execution log since ${name} verified`);
       }
       // The proof plan's own log append counts only when a `(reads)` declaration names it: a bare
       // operand such as `make docs` would otherwise stale every proof on the commit that records it.
@@ -3678,26 +3691,183 @@ function reviewPaths(record) {
   return paths;
 }
 
-// The hat decisions a review of this plan shows: its `**Branch:**` unit's, abandoned plans included,
-// as `esq branch check` collects them — or, for a legacy plan recording no branch, its own log's.
-// The unit is found from the plan's path, like `unitForPlan`, so the answer needs no git.
-async function reviewDecisions(file, text) {
+// The plans a review of this plan reads as one unit: its `**Branch:**` unit's, abandoned plans
+// included, as `esq branch check` collects them — or, for a legacy plan recording no branch, itself.
+// The unit is found from the plan's path, like `unitForPlan`, so the answer needs no git. The hat
+// decisions and the capability inventories both come from these headers, read once.
+async function reviewUnitHeaders(file, text) {
   const repository = path.resolve(path.dirname(file), '../..');
   const branch = parseBranch(text);
-  const headers = branch ? unitHeaders(await planHeaders(repository), branch) : [{ relative: path.relative(repository, file), text }];
+  return branch ? unitHeaders(await planHeaders(repository), branch) : [{ relative: path.relative(repository, file), text }];
+}
+
+function reviewDecisions(headers) {
   return headers.flatMap((header) => planDecisions(header.text).map((decision) => ({ plan: header.relative, ...decision })));
+}
+
+// ── What a change removed ────────────────────────────────────────────────────
+// A rewrite that replaces a surface can drop a capability nobody named: the old component goes, the
+// new one does the new flow, and the autocomplete, map picker and geolocation the old one consumed go
+// with it — under a green suite and a grep proving the deletion. Two facts git settles without
+// judgment, so the CLI settles them: the source modules a range **deleted** (a rename is a move, not
+// a deletion) and the ones it **orphaned** — a module an import this range removed pointed at, which
+// some non-test source imported at the base and none imports at the head. `uncovered` is the subset
+// no unit plan's `## Capability inventory` names by its repo-relative path: a reference that does not
+// resolve, never a judgment. Which capability each module powered and where it lives now stays the
+// reviewer's, and a `dropped` disposition stays the user's.
+//
+// Deletions are read for every source language; orphans only where an import names a path
+// (JS/TS and the component formats that import like them). Every miss is in the safe direction: an
+// unrecognized import or a same-named module elsewhere reads as still imported, never as orphaned,
+// so the landing that refuses on `uncovered` cannot refuse on a module that is still in use.
+export const CAPABILITY_INVENTORY = '## Capability inventory';
+const SOURCE_FILE = /\.(?:[cm]?[jt]sx?|mts|cts|vue|svelte|astro|py|rb|go|rs|java|kts?|swift|php|dart|cs|exs?|scala|c|cc|cpp|h|hpp|m|mm)$/i;
+const IMPORTING_FILE = /\.(?:[cm]?[jt]sx?|mts|cts|vue|svelte|astro)$/i;
+const IMPORTING_GLOBS = ['*.js', '*.jsx', '*.ts', '*.tsx', '*.mjs', '*.cjs', '*.mts', '*.cts', '*.vue', '*.svelte', '*.astro'];
+// Test code, stories and fixtures power no user feature, and importing a module does not keep one alive.
+const TEST_CODE = [
+  /(?:^|\/)(?:tests?|spec|__tests__|__mocks__|__fixtures__|fixtures|e2e)\//,
+  /\.(?:test|spec|stories|story)\.[^/]+$/i,
+  /(?:^|\/)test_[^/]+\.py$|_test\.(?:go|py)$/,
+];
+// Neither is a feature module: a type declaration, a tool's configuration, a documentation page.
+const NOT_FEATURE = [...TEST_CODE, /\.d\.[cm]?ts$/, /(?:^|\/)[^/]+\.config\.[^/]+$/, /^docs\//];
+const IMPORT_SPECIFIER = /(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)['"]([^'"\n]+)['"]/g;
+const REMOVED_DIFF_BYTES = 256 * 1024 * 1024;
+
+function featureModule(file) {
+  return SOURCE_FILE.test(file) && !NOT_FEATURE.some((pattern) => pattern.test(file));
+}
+
+// A module's identity as an import names it: its path without the importable extension, and a
+// directory's `index` is the directory.
+function moduleKey(file) {
+  return file.replace(/\.(?:[cm]?[jt]sx?|mts|cts|vue|svelte|astro)$/i, '').replace(/\/index$/, '');
+}
+
+// The head's files a removed specifier may have meant. A relative specifier resolves exactly; any
+// other drops its first segment (an alias such as `@`, `~` or `src`, or a package name) and matches
+// by path suffix. A package import matches a local file only by coincidence, and the base-importer
+// test in `removedModules` keeps that coincidence from ever reading as an orphan.
+function specifierTargets(importer, specifier, files) {
+  const clean = specifier.split(/[?#]/)[0].replace(/\/+$/, '');
+  if (clean === '' || clean === '.') return [];
+  if (clean.startsWith('.')) {
+    const joined = path.posix.normalize(path.posix.join(path.posix.dirname(importer), clean));
+    if (joined.startsWith('../')) return [];
+    const wanted = moduleKey(joined);
+    return files.filter((file) => moduleKey(file) === wanted);
+  }
+  const rest = moduleKey(clean.split('/').slice(1).join('/'));
+  if (rest === '') return [];
+  return files.filter((file) => { const key = moduleKey(file); return key === rest || key.endsWith(`/${rest}`); });
+}
+
+function gitText(repository, args) {
+  if (process.env.NODE_ENV === 'test' && process.env.ESQ_TEST_GIT_ROOT) return null;
+  try {
+    return execFileSync('git', ['-C', repository, '-c', 'core.quotepath=off', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: REMOVED_DIFF_BYTES });
+  } catch { return null; }
+}
+
+// The non-test sources at `rev` that import `module` by a specifier ending in its last segment —
+// `null` when git cannot answer. Matching the segment and not the full path is deliberate: it can
+// only over-count importers, which errs toward "still imported".
+function moduleImporters(repository, rev, module) {
+  if (process.env.NODE_ENV === 'test' && process.env.ESQ_TEST_GIT_ROOT) return null;
+  const key = moduleKey(module);
+  const stem = key.slice(key.lastIndexOf('/') + 1).replace(/[.^$*+?()[\]{}|\\]/g, '\\$&');
+  const pattern = `['"][^'"]*/${stem}(\\.[A-Za-z]+)?(/index(\\.[A-Za-z]+)?)?['"]`;
+  const result = spawnSync('git', ['-C', repository, '-c', 'core.quotepath=off', 'grep', '-l', '-I', '-E', '-e', pattern, rev, '--', ...IMPORTING_GLOBS], { encoding: 'utf8', maxBuffer: REMOVED_DIFF_BYTES });
+  if (result.error || (result.status !== 0 && result.status !== 1)) return null;
+  return String(result.stdout ?? '').split('\n').filter((line) => line !== '')
+    .map((line) => line.slice(rev.length + 1))
+    .filter((file) => file !== module && !TEST_CODE.some((test) => test.test(file)));
+}
+
+// The `-` lines of a `-U0` diff, each with the path it was removed from. Header lines are told
+// apart by position, not by prefix: a removed `-- x` line prints as `--- x` inside a hunk.
+function removedImports(diff) {
+  const found = [];
+  let file = null;
+  let header = false;
+  for (const line of diff.split('\n')) {
+    if (line.startsWith('diff --git ')) { header = true; file = null; continue; }
+    if (header) {
+      if (line.startsWith('--- a/')) file = line.slice(6);
+      if (line.startsWith('@@')) header = false;
+      continue;
+    }
+    if (!file || !line.startsWith('-')) continue;
+    for (const match of line.matchAll(IMPORT_SPECIFIER)) found.push({ importer: file, specifier: match[1] });
+  }
+  return found;
+}
+
+// The text of a plan's `## Capability inventory`, up to the next `#`/`##` heading; '' without one.
+export function capabilityInventory(text) {
+  const lines = String(text ?? '').split('\n');
+  const start = lines.findIndex((line) => line.trim() === CAPABILITY_INVENTORY);
+  if (start < 0) return '';
+  const end = lines.findIndex((line, index) => index > start && /^#{1,2} /.test(line));
+  return lines.slice(start + 1, end < 0 ? undefined : end).join('\n');
+}
+
+function inventoryNames(inventories, file) {
+  const escaped = file.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const named = new RegExp(`(?<![\\w./-])${escaped}(?![\\w.-])`);
+  return inventories.some((text) => named.test(text));
+}
+
+// `{ base, deleted, orphaned, uncovered }` for `base..head`, or `null` when git cannot answer.
+function removedModules(repository, base, head, inventories) {
+  const status = gitText(repository, ['diff', '--name-status', '-z', '-M', '--diff-filter=D', base, head]);
+  if (status === null) return null;
+  const deleted = reviewPaths(status).map((entry) => entry.path).filter(featureModule).sort();
+  const listing = gitText(repository, ['ls-tree', '-r', '-z', '--name-only', head]);
+  const diff = gitText(repository, ['diff', '-U0', '--no-color', '--no-ext-diff', '-M', base, head, '--', ...IMPORTING_GLOBS]);
+  if (listing === null || diff === null) return null;
+  const files = listing.split(FIELD_NUL).filter((file) => file !== '' && IMPORTING_FILE.test(file) && featureModule(file));
+  const candidates = new Set();
+  for (const { importer, specifier } of removedImports(diff)) {
+    for (const target of specifierTargets(importer, specifier, files)) candidates.add(target);
+  }
+  const orphaned = [];
+  for (const module of [...candidates].sort()) {
+    const now = moduleImporters(repository, head, module);
+    if (now === null || now.length > 0) continue;
+    const before = moduleImporters(repository, base, module);
+    if (before !== null && before.length > 0) orphaned.push(module);
+  }
+  const uncovered = [...deleted, ...orphaned].filter((file) => !inventoryNames(inventories, file));
+  return { base, deleted, orphaned, uncovered };
+}
+
+// The base a unit's removals are read from: where its branch left its `**Origin:**`. Asked only of
+// a plan recording both fields; `null` when either does not resolve.
+function unitRemovalBase(repository, origin, head) {
+  if (!origin || !safeRef(origin) || !head) return null;
+  return gitTry(repository, ['merge-base', `refs/heads/${origin}`, head]) || null;
 }
 
 export async function reviewScope(root, planPath, { full = false } = {}) {
   const text = await readText(path.resolve(root, planPath));
   // Computed once, before any early return, so every plan-mode answer carries the field.
-  const decisions = await reviewDecisions(path.resolve(root, planPath), text);
+  const headers = await reviewUnitHeaders(path.resolve(root, planPath), text);
+  const decisions = reviewDecisions(headers);
   let repository = null;
   try { repository = git(root, ['rev-parse', '--show-toplevel']); } catch { repository = null; }
   const file = repository ? (path.relative(repository, path.resolve(root, planPath)) || planPath) : planPath;
   const slug = planSlug(file);
   const head = repository ? gitTry(repository, ['rev-parse', '--verify', '--quiet', 'HEAD']) : null;
-  const answer = { root: repository, file, slug, head, mode: 'unresolved', base: null, provenance: null, reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null, decisions };
+  // Removals are the unit's, from where its branch left its origin, whatever range this review
+  // narrows to — a delta re-review still owes every module no inventory names — and read before any
+  // early return, so an unresolved scope carries them too. A plan with no origin falls back below to
+  // the range this review resolves.
+  const inventories = headers.map((header) => capabilityInventory(header.text));
+  const unitBase = repository && head ? unitRemovalBase(repository, parseOrigin(text), head) : null;
+  const removed = unitBase ? removedModules(repository, unitBase, head, inventories) : null;
+  const answer = { root: repository, file, slug, head, mode: 'unresolved', base: null, provenance: null, reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null, decisions, removed };
   if (!repository || !head) return { ...answer, reason: 'git could not be read here, so no commit range can be resolved — review the whole change and say so' };
   if (!REVIEW_SLUG.test(slug)) {
     return { ...answer, reason: `\`${slug}\` is not a plan slug this can search history for — review the whole change and say so` };
@@ -3750,7 +3920,7 @@ export async function reviewScope(root, planPath, { full = false } = {}) {
       : `${reason ?? 'no review baseline is usable'}, so the range is the whole unit from ${fallback.reason}`;
   }
 
-  return reviewRangeFacts(repository, base, head, { ...answer, mode, provenance, reason, candidates });
+  return reviewRangeFacts(repository, base, head, { ...answer, mode, provenance, reason, candidates, removed: removed ?? removedModules(repository, base, head, inventories) });
 }
 
 // Everything a review needs once a base and a head are settled, whichever way they were settled — a
@@ -3838,7 +4008,7 @@ async function spillReviewDiff(repository, base, head, contracts) {
 export async function reviewScopeRange(root, spec) {
   let repository = null;
   try { repository = git(root, ['rev-parse', '--show-toplevel']); } catch { repository = null; }
-  const answer = { root: repository, file: null, slug: null, head: null, mode: 'unresolved', base: null, provenance: 'named-range', reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null };
+  const answer = { root: repository, file: null, slug: null, head: null, mode: 'unresolved', base: null, provenance: 'named-range', reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null, removed: null };
   if (!repository) return { ...answer, reason: 'git could not be read here, so no commit range can be resolved' };
 
   const dots = spec.indexOf('..');
@@ -3851,6 +4021,8 @@ export async function reviewScopeRange(root, spec) {
   return reviewRangeFacts(repository, base, head, {
     ...answer,
     head,
+    // No plan, so no inventory: every removal is uncovered and the reviewer names each one.
+    removed: removedModules(repository, base, head, []),
     mode: 'range',
     reason: dots >= 0
       ? `the range \`${spec}\` was named on the command line — nothing else scoped this review`
