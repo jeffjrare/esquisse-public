@@ -34,12 +34,12 @@ Read each needed file or slice once and retain it; re-read only after a write or
 ## Preflight
 
 1. Require `$0` to name a plan under `docs/plans/`, excluding `*.brief.md` and `*.log.md`. Missing → stop with `/esq:land docs/plans/<date>-<slug>.md`. Never choose the newest plan for a merge. `--from <n>` in `$ARGUMENTS` is a rollout re-entry: the user did the steps before `n`.
-2. Batch `git status --porcelain`, `esq branch check <plan>`, `esq validate` and `esq projections`. Collect every result independently: check/validate may exit 1 with usable JSON, so do not short-circuit these readers with `&&`. Retain the branch verdict's head, recorded, origin, landed, unit (its `decisions` included), coverage and destination.
+2. Batch `git status --porcelain`, `esq branch check <plan>`, `esq validate` and `esq projections`. Collect every result independently: check/validate may exit 1 with usable JSON, so do not short-circuit these readers with `&&`. Retain the branch verdict's head, recorded, origin, landed, unit (its `decisions` included), coverage, destination and removed.
 3. Announce `Landing <slug> — <recorded> → <origin>.` With no origin: `Landing <slug> — legacy plan, nothing to land.`
 
 ## Prerequisites — first failure stops
 
-Keep this exact order. Steps 1–10 use preflight facts except the bounded research/write in 7; verification comes only after them. A stop names the remedy and what did not run. Any backlog closure already committed in 7 stands even if landing later stops.
+Keep this exact order. Steps 1–11 use preflight facts except the bounded research/write in 7; verification comes only after them. A stop names the remedy and what did not run. Any backlog closure already committed in 7 stands even if landing later stops.
 
 1. **Already landed:** `landed === true` or `'equivalent'` → report already landed, run no verification or merge, and go to **Rollout** from step `n` when `--from <n>` was given; otherwise stop. Read this **before refuse**: inspection from the destination may be a branch mismatch, and a deleted source branch may still be proved landed. `null` proves nothing; continue.
 2. **Origin:** `origin === null` → `○ not landed legacy plan — it records no **Origin:**`; a no-op, not a failure.
@@ -49,10 +49,11 @@ Keep this exact order. Steps 1–10 use preflight facts except the bounded resea
 6. **Ledgers parse:** require `esq validate`'s `valid: true`; otherwise quote findings and stop with that diagnostic.
 7. **Backlog disposed:** follow the disposition procedure below. Both `unit.open` and `unit.promised` must be empty afterward.
 8. **No live findings:** `unit.findings` must be empty. These are existing corrective briefs whose Source joins a unit plan; never reconstruct deleted briefs. Across findings, 🔴 wins → `/esq:converge <brief>` to put the decision to the user; else 🟢 → `/esq:fix <brief>`; else `/esq:plan <brief>`. Report and stop, never run the finder/fixer.
-9. **Review coverage:** require `coverage.verdict === "covered"`, using the CLI's unit-wide verdict. Stale → `/esq:review <coverage.plan>`, naming changed paths; corrected → the same target, one delta review after fixes; unproven → a first review. In each case use the input plan only when coverage.plan is null. Offer `/esq:converge <target>` as an unattended alternative, never a prerequisite. Do not infer coverage from headers, brief existence or commit subjects.
-10. **Usable destination:** `destination.usable: true` continues, whether `here` or a clean linked `worktree`. False → report the site's reason and command **verbatim**, including its path, and stop before expensive verification. Never detach, switch, unlock, prune or remove another checkout.
-11. **Owed verification passes:** run the verification procedure below.
-12. **Assert the verified HEAD and merge:** one ordered call:
+9. **Removals accounted for:** `removed.uncovered` must be empty — every source module the unit deleted or left without an importer is named by a unit plan's `## Capability inventory`. Non-empty → stop, listing each path: `/esq:review <plan>` names the feature each powered and puts any drop to the user, even over a recorded clean review. `removed: null` (git could not answer) reports `○ removals not read` and continues.
+10. **Review coverage:** require `coverage.verdict === "covered"`, using the CLI's unit-wide verdict. Stale → `/esq:review <coverage.plan>`, naming changed paths; corrected → the same target, one delta review after fixes; unproven → a first review. In each case use the input plan only when coverage.plan is null. Offer `/esq:converge <target>` as an unattended alternative, never a prerequisite. Do not infer coverage from headers, brief existence or commit subjects.
+11. **Usable destination:** `destination.usable: true` continues, whether `here` or a clean linked `worktree`. False → report the site's reason and command **verbatim**, including its path, and stop before expensive verification. Never detach, switch, unlock, prune or remove another checkout.
+12. **Owed verification passes:** run the verification procedure below.
+13. **Assert the verified HEAD and merge:** one ordered call:
     `esq branch check <plan> --at <gate-head> && esq merge land --plan <plan>`.
     The first JSON is the branch assertion; the second exists only if it passed. `moved` means nothing merged or switched: report `moved during verification` and `/esq:land <plan>`. Pass only the plan to merge land, never caller-resolved refs or destination. The primitive reads Branch/Origin itself through safeRef and rechecks the landing site immediately before writing.
 
@@ -72,7 +73,7 @@ Close all proved rows in ordered CLI calls, then one commit:
 
 Immediately re-run `esq branch check <plan>` and carry its updated head/unit/coverage forward; the bookkeeping moved HEAD but does not itself stale review or phase proof. If rows remain, stop after recording the proved subset. Closures stand on later refusal; name their evidence and bookkeeping hash. No other backlog edits are authorized.
 
-### Verification — prerequisite 11
+### Verification — prerequisite 12
 
 Call `esq gate verify --unit <plan>`, without `--workers-moved`, in the **invoking source checkout**, never the destination checkout. Retain its full head and compare it to the latest branch-check head **before executing any returned step**. Different → stop without running commands; report moved during verification and offer this landing again.
 
@@ -130,6 +131,6 @@ Always include:
 - **Every non-fresh projection:** `○ advisory <name> <verdict> — <owner>`, arch before spec. Include even when landing stops; never count advice as NEEDS YOU, make it Next, or run its owner.
 - Passed prerequisites and measured elapsed, even on early stop.
 
-Last line is `→ Next`, nothing after it. Repeat the first executable ask or name the decision then `/esq:land <plan>`. Choose the remedy for the stopping prerequisite: branch switch; git status; first incomplete plan's build/ledger repair; validate finding; actual backlog implementation/choice; brief action; coverage review; destination.command; failing auto step; this landing for moved; merge result.command with cwd. Never let a generic backlog choice replace a clearly undelivered item's implementation command.
+Last line is `→ Next`, nothing after it. Repeat the first executable ask or name the decision then `/esq:land <plan>`. Choose the remedy for the stopping prerequisite: branch switch; git status; first incomplete plan's build/ledger repair; validate finding; actual backlog implementation/choice; brief action; removals review; coverage review; destination.command; failing auto step; this landing for moved; merge result.command with cwd. Never let a generic backlog choice replace a clearly undelivered item's implementation command.
 
 Stopped at user rollout step `k` → `→ Next: <step k, action-first> — then say done here, or later /esq:land <plan> --from <k+1>`. Landed/already landed (including up-to-date) with no rollout left → `nothing to run — the merge is local, and publishing it is a separate step`. Legacy → no landing to run. Never lower readiness requirements or turn projection advice into a requirement.

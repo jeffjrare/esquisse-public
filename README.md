@@ -131,9 +131,9 @@ map and a decision record on demand; none is a required setup step.
 | Command | Purpose | Main result |
 |---|---|---|
 | `/esq:grill <idea>` | Resolve scope and consequential choices before planning | A brief in `docs/plans/` |
-| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases | A plan committed on its own branch |
+| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases | A plan committed on its own branch; when it replaces a surface, the inventory of what that surface did, any drop asked first |
 | `/esq:build <plan>` | Implement and verify one phase, then stop | Task commits and an execution-log entry |
-| `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, correctness, security, UX and design | Review findings, the calls build decided for you by hat; a corrective brief when needed |
+| `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design | Review findings, the calls build decided for you by hat; a corrective brief when needed |
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings |
 | `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
@@ -211,7 +211,8 @@ that, safe fixes still go through `fix` → `review` → `land`, and
 `Dropped`, never `Done`, and without skipping verification.
 
 **Landing** checks the whole branch, not just the named plan: plans complete or
-explicitly abandoned, findings dealt with, review done, working tree clean. It
+explicitly abandoned, findings dealt with, review done, every module the branch
+deleted or left unused accounted for, working tree clean. It
 reuses verification that still holds and runs only what is owed, then merges
 locally, listing once, by hat, the calls build decided for you with how to undo
 each; silence is consent. Conflicts that need judgment come back to you with a recovery action.
@@ -221,6 +222,15 @@ landing report under **Rollout**, and the landing runs every step it can itself.
 It stops only at a step that is yours — a push, a deploy, an action in your own
 accounts — and once you have done it, `/esq:land <plan> --from <n>` (or saying
 done in the same session) carries on. esquisse never pushes.
+
+**Replacing a screen, an editor or a form** keeps what the old one did unless you
+say otherwise. `plan` reads the old code and lists each capability it carried — the
+autocomplete, the map picker, the geolocation — as kept or moved (and where), or
+dropped. Dropping one is always your call, asked before anything is built, and every
+kept one gets a check proving it works on the new surface; `build` walks that list on
+the new screen, not just the new flow. `review` names the feature behind every file
+the change deleted or left unused and where it lives now — one that lives nowhere comes
+to you as a decision — and `land` refuses while any of them is unaccounted for.
 
 **Manual checks** need an actual observation of the stated behavior, and the
 build makes it with a browser tool when one is available: a "phone" check runs at a

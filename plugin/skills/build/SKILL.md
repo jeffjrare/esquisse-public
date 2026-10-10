@@ -184,6 +184,8 @@ If a step is tagged `(manual)` but is actually machine-executable (an HTTP reque
 **`(manual)` steps — only for rendered UI that requires human eyes.**
 A genuine manual step is one where the observable result is a browser screen, a rendered component, or a visual UX flow — something only a human *or a browser-driving tool* can judge.
 
+**A phase that replaces a surface walks the old surface's inventory on the new one, not just the new flow:** each `kept`/`moved` row of the plan's `## Capability inventory` this phase touches is an observation from the new screen, even where the plan's step forgot to list it. A row observed missing is a FAIL.
+
 **Run "Observe the `(manual)` steps" in `${CLAUDE_SKILL_DIR}/references/manual-verification.md` — the full procedure, probe included** (load it now if "Conditional references" did not). Only the probe decides that you have no instrument, and no step is PASS before it.
 
 - No `(manual)` steps, all `(auto)` passed → verified. `TaskUpdate` the Verification task `completed`, log the phase `completed` (below).
@@ -219,6 +221,7 @@ The user wears three hats: product (business rules, scope), architecture (struct
 
 - **Reversible → decide, record, continue.** Payload `decisions`, one line each: `<hat>: <what> — <why> — undo: <how>`, the hat `product`, `architecture` or `design`, the undo a concrete path (the file to change, the command to run). It renders under `**Decided for you:**`, and `/esq:review` and `/esq:land` show it to that hat. It is not repeated under *Surprises*, which keeps the divergences from the plan.
 - **A one-way door (data loss, a public contract, money, an irreversible external effect) is never recorded as decided.** A call with no feasible undo is one by definition. It takes the existing missing-authority route unchanged: a 🔴 under "On failure", or the paused entry with `blockedBy` when a same-unit row names it (the section above). This adds no stop and no pause cause.
+- **A capability loss is a one-way door here.** Removing, or leaving unreachable, something the replaced surface let the user do, which the plan's `## Capability inventory` does not record as `dropped — user: …`, is never recorded as decided: it takes the same missing-authority route. A call whose undo would be "restore the old component" is one by definition. A module this phase deletes or leaves without an importer that the inventory does not name, and whose capability lives on, is recorded rather than decided: add its row (`kept`/`moved` with where, or `none — <what it was for>`) to the inventory in that task's commit — an inventory row stales no recorded proof.
 
 ## Append to execution log
 

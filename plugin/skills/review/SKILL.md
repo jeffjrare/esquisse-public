@@ -40,13 +40,13 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    - **No argument → STOP and ask in one line:** `/esq:review <plan-path>` or `/esq:review <A>..<B>` (or one commit). Never choose the latest plan or offer a guessed plan menu.
 
 2. Read the plan file briefly, with the Read tool — `cat` of a plan past ~30 KB comes back as a preview and costs a second read — for what was supposedly built, plus any prospective contract correction the scope query returns. A commit range has no plan to read.
-3. Run **`esq review scope <target>` once**. Keep its pinned head, base/provenance, commits, paths, `bookkeepingOnly`, `diff` and `decisions`; route off `mode`, never reconstruct its answer.
+3. Run **`esq review scope <target>` once**. Keep its pinned head, base/provenance, commits, paths, `bookkeepingOnly`, `diff`, `decisions` and `removed`; route off `mode`, never reconstruct its answer.
    - `delta`: report "Delta review since <base short hash> (<review brief | clean review>) — say 'full re-review' to override."
    - `full`: review the unit from its plan commit. Pass `--full` when the user explicitly asks for a full plan re-review.
    - `range`: review exactly the named range or single commit; no baseline is inferred.
    - `unresolved` or nonzero exit: review the whole change, disclose that, and never invent a narrower range.
 
-   With `bookkeepingOnly: true`, open no file: report clean and follow "Record a clean review". **A range target never records coverage or offers land/converge**, and never creates a plan to carry coverage. Findings follow the tier routing below; a clean range review ends at its report.
+   With `bookkeepingOnly: true`, open no file: report clean and follow "Record a clean review" — unless `removed.uncovered` is non-empty: then run "What this removed" on those modules alone, and nothing else. **A range target never records coverage or offers land/converge**, and never creates a plan to carry coverage. Findings follow the tier routing below; a clean range review ends at its report.
 
 4. Load the change with the `diff` command the query returned — one call, the whole diff, including changed prospective plans. When the answer carries `diffFile`, the diff was too long to print: Read that file instead, every range its `ranges` names in one batch, and never run the command or filter it. For a plan amendment, compare old/new obligations against the original outcome; historical execution entries must be untouched and new evidence must prove the corrected criterion. A softened acceptance is not a safe correction.
 5. Read `CLAUDE.md` for project conventions, and `docs/SPEC.md` if present, scoped to the feature sections the diff touches (see "Spec conformance").
@@ -94,6 +94,12 @@ For UI, also read observations in the execution log's `**Verification:**` list. 
 - **Only the user can judge:** after investigation and without valid confirmation, ask a 🔴 about the concrete screen/output. On a plan, the options are acceptance toward `/esq:land <plan-path>` or re-planning via `/esq:plan <brief-path>`; the final handoff still follows the gates below. Never assume the plan itself proves success.
 
 If `## Done looks like` is absent, report that, use `## Goal`, and note that the next plan should carry the user's conditions. Without a plan, derive the goal from commit messages and code, disclose that source, and perform the same outcome assessment.
+
+**What this removed** — skip when `removed` is null or lists nothing and the diff drops no import of a feature module. `removed` is the unit's since its branch left its origin (the range itself on a plan-less target): `deleted` and `orphaned` modules, and `uncovered`, those no unit plan's `## Capability inventory` names. For each uncovered module, and each dropped feature import whose module lives on, name the user feature it powered and where it lives now, reading the old file at `removed.base` (`git show <base>:<path>`) — all of them in one turn.
+
+- **Named by the inventory** → check the row against the code: `kept`/`moved` names a place that does it, with a recorded parity proof; `dropped` carries the user's answer (`dropped — user: …`) — without it, it is the 🔴 below. A delta review re-judges a row only when the delta touches it or its destination.
+- **Uncovered, and it lives on** (or powered no user feature) → 🟢 on a plan target: fix: add the row `| <path> | <capability> | moved — <where> |` (or `none — <what it was for>`) to `<plan>`'s `## Capability inventory`. Plan-less: no finding.
+- **Lives nowhere** → a 🔴 `Restore or drop <capability>`, `Why yours:` dropping a capability is a product decision nobody recorded. **A · restore** — do: `/esq:work "restore <capability> (was <path>) on <new surface>"`; **B · drop it** — do: `<plan>:<line>` → add the row `| <path> | <capability> | dropped — user: <date>, /esq:review |` under `## Capability inventory` (plan-less: `esq decisions add` with `fondement: user — <date>, /esq:review`). Never 🟡, and never accepted on the user's behalf.
 
 Then read the code in the repo now, not the plan's word for it. The places below are where to look, not a roster: a category with nothing that clears the bar produces no output.
 
@@ -199,6 +205,7 @@ No introductory or restating paragraph between these lines. If you cannot name d
   ✖ bugs        1                     `file:line` — <what's wrong> → <what happens>
   ✖ security    1                     `file:line` — <untrusted input, mishandled how>
   ⚠ spec        2 features behind     `SPEC.md › <feature> › <rule>` → /esq:spec
+  ✔ removals    4 modules             each accounted for in the inventory
   ○ clean       edge cases · UX · quality — nothing that clears the bar
   ✔ strong      <one clause, omit unless genuinely remarkable>
   ○ decided for you
@@ -212,7 +219,7 @@ The headline's counter is the verdict itself: `ship it` · `ship after fixing <n
 
 Zone 2 is the three tiers, worst first; `NEEDS YOU (<n>)` counts every item across them. Omit empty tiers; none means `✔` and no zone 2.
 
-Zone 3 is the six review dimensions, and **it collapses hard**: clean dimensions merge into one `○ clean` line naming them; only a dimension with findings expands, one line per finding, several indented beneath its count. Never a `None found.` line per dimension. `✔ strong` is optional, one clause, only when genuinely remarkable. A clean review is short: "Ship it." plus three lines is the expected output for a small, competent change.
+Zone 3 is the review dimensions, removals included, and **it collapses hard**: clean dimensions merge into one `○ clean` line naming them; only a dimension with findings expands, one line per finding, several indented beneath its count. Never a `None found.` line per dimension. `✔ strong` is optional, one clause, only when genuinely remarkable. A clean review is short: "Ship it." plus three lines is the expected output for a small, competent change.
 
 **Decided for you** closes zone 3 when the scope answer's `decisions` is non-empty: the calls build made for a hat, grouped Product / Architecture / Design (empty hats omitted), one line each `<decision> · <plan> Phase N`, its `undo:` kept as written. Read it from that answer, never re-derived from the log; a range target carries none. It is never a finding, never a 🔴, never counted in NEEDS YOU and never changes the headline glyph or `→ Next`: the user ratifies by silence, and a reversal they ask for is ordinary work, `/esq:work "<the undo>"`.
 

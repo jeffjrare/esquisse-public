@@ -29,6 +29,7 @@ not keep a list of what was removed.
 | `**Branch:**` | `headerField`, then `esq branch check` (the shipping unit) and `esq merge land` (the source ref) |
 | `**Origin:**` | `esq merge land` — the landing **destination**. A plan missing it is refused rather than repaired, so losing the line from the template loses every landing. |
 | `## Rollout` | `esq branch check` collects its bullets into `unit.rollout`, which `/esq:land` runs after the merge up to the first `(user)` step. Renamed in the template, every deployment step silently disappears from the landing report. |
+| `## Capability inventory` | `esq branch check` and `esq review scope` read it: a module the unit deleted or orphaned is covered only when its repo-relative path appears in this section, and `/esq:land` refuses on `removed.uncovered`. Renamed in the template, every replacing plan's inventory goes unread and every landing that deletes a module refuses. |
 
 **The token, not the sentence around it.** A placeholder explaining which branch belongs in the field
 is prose: reword it freely. What may not change is the field marker the parser matches.

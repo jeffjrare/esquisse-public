@@ -309,7 +309,7 @@ Report measured elapsed time: use a field on the returning tool result, or one `
 **The clean bar, cheapest first.** Stop at the first that fails and report `○ not ready` with the command that clears it:
 
 1. **No gate is left open, and no 🟢, 🟡 or 🔴 survives in any brief this run read.** Both are already in hand from the step classifications — do not re-read a brief.
-2. **`unit.open` is still empty.** The fix steps may have filed a 🐛/⚠️ row; re-read it with `esq branch check <plan-path>` again, once, since `HEAD` and the ledger have moved since preflight. A row still standing means not ready.
+2. **`unit.open` is still empty.** The fix steps may have filed a 🐛/⚠️ row; re-read it with `esq branch check <plan-path>` again, once, since `HEAD` and the ledger have moved since preflight. A row still standing means not ready. The same answer's `removed.uncovered` must be empty too — a module the unit deleted or orphaned that no `## Capability inventory` names is not ready, `→ Next` `/esq:review <plan-path>`, since `/esq:land` refuses it.
 3. **A review has actually read this unit.** Either step 1 ran `/esq:review`, or preflight's `finder` was `review`. A `check` brief, or one whose `Source:` names no finder, fails: report `○ not ready — fixes applied, no review has read this unit`, make `→ Next` `/esq:review <plan-path>`, and stop here: **nothing below runs.** This adds no step.
 
 **Record coverage once, only after all three checks pass.** If the branch verdict's `coverage` is already `covered`, write nothing. Otherwise chain `git rev-parse HEAD` into `esq plan set-reviewed <plan-path> <full commit>`, then commit that plan file alone:

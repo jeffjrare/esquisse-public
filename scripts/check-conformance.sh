@@ -124,6 +124,7 @@ need P-02 plan '## Execution log' 'the `## Execution log` heading `parsePlan` fi
 need P-02 plan '**Branch:**' 'the `**Branch:**` header field `headerField` reads, and `esq branch check` and `esq merge land` take the shipping unit and the merge source from'
 need P-02 plan '## Rollout' 'the `## Rollout` section heading `esq branch check` collects `unit.rollout` from, which `/esq:land` shows after the merge'
 need P-02 plan '**Origin:**' 'the `**Origin:**` header field `esq merge land` takes the landing destination from — a plan missing it is refused rather than repaired'
+need P-02 plan '## Capability inventory' 'the section heading `esq branch check` and `esq review scope` read a deleted or orphaned module path from, and `/esq:land` refuses on what it leaves uncovered'
 
 # --- `/esq:build` writes the execution-log entry the classifier reads --------
 #
