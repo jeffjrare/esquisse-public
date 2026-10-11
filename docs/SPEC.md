@@ -335,7 +335,7 @@ esquisse is a Claude Code plugin (`/esq:*`) that turns software work into a cycl
 - **Parked work says why and when it resumes**, and parking one item never parks its neighbours; priority, horizon or a recent plan never prove that work is running. <!-- ajouté 2026-09-27 (B-075) -->
 - **A deferral the user states is written down, and never asked again.** Answering a pending call with *not now* records `parked — <their reason>; resume when <their condition, else "the user raises it">` on that entry, committed with the pass; a parked entry never counts toward NEEDS YOU. <!-- ajouté 2026-09-29 -->
 - **Work planned on a branch not yet merged still reads as planned.** An item a plan picked up on its own branch shows as `Planned (on <branch>)` whatever the main backlog row says, so a refresh never presents in-flight work as open. <!-- ajouté 2026-09-11 -->
-- **Only the bare refresh can run without the user typing it** — and only when `/esq:advance` delegated it at the end of a walk. That refresh rebuilds the generated state lines and reorders nothing; every mode that changes the order stays user-invoked. <!-- ajouté 2026-09-11 (D-advance-preserves-units-and-its-branch) -->
+- **It runs without the user typing it only on a mandate** — when another esq command the user invoked delegates it with the instruction (`/esq:advance`'s end-of-walk refresh is one), or when the user asks for it and what it should do in their own words. The run changes the order exactly as far as that instruction goes; a description match or the model's own initiative still stops and prints the command. <!-- modifié 2026-10-11 (D-roadmap-runs-on-a-mandate) -->
 **Décisions liées:** `D-roadmap-horizons-uncapped`, `D-advance-preserves-units-and-its-branch`
 
 ### Epics — `/esq:epic`

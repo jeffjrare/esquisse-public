@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-roadmap-runs-on-a-mandate | 2026-10-11 | arch | skills | The roadmap guard accepts the same mandates as the other guarded skills, plus delegation by any esq command the user invoked in this conversation with the instruction in the invoking turn. The run changes the order exactly as far as that instruction goes. A description match or the model's own initiative still stops and prints the invocation. | Active |
 | D-ui-runs-on-request | 2026-10-04 | arch | skills | `/esq:work` routes a screen question a picture settles to `/esq:ui B-N` instead of `/esq:grill`; `/esq:ui` drops `disable-model-invocation` for the in-body mandate refusal, and a `B-NNN` or problem target makes it a targeted run on that screen. | Active |
 | D-hat-decisions-are-logged-never-gated | 2026-10-02 | prod | autonomy | A reversible hat-owned call is logged as `decisions` (`<product\|architecture\|design>: what — why — undo: how`) in the phase entry, collected by esq branch check and esq review scope, and shown grouped by hat in review and land, never as a finding, a gate or a NEEDS YOU. | Active |
 | D-a-user-request-in-the-conversation-is-a-mandate | 2026-10-02 | arch | skills | The in-body "No mandate, no run." refusal also accepts a run the user requested in their own words in this conversation, naming the command and its target. A description match or the model's own initiative still stops and prints the invocation. | Active |
@@ -579,7 +580,7 @@ agent frontmatter behavioral proof (does not exercise invocation, authority, or 
 **Scope:** arch
 **Topic:** skills
 **Date:** 2026-08-18
-**Statut:** Active — amended 2026-09-11 by [D-advance-preserves-units-and-its-branch]: `roadmap` joins the model-invocable set, for `/esq:advance`'s bare refresh only, behind the same in-body refusal — seven skills now. Amended 2026-10-02 by [D-a-user-request-in-the-conversation-is-a-mandate]: the six also run when the user asks for the command and its target in their own words in the conversation.
+**Statut:** Active — amended 2026-09-11 by [D-advance-preserves-units-and-its-branch]: `roadmap` joins the model-invocable set, for `/esq:advance`'s bare refresh only, behind the same in-body refusal — seven skills now. Amended 2026-10-02 by [D-a-user-request-in-the-conversation-is-a-mandate]: the six also run when the user asks for the command and its target in their own words in the conversation. Amended 2026-10-11 by [D-roadmap-runs-on-a-mandate]: `roadmap` runs on any delegated or requested mandate, no longer the bare refresh only.
 
 **Contexte:** The first production `/esq:autopilot` run after cutover proved the assumption
 in D-native-agents-cannot-compose-guarded-skills wrong one level down: `disable-model-invocation:
@@ -5509,3 +5510,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** `esq apply route` now answers `apply` for a `/esq:ui` option an orchestrator gate puts, so a delegated run can render unattended; it ends on the page and both options instead of asking. `/esq:advance` still relays it.
 **Conséquences:** `check-plugin.sh` holds `ui` to the in-body guard; the work ladder renumbers to ten rungs; no new mode flag — the target's shape decides.
 **Alternatives rejetées:** A `--ux` flag (the target already says it); routing work → grill → ui (two briefs for one task); keeping ui user-only (the retype the user reported).
+
+## D-roadmap-runs-on-a-mandate — /esq:roadmap runs on any mandate, not only advance's bare refresh
+
+**Scope:** arch
+**Topic:** skills
+**Date:** 2026-10-11
+**Statut:** Active
+**Fondement:** user — the user asked for this change on 2026-10-11
+
+**Contexte:** /esq:roadmap's in-body refusal accepted only /esq:advance's bare refresh. A session that had filed findings and was asked for the roadmap step refused `/esq:roadmap add …` and handed the user one command per entry to retype; an orchestrator gate's `do: /esq:roadmap …` already routed `apply` (no disable-model-invocation) and reached a worker that would refuse it.
+**Décision:** The roadmap guard accepts the same mandates as the other guarded skills, plus delegation by any esq command the user invoked in this conversation with the instruction in the invoking turn. The run changes the order exactly as far as that instruction goes. A description match or the model's own initiative still stops and prints the invocation.
+**Raison:** Retyping a roadmap instruction the user or their command already gave is a block that buys nothing; the guard exists against unrequested reordering, and a delegated or requested instruction is not one.
+**Tradeoff:** The order can now change inside another command's run, judged from its instruction rather than typed by the user.
+**Conséquences:** One SKILL.md guard line and Mode A's trigger change; SPEC and ARCHITECTURE drop the advance-only wording; check-plugin.sh is unchanged, since the guard sentence stays.
+**Alternatives rejetées:** Keep the advance-only rule (the user retypes each entry); restore disable-model-invocation (breaks advance's refresh, D-orchestrated-skills-guard-in-body).
