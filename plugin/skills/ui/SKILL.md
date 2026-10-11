@@ -256,7 +256,7 @@ update this sentence after the pick.
 - Screens deliberately left alone, and why.
 - The next slices, in run order: the screens each holds, the ring that reached them, and
   the invocation that covers them. Blast-radius screens outside the slice, counted.
-- Findings from the audit that are real but belong in the backlog, not this work.
+- The audit findings that are real but outside this work, filed as backlog rows (by ID).
 
 ## Resolved decisions
 - Direction: <A or B> — <the one-line reason, filled in after the pick>
@@ -295,11 +295,11 @@ will detect and consume this brief. Do not edit below this line. -->
 
 The `<!-- comment -->` is required — it marks the file as a consumable brief.
 
-Then: `git add docs/plans/<filename>` (plus the `.ui.html` page and its `.ui/` directions when they are local) and `git commit -m "brief: <slug>"`.
+## File the leftovers into the backlog
 
-## Propose the leftovers into the backlog
+Findings from the audit that are real but sit outside the redesign (a missing empty state on a screen nobody is touching, an unlabelled input in an old form, a defect on a blast-radius screen) belong in `docs/BACKLOG.md`, not buried in a brief about something else or left in the report. File each one yourself: check the backlog for an open row on the same screen and defect first, then `esq backlog add --type "🐛 bug" --summary "<≤ ~12 words>" --source "ui: <slug>" --pri "<lo?|med?|hi?>" --status Open`, with a `## B-NNN` detail section holding the screen, the read and why a person is hurt. A finding the direction closes is in the brief's `## Done looks like`, never filed twice. The brief's `## Out of scope` lists the filed rows by ID.
 
-Findings from pass 1 that are real but sit outside the redesign — a missing empty state on a screen nobody is touching, an unlabelled input in an old form — belong in `docs/BACKLOG.md`, not buried in a brief about something else. Propose them the way the rest of esquisse does: list them to the user with the one line each would carry, and offer `/esq:backlog` to capture the ones they want. Do not write the backlog yourself here.
+Then commit the brief and the rows together, once: `git add docs/plans/<filename> docs/BACKLOG.md` (plus the `.ui.html` page and its `.ui/` directions when they are local) and `git commit -m "brief: <slug>"`. **Ask nothing until that commit exists.**
 
 ## Then ask for the direction
 
@@ -325,7 +325,7 @@ Tell the user, in this order:
 1. Whether the audit ran complete or a pass was cut short, and which.
 2. The direction they picked, and the brief path.
 3. The comparison page's URL or path.
-4. What still needs them: leftover findings worth a backlog entry, screens or journey steps you could not reach, and the next slices with their invocations.
+4. What still needs them: the leftover rows it filed, one line each, screens or journey steps you could not reach, and the next slices with their invocations.
 5. Elapsed time, and what it spent: screens covered, journeys walked, captures taken, searches run, directions rendered.
 6. Next step: "Review the brief in your editor. When ready, `/clear` and run `/esq:plan` — it will pick up this brief automatically."
 
