@@ -8,7 +8,7 @@ effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
 
-**No mandate, no run.** Model invocation is allowed only for a bare refresh explicitly delegated by a user-invoked `/esq:advance`, with an existing `docs/ROADMAP.md`. Any argument, missing roadmap or unsolicited invocation → stop and print the exact invocation for the user. Deriving or editing the order belongs to the user.
+**No mandate, no run.** Model invocation of this skill is legitimate only when the run and its instruction were explicitly asked for: delegated by another esq command the user invoked in this conversation, with the instruction in the invoking turn (`/esq:advance`'s bare refresh is one), or requested by the user in their own words in this conversation, naming this command and what it should do. A mandated run carries the user's authority over the order exactly as far as its instruction goes, never further. Invoked without that explicit request — or off a description match, on your own initiative — do not guess: stop and print the exact invocation for the user to run.
 
 Maintain `docs/ROADMAP.md`: the ordered queue and the reason for each position. No plan mode or subagents. Write the roadmap and, only where specified below, backlog Pri/Rank through the CLI. Plans, epics, decisions, code and every other backlog cell are read-only. Print next commands; never invoke another skill.
 
@@ -25,7 +25,7 @@ After resolving the mode, announce `Mode: <show & refresh | derive the order | a
 <!-- shared:resolve-cli:end -->
 
 - **B — show & refresh:** no argument and file exists.
-- **A — derive:** first token `plan` or `re-plan`, or a user invocation with no argument and no file.
+- **A — derive:** first token `plan` or `re-plan`, or no argument and no file.
 - **C — edit:** any other text.
 
 B reads the roadmap and one `esq state` — its `backlog.rows` already hold every row the roadmap covers, plus `inFlight` and `plans[].state`; when the answer carries `file`, that file is the whole answer: Read it in the next turn — every range its `ranges` names, in one batch — never re-run `esq state` through a filter — then cited plans and cited epic Status. Before a completion recommendation, also read only the relevant open items' detail sections and their cited acceptance evidence already in those sources. No code, verification rerun or plan sweep. C has the same budget, including the moved entry's and neighbour's covered rows. A adds only its Gather inputs below.
