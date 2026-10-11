@@ -38,6 +38,8 @@ If a pass would exceed it, stop at the bound and name what you did not cover, wi
    - a feature name: the promises about it, wherever they are made;
    - `--copy docs/copy/<file>.md`: an earlier copy proposal, applied without regenerating it (see `## --copy: apply`);
    - nothing: the whole product, cut to the bound in the order below.
+
+   Free text that asks for more than a mode judges ("is the UX a pleasure", "beat the competitors") resolves to the features or screens it names. The rest of the ask is not dropped: the target line names it, and `### File what does not hold` files it.
 4. `--all` (bare mode only) re-proves kept promises too. Without it a re-run walks only what is not already proven (see `## The register`).
 5. Fetch the tools you need: `ToolSearch "select:AskUserQuestion"`, and `WebSearch,WebFetch` in `--copy`. If one is unavailable, say so where it matters and continue.
 6. **Announce the resolved target** in a second line: the mode, the sources or screens or pages you will cover, and what the bound leaves for a next run. For example, `Promises from: site/index, site/pricing, onboarding, SPEC — 31 found, 25 walked this run (hero and pricing first); next: /esq:promise "integrations"`. This is the free moment to be redirected.
@@ -106,6 +108,8 @@ Walk the testable form as its person would, from a fresh state when the promise 
 
 **The other direction too.** While walking, note what the product does well that no page promises: a shipped feature nobody sells. It is not a defect and files nothing. It is material for `--copy`, listed in the register's notes and in the report.
 
+**What you trip over on the way is filed too.** A defect you observe while walking that is no promise's verdict (a raw i18n key, a label that does something else, a field holding the wrong record) is a `--sense` finding: its class, its severity and its filing follow `## --sense`, with `--source "promise: seen <screen>"`. Only what you observed is filed; one you could not reproduce is named in the report and dropped. The register's notes keep only the shipped features nobody sells.
+
 ### File what does not hold
 
 For each 🔴, ⚫ and 🟡 verdict without an open backlog row, add one. Check the backlog for `promise: P-<slug>` in a `Source` cell first, so a re-run never files the same promise twice.
@@ -121,6 +125,9 @@ Report a refusal and its recovery action; never calculate an ID from the ledger 
 - **Summary**, ≤ ~12 words: `Broken promise: <claim, shortened>`, `Partial promise: <claim> — <condition>`, or `Promised, absent: <claim>`.
 - **Priority** is suggested, never confirmed: `hi?` for a claim on the landing page or pricing that is broken or absent (the product sells what fails), `med?` for one made elsewhere and for a partial one, `lo?` for a spec-only gap.
 - Add a `## B-NNN` detail section with the claim, every place it is made, the walk and the read. For a ⚫ or 🟡 verdict, name both remedies (make the product do it, or change the words) without picking: which one is the product owner's call, and `/esq:work` routes it.
+- End the detail section with one `**Impact:**` line: what else reads or waits on what does not hold (another feature's data, a flow it blocks, a page that sells it), or `the claim only`. It is the reasoning an ordering needs later, kept where the queue reads it; the order itself stays the user's.
+
+**The part of the ask no mode judges** (see Preflight step 3) is filed once, as `--type "💡 idea" --source "promise: asked, not judged" --pri "med?"`, after checking for an open row with that source and the same ask. Its detail section quotes the ask and holds the ready invocations of the command that judges it, one per journey, at most 8: `/esq:ui <screen or journey> — <what to look for>`.
 
 Write the register, then commit the register and the backlog together, once: `git add docs/PROMISES.md docs/BACKLOG.md && git commit -m "promise: audit <target or 'all'> — <n> kept, <n> not"`.
 
@@ -201,7 +208,7 @@ Lead with the headline, then what needs the user, then the next action:
 3. Every backlog row filed, one line each. The register path, the proposal and before/after page when there is one.
 4. What the bound left, each with its invocation.
 5. Elapsed time and what it spent: promises walked, screens swept, pages written, captures taken, searches run.
-6. Next step. With broken promises filed: `/esq:work <the highest one>`. After a sense sweep: the same. After a proposal: open the before/after page and answer. After an apply: review the copy commits with `/esq:review <first>..<last>`.
+6. Next step. With broken promises filed: `/esq:work <the highest one>`. Whenever rows were filed, also print the one `/esq:roadmap` invocation that places them all, one instruction per line (`add <slug>: B-…, B-… <now|next|later or after <entry>> — <why, from the Impact lines>`), grouping rows that share a reason. It is printed for the user, never run: the order is theirs. After a sense sweep: the same. After a proposal: open the before/after page and answer. After an apply: review the copy commits with `/esq:review <first>..<last>`.
 
 Then stop.
 
