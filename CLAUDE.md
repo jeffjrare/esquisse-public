@@ -8,7 +8,9 @@ behind every rule below, is `docs/ARCHITECTURE.md`.
 ## What esq is for
 
 **A framework that is fast, facilitating and non-blocking, whose output is the maximum of shipped features a user actually
-values.** That is the maximand. The rest are constraints on it, never rivals to it:
+values.** That is the maximand. **Every order esq produces (the roadmap, a suggested priority, a next action, the rank of
+findings) leads with user and business value**: the feature, the experience, what is sold. The rest follows common sense,
+and every run buys that value at the lowest model cost that still delivers it. The rest are constraints on it, never rivals to it:
 
 1. **Never block.** A stop is earned only when the answer lives in the user's head (intent, priority, a tradeoff on their
    constraints), never when reading, running or reasoning reaches it: the user decides, never tests. **No research instrument,

@@ -12,7 +12,9 @@ one stopped.
 on that, never a rival to it:
 
 - **Value first.** A plan is written against what the feature is for, and review
-  checks that this goal was delivered, not only that the code is sound.
+  checks that this goal was delivered, not only that the code is sound. Every order
+  esq proposes (the roadmap, a suggested priority, the next step) puts what you and
+  your users get first; the rest follows common sense.
 - **Cost is a requirement.** The whole workflow counts — model calls, context, tool
   round trips, subagents, elapsed time and repeated work — and stays proportionate
   to the value. Verification that still holds is reused; the same answer is never
