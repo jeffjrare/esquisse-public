@@ -117,8 +117,11 @@ running app as the person it was made to would, and gives it a verdict with its 
 kept, partial, broken, absent, unverifiable here, or not testable at all ("the best").
 Verdicts live in `docs/PROMISES.md`, so a re-run walks only what is not already proven
 (`--all` re-proves everything). Each promise that does not hold becomes a backlog row
-naming both remedies, make the product do it or change the words, for you to pick.
-It never writes to a production instance.
+naming both remedies, make the product do it or change the words, for you to pick, and
+what else it affects. A defect seen on the way is filed too, and the part of your ask no
+promise can judge ("is the UX a pleasure?") is filed as one idea holding the `/esq:ui`
+invocations that judge it. The report ends with one `/esq:roadmap` invocation that places
+everything filed. It never writes to a production instance.
 `/esq:promise --sense` sweeps the screens for what makes no sense: a button that does
 nothing, a count that disagrees with its list, "Cancel" that saves, a field asked for and
 never used, work lost on back. Each finding is filed with the step that shows it.
@@ -172,7 +175,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:harvest` | Recover decisions from the code, history and discussion | `docs/DECISIONS.md` |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md` |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
-| `/esq:promise [page-or-feature] [--sense \| --copy] [--all]` | Check that what the product promises works in the running app; sweep it for UX nonsense; write or improve page copy | `docs/PROMISES.md` verdicts with evidence and a backlog row per promise that does not hold; `--sense` backlog rows; `--copy` a before/after page, then approved copy committed page by page |
+| `/esq:promise [page-or-feature] [--sense \| --copy] [--all]` | Check that what the product promises works in the running app; sweep it for UX nonsense; write or improve page copy | `docs/PROMISES.md` verdicts with evidence and a backlog row per promise that does not hold, per defect seen on the way and for the part of the ask it cannot judge; `--sense` backlog rows; `--copy` a before/after page, then approved copy committed page by page |
 | `/esq:ui [screen-problem-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), live, animated and walkable, gated on contrast, focus, target size, phone width, reduced motion and states, a comparison page and a planning brief naming the next slices |
 
 In every example, use the actual paths the previous command reported. `review` and
@@ -271,8 +274,9 @@ only operates on planned work.
 
 - `/esq:backlog <text>` captures an item; `/esq:work` takes one item at a time and,
   with no argument, picks the top of the roadmap.
-- `/esq:roadmap plan` orders the open work and records why each item sits where it
-  does; bare `/esq:roadmap` refreshes state without reordering. A finished plan does
+- `/esq:roadmap plan` orders the open work, user and business value first, and records
+  why each item sits where it does; bare `/esq:roadmap` refreshes state without reordering; `/esq:roadmap <edit>`
+  applies one edit per line (`add`, `X before Y`, `why X: …`) in one run and one commit. A finished plan does
   not close its items by itself: `/esq:sweep` closes one only with evidence of its
   whole outcome.
 - `/esq:advance` works the roadmap's `Now` items — one worker per item, at most one

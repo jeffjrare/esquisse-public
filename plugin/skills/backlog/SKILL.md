@@ -57,7 +57,7 @@ Preserve `<!-- last-sweep: <hash> YYYY-MM-DD -->`; only `/esq:sweep` writes it. 
 ### Classify and deduplicate
 
 1. Honor a case-insensitive type prefix, optional colon, and strip it: `bug`; `improvement|imp|enh`; `todo`; `idea`; `debt`. Otherwise infer: broken/fails/crashes/wrong/regression → bug; should/could/nicer/cleaner/refactor → improvement; maybe/what if/one day/could we → idea; other reminders → todo. When torn, choose the more actionable type and say which; don't ask.
-2. Set confirmed priority only from a user signal: trailing `!!` or urgent/critical → hi; `!` → med; explicit lo/low/someday → lo. Otherwise suggest med? for bug/todo/debt, lo? for improvement/idea; bump to hi? for crash, data loss, security, broken, regression, blocks, can't ship, production, everyone; drop to lo? for cosmetic, nit, typo, polish, nice to have, someday.
+2. Set confirmed priority only from a user signal: trailing `!!` or urgent/critical → hi; `!` → med; explicit lo/low/someday → lo. Otherwise suggest med? for bug/todo/debt and for an improvement or idea a user would see or feel, lo? for an internal improvement/idea; bump to hi? for crash, data loss, security, broken, regression, blocks, can't ship, production, everyone; drop to lo? for cosmetic, nit, typo, polish, nice to have, someday.
 3. Scan existing rows once for overlapping summaries. A clear duplicate in Open or Needs-decision → name its ID and stop without adding. Done/Dropped do not block re-addition. No ID arithmetic during this scan.
 4. Extract `epic:<slug>` or `epic <slug>`, stripping it from the summary. No tag → blank. If the epic plainly isn't opened yet, mention `/esq:epic new …` without blocking capture.
 

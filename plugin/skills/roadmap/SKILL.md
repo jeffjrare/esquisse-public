@@ -75,7 +75,7 @@ Read:
 A plan is complete when every `### Phase N` under `## Phases` has a matching completed entry in its own `## Execution log`; in-progress when some phases are logged but not all, including any `⏸` entry; not started when none are. The pause glyph, not its following clause, identifies a pause.
 <!-- shared:plan-state:end -->
 
-Form units that land together; report when one backlog item needs splitting. Order by these signals, strongest first: **hard blockers**, **unblocks/shrinks edges**, **cost of deferral**, **risk-adjusted size** (cheap/certain first), **priority** as last tiebreak. A confirmed hi in Later is allowed only with a defended why-now.
+Form units that land together; report when one backlog item needs splitting. **User and business value orders first:** what a user gets, feels or is sold (a feature, an experience gain, a promise the product breaks) leads the queue. The rest follows common sense. An item never precedes what it needs: a hard blocker is a constraint, not a signal. A risk to that value that is already live (an exposed secret, data being lost, a legal exposure) can outrank it. Then **unblocks/shrinks edges**, **cost of deferral**, **risk-adjusted size** (cheap/certain first), **priority** as last tiebreak. Internal work (infrastructure, dependencies, refactors, tooling) goes ahead of user value only when its why-now names the user value it protects or unblocks. A confirmed hi in Later is allowed only with a defended why-now.
 
 Preserve the previous Shipped tail. For unchanged covered work, retain why-now verbatim unless new evidence contradicts it. Write the new durable roadmap and generate its states from the data already gathered, using the refresh rules below without another scan. Write it **before ranking** so the CLI reads the new edges. No additional permission is needed for an invoked derive.
 
@@ -130,6 +130,8 @@ If the file changed, commit only `docs/ROADMAP.md`: `roadmap: refresh state (<wh
 
 Resolve the entry by slug or covered ID/plan/epic. Unknown reference → report and stop; only explicit add or A creates entries. Ask one short question only when entry/field intent is genuinely ambiguous.
 
+**One instruction per line; several lines are one run.** Apply them in order, each against the roadmap the previous one left, so a later line may name an entry an earlier line added. A refused line is reported and skipped; the others stand. All lines share one roadmap write, one refresh, one placement pass and one commit.
+
 | Instruction | Durable change |
 |---|---|
 | X before/after Y; X now/next/later; put X first | Move; no cap and no displacement of another entry |
@@ -139,7 +141,7 @@ Resolve the entry by slug or covered ID/plan/epic. Unknown reference → report 
 | X needs/unblocks Y | Set edge; apply even if positions contradict it, then report and offer the resolving move |
 | X covers B-N; add B-N to X | Add/remove covered reference; refresh determines state |
 
-Order of operations: **write roadmap → refresh using B's rules → place moved IDs → one commit**. The rank CLI must see the post-edit edges.
+Order of operations: **write roadmap (every line) → refresh using B's rules → place moved IDs, entry by entry in queue order → one commit**. The rank CLI must see the post-edit edges.
 
 Only a **move** or an **add naming a position** calls `esq backlog rank <id> --after|--before <neighbour>` for its covered open IDs (Open, Needs-decision, Planned). Never call `--order` in C. Edge, drop, covers, reason and an unpositioned add leave backlog cells untouched; explain that stored backlog order is unchanged.
 
