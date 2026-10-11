@@ -274,8 +274,8 @@ only operates on planned work.
 
 - `/esq:backlog <text>` captures an item; `/esq:work` takes one item at a time and,
   with no argument, picks the top of the roadmap.
-- `/esq:roadmap plan` orders the open work and records why each item sits where it
-  does; bare `/esq:roadmap` refreshes state without reordering; `/esq:roadmap <edit>`
+- `/esq:roadmap plan` orders the open work, user and business value first, and records
+  why each item sits where it does; bare `/esq:roadmap` refreshes state without reordering; `/esq:roadmap <edit>`
   applies one edit per line (`add`, `X before Y`, `why X: …`) in one run and one commit. A finished plan does
   not close its items by itself: `/esq:sweep` closes one only with evidence of its
   whole outcome.
