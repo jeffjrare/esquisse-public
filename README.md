@@ -119,7 +119,9 @@ the defects it counted: each carries its own signature and motion, built live on
 so you play the hover, the press and the transitions before choosing. It may break the
 app's own visual rules where only habit set them, and it ships only after it passes
 contrast, focus, 44 px targets, phone width, reduced motion and its empty, loading and
-error states.
+error states. Each direction's own HTML (no embedded screenshots, one section per screen)
+is committed beside the brief, and that is what `/esq:build` reads when it builds the screen,
+so a mockup is never too big to read.
 
 **A screen someone misread?** `/esq:ui B-NNN` (or a sentence saying what went wrong)
 captures the screen as they met it, along with the screens of its journey and the ones
@@ -193,7 +195,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
 | `/esq:ideas [focus] [features\|adjust\|content\|container]`, `/esq:ideas capture <n,…>` | Propose grounded ideas, user value first: new features, adjustments, content and container (architecture, structure, surfaces) | A ranked slate you pick from in one question; picked ideas become backlog rows with a suggested priority, the rest kept for a later `capture` |
 | `/esq:promise [page-or-feature] [--sense \| --copy] [--all]` | Check that what the product promises works in the running app; sweep it for UX nonsense; write or improve page copy | `docs/PROMISES.md` verdicts with evidence and a backlog row per promise that does not hold, per defect seen on the way and for the part of the ask it cannot judge; `--sense` backlog rows; `--copy` a before/after page, then approved copy committed page by page |
-| `/esq:ui [screen-problem-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), live, animated and walkable, gated on contrast, focus, target size, phone width, reduced motion and states, a comparison page and a planning brief naming the next slices; backlog rows for the defects outside the work |
+| `/esq:ui [screen-problem-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), live, animated and walkable, gated on contrast, focus, target size, phone width, reduced motion and states, a comparison page, each direction's HTML source committed beside a planning brief naming the next slices (the source, not the page, is what `/esq:build` builds from); backlog rows for the defects outside the work |
 
 In every example, use the actual paths the previous command reported. `review` and
 `check` need an explicit target and ask for one when it is missing.
