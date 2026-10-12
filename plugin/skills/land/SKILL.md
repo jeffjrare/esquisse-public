@@ -19,7 +19,7 @@ Before recommending `/esq:plan` for a corrective brief, ask `esq brief depth <br
 
 Before any tool call, announce and continue in the same response:
 
-> `/esq:land — landing one shipping unit. Bound: no subagents, only the commands esq gate verify decides to run, at most one backlog bookkeeping commit, exactly one merge commit or none, then each rollout step esq can run, once, up to the first one that is the user's.`
+> `/esq:land — landing one shipping unit. Bound: no subagents, only the commands esq gate verify decides to run (on a red, at most its failing tests alone at HEAD and at the origin, and one re-run of the command), at most one backlog bookkeeping commit, exactly one merge commit or none, then each rollout step esq can run, once, up to the first one that is the user's.`
 
 Stop at the bound and report anything not covered.
 
@@ -81,7 +81,15 @@ The gate covers all same-Branch plans, excluding abandoned unbuilt phases, and r
 - `run`: execute each distinct returned command exactly once, even if several phases/plans named it.
 - `resolved: false`: inspect and perform each full step; never skip or deduplicate it, or execute a lone document path as a command. If its action cannot be resolved, report the original step as unverified and stop landing; absence from `commands` is not a PASS.
 
-Judge output against the returned **step text**, with its plan/phase, not exit 0 alone: a no-match grep can pass at exit 1. No retry, extra check, replacement command or inferred suite subsumption. A red stops landing; show the failing step, plan, phase and at most ten output lines.
+Judge output against the returned **step text**, with its plan/phase, not exit 0 alone: a no-match grep can pass at exit 1. No replacement command or inferred suite subsumption, and no retry for its own sake.
+
+**A red is diagnosed here, never handed to the user to reproduce.** Running a test is the run's work: a `→ Next` asking the user to re-run a command and report back is the defect this rule removes. Before stopping, in this order, each once:
+1. **Its failing tests alone, at HEAD and at the unit's `**Origin:**`** (the runner's own file argument; the Origin in a detached `git worktree`, its untracked dependency directories linked rather than reinstalled, removed afterwards). Match failures by test name and message, never by line number.
+2. **Red at both, the same way** → inherited, not this unit's: the step reads "this unit adds none" and is PASS. Merging adds no failure to the destination; report both readings as one `✔` line naming the inherited tests.
+3. **Red alone at HEAD, green at the Origin** → this unit's regression, whether or not the unit touched that file: landing stops.
+4. **Green alone at HEAD** → re-run the original command once. Green → a flake: PASS, reported as `○ flaky <test> — red in the full run, green alone and on re-run`. Red again → run the original command once at the Origin: red the same way → inherited (2); otherwise this unit's regression (3).
+
+A regression stops landing with the failing step, plan, phase, at most ten output lines and each diagnostic reading; its `→ Next` is `/esq:work "<test> — red at landing of <slug>, green on its origin"`, then `/esq:land <plan>`.
 
 An unrunnable command stops landing as unverified, even if a historical build logged a substitute. Report the original step and diagnosis for a prospective plan correction through build (unfinished phase) or the existing check/review → fix route (completed phase). Land makes no amendment and transfers no PASS; the corrected obligation needs its own proof under the normal freshness rules.
 
@@ -130,6 +138,6 @@ Always include:
 - **Every non-fresh projection:** `○ advisory <name> <verdict> — <owner>`, arch before spec. Include even when landing stops; never count advice as NEEDS YOU, make it Next, or run its owner.
 - Passed prerequisites and measured elapsed, even on early stop.
 
-Last line is `→ Next`, nothing after it. Repeat the first executable ask or name the decision then `/esq:land <plan>`. Choose the remedy for the stopping prerequisite: branch switch; git status; first incomplete plan's build/ledger repair; validate finding; actual backlog implementation/choice; brief action; coverage review; destination.command; failing auto step; this landing for moved; merge result.command with cwd. Never let a generic backlog choice replace a clearly undelivered item's implementation command.
+Last line is `→ Next`, nothing after it. Repeat the first executable ask or name the decision then `/esq:land <plan>`. Choose the remedy for the stopping prerequisite: branch switch; git status; first incomplete plan's build/ledger repair; validate finding; actual backlog implementation/choice; brief action; coverage review; destination.command; for a failing auto step, the regression route above, never a command for the user to run and report; this landing for moved; merge result.command with cwd. Never let a generic backlog choice replace a clearly undelivered item's implementation command.
 
 Stopped at user rollout step `k` → `→ Next: <step k, action-first> — then say done here, or later /esq:land <plan> --from <k+1>`. Landed/already landed (including up-to-date) with no rollout left → `nothing to run — the merge is local, and publishing it is a separate step`. Legacy → no landing to run. Never lower readiness requirements or turn projection advice into a requirement.
