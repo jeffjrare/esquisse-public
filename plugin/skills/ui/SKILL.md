@@ -229,9 +229,11 @@ Build one page. When the session has the `Artifact` tool, publish it — `artifa
 
 Embed captures as `data:` URIs; downscale them so the page stays under 16 MB. If the budget is tight, drop *captures*, never findings.
 
-**A capture cannot show motion, so each direction ships live beside it.** Publish each direction's HTML with the page — through the `Artifact` tool's `files`, or locally in `docs/plans/<YYYY-MM-DD>-<slug>.ui/` committed with the brief — and embed it in the direction's section (an `iframe` at the capture width, opening on the centre) with a link to open it full screen, so the user walks the journey and plays the hover, the press and the transitions before choosing.
+**A capture cannot show motion, so each direction ships live beside it.** Publish each direction's HTML with the page — through the `Artifact` tool's `files` when publishing — and embed it in the direction's section (an `iframe` at the capture width, opening on the centre) with a link to open it full screen, so the user walks the journey and plays the hover, the press and the transitions before choosing.
 
 A published page is private on publish. Record its URL or file path — it goes in the brief.
+
+**Each direction's source is the build's referent, and it is committed whether or not the page is published.** Write each direction as `docs/plans/<YYYY-MM-DD>-<slug>.ui/<direction>.html` (`a.html`, `b.html`) and commit it with the brief: a published file lives only on the page and a scratchpad dies with the session, so the next session's `/esq:build` could otherwise reach nothing but the comparison page — whose embedded captures make it too big to read. **A source file carries markup, styles and motion, never a `data:` URI**: an image it needs is its own file in the same directory. Keep it readable in one pass: one file per direction, each screen a top-level `<section id="<screen>">` so a builder can read one screen alone. The comparison page is for choosing and is never a build input.
 
 ## Write the brief and commit it — before you ask anything
 
@@ -266,6 +268,7 @@ update this sentence after the pick.
 ## Constraints & context
 The audit itself, and it is the section this brief exists for:
 - **Visual evidence:** <page URL or docs/plans/…ui.html> — captures of today and the rendered direction(s).
+- **Direction source:** docs/plans/<YYYY-MM-DD>-<slug>.ui/a.html (and b.html) — each direction's committed source, one `<section id>` per screen; the one `Direction:` names is what `/esq:build` builds from.
 - **What the interface is made of today:** the counted findings from pass 1.
 - **What the app looks like today:** the per-screen reading from pass 2.
 - **What the journeys are like today:** the walk from pass 2, counted, step by step.
@@ -299,7 +302,7 @@ The `<!-- comment -->` is required — it marks the file as a consumable brief.
 
 Findings from the audit that are real but sit outside the redesign (a missing empty state on a screen nobody is touching, an unlabelled input in an old form, a defect on a blast-radius screen) belong in `docs/BACKLOG.md`, not buried in a brief about something else or left in the report. File each one yourself: check the backlog for an open row on the same screen and defect first, then `esq backlog add --type "🐛 bug" --summary "<≤ ~12 words>" --source "ui: <slug>" --pri "<lo?|med?|hi?>" --status Open`, with a `## B-NNN` detail section holding the screen, the read and why a person is hurt. A finding the direction closes is in the brief's `## Done looks like`, never filed twice. The brief's `## Out of scope` lists the filed rows by ID.
 
-Then commit the brief and the rows together, once: `git add docs/plans/<filename> docs/BACKLOG.md` (plus the `.ui.html` page and its `.ui/` directions when they are local) and `git commit -m "brief: <slug>"`. **Ask nothing until that commit exists.**
+Then commit the brief and the rows together, once: `git add docs/plans/<filename> docs/BACKLOG.md` plus the `.ui/` direction sources always, and the `.ui.html` page when it is local and `git commit -m "brief: <slug>"`. **Ask nothing until that commit exists.**
 
 ## Then ask for the direction
 
