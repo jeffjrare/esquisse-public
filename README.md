@@ -93,6 +93,18 @@ until the scope is clear and writes a brief that `plan` picks up. For a product 
 no UI yet, it suggests `/esq:ui --greenfield` to put rendered design directions on
 screen before any code.
 
+**Out of ideas?** `/esq:ideas` reads what the product already is (the spec, its screens
+and routes, the backlog, the decisions, where the history churns) and proposes a short
+slate, user value first: new end-user features, then adjustments to what exists, then
+content (copy, templates, onboarding, the defaults people start from), then container
+(architecture, structure, the surfaces it lives on), each judged by the user value it
+unlocks. Every idea names what it was read from, who gets what, its size and the command
+that takes it further; nothing generic, nothing already in the backlog or decided against.
+Narrow it with a focus (`/esq:ideas invoicing`) or an axis (`features`, `adjust`,
+`content`, `container`). You pick in one question; what you pick becomes backlog rows
+with a suggested priority, and the rest stays in a slate you can capture from later
+(`/esq:ideas capture 4,7`) without generating again. It writes no code and no plan.
+
 **An interface that works but looks dull?** `/esq:ui` (or `/esq:ui <screen>`) never reads
 one page alone. It covers a slice: the journeys through the screen, and the screens a
 change there would reach through a shared component, layout or token. It walks those
@@ -179,6 +191,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:harvest` | Recover decisions from the code, history and discussion | `docs/DECISIONS.md` |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md` |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
+| `/esq:ideas [focus] [features\|adjust\|content\|container]`, `/esq:ideas capture <n,…>` | Propose grounded ideas, user value first: new features, adjustments, content and container (architecture, structure, surfaces) | A ranked slate you pick from in one question; picked ideas become backlog rows with a suggested priority, the rest kept for a later `capture` |
 | `/esq:promise [page-or-feature] [--sense \| --copy] [--all]` | Check that what the product promises works in the running app; sweep it for UX nonsense; write or improve page copy | `docs/PROMISES.md` verdicts with evidence and a backlog row per promise that does not hold, per defect seen on the way and for the part of the ask it cannot judge; `--sense` backlog rows; `--copy` a before/after page, then approved copy committed page by page |
 | `/esq:ui [screen-problem-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), live, animated and walkable, gated on contrast, focus, target size, phone width, reduced motion and states, a comparison page and a planning brief naming the next slices; backlog rows for the defects outside the work |
 
@@ -287,6 +300,8 @@ only operates on planned work.
   whole outcome.
 - `/esq:advance` works the roadmap's `Now` items — one worker per item, at most one
   new plan per entry — and stops before building.
+- `/esq:ideas [focus]` proposes grounded features, adjustments, content and container
+  changes, and captures the ones you pick as backlog rows.
 - `/esq:epic new <title>` creates a theme; tag work with `epic:<slug>`.
 
 ## Parallel sessions
