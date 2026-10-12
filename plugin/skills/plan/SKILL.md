@@ -242,7 +242,9 @@ shipped feature. Keep the promised outcome intact when splitting the work.
 One imperative line per step, in order: a migration to run, an env var or secret to set,
 config, a restart, a backfill, a flag to flip, an install, a third-party setup.
 `/esq:land` runs each step itself after the merge, up to the first one tagged `(user)`:
-tag only what needs the user — publishing (push, deploy, release) or their own accounts.
+tag only what needs the user — publishing (push, deploy, release), their own accounts, or a result only their
+device shows (install, push, haptics, camera): write that one as the result to confirm, never as a build or
+sideload command, and keep it out of the phases' `(manual)` steps so no phase waits on it.
 Write every other step so esq can run and judge it: a command with its pass criterion,
 the evidence to write and where it is committed. Prefer a command to a browser check. -->
 - <step>

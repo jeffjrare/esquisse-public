@@ -279,10 +279,11 @@ to you as a decision — and `land` refuses while any of them is unaccounted for
 
 **Manual checks** need an actual observation of the stated behavior, and the
 build makes it with a browser tool when one is available: a "phone" check runs at a
-phone-sized viewport. It comes to you only when no instrument can reach the result —
-a native phone behavior (install, push, camera) or access only you hold. A step left
-unobserved pauses the phase; resume with `/esq:build <plan>`, which picks up from the
-log and existing commits.
+phone-sized viewport. A native phone behavior (install, push, haptics, camera) never
+stops the run: the build prepares the artifact (the APK, the link) and `land` asks you,
+once and after the merge, only whether the result is right on your device. Any other
+step left unobserved pauses the phase; resume with `/esq:build <plan>`, which picks up
+from the log and existing commits.
 
 **Reviewing work without a plan:** `/esq:review <full-commit-hash>` or
 `<base>..<tip>`. Avoid bare `HEAD` after `/esq:work`: the last commit is then the

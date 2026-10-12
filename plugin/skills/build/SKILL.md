@@ -190,6 +190,7 @@ A genuine manual step is one where the observable result is a browser screen, a 
 
 - No `(manual)` steps, all `(auto)` passed → verified. `TaskUpdate` the Verification task `completed`, log the phase `completed` (below).
 - `(manual)` steps, all observed PASS → verified the same way. Name the instrument in the log entry. **This is the expected outcome whenever the project's resources cover this step's path — the phase does not pause.**
+- A device-native `(manual)` step (install, push, haptics, camera, sensors, the OS share sheet) → never a pause: it becomes a `(user)` rollout line with its artifact built, per the manual-verification reference, and the phase logs `completed`.
 - `(manual)` steps left unobserved because a link the observation needs is uncovered, closing it exceeded this phase's mandate or failed inside its bound, and neither this run nor the user has observed the result → the phase is NOT done. `TaskUpdate` the Verification task `in_progress` (leave it open), log the phase `⏸ awaiting manual verification` (below), then STOP — do not advance. The next build run resolves it via "Resolve a paused phase."
 
 ## A defect against this unit is not a backlog candidate
