@@ -257,7 +257,8 @@ that, safe fixes still go through `fix` → `review` → `land`, and
 
 **Landing** checks the whole branch, not just the named plan: plans complete or
 explicitly abandoned, findings dealt with, review done, every module the branch
-deleted or left unused accounted for, working tree clean. It
+deleted or left unused accounted for, working tree clean (screenshots build left
+behind are committed, never asked about). It
 reuses verification that still holds and runs only what is owed. A red test is
 diagnosed on the spot, alone and on the branch's origin: an inherited failure or a
 flake lands, only a regression of the branch stops it. It then merges
