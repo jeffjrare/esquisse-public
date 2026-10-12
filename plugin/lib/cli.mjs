@@ -5098,6 +5098,10 @@ export async function applyRoute(root, inputs, { skillsDir = SKILLS_DIR } = {}) 
 
 export async function validate(root) {
   const findings = [];
+  // An open row with no priority is triage the user owes, never a broken ledger: finders file rows
+  // with the priority blank on purpose, so counting it as a finding made esq's own writes fail the
+  // landing and the session stop. It is reported beside the findings and never decides `valid`.
+  const advisories = [];
   let repository;
   try { repository = git(root, ['rev-parse', '--show-toplevel']); }
   catch { return { valid: false, findings: ['not inside a git working tree'] }; }
@@ -5135,7 +5139,7 @@ export async function validate(root) {
         unprioritized.push(id);
       }
     }
-    if (ranks.size > 0) for (const id of unprioritized) findings.push(`open backlog row with no priority: ${id}`);
+    if (ranks.size > 0) for (const id of unprioritized) advisories.push(`open backlog row with no priority: ${id}`);
   } catch (error) {
     if (error.code !== 'ENOENT') findings.push(error.message);
   }
@@ -5169,7 +5173,7 @@ export async function validate(root) {
     }
     catch (error) { findings.push(`${relative}: ${error.message}`); }
   }
-  return { valid: findings.length === 0, root: repository, findings };
+  return { valid: findings.length === 0, root: repository, findings, advisories };
 }
 
 // The default standards referent ships inside the plugin, beside the skills, so `esq standards`

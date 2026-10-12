@@ -31,7 +31,8 @@ not keep a list of what was removed.
 | `## Rollout` | `esq branch check` collects its bullets into `unit.rollout`, which `/esq:land` runs after the merge up to the first `(user)` step. Renamed in the template, every deployment step silently disappears from the landing report. |
 
 **The token, not the sentence around it.** A placeholder explaining which branch belongs in the field
-is prose: reword it freely. What may not change is the field marker the parser matches.
+is prose: reword it freely. On a written header, a ` — <comment>` after the ref is read as a comment and the
+ref before it is the value. What may not change is the field marker the parser matches.
 
 ## Scenario U-01 — the execution-log entry the classifier reads by glyph
 

@@ -2381,7 +2381,7 @@ test('derive preserves a one-sided Rank edit and asks when both sides chose diff
   assert.equal(typeof derive('100', '200', null).ask, 'string');
 });
 
-test('validate reports a duplicate rank and an unprioritized open row, each on its own gate', async () => {
+test('validate reports a duplicate rank as a finding and an unprioritized open row as an advisory', async () => {
   const narrow = await rankFixture(NINE,
     '| B-001 | 2026-08-17 | 🐛 bug | | first | manual | | | Open |',
     '| B-002 | 2026-08-17 | 🐛 bug | | second | manual | | | Open |');
@@ -2402,10 +2402,18 @@ test('validate reports a duplicate rank and an unprioritized open row, each on i
     '| B-002 | 2026-08-17 | 🐛 bug | med | 100 | second | manual | | | Open |',
     '| B-003 | 2026-08-17 | 🐛 bug | | 300 | third | manual | | | Open |',
     '| B-004 | 2026-08-17 | 🐛 bug | | | fourth | manual | | | Done |');
-  assert.deepEqual((await validate(wide)).findings, [
-    'duplicate backlog rank 100: B-001 and B-002',
-    'open backlog row with no priority: B-003',
-  ]);
+  const result = await validate(wide);
+  assert.deepEqual(result.findings, ['duplicate backlog rank 100: B-001 and B-002']);
+  assert.deepEqual(result.advisories, ['open backlog row with no priority: B-003']);
+
+  // Triage the user owes never makes the ledger invalid: a finder files its rows with the priority
+  // blank, and that alone must not fail the landing or the session stop.
+  const unranked = await rankFixture(TEN,
+    '| B-001 | 2026-08-17 | 🐛 bug | hi | 100 | first | manual | | | Open |',
+    '| B-002 | 2026-08-17 | 🐛 bug | | 200 | second | review: x | | | Open |');
+  const triage = await validate(unranked);
+  assert.equal(triage.valid, true);
+  assert.deepEqual(triage.advisories, ['open backlog row with no priority: B-002']);
 });
 
 

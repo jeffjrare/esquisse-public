@@ -158,12 +158,19 @@ export function parseVerified(text) {
 //
 // The values are data, never commands: they are compared, printed and `safeRef`-validated before
 // they ever reach git, which is only ever called through an argument vector, never a shell.
+//
+// A ` — <prose>` after the ref is a comment on it, never part of it: a plan header written
+// `**Origin:** esq/x — cut from \`esq/x\`, lands back on it` records `esq/x`. Reading it as no
+// Origin made the plan legacy and sent the user to hand-edit a line the parser could already read.
 function headerField(text, name) {
-  const field = new RegExp(`^\\*\\*${name}:\\*\\*\\s*\`?\\s*([^\`]*?)\\s*\`?\\s*$`);
+  const field = new RegExp(`^\\*\\*${name}:\\*\\*\\s*(.*?)\\s*$`);
   for (const line of text.split('\n')) {
     if (/^##\s/.test(line)) break;
     const match = line.match(field);
-    if (match) return match[1].length > 0 ? match[1] : null;
+    if (!match) continue;
+    const value = match[1].split(/(?:^|\s+)—(?:\s|$)/)[0].replace(/^`\s*|\s*`$/g, '');
+    if (value.includes('`')) return null;
+    return value.length > 0 ? value : null;
   }
   return null;
 }

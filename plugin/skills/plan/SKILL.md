@@ -148,9 +148,9 @@ refusal; preserve it and stage only this command's own writes at the commit step
 **Epic:** <epic-slug>
 
 <!-- Omit BOTH of the next two fields ONLY on a detached HEAD or outside a git repository. -->
-**Branch:** <the branch this plan's phases commit to>
+**Branch:** <the branch name alone: the one this plan's phases commit to>
 
-**Origin:** <the branch it was cut from, and the branch it lands back on>
+**Origin:** <the branch name alone: the one it was cut from, and lands back on>
 
 ## Context
 What's the situation. Current state. Why this is on the table now.
