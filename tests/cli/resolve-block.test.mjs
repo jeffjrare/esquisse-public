@@ -6,7 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { appendLog, gateVerify, resolveBlock } from '../../plugin/lib/cli.mjs';
+import { appendLog, branchCheck, gateVerify, resolveBlock } from '../../plugin/lib/cli.mjs';
 import { nextPhase, parsePlan, parseVerified } from '../../plugin/lib/markdown.mjs';
 
 // ── The recovery transition out of a `⏸` pause, under either of its clauses ──
@@ -804,4 +804,30 @@ test('a log naming a phase the plan does not have is malformed, never a pause re
   assert.equal(answer.code, 'malformed-entry');
   assert.match(answer.reason, /unknown Phase 3/);
   assert.equal(await readFile(fixture.file, 'utf8'), before);
+});
+
+test('a device-only step is carried to the landing as a (user) rollout line, and the phase completes', async () => {
+  const fixture = await unit([]);
+  const step = '[APK on the phone] tap a tile → expect: a short haptic pulse';
+  await pauseForManual(fixture, [step]);
+
+  // The shape is the CLI's: exactly one of observed/carried, and a carried line tagged (user).
+  await assert.rejects(confirm(fixture, { phase: 1, manual: [{ step, observed: 'x', carried: '(user) y' }] }), /exactly one/);
+  await assert.rejects(confirm(fixture, { phase: 1, manual: [{ step, carried: 'install and check' }] }), /\(user\)/);
+
+  const carried = '(user) Install build/app-debug.apk; on Accueil, tap a tile: the phone gives a short pulse';
+  const written = await confirm(fixture, { phase: 1, manual: [{ step, carried }] });
+  assert.equal(written.refuse, false);
+  assert.equal(written.status, 'completed');
+  assert.deepEqual(written.manualConfirmed, []);
+  assert.deepEqual(written.manualCarried, [carried]);
+
+  const text = await readFile(fixture.file, 'utf8');
+  assert.match(text, /### Phase 1 — completed 2026-09-09/);
+  assert.ok(text.includes(`- ${step} — → rollout (user): device-native, carried to the landing`));
+  assert.ok(text.includes(`**Rollout:**\n- ${carried}`));
+  assert.doesNotMatch(text, /\*\*Manual verification outstanding:\*\*/);
+  // The landing reads it back as one of the unit's steps that are the user's.
+  const check = await branchCheck(fixture.root, fixture.relative);
+  assert.ok(check.unit.rollout.some((entry) => entry.step === carried && entry.source === 'Phase 1'));
 });
