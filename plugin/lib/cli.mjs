@@ -1281,7 +1281,7 @@ const BLOCKER_ID = /^(B-\d+)\b/;
 // why a row was accepted rather than fixed — which is the half a bare `Dropped` loses.
 const DISPOSITION_REASON = /\b(?:Done|Dropped):\s*([^·|]+)/;
 const RESOLVE_KEYS = ['phase', 'verified', 'verification', 'manual'];
-const MANUAL_KEYS = ['step', 'observed'];
+const MANUAL_KEYS = ['step', 'observed', 'carried'];
 
 // The lines one execution-log entry occupies: its heading through the line before the next `### `
 // heading inside the log span, or the end of that span.
@@ -1445,20 +1445,32 @@ export function planContext(plan, next) {
 // a step this array omits — nothing about a red is inferred, its absence is the evidence — which is
 // the same idiom `verified.commands` uses for a red `(auto)` command, held here so a run settling
 // both halves of a pause states them the same way.
+//
+// A step only the user's own device can show is settled the other way: `carried` is the `(user)`
+// rollout line that puts it to them once, after the merge. The CLI checks the shape — exactly one of
+// the two, and a carried line tagged `(user)` — never whether the step is device-native; that
+// judgment is the caller's. Before this, a pause on such a step had no exit but an observation the
+// user could not make where they stood, or abandoning a plan whose work had shipped.
 function validateManual(value) {
   if (!Array.isArray(value) || value.length === 0) {
-    throw new Error('--confirm key "manual" must be a non-empty array of {step, observed} — one observation per step the entry lists under **Manual verification outstanding:**');
+    throw new Error('--confirm key "manual" must be a non-empty array of {step, observed} or {step, carried} — one per step the entry lists under **Manual verification outstanding:**');
   }
   for (const item of value) {
-    if (item === null || typeof item !== 'object' || Array.isArray(item)) throw new Error('--confirm key "manual" takes objects {step, observed}');
+    if (item === null || typeof item !== 'object' || Array.isArray(item)) throw new Error('--confirm key "manual" takes objects {step, observed} or {step, carried}');
     for (const key of Object.keys(item)) {
-      if (!MANUAL_KEYS.includes(key)) throw new Error(`--confirm manual key "${key}" is not accepted; each observation takes {step, observed}`);
+      if (!MANUAL_KEYS.includes(key)) throw new Error(`--confirm manual key "${key}" is not accepted; each item takes {step, observed} or {step, carried}`);
     }
     if (!fieldText(item.step)) {
       throw new Error(structuralOffender(item.step) ? `--confirm manual "step" ${STRUCTURAL_REFUSAL}` : '--confirm manual "step" must be one outstanding step, copied exactly as the entry lists it');
     }
-    if (!fieldText(item.observed)) {
+    const observed = Object.hasOwn(item, 'observed');
+    const carried = Object.hasOwn(item, 'carried');
+    if (observed === carried) throw new Error('--confirm manual item takes exactly one of "observed" (what was seen) or "carried" (the (user) rollout line that puts the step to the user after the merge)');
+    if (observed && !fieldText(item.observed)) {
       throw new Error(structuralOffender(item.observed) ? `--confirm manual "observed" ${STRUCTURAL_REFUSAL}` : '--confirm manual "observed" must be what you actually saw, naming the instrument that saw it — never a restatement of the step');
+    }
+    if (carried && (!fieldText(item.carried) || !/^\(user\)\s+\S/.test(item.carried))) {
+      throw new Error(structuralOffender(item.carried) ? `--confirm manual "carried" ${STRUCTURAL_REFUSAL}` : '--confirm manual "carried" must be one rollout line starting "(user) ", worded as the result the user confirms on their device');
     }
   }
 }
@@ -1633,7 +1645,7 @@ export async function resolveBlock(root, planPath, confirmJson = null) {
       : `Phase ${phase} is paused only for ${outstanding.length === 1 ? 'a step' : 'steps'} a human has to observe`;
     const confirmWith = clause === 'blocked' && outstanding.length > 0
       ? `Confirm to resolve the entry to \`⏸ ${PAUSE_MANUAL}\`, or settle both clauses in this call by passing \`manual\` as well.`
-      : `Confirm with one \`manual\` observation per outstanding step to resolve the entry to completed.`;
+      : `Confirm with one \`manual\` item per outstanding step to resolve the entry to completed: \`{step, observed}\` for what was seen, or \`{step, carried}\` with the \`(user)\` rollout line for a result only the user's device shows, which the landing puts to them after the merge.`;
     return {
       file: relative,
       phase,
@@ -1673,7 +1685,21 @@ export async function resolveBlock(root, planPath, confirmJson = null) {
     // never be read as still owing the steps, and each line carries the step beside what was seen.
     next.splice(manualField.line, manualField.last - manualField.line + 1,
       `**Manual verification:** confirmed ${today}`,
-      ...observations.map((item) => `- ${item.step} — ${item.observed}`));
+      ...observations.map((item) => (Object.hasOwn(item, 'carried')
+        ? `- ${item.step} — → rollout (user): device-native, carried to the landing`
+        : `- ${item.step} — ${item.observed}`)));
+    // A carried step lands in the entry's own `**Rollout:**` list, which `esq branch check` collects
+    // into `unit.rollout` — so `/esq:land` asks it once, after the merge, with the unit's other steps.
+    const carried = observations.filter((item) => Object.hasOwn(item, 'carried')).map((item) => `- ${item.carried}`);
+    if (carried.length > 0) {
+      const rolloutField = entryField(next, 'Rollout');
+      if (rolloutField) next.splice(rolloutField.last + 1, 0, ...carried);
+      else {
+        let end = next.length;
+        while (end > 1 && next[end - 1].trim() === '') end -= 1;
+        next.splice(end, 0, '', '**Rollout:**', ...carried);
+      }
+    }
   }
   if (clause === 'blocked') {
     next.splice(blockedField.line, blockedField.last - blockedField.line + 1, '**Blocked by (resolved):**', ...dispositions.map((row) => {
@@ -1716,7 +1742,8 @@ export async function resolveBlock(root, planPath, confirmJson = null) {
     reran: owed.map((command) => command.command),
     reused: reused.map((command) => command.command),
     unresolved: verify.unresolved,
-    manualConfirmed: observations ? observations.map((item) => item.step) : [],
+    manualConfirmed: observations ? observations.filter((item) => !Object.hasOwn(item, 'carried')).map((item) => item.step) : [],
+    manualCarried: observations ? observations.filter((item) => Object.hasOwn(item, 'carried')).map((item) => item.carried) : [],
     manualOutstanding: observations ? [] : outstanding,
   };
 }
@@ -5556,7 +5583,7 @@ export async function main(args) {
   // that and never off the prose.
   if (group === 'plan' && action === 'resolve-block') {
     const [file, ...flags] = rest;
-    const usage = "usage: esq plan resolve-block <plan> [--confirm '<json>'] — the payload takes {phase, verified?, verification?}";
+    const usage = "usage: esq plan resolve-block <plan> [--confirm '<json>'] — the payload takes {phase, verified?, verification?, manual?: [{step, observed} | {step, carried}]}";
     if (!file) throw new Error(usage);
     if (flags.length > 0 && (flags[0] !== '--confirm' || flags.length !== 2)) throw new Error(usage);
     const result = await resolveBlock(root, file, flags.length === 2 ? flags[1] : null);
