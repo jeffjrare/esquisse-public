@@ -7,7 +7,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { appendLog, branchCheck, gateVerify, projections, setAbandoned, setReviewed, state } from '../../plugin/lib/cli.mjs';
-import { parseAbandoned } from '../../plugin/lib/markdown.mjs';
+import { parseAbandoned, parseBranch, parseOrigin } from '../../plugin/lib/markdown.mjs';
 
 // What a landing can prove without re-running anything: projection freshness, review coverage, the
 // unit's obligations and whether it already landed. Real git in throwaway repositories, because each
@@ -793,4 +793,19 @@ test('a unit whose branch was deleted after landing reads landed, and status has
   git(abandoned, 'switch', '-q', '--detach', 'esq/stem');
   git(abandoned, 'branch', '-q', '-D', 'esq/stem');
   assert.equal((await branchCheck(abandoned, other)).landed, null);
+});
+
+test('a header ref followed by an em-dash comment records the ref, and a bare comment records nothing', () => {
+  // The observed specimen: a corrective plan whose Origin carried a note was read as legacy, and the
+  // landing sent the user to hand-edit a line the parser could have read.
+  const header = (line) => `# t\n\n**Branch:** esq/x-fixes\n\n${line}\n\n## Phases\n`;
+  assert.equal(parseOrigin(header('**Origin:** esq/x — cut from `esq/x`, lands back on it')), 'esq/x');
+  assert.equal(parseOrigin(header('**Origin:** `esq/x` — lands back on it')), 'esq/x');
+  assert.equal(parseOrigin(header('**Origin:** main')), 'main');
+  assert.equal(parseOrigin(header('**Origin:** `main`')), 'main');
+  assert.equal(parseOrigin(header('**Origin:**')), null);
+  assert.equal(parseOrigin(header('**Origin:** — no ref, only a note')), null);
+  assert.equal(parseBranch(header('**Origin:** main')), 'esq/x-fixes');
+  // Below the first `##`, the same text is prose and never the record.
+  assert.equal(parseOrigin('# t\n\n## Context\n**Origin:** main\n'), null);
 });

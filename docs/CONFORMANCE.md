@@ -32,7 +32,8 @@ not keep a list of what was removed.
 | `## Capability inventory` | `esq branch check` and `esq review scope` read it: a module the unit deleted or orphaned is covered only when its repo-relative path appears in this section, and `/esq:land` refuses on `removed.uncovered`. Renamed in the template, every replacing plan's inventory goes unread and every landing that deletes a module refuses. |
 
 **The token, not the sentence around it.** A placeholder explaining which branch belongs in the field
-is prose: reword it freely. What may not change is the field marker the parser matches.
+is prose: reword it freely. On a written header, a ` — <comment>` after the ref is read as a comment and the
+ref before it is the value. What may not change is the field marker the parser matches.
 
 ## Scenario U-01 — the execution-log entry the classifier reads by glyph
 
