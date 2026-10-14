@@ -809,3 +809,33 @@ test('a header ref followed by an em-dash comment records the ref, and a bare co
   // Below the first `##`, the same text is prose and never the record.
   assert.equal(parseOrigin('# t\n\n## Context\n**Origin:** main\n'), null);
 });
+
+// ── Onward unit ──────────────────────────────────────────────────────────────
+
+test('a unit landing into another unit\'s branch reports that parent as it stands on its own branch', async () => {
+  const root = await repo();
+  git(root, 'switch', '-q', '-c', 'esq/parent');
+  const parent = await unitPlan(root, 'parent.md', { branch: 'esq/parent', origin: 'main' });
+  commit(root, 'plan: parent');
+  git(root, 'switch', '-q', '-c', 'esq/child');
+  const child = await unitPlan(root, 'child.md', { branch: 'esq/child', origin: 'esq/parent' });
+  commit(root, 'plan: child');
+
+  const verdict = await branchCheck(root, child);
+  assert.deepEqual(verdict.onward, {
+    branch: 'esq/parent',
+    plans: ['docs/plans/parent.md'],
+    incomplete: [{ plan: 'docs/plans/parent.md', state: 'ready', phase: 1 }],
+    origin: 'main',
+  });
+
+  // Moved on its own branch after the child was cut: read there, not from this checkout's stale copy.
+  git(root, 'switch', '-q', 'esq/parent');
+  await setAbandoned(root, parent, 'superseded');
+  commit(root, 'plan(abandoned): parent');
+  git(root, 'switch', '-q', 'esq/child');
+  assert.deepEqual((await branchCheck(root, child)).onward.incomplete, []);
+
+  // A trunk destination carries no unit.
+  assert.equal((await branchCheck(root, parent)).onward, null);
+});
