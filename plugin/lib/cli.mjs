@@ -2717,6 +2717,26 @@ export async function branchCheck(root, planPath, { at = null } = {}) {
   return { ...verdict, verdict: 'moved', refuse: true, reason: `${moved.join(' and ')}, not ${at.slice(0, 7)} — something moved after verification ran on ${at.slice(0, 7)}, so nothing lands; a no-op.` };
 }
 
+// The unit a destination branch carries, read from that branch's own copy of each candidate plan, so a
+// parent built after this unit was cut reads as it stands there, not as this checkout last saw it.
+// Candidates come from this checkout's headers; a plan absent on the destination keeps the local text.
+function onwardUnit(repository, origin, headers) {
+  const plans = [];
+  const incomplete = [];
+  let next = null;
+  for (const header of headers) {
+    if (parseBranch(header.text) !== origin) continue;
+    const text = (safeRef(origin) && gitTry(repository, ['show', `refs/heads/${origin}:${header.relative}`])) || header.text;
+    if (parseBranch(text) !== origin) continue;
+    plans.push(header.relative);
+    const standing = planStanding(text);
+    if (!standing.abandoned && standing.state !== 'complete') incomplete.push({ plan: header.relative, state: standing.state, phase: standing.phase });
+    next ??= parseOrigin(text);
+  }
+  if (plans.length === 0) return null;
+  return { branch: origin, plans, incomplete, origin: next };
+}
+
 async function branchVerdict(root, planPath) {
   const repository = git(root, ['rev-parse', '--show-toplevel']);
   const file = path.relative(repository, path.resolve(root, planPath)) || planPath;
@@ -2762,8 +2782,12 @@ async function branchVerdict(root, planPath) {
   // unit's — and `null` for a legacy plan, a detached HEAD or a git that cannot answer.
   const removalBase = recorded && recorded === branch ? unitRemovalBase(repository, origin, head) : null;
   const removed = removalBase ? removedModules(repository, removalBase, head, members.map((member) => capabilityInventory(member.text))) : null;
+  // The seventh: whether the destination is itself a unit's `**Branch:**` — a plan landing into its
+  // parent's branch rather than a trunk. Then landing this unit ships nothing, and the work still owed
+  // is the parent's; `null` when no plan records the origin.
+  const onward = origin ? onwardUnit(repository, origin, headers) : null;
   const verdict = (name, refuse, reason, owners = []) =>
-    ({ root: repository, file, branch, head, recorded, origin, dirty, verdict: name, owners, unit, landed, coverage, destination, removed, refuse, reason });
+    ({ root: repository, file, branch, head, recorded, origin, dirty, verdict: name, owners, unit, landed, coverage, destination, removed, onward, refuse, reason });
 
   // First match wins, in this order.
   if (!branch) {
