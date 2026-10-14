@@ -300,7 +300,7 @@ The task, for the one route that spawns:
 Report measured elapsed time: use a field on the returning tool result, or one `date` reading before and one after the step, chained into shell calls already needed. The span ends when the result arrives. Ignore later kill notifications, agent-registration lifetime, uncited harness timing and durations in worker prose.
 <!-- orch-shared:elapsed-span:end -->
 
-🟡 items are **not** a gate — they are the expected terminal state, go in the report, and become the `→ Next`.
+🟡 items are **not** a gate — they are the expected terminal state, go in the report, and become the `→ Next`. **They are never a NEEDS YOU:** planning one asks nothing only the user knows, so a run whose only remainder is 🟡 heads `✔`, with no user-needs zone.
 
 ## Ready to land — the clean completion
 
@@ -335,10 +335,7 @@ Last line: `→ Next` with the first executable ask verbatim, or `pick an option
 Always produce this, whether the run went clean through or stopped at step 1:
 
 ```
-⚠  converge — <slug> · 2/2 steps · 1 decision · 3 commits · 8m40s · NEEDS YOU (1)
-
-  1  Plan the remaining retry-policy change
-     /esq:plan docs/plans/<brief>
+✔  converge — <slug> · 2/2 steps · 1 decision · 3 commits · 8m40s
 
   ✔ review      2 🟢, 1 🟡, 1 🔴       (4m)
   ⚑ decision    retry ceiling → picked A · applied 8f2a1c
