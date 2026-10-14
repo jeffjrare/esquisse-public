@@ -241,7 +241,7 @@ has to act on it:
 
 | Finding | What happens next |
 |---|---|
-| 🔴 Needs your decision | You pick one of the options it presents; red comes first |
+| 🔴 Needs your decision | You pick one of the options it presents; red comes first. "No preference" lets it take its recommended option |
 | 🟢 Mechanical, contained fix | `/esq:fix` applies and verifies it; a red its own change explains (a stale mock, a missed import) is corrected and re-run once before it would escalate |
 | 🟡 Substantive change | `/esq:plan` defines the work |
 | Clean | The work moves on toward landing |
@@ -266,8 +266,12 @@ diagnosed on the spot, alone and on the branch's origin: an inherited failure or
 flake lands, only a regression of the branch stops it. A red caused by your local
 setup (a flag left on in a gitignored `.env`, a stale server, a cache, a test
 database behind the branch's migrations — destructive ones included, since the test
-suite owns that data) is fixed by the landing itself and reported with its undo, never
-handed back to you; only a secret or data that is really yours is. It then merges
+suite owns that data; your local dev database too, after a dump that is its undo) is
+fixed by the landing itself and reported with its undo, never handed back to you; only a
+secret or a remote database is yours. A check the machine killed for low memory is re-run
+once in the foreground after esq's own leftover servers are stopped. A backlog row the
+branch only partly delivered is split: the delivered part closes, the rest becomes its own
+row for you to triage whenever you like. It then merges
 locally, listing once, by hat, the calls build decided for you with how to undo
 each; silence is consent. Conflicts that need judgment come back to you with a recovery action.
 When the feature needs more than a merge to reach users — a migration, an
