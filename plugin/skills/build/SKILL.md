@@ -176,6 +176,7 @@ If a step is tagged `(manual)` but is actually machine-executable (an HTTP reque
 - **Collect a finite background check once.** Wait under a deadline or on actual process/task completion, never with an unbounded sentinel or repeated status polling. Use the collection primitive named by the launch result; do not assume an unavailable `TaskOutput` or `BashOutput`.
 <!-- shared:collect-once:end -->
   - **Every process this phase started is confirmed gone before the execution-log entry is appended.** Process-group ownership, not a single PID.
+  - **A check the harness stopped for memory pressure has no verdict yet, and is never handed back.** Stop every process this unit's runs left behind (dev servers, watchers, test workers), re-run the same command once in the foreground, and judge that run. Only a second stop reaches the user, quoting what the harness said.
   - Process cleanup does not clear the harness's task registration. A later notification, including `status: killed`, never revives work that has already concluded.
 
 - **A red verification is never logged `completed`, however late or badly the wait was collected**; it gets a failure report.

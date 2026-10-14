@@ -190,7 +190,7 @@ Before offering options, call `esq apply route '<do A>' '<do B>'` once for the w
 - One entry per author's option: its label, consequence and literal `do:`.
 - Put the leaning first with `(Recommended)`; with no leaning, preserve order and append nothing.
 
-Never invent, combine or omit options, or add "you decide"/"skip". Apply only the selected `do:` through the routing below; nothing unchosen or deferred is authorized.
+Never invent, combine or omit options, or add "you decide"/"skip". Apply only the selected `do:` through the routing below; nothing unchosen or deferred is authorized. **An answer that hands the choice back** ("no preference", "you choose", "whatever you think") is the user choosing: take the leaning option — with no leaning, the one that changes least and is easiest to undo — route it as the selection, and report it once under Decided for you. Never leave it unchosen.
 
 One round per gate: if the same step gates again after an applied option, stop and report. If the tool is unavailable, print the option block and stop; do not simulate it, ask in prose or choose for the user.
 <!-- decision-ask:end -->
@@ -238,7 +238,7 @@ A *user*-interrupted phase agent reported no failure: the phase is unclassified 
 
 1. Read the `| B-NNN |` table rows of `docs/BACKLOG.md` — **the rows only**, never the detail sections. No file → skip silently.
 2. Rows whose `Source` names this plan's slug (` · Planned by <slug>`): `Done` with ` · Done by <slug>` → one `✔ closed` line; still `Planned` → not provably delivered.
-3. A still-`Planned` row is a NEEDS YOU line only when a real decision remains — is the undelivered part still wanted — as an option set: `/esq:backlog B-41 done` if it was in fact delivered, or `/esq:plan implement B-41: <what is missing>`. Otherwise it is one `○ still planned` fact.
+3. A still-`Planned` row is never a NEEDS YOU line: it is one `○ still planned` fact, and `/esq:land` splits its delivered part from the remainder.
 
 Never close, drop or re-file a row yourself, and never loosen the `all completed` condition.
 
@@ -246,7 +246,7 @@ Never close, drop or re-file a row yourself, and never loosen the `all completed
 **Conclude in three zones, then `→ Next`; nothing before or after them.**
 
 1. **Headline:** `<glyph>  <command> — <your own counters> · <elapsed> · NEEDS YOU (<n>)`. `✔` nothing needs the user; `⚠` something does; `✖` you could not do the job. Omit `NEEDS YOU` when empty. Any open gate makes the headline `⚠`.
-2. **What needs the user:** omit on `✔`. Number each ask, action first, with its exact runnable command. Product choices use the 🔴 option set; copy manual verifications verbatim with their starting state bracketed first. The user decides product, architecture and design, and is never the tester: a manual verification reaches this zone only when its result is device-native or needs access only the user holds. Do not ask for work this command can perform itself. Local state the repo does not track (a gitignored `.env` value, a stale process on a port, a cache, a local test database behind the branch's migrations) is not the user's to edit for you: when a diagnosis names it, change it yourself, re-run what it broke, and report the one-line undo; only a secret you would have to invent or data that is not disposable is theirs. A database the test suite itself writes to is disposable, so migrating, resetting or seeding it is yours even when a migration drops data; a dev database holding the user's own records, or anything remote, is not.
+2. **What needs the user:** omit on `✔`. Number each ask, action first, with its exact runnable command. Product choices use the 🔴 option set; copy manual verifications verbatim with their starting state bracketed first. The user decides product, architecture and design, and is never the tester: a manual verification reaches this zone only when its result is device-native or needs access only the user holds. Do not ask for work this command can perform itself. Local state the repo does not track (a gitignored `.env` value, a stale process on a port, a cache, a local test database behind the branch's migrations) is not the user's to edit for you: when a diagnosis names it, change it yourself, re-run what it broke, and report the one-line undo; only a secret you would have to invent or data that is not disposable is theirs. A database the test suite itself writes to is disposable, so migrating, resetting or seeding it is yours even when a migration drops data; a local dev database holding the user's own records is migrated too, after a dump you take under `<git-dir>/esq/` whose restore command is the undo; only a remote database is not yours.
 3. **What happened:** one factual row per result — glyph, label, value, evidence. `✔` happened; `○` deliberately did not; `✖` failed. Collapse empty categories and unremarkable no-ops; never print `None.`. Explicitly name unperformed work the reader would otherwise assume happened.
 
 Last line: `→ Next` with the first executable ask verbatim, or `pick an option in <n>, then <resume command>`, or the command that follows. No preamble, closing observations or extra headings.
