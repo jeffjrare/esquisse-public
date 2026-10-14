@@ -289,7 +289,7 @@ Compute `→ Next`:
 - An unclassifiable pick paused, or its repair failed → `paused by your choice — nothing to run now (resume later: /esq:build <plan-path>)`, naming a failed repair first, never the quoted original.
 - Stopped on a failure with a decision block still unresolved → `"Run option <A|B|…>'s `do:` above, then: /esq:build <plan-path>"`. Name no option as chosen — the letter is a placeholder the user fills.
 - Stopped on a failure with no decision block → the phase agent's named action, then `/esq:build <plan-path>`.
-- All phases completed → `/esq:review <plan-path>` in a fresh session, with the unattended alternative on the same line at its real cost: `/esq:converge <plan-path>`, review then fix, at most two subagents. Do not name `/esq:check <plan-path>` — it is the user's to ask for. `/esq:arch` follows the review and is not part of that loop.
+- All phases completed → `/esq:review <plan-path>` in a fresh session, with the unattended alternative on the same line at its real cost: `/esq:converge <plan-path>`, review then fix, at most two subagents, plus a corrective plan and build per surviving 🟡. Do not name `/esq:check <plan-path>` — it is the user's to ask for. `/esq:arch` follows the review and is not part of that loop.
 - Phase cap reached with phases left → `/esq:autopilot <plan-path>` to continue.
 
 Send a `PushNotification`: `"esq:autopilot — <X>/<Y> phases done. <stopped at Phase N: reason | all phases complete>."`
