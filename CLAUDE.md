@@ -1,9 +1,8 @@
 # esquisse — CLAUDE.md
-<!-- last-arch: 2026-10-02 @ 4877e55efed7564dcdad62b9e512bcedd3c34dcd -->
+<!-- last-arch: 2026-10-13 @ d865f32206941ef2827f9c6deb7f03ee2bcfbfb6 -->
 
 esquisse is a Claude Code plugin (`esq`): twenty-three skills, a dependency-free CLI and four hook handlers (five events) running a
-plan → build → review cycle over Markdown ledgers in `docs/`. This repo is also its marketplace. How it is built, and the why
-behind every rule below, is `docs/ARCHITECTURE.md`.
+plan → build → review cycle over Markdown ledgers in `docs/`; this repo is its marketplace. Why each rule: `docs/ARCHITECTURE.md`.
 
 ## What esq is for
 
@@ -15,7 +14,11 @@ and every run buys that value at the lowest model cost that still delivers it. T
 1. **Never block.** A stop is earned only when the answer lives in the user's head (intent, priority, a tradeoff on their
    constraints), never when reading, running or reasoning reaches it: the user decides, never tests. **No research instrument,
    measurement registry or telemetry reading ever gates delivery.**
-2. **Spend tokens like money.** See § Cost below.
+2. **Spend tokens like money.** Every change is audited for what it spends (tokens, agents, wall-clock, redone work):
+   - **What does this re-run that already succeeded?** Paid work done twice is the costly failure.
+   - **Is the bound stated before spending?** A worst case named afterwards is a bill, not a bound.
+   - **Does this resume into a stop?** If the halt reason is still in the artifact, resuming buys an agent to be told it.
+   - **What was the human's judgment silently supplying?** Automating a step inherits the written rule, not the unwritten one.
 3. **Deterministic where it can be, model where it must be.** The CLI owns structure, IDs, cells and invariants; the model owns
    judgment. Work a script could settle but left to the model is paid again on every run.
 4. **Design quality is part of the feature.** The right-sizing pass trims generality, never design.
@@ -40,22 +43,14 @@ the README — its table row and every paragraph about it — in the same commit
 - `scripts/`: `audit.sh` (the one `run` dispatch) and its checks; `update.sh` / `release-local.sh` (release, `--release`); the
   research instruments (probes, measures, captures), reached only by `--lab`.
 - `tests/`: node suites discovered by convention. Product: `{cli,hooks,audit}`; lab: the rest. Each owns its `fixtures/`.
-- `docs/`: SPEC (what it does for users, `/esq:spec`), ARCHITECTURE (how it is built, `/esq:arch`), DECISIONS, BACKLOG, ROADMAP,
-  `epics/`, `plans/`, CONFORMANCE (formats the code parses), AUDIT (the reading pass), MAINTAINING (its cost table feeds
-  `cost-budgets.mjs`). EVIDENCE, `evidence/`, `preparation/`, `baselines/`, PRIORITY-REVIEW, headless-trial: no skill reads them.
+- `docs/`: SPEC (`/esq:spec`), ARCHITECTURE (`/esq:arch`), DECISIONS, BACKLOG, ROADMAP, PROMISES, `epics/`, `plans/`, CONFORMANCE
+  (parsed formats), AUDIT (the reading pass), MAINTAINING (cost table → `cost-budgets.mjs`). EVIDENCE and the rest: no skill reads them.
 
 ## Verification
 
 A phase runs the checks its change earns. The final phase runs `./scripts/audit.sh` and records its PASS in `esq plan append-log`'s
 `verified` block, which `/esq:land` reuses. **The audit runs the node product suites itself: never `node --test` beside it.**
 `--release` and `--lab` *add* a pass, off the frequent path. A verdict never depends on which ambient tool the shell resolves.
-
-## Cost is a requirement: every change is audited for what it spends (tokens, agents, wall-clock, redone work)
-
-1. **What does this re-run that already succeeded?** Paid work done twice is the costly failure.
-2. **Is the bound stated before spending?** A worst case named afterwards is a bill, not a bound.
-3. **Does this resume into a stop?** If the halt reason is still in the artifact, resuming buys an agent to be told it.
-4. **What was the human's judgment silently supplying?** Automating a step inherits the written rule, not the unwritten one.
 
 ## Model policy and the CLI
 
@@ -69,8 +64,7 @@ under a printed `ESQ_CODEX=on`, read-only: it sends the user's code out, and its
 - **Skills, the README table** → project skill `skill-authoring`. **`scripts/audit.sh` or any check** → `audit-scripts`: every
   non-zero exit fails the pass, exit 2 included. **`plugin/bin|lib|scripts`, `hooks.json`, `tests/`** → `plugin-runtime`.
 - **Before changing what a skill reads or writes in `docs/`, or `/esq:fix`'s order** → `§ docs/ — ledgers and projections`. One
-  writer per file, except `**Verified:**` (build *and* fix), so a reader returns every block. The fix order is stage →
-  `git write-tree` → one run → judge → commit → record.
+  writer per file, except `**Verified:**` (build *and* fix), so a reader returns every block.
 - **Before touching subagent spawning or telemetry** → `§ Billing a subagent`. The `esq:<command>` description prefix is the only
   join key, and `plan:<slug>` the only plan identity. `ESQ_TELEMETRY=off` is honored first, and telemetry never authorizes a step.
 - **Before adding a re-read, a second tool call where one turn would do, or a wait** → `§ Rules`. Independent reads go out
@@ -80,8 +74,7 @@ under a printed `ESQ_CODEX=on`, read-only: it sends the user's code out, and its
   `esq backlog add|set-status`, and a pause only through `esq plan resolve-block`.
 - **Before adding anything that merges or pushes** → `§ Boundaries not to cross`. `esq merge land` takes both refs from the plan
   header via `safeRef`, and a plan missing either is refused, never repaired. Nothing in `plugin/` runs or spells a push.
-- **Before writing a `-fixes` plan or changing a finder's `→ Next`** → `§ Rules`. A corrective chain opens two generations at most,
-  and consumers ask `esq brief depth`, never count suffixes. `esq brief plan <brief>` is the only source of a `/esq:fix` target:
-  it must keep **refusing, never ranking**.
+- **Before writing a `-fixes` plan, a converge round or a finder's `→ Next`** → `§ Rules`. Two corrective generations at most, asked
+  of `esq brief depth`; `esq brief plan <brief>`, the only source of a `/esq:fix` target, keeps **refusing, never ranking**.
 - **Before authoring a question, a 🔴 or a `DECISIONS.md` entry** → `§ Rules`. Ask only for a named, unrecorded authority, and
   treat a failure as a diagnosis with its action. An entry authorizes only through its `**Fondement:**` citation.
