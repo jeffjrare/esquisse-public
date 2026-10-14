@@ -242,12 +242,12 @@ has to act on it:
 | Finding | What happens next |
 |---|---|
 | 🔴 Needs your decision | You pick one of the options it presents; red comes first |
-| 🟢 Mechanical, contained fix | `/esq:fix` applies and verifies it |
+| 🟢 Mechanical, contained fix | `/esq:fix` applies and verifies it; a red its own change explains (a stale mock, a missed import) is corrected and re-run once before it would escalate |
 | 🟡 Substantive change | `/esq:plan` defines the work |
 | Clean | The work moves on toward landing |
 
 `/esq:converge <plan>` runs review → fix for you and reports whether the work is
-ready; it never merges. `/esq:check` is an optional, deeper phase-by-phase
+ready; it never merges. A 🟡 left over is its next step, not a question for you. `/esq:check` is an optional, deeper phase-by-phase
 reconciliation; it does not count as a review.
 
 Corrections are bounded: a piece of work gets at most two corrective plans. Past

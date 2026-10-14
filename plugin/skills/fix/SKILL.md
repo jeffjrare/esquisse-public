@@ -114,7 +114,7 @@ At exhausted depth, one attempt per 🟢 in this invocation; a failed or repeate
 
 ## Apply the green items
 
-Announce: "Applying N safe fixes from <brief> — at most one commit each, M items escalated untouched."
+Announce: "Applying N safe fixes from <brief> — at most one commit and two verification runs each, M items escalated untouched."
 
 Call `TaskCreate` for each 🟢 item (title: `"Fix — <short description>"`, status `pending`). Note IDs. Skip silently if unavailable.
 
@@ -126,6 +126,7 @@ This loop is **resilient, not halt-on-first-failure**. For each 🟢 item, in or
 4. **Pick the path before you verify, never after.** If the item's verification **is** one of the plan's current `(auto)` steps (the corrected step after a prospective amendment) — the same step, not a narrower command or a substitute — it is a **recording item**, with a fixed order: **stage → `git write-tree` → one verification run → judge the criterion → commit the fix → record and commit the proof**, per "Record the proof you earned". Otherwise it is ordinary: verify, then stage and commit.
 5. **Verify before committing — once.** Run the item's verification (or the project test command for the touched area). On a recording item that single run is step 3 of "Record the proof you earned"; nothing re-runs it.
    - **Passes** → commit atomically: `fix(scope): subject`, imperative, lowercase, ≤72 chars; body explains why if non-obvious. Stage only this fix's files (a recording item's are staged already; its commit heads that section's chained call). Report: "Fixed (<short-hash>): <one line>." `TaskUpdate` → `completed`.
+   - **Fails, and the failure names its cause inside this fix** (a mock or fixture the corrected behavior outgrew, an import the edit missed, a test still asserting the old behavior the finding condemns) → that is a diagnosis you can settle, never a 🟡: correct it, re-run the same verification **once**, and judge that run. Never weaken an assertion of the outcome the finding asked for. Still red, or the cause lies outside this fix → the next bullet. On a recording item, stage the correction and take a new `git write-tree` before that run. This is the one extra run a 🟢 can cost.
    - **Fails, or no verification possible** → do NOT commit. Discard with `git restore --staged --worktree <the touched files>` — never a bare `git restore` or `git checkout --`, which restore from the index and leave a staged red change for the next commit or `git write-tree`. Downgrade to 🟡 with the reason ("verification failed: <what you saw>" or "no runnable verification"). `TaskUpdate` → `failed`. **Continue to the next item.**
 6. If the fix turns out substantive (you are making a judgment call), abandon the edit, restore the files, downgrade to 🟡, continue.
 
