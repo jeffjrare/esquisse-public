@@ -264,8 +264,10 @@ behind are committed, never asked about). It
 reuses verification that still holds and runs only what is owed. A red test is
 diagnosed on the spot, alone and on the branch's origin: an inherited failure or a
 flake lands, only a regression of the branch stops it. A red caused by your local
-setup (a flag left on in a gitignored `.env`, a stale server, a cache) is fixed by
-the landing itself and reported with its undo, never handed back to you. It then merges
+setup (a flag left on in a gitignored `.env`, a stale server, a cache, a test
+database behind the branch's migrations — destructive ones included, since the test
+suite owns that data) is fixed by the landing itself and reported with its undo, never
+handed back to you; only a secret or data that is really yours is. It then merges
 locally, listing once, by hat, the calls build decided for you with how to undo
 each; silence is consent. Conflicts that need judgment come back to you with a recovery action.
 When the feature needs more than a merge to reach users — a migration, an
