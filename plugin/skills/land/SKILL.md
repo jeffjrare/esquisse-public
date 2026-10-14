@@ -89,6 +89,7 @@ Judge output against the returned **step text**, with its plan/phase, not exit 0
 2. **Red at both, the same way** → inherited, not this unit's: the step reads "this unit adds none" and is PASS. Merging adds no failure to the destination; report both readings as one `✔` line naming the inherited tests.
 3. **Red alone at HEAD, green at the Origin** → this unit's regression, whether or not the unit touched that file: landing stops.
 4. **Green alone at HEAD** → re-run the original command once. Green → a flake: PASS, reported as `○ flaky <test> — red in the full run, green alone and on re-run`. Red again → run the original command once at the Origin: red the same way → inherited (2); otherwise this unit's regression (3).
+5. **Red from local state the repo does not track** (a gitignored `.env` value, a stale process on the port, a cache), shown by the same tests going green with that state neutralized → the fix is the run's, never a NEEDS YOU: change it in place (comment out the line, stop the process, clear the cache), re-run the original command once and judge that run. Report `✔ <file:line> changed — undo: <the exact reverse>`. Only a value you would have to invent (a secret, a credential) or data you would destroy goes to the user.
 
 A regression stops landing with the failing step, plan, phase, at most ten output lines and each diagnostic reading; its `→ Next` is `/esq:work "<test> — red at landing of <slug>, green on its origin"`, then `/esq:land <plan>`.
 
@@ -126,7 +127,7 @@ From the start step, in order: run each esq step **once**, judged against its te
 Conclude with three zones, no preamble:
 
 1. **Headline:** `<glyph> land — <slug> · <outcome/counters> · <measured elapsed> · NEEDS YOU (<n>)`. ✔ no user need, ⚠ a user gate, ✖ unable to do the job. Omit NEEDS YOU when empty; never soften an open gate.
-2. **User needs:** numbered action-first asks with exact executable commands. Preserve genuine product choices' 🔴 options; copy manual verification verbatim with bracketed starting state. Omit on ✔. Ask only for user-owned intent/authorization, not a diagnosis the run can settle.
+2. **User needs:** numbered action-first asks with exact executable commands. Preserve genuine product choices' 🔴 options; copy manual verification verbatim with bracketed starting state. Omit on ✔. Ask only for user-owned intent/authorization, not a diagnosis the run can settle. A gitignored file, a local process or a cache is not user-owned for this purpose: fix it and report the undo.
 3. **Facts:** glyph, label, value, evidence. ✔ happened, ○ deliberately not, ✖ failed. Collapse empty categories; explicitly name prerequisites/verification skipped after a stop.
 <!-- conclusion:end -->
 
