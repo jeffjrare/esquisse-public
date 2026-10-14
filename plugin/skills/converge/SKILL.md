@@ -1,5 +1,5 @@
 ---
-description: Run the corrective loop unattended — review, then fix what it found, stopping at each gate for your pick.
+description: Run the corrective loop unattended — review, fix what it found, then plan and build what needs a plan, stopping only at your decisions.
 name: converge
 argument-hint: "[target] [options]"
 disable-model-invocation: true
@@ -31,9 +31,10 @@ The `/clear` stops ending `/esq:check`, `/esq:review` and `/esq:fix` are `[conte
 
 1. `/esq:review <plan>`.
 2. `/esq:fix <brief>` only if the review wrote a brief with 🟢 items.
-3. Report and stop. At most two step agents, plus one apply agent per approved decision routed `apply`.
+3. **🟡 survives, no gate open, and `esq brief depth <brief>` answers `open`** → the corrective round in "Close a 🟡 without the user": `/esq:plan <brief>`, `/esq:build` once per phase of the plan it writes, then steps 1–3 again on that corrective plan.
+4. Report and stop. Per round: at most two step agents, plus, for a corrective round, one plan agent and one build agent per phase; plus one apply agent per approved decision routed `apply`. Rounds stop where `esq brief depth` answers `exhausted` — two corrective generations at most.
 
-`/esq:check` remains a user-requested diagnosis. Never follow a worker's `→ Next`, repeat a step, or add a re-review after fix. Brief entry starts at step 2 under the provenance rules in Preflight.
+`/esq:check` remains a user-requested diagnosis. Never follow a worker's `→ Next`, repeat a step, or add a re-review after fix within a round. Brief entry starts at step 2 under the provenance rules in Preflight.
 
 ## What this run leaves behind, and what it never claims
 
@@ -45,14 +46,14 @@ Do not add a step to close these gaps.
 
 ## The invariant — no decisions about cost, at any point
 
-**The itinerary is fixed before the run starts and is never re-decided inside it.** Nothing a subagent returns lengthens, shortens or reorders it — not a scarier-than-planned review, not a fixer that escalated everything to 🟡, not a `→ Next` pointing past step 2. The user overrides it by invoking a finder directly, which you never refuse.
+**The itinerary is fixed before the run starts and is never re-decided inside it.** Its rule is the one above: a round, and a corrective round only for a surviving 🟡 while the chain is `open`. Nothing a subagent returns lengthens, shortens or reorders it — not a scarier-than-planned review, not a `→ Next` pointing elsewhere. The user overrides it by invoking a finder directly, which you never refuse.
 
 ## Announce, before anything
 
 <!-- announce-open:start -->
 Print this line first, before any tool call, then continue with the first call in the same response:
 
-> `/esq:converge — review, then fix what it found. Bound: at most two subagents, one extra per decision; never merges.`
+> `/esq:converge — review, fix, then plan and build any 🟡. Bound: two subagents per round, plus one plan agent and one per phase for a corrective round, at most two corrective rounds, one extra per decision; never merges.`
 
 Stop at the bound and report what remains uncovered. Announce the resolved target after preflight.
 <!-- announce-open:end -->
@@ -83,7 +84,9 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 6. **Record the starting `HEAD` short hash**, and snapshot the current set of `docs/plans/*-fixes.brief.md` paths.
 7. **Announce the resolved target:**
    <!-- announce:start -->
-   > `Converge on <slug> — branch <the step-2 verdict: the branch name, or `unrecorded — legacy plan`>: review → fix, at most 2 subagents.`
+   > `Converge on <slug> — branch <the step-2 verdict: the branch name, or `unrecorded — legacy plan`>: review → fix, at most 2 subagents; a surviving 🟡 opens a corrective round (<remaining> left), announced with its phase count before it builds.`
+
+   `<remaining>` is `bound − depth` from `esq brief depth <plan-path>`, read once here.
 
    Entering from a brief, drop the review and its cost, and say what the run can end at — which `finder` already decided:
    > from a **review** brief: `Converge on <slug> from <brief> — branch <same>: fix, at most 1. Can end ready to land.`
@@ -300,7 +303,19 @@ The task, for the one route that spawns:
 Report measured elapsed time: use a field on the returning tool result, or one `date` reading before and one after the step, chained into shell calls already needed. The span ends when the result arrives. Ignore later kill notifications, agent-registration lifetime, uncited harness timing and durations in worker prose.
 <!-- orch-shared:elapsed-span:end -->
 
-🟡 items are **not** a gate — they are the expected terminal state, go in the report, and become the `→ Next`. **They are never a NEEDS YOU:** planning one asks nothing only the user knows, so a run whose only remainder is 🟡 heads `✔`, with no user-needs zone.
+🟡 items are **not** a gate: planning one asks nothing only the user knows. While the chain is `open` they open the corrective round below and never reach the user; only at `exhausted` do they become the user's, as the scope or debt-acceptance choice the depth rule at the top names.
+
+## Close a 🟡 without the user — the corrective round
+
+Reached when a round ends with 🟡 surviving in its brief, no gate open and no 🔴 left. Ask `esq brief depth <brief-path>` once:
+
+- **`exhausted`** → no round; report per the depth rule at the top.
+- **`open`** → run the round, strictly one agent at a time:
+
+1. **Plan.** Spawn one `esq:plan` agent (same spawn rules) with the task: `Invoke the /esq:plan slash command via the Skill tool with <brief-path> as its argument, and let it write the corrective plan. Stop when the plan is committed. Do not invoke /esq:build, /esq:autopilot, /esq:grill or /esq:epic.` plus the step prompt's report and option-set paragraphs. A decision it returns is an answerable gate, handled as any other; anything else that leaves no committed plan is terminal. Find the plan in `git log --name-only <hash-before>..HEAD -- docs/plans/`.
+2. **State the moved bound before building:** `esq next-phase <corrective-plan>` and the phase headings give `P`; print `Corrective round <n>: <corrective-plan> — <P> phases, <P> build agents, then review → fix.`
+3. **Build.** One agent per phase, with `/esq:autopilot`'s phase task (`Execute the next phase of <corrective-plan> by invoking the /esq:build slash command…`, its report and option-set paragraphs). After each, classify by `esq next-phase <corrective-plan>`: the phase logged `completed` → next phase; a returned decision → answerable gate; anything else (`⏸`, a failure, no entry) → terminal: relay it verbatim, and `→ Next` is the agent's named action, else `/esq:autopilot <corrective-plan>`, which owns reconcile passes. Never retry a phase here.
+4. **Next round:** the corrective plan is now this run's plan. Run steps 1–3 of the itinerary on it, from the review. The clean bar and the coverage record below apply to the last round's plan.
 
 ## Ready to land — the clean completion
 
@@ -308,7 +323,7 @@ Report measured elapsed time: use a field on the returning tool result, or one `
 
 **The clean bar, cheapest first.** Stop at the first that fails and report `○ not ready` with the command that clears it:
 
-1. **No gate is left open, and no 🟢, 🟡 or 🔴 survives in any brief this run read.** Both are already in hand from the step classifications — do not re-read a brief.
+1. **No gate is left open, and no 🟢, 🟡 or 🔴 survives in the last round's brief.** Both are already in hand from the step classifications — do not re-read a brief.
 2. **`unit.open` is still empty.** The fix steps may have filed a 🐛/⚠️ row; re-read it with `esq branch check <plan-path>` again, once, since `HEAD` and the ledger have moved since preflight. A row still standing means not ready. The same answer's `removed.uncovered` must be empty too — a module the unit deleted or orphaned that no `## Capability inventory` names is not ready, `→ Next` `/esq:review <plan-path>`, since `/esq:land` refuses it.
 3. **A review has actually read this unit.** Either step 1 ran `/esq:review`, or preflight's `finder` was `review`. A `check` brief, or one whose `Source:` names no finder, fails: report `○ not ready — fixes applied, no review has read this unit`, make `→ Next` `/esq:review <plan-path>`, and stop here: **nothing below runs.** This adds no step.
 
@@ -335,14 +350,17 @@ Last line: `→ Next` with the first executable ask verbatim, or `pick an option
 Always produce this, whether the run went clean through or stopped at step 1:
 
 ```
-✔  converge — <slug> · 2/2 steps · 1 decision · 3 commits · 8m40s
+✔  converge — <slug> · 2 rounds · 6 steps · 1 decision · 7 commits · 22m40s
 
   ✔ review      2 🟢, 1 🟡, 1 🔴       (4m)
   ⚑ decision    retry ceiling → picked A · applied 8f2a1c
-  ✔ fix         2 applied              abc1234, def5678 (4m40s)
-  ○ not ready   1 🟡 survives           /esq:plan docs/plans/<brief>
+  ✔ fix         2 applied, 1 → 🟡        abc1234, def5678 (4m40s)
+  ✔ plan        <slug>-fixes · 2 phases  (3m)
+  ✔ build       phase 1, phase 2         1a2b3c4, 5d6e7f8 (9m)
+  ✔ review      <slug>-fixes · clean     (3m)
+  ✔ ready to land  reviewed at 9e8d7c6   /esq:land docs/plans/<slug>-fixes.md
   ✔ closed      B-27                   fixed in abc1234 by /esq:fix
-  ○ not run     plan the 🟡 · arch · spec
+  ○ not run     arch · spec
 
 → Next: <the one exact command the user should run>
 ```
@@ -372,7 +390,7 @@ Compute `→ Next`:
 - Stopped on a scope verdict → name the unmet condition, then `/esq:plan <plan-path>`.
 - Stopped on a failed step → name what broke, then the step agent's own named action when it returned one; only when it named none is the next command the one that step was running.
 - An unclassifiable pick paused or its repair failed → `paused by your choice — nothing to run now (resume later: /esq:converge <brief-path>)`, a failed repair named first, never the original.
-- 🟡 remain → `/esq:plan <brief-path>` · run `/clear` first.
+- 🟡 remain at `exhausted` depth → per the depth rule at the top: the scope or acceptance choice, with `/esq:fix <brief-path> --accept <B-IDs>` as the acceptance option. A 🟡 at `open` depth never reaches here: the corrective round took it.
 - Nothing remains and the clean bar stopped the completion → the command that clears it: `/esq:backlog` for a `unit.open` row still standing.
 - Nothing remains and the completion is recorded → `/clear`, then `/esq:land <plan-path>`. No spec or arch refresh is owed first, and this run runs neither.
 - Nothing remains and the plan records no `**Origin:**` — a legacy plan, which never lands → `"Loop clean — legacy plan, nothing to land."`
@@ -390,7 +408,7 @@ Send a `PushNotification`: `"esq:converge — <X>/<N> steps. <K fixes applied ·
 - **Orchestrate only — you write no code** and never `docs/BACKLOG.md`. Your writes are listed under "Deterministic CLI"; every other mutation is a subagent's.
 - **Never merge.** Not through `esq merge land`, not by hand, not "because the run was clean". Never stage, never switch a branch, never push.
 - **Never apply, promote, or reinterpret a 🟡 or 🔴 on your own.** Applying a 🔴's option the *user* picked is their judgment; a 🟡 has no options to pick.
-- **Never re-run a step** — a failure is a finding, not a flake; resuming continues *forward* — and **never extend the itinerary past step 2** (no second review, `/esq:check`, `/esq:plan`, `/esq:build`, `/esq:arch` or `/esq:spec`). You recommend and stop.
-- **At most two subagents** — one when entered from a brief — strictly sequential, never concurrent, plus one apply agent per decision whose approved action routes `apply`. State the bound up front and never exceed it.
+- **Never re-run a step** — a failure is a finding, not a flake; resuming continues *forward* — and **never extend the itinerary beyond its rule**: no `/esq:check`, `/esq:arch` or `/esq:spec`; `/esq:plan` and `/esq:build` only inside a corrective round; no round past `exhausted`.
+- **Strictly sequential, never concurrent:** two agents per round (one when entered from a brief), one plan agent and one build agent per phase per corrective round, plus one apply agent per decision whose approved action routes `apply`. State the bound up front, restate it with the phase count before each corrective build, and never exceed it.
 - **A 🔴 is resolved once per gate by the user's pick, never unanswered, never with an option you wrote.** Never answer one on the user's behalf, and never pick an option from an `AskUserQuestion` a subagent raised. Relaying a brief's or a step agent's leaning is not answering; forming your own, or acting on a prompt nobody answered, is.
 - **Report the bill** — steps, commits, elapsed time — per step as it resolves, and again at the end even on an early stop. If a step failed, the report says so first.

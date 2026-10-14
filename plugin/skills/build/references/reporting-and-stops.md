@@ -32,7 +32,7 @@ Two lines are conditional and both must vanish rather than say "none": `captured
 
 `→ Next` follows the same rule — one branch, never a menu:
 - More phases remain → `/clear` and `/esq:build <plan-path>`. When **2 or more** remain, add the `/esq:autopilot` alternative on the second line, once.
-- Last phase → `/clear`, then **`/esq:review <plan-path>`** in a fresh session — one reader for both questions, did it deliver what the work was for and is the code sound. Name the unattended alternative on the second line, at its real cost: `/esq:converge <plan-path>` — review, then fix what it found, at most two subagents, stopping at the first gate.
+- Last phase → `/clear`, then **`/esq:review <plan-path>`** in a fresh session — one reader for both questions, did it deliver what the work was for and is the code sound. Name the unattended alternative on the second line, at its real cost: `/esq:converge <plan-path>` — review, then fix what it found, at most two subagents, plus a corrective plan and build per surviving 🟡, stopping only at your decisions.
 
   `/esq:check <plan-path>` is not on this line. It is the deeper plan-versus-reality reconciliation, worth a session on a large plan or a suspected drift, and it is the user's to ask for — putting it here made every plan pay a second full reader before the one that decides landing.
 

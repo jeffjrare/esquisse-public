@@ -186,7 +186,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order | `docs/ROADMAP.md`; backlog priority/rank updates when ordering |
 | `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items and plan substantive work | Inline fixes and plans; stops before building |
 | `/esq:autopilot <plan>` | Build remaining phases sequentially, one worker per phase | Code and execution logs |
-| `/esq:converge <plan-or-fixes-brief>` | Run review → fix, or resume an existing brief | Readiness report; no merge |
+| `/esq:converge <plan-or-fixes-brief>` | Run review → fix, then plan → build → review any 🟡 left, or resume an existing brief | Readiness report; no merge |
 | `/esq:epic [new title-or-slug]` | Group a theme spanning several plans and backlog items | `docs/epics/<slug>.md` |
 | `/esq:worktree [name-or-action]` | Create, list, remove or merge linked worktrees | Separate working directories and reserved backlog ID blocks |
 | `/esq:status` | Orient without changing anything | Plan, backlog, pending briefs, roadmap and next action |
@@ -247,7 +247,9 @@ has to act on it:
 | Clean | The work moves on toward landing |
 
 `/esq:converge <plan>` runs review → fix for you and reports whether the work is
-ready; it never merges. A 🟡 left over is its next step, not a question for you. `/esq:check` is an optional, deeper phase-by-phase
+ready; it never merges. A 🟡 left over is not a question for you: converge plans it,
+builds it phase by phase and reviews it again, within the two-corrective-plan bound
+below, and stops only on a decision that is yours. `/esq:check` is an optional, deeper phase-by-phase
 reconciliation; it does not count as a review.
 
 Corrections are bounded: a piece of work gets at most two corrective plans. Past

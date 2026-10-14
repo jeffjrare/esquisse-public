@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-converge-carries-a-yellow-through-plan-and-build | 2026-10-14 | func | converge | While `esq brief depth` answers `open`, a 🟡 surviving a round with no gate open opens a corrective round inside the same run: /esq:plan on the brief, /esq:build once per phase, then review → fix on the corrective plan. At `exhausted` the 🟡 is the user's scope or debt-acceptance choice, as before. | Active |
 | D-roadmap-runs-on-a-mandate | 2026-10-11 | arch | skills | The roadmap guard accepts the same mandates as the other guarded skills, plus delegation by any esq command the user invoked in this conversation with the instruction in the invoking turn. The run changes the order exactly as far as that instruction goes. A description match or the model's own initiative still stops and prints the invocation. | Active |
 | D-ui-runs-on-request | 2026-10-04 | arch | skills | `/esq:work` routes a screen question a picture settles to `/esq:ui B-N` instead of `/esq:grill`; `/esq:ui` drops `disable-model-invocation` for the in-body mandate refusal, and a `B-NNN` or problem target makes it a targeted run on that screen. | Active |
 | D-hat-decisions-are-logged-never-gated | 2026-10-02 | prod | autonomy | A reversible hat-owned call is logged as `decisions` (`<product\|architecture\|design>: what — why — undo: how`) in the phase entry, collected by esq branch check and esq review scope, and shown grouped by hat in review and land, never as a finding, a gate or a NEEDS YOU. | Active |
@@ -5525,3 +5526,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** The order can now change inside another command's run, judged from its instruction rather than typed by the user.
 **Conséquences:** One SKILL.md guard line and Mode A's trigger change; SPEC and ARCHITECTURE drop the advance-only wording; check-plugin.sh is unchanged, since the guard sentence stays.
 **Alternatives rejetées:** Keep the advance-only rule (the user retypes each entry); restore disable-model-invocation (breaks advance's refresh, D-orchestrated-skills-guard-in-body).
+
+## D-converge-carries-a-yellow-through-plan-and-build — Converge carries a surviving 🟡 through plan and build
+
+**Scope:** func
+**Topic:** converge
+**Date:** 2026-10-14
+**Statut:** Active
+**Fondement:** user — 2026-10-13, asked in session: « Yes » to converge chaining plan → build → review for a decision-free 🟡
+
+**Contexte:** An unattended /esq:converge ended on NEEDS YOU (1) 'plan the remaining fix' for a 🟡 that held no decision of the user's; the user had run converge precisely not to be involved, and called the stop valueless.
+**Décision:** While `esq brief depth` answers `open`, a 🟡 surviving a round with no gate open opens a corrective round inside the same run: /esq:plan on the brief, /esq:build once per phase, then review → fix on the corrective plan. At `exhausted` the 🟡 is the user's scope or debt-acceptance choice, as before.
+**Raison:** A stop is earned only when the answer lives in the user's head; planning and building a 🟡 asks nothing only the user knows, and the two-generation corrective bound already caps the spend.
+**Tradeoff:** Gained an unattended loop that ends ready to land or on a real decision; accepted a run whose agent count is known per round only once the corrective plan states its phases, restated before any build.
+**Conséquences:** The opening announce names the per-round bound and the two-round cap; each corrective round prints its phase count before building. A phase that does not complete is terminal and hands off to /esq:autopilot, which owns reconcile passes.
+**Alternatives rejetées:** Keeping the fixed review → fix itinerary and only dropping NEEDS YOU from the 🟡 line — honest labelling, but the user still had to type /esq:plan then /esq:build then /esq:converge.
