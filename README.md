@@ -89,7 +89,8 @@ Then review and land:
 the plan started from.
 
 **Not sure what to build yet?** Start with `/esq:grill <idea>`. It questions you
-until the scope is clear and writes a brief that `plan` picks up. For a product with
+until the scope is clear and writes a brief that `plan` picks up. Asking for it in
+the conversation ("grill B-12") is enough: Claude starts it for you. For a product with
 no UI yet, it suggests `/esq:ui --greenfield` to put rendered design directions on
 screen before any code.
 
