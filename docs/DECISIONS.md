@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-grill-runs-on-request | 2026-10-15 | arch | skills | `/esq:grill` drops the flag for the in-body "No mandate, no run." refusal. It runs on the user's own request in this conversation, naming the command and its target, and only in the session talking to that user. A description match, the model's own initiative or a subagent delegation stops and prints the invocation. | Active |
 | D-converge-carries-a-yellow-through-plan-and-build | 2026-10-14 | func | converge | While `esq brief depth` answers `open`, a 🟡 surviving a round with no gate open opens a corrective round inside the same run: /esq:plan on the brief, /esq:build once per phase, then review → fix on the corrective plan. At `exhausted` the 🟡 is the user's scope or debt-acceptance choice, as before. | Active |
 | D-roadmap-runs-on-a-mandate | 2026-10-11 | arch | skills | The roadmap guard accepts the same mandates as the other guarded skills, plus delegation by any esq command the user invoked in this conversation with the instruction in the invoking turn. The run changes the order exactly as far as that instruction goes. A description match or the model's own initiative still stops and prints the invocation. | Active |
 | D-ui-runs-on-request | 2026-10-04 | arch | skills | `/esq:work` routes a screen question a picture settles to `/esq:ui B-N` instead of `/esq:grill`; `/esq:ui` drops `disable-model-invocation` for the in-body mandate refusal, and a `B-NNN` or problem target makes it a targeted run on that screen. | Active |
@@ -5541,3 +5542,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained an unattended loop that ends ready to land or on a real decision; accepted a run whose agent count is known per round only once the corrective plan states its phases, restated before any build.
 **Conséquences:** The opening announce names the per-round bound and the two-round cap; each corrective round prints its phase count before building. A phase that does not complete is terminal and hands off to /esq:autopilot, which owns reconcile passes.
 **Alternatives rejetées:** Keeping the fixed review → fix itinerary and only dropping NEEDS YOU from the 🟡 line — honest labelling, but the user still had to type /esq:plan then /esq:build then /esq:converge.
+
+## D-grill-runs-on-request — `/esq:grill` runs when the user asks for it in the conversation
+
+**Scope:** arch
+**Topic:** skills
+**Date:** 2026-10-15
+**Statut:** Active
+**Fondement:** user — asked on 2026-10-15 that `/esq:grill` be invocable by the model, after a session told to grill B-137 could not start it and handed back a command to retype
+
+**Contexte:** `/esq:grill` carried `disable-model-invocation: true`. A user who answered "go, storage included in the grill" got a refusal from the harness and a pasted command to run, a retype that buys nothing (D-a-user-request-in-the-conversation-is-a-mandate).
+**Décision:** `/esq:grill` drops the flag for the in-body "No mandate, no run." refusal. It runs on the user's own request in this conversation, naming the command and its target, and only in the session talking to that user. A description match, the model's own initiative or a subagent delegation stops and prints the invocation.
+**Raison:** A grill is questions put to the user, so the user asking for one in the conversation is the whole mandate. A subagent has nobody to question, so the guard excludes delegation, unlike `/esq:ui`'s.
+**Tradeoff:** Gained: no retype after the user asked. Accepted: `esq apply route` reads only the frontmatter flag, so a `do: /esq:grill …` in an orchestrator gate now routes `apply`, and the spawned worker stops on the guard and returns the invocation. That is one short agent spent where `relay` spent none. No gate in the shipped skills emits that `do:` today.
+**Conséquences:** `check-plugin.sh` holds `grill` to the in-body guard. ARCHITECTURE counts fourteen flagged skills and nine guarded ones. The README says asking for a grill in the conversation starts it.
+**Alternatives rejetées:** Keep the flag (the user retypes every grill they asked for). A CLI-side list making `apply route` relay `grill` (a list rots the first time a flag moves, D-executability-is-read-from-the-skill).
