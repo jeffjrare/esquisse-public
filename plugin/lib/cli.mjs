@@ -3,7 +3,7 @@ import { realpathSync } from 'node:fs';
 import { appendFile, mkdir, open, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseVerified, readText, splitTableRow, tableAt } from './markdown.mjs';
+import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseVerified, readText, splitTableRow, tableAt, touchedPaths, touchesPath } from './markdown.mjs';
 import { canonicalPlanSlug, telemetryOptedOut } from '../scripts/hook-io.mjs';
 import { MIN_SAMPLE_RUNS, compareTelemetry, discoverTelemetryFiles, renderTelemetrySummary, repoKey, summarizeTelemetry, trendWindow } from './telemetry.mjs';
 
@@ -3051,6 +3051,45 @@ function commandInputs(command) {
   return { operands };
 }
 
+// ── esq plan probe ────────────────────────────────────────────────────────────
+// Which phase of a plan touches each repository path it is handed, and which paths no phase touches.
+// `/esq:plan` runs a removal check's pattern over the whole tracked tree and pipes the hits here
+// before it commits the plan: a hit inside the check's own scope that no phase touches is a step
+// `/esq:build` would find red, and a hit outside it is a place the plan's scope never looked. The
+// model runs the search — nothing derived from Markdown is executed in this process
+// (D-cli-owns-structure-model-owns-judgment) — and judges every `unassigned` path; this answers only
+// the mapping, from `**Files touched:**` as written.
+//
+// Read-only, writes nothing, always exits 0: an unassigned path is data, never a verdict. The listed
+// paths are bounded so the answer stays inline whatever the search returned; the count is exact.
+const PROBE_LISTED = 200;
+
+export async function planProbe(root, planPath, { paths = null } = {}) {
+  const text = await readText(path.resolve(root, planPath));
+  const phases = touchedPaths(text);
+  if (phases.length === 0) throw new Error(`${planPath}: plan contains no phases`);
+  if (paths === null) return { plan: planPath, phases };
+  const candidates = [...new Set(paths.map((entry) => entry.trim().replace(/^\.\//, '')).filter((entry) => entry !== ''))];
+  // An entry is rooted when its first segment is a top-level entry of the repository; an unreadable
+  // root leaves every entry rooted, the reading that assigns least.
+  const top = new Set(await readdir(root).catch(() => null) ?? []);
+  const rooted = (entry) => top.size === 0 || /[*<]/.test(entry.split('/')[0]) || top.has(entry.split('/')[0]);
+  const hits = new Map(phases.map((phase) => [phase.phase, 0]));
+  const unassigned = [];
+  for (const candidate of candidates) {
+    const owners = phases.filter((phase) => phase.paths.some((entry) => touchesPath(entry, candidate, { unrooted: !rooted(entry) })));
+    for (const owner of owners) hits.set(owner.phase, hits.get(owner.phase) + 1);
+    if (owners.length === 0) unassigned.push(candidate);
+  }
+  return {
+    plan: planPath,
+    probed: candidates.length,
+    phases: phases.map(({ phase, title, unread }) => ({ phase, title, hits: hits.get(phase), unread })),
+    unassignedCount: unassigned.length,
+    unassigned: unassigned.slice(0, PROBE_LISTED),
+  };
+}
+
 export async function gateVerify(root, planPath, { workersMoved = false, phase = null, unit = false } = {}) {
   const text = await readText(path.resolve(root, planPath));
   let repository = null;
@@ -5627,6 +5666,21 @@ export async function main(args) {
     if (result.refuse) process.exitCode = 1;
     return;
   }
+  // Read-only, always exit 0: which phase's `**Files touched:**` covers each path, read one per line
+  // from a file or stdin (`-`). Without `--paths`, every phase's touched set as parsed.
+  if (group === 'plan' && action === 'probe') {
+    const usage = 'usage: esq plan probe <plan> [--paths <file>|-] — repository paths one per line, as `git grep -l` prints them from the repository root';
+    const [file, flag, source, ...extra] = rest;
+    if (!file || file.startsWith('--') || extra.length > 0 || (flag !== undefined && (flag !== '--paths' || source === undefined))) throw new Error(usage);
+    let listed = null;
+    if (flag === '--paths') {
+      let body = '';
+      if (source === '-') { for await (const chunk of process.stdin) body += chunk; }
+      else body = await readText(path.resolve(root, source));
+      listed = body.split('\n');
+    }
+    return output(await planProbe(root, file, { paths: listed }));
+  }
   // One of the two header fields a command other than /esq:plan writes: the commit a clean review or converge
   // completion covered. Exit 2 on a value that is not a full commit this repository holds.
   if (group === 'plan' && action === 'set-reviewed') {
@@ -5827,5 +5881,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
 }

@@ -30,6 +30,7 @@ not keep a list of what was removed.
 | `**Origin:**` | `esq merge land` — the landing **destination**. A plan missing it is refused rather than repaired, so losing the line from the template loses every landing. |
 | `## Rollout` | `esq branch check` collects its bullets into `unit.rollout`, which `/esq:land` runs after the merge up to the first `(user)` step. Renamed in the template, every deployment step silently disappears from the landing report. |
 | `## Capability inventory` | `esq branch check` and `esq review scope` read it: a module the unit deleted or orphaned is covered only when its repo-relative path appears in this section, and `/esq:land` refuses on `removed.uncovered`. Renamed in the template, every replacing plan's inventory goes unread and every landing that deletes a module refuses. |
+| `**Files touched:**` | `esq plan probe` reads a phase's touched paths from the inline-code spans of this item and its nested bullets, and maps every path `/esq:plan`'s removal probe pipes in onto them. Renamed in the template, every path reads `unassigned`, and the probe stops telling a missed reference from a planned one. |
 
 **The token, not the sentence around it.** A placeholder explaining which branch belongs in the field
 is prose: reword it freely. On a written header, a ` — <comment>` after the ref is read as a comment and the

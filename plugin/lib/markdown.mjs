@@ -383,3 +383,82 @@ function listItems(lines) {
   flush();
   return items;
 }
+
+// ── `**Files touched:**` — the paths a phase says it changes ─────────────────
+// What `esq plan probe` maps a repository path back to. **Read, never inferred:** a phase touches
+// exactly the paths its own `**Files touched:**` item names in inline-code spans, on the item's line
+// and in the bullets nested under it. A span is a path when, once its brace group is expanded, every
+// alternative is a plain path — a slash or a file extension, and nothing a sentence carries (a space,
+// a quote, a colon, a parenthesis). `*` and a `<placeholder>` stand for one segment's characters. Any
+// other span is `unread` and reported as such, because a prose item (`the 27 suites mocking …`) is a
+// claim the model judges and no parser may settle.
+const PATH_SPAN = /^[A-Za-z0-9._@+\-/*<>]+$/;
+
+export function touchedPaths(text) {
+  const plan = parsePlan(text);
+  const planEnd = plan.logIndex < 0 ? plan.lines.length : plan.logIndex;
+  return plan.phases.map((phase, index) => {
+    let end = plan.phases[index + 1] ? plan.phases[index + 1].line - 1 : planEnd;
+    for (let line = phase.line; line < end; line += 1) {
+      if (/^#{1,3} /.test(plan.lines[line])) { end = line; break; }
+    }
+    const items = listItems(plan.lines.slice(phase.line, end));
+    const header = items.findIndex((item) => /^\*\*Files touched:?\*\*/.test(item.text));
+    const texts = [];
+    if (header >= 0) {
+      texts.push(items[header].text);
+      for (const item of items.slice(header + 1)) {
+        if (item.indent <= items[header].indent) break;
+        texts.push(item.text);
+      }
+    }
+    const paths = [];
+    const unread = [];
+    for (const span of texts.flatMap((item) => [...item.matchAll(/`([^`]+)`/g)].map((match) => match[1].trim()))) {
+      const alternatives = expandBraces(span).map((entry) => entry.replace(/^\.\//, '').replace(/\/+$/, ''));
+      const plain = alternatives.every((entry) => entry !== '' && PATH_SPAN.test(entry) && (entry.includes('/') || /\.[A-Za-z0-9]+$/.test(entry)));
+      if (!plain) { if (!unread.includes(span)) unread.push(span); continue; }
+      for (const entry of alternatives) if (!paths.includes(entry)) paths.push(entry);
+    }
+    return { phase: phase.number, title: phase.title, paths, unread };
+  });
+}
+
+// `a/{b,c/d}.ts` → `a/b.ts`, `a/c/d.ts`, nested groups included. An unbalanced brace is left as
+// written, which then fails the path shape and lands in `unread` rather than being guessed at.
+function expandBraces(span) {
+  const open = span.indexOf('{');
+  if (open < 0) return [span];
+  let depth = 0;
+  const cuts = [];
+  for (let index = open; index < span.length; index += 1) {
+    const character = span[index];
+    if (character === '{') depth += 1;
+    else if (character === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        const parts = [];
+        let start = open + 1;
+        for (const cut of cuts) { parts.push(span.slice(start, cut)); start = cut + 1; }
+        parts.push(span.slice(start, index));
+        const head = span.slice(0, open);
+        const tail = span.slice(index + 1);
+        return parts.flatMap((part) => expandBraces(`${head}${part}${tail}`));
+      }
+    } else if (character === ',' && depth === 1) cuts.push(index);
+  }
+  return [span];
+}
+
+// Does a touched entry cover a repository path? The whole path, or a directory it names — whole
+// segments, as `declaresPath` reads a `(reads)` declaration — with `*` and `<placeholder>` matching
+// within one segment. A rooted entry (its first segment is a top-level entry of the repository) is
+// never read as a suffix: `src/index.ts` covering `frontend/src/index.ts` would assign a path no phase
+// names. An `unrooted` one — a plan writing `delete \`SupabaseAdapter.ts\`` under the directory the
+// line above named — can only be read as a whole-segment suffix, and is.
+export function touchesPath(entry, candidate, { unrooted = false } = {}) {
+  const source = entry.split(/(\*|<[^>/]*>)/).map((part) => (part === '*' || /^<[^>/]*>$/.test(part)
+    ? '[^/]*'
+    : part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))).join('');
+  return new RegExp(`${unrooted ? '(?:^|/)' : '^'}${source}(?:/.*)?$`).test(candidate);
+}

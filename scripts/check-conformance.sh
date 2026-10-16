@@ -125,6 +125,7 @@ need P-02 plan '**Branch:**' 'the `**Branch:**` header field `headerField` reads
 need P-02 plan '## Rollout' 'the `## Rollout` section heading `esq branch check` collects `unit.rollout` from, which `/esq:land` shows after the merge'
 need P-02 plan '**Origin:**' 'the `**Origin:**` header field `esq merge land` takes the landing destination from — a plan missing it is refused rather than repaired'
 need P-02 plan '## Capability inventory' 'the section heading `esq branch check` and `esq review scope` read a deleted or orphaned module path from, and `/esq:land` refuses on what it leaves uncovered'
+need P-02 plan '**Files touched:**' 'the phase field `esq plan probe` reads the paths a phase touches from — renamed, every hit a removal probe pipes in reads unassigned'
 
 # --- `/esq:build` writes the execution-log entry the classifier reads --------
 #
