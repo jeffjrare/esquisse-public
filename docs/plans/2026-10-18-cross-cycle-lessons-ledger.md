@@ -177,3 +177,10 @@ None.
 **Backlog candidates:** None.
 
 **For Phase 3:** Last phase — the plan is complete.
+
+### Phase 2 — reverified 2026-10-18
+
+**Reverified by:** 2026-10-18-cross-cycle-lessons-ledger-fixes item 1
+
+**Verified:** 3dc21e760f6b63ba89203c48b2fa67d37f0bff8e
+- `./scripts/audit.sh`
