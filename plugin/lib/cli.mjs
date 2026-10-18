@@ -3962,7 +3962,18 @@ function unitRemovalBase(repository, origin, head) {
   return gitTry(repository, ['merge-base', `refs/heads/${origin}`, head]) || null;
 }
 
-export async function reviewScope(root, planPath, { full = false } = {}) {
+// Both review-scope answers carry the lessons matched against the paths they changed — an empty
+// `cues` when no ledger exists or nothing was resolved. Never a reason for either call to fail.
+async function withLessons(root, answer) {
+  const paths = Array.isArray(answer.paths) ? answer.paths.map((entry) => entry.path) : [];
+  return { ...answer, lessons: paths.length > 0 ? await lessonsMatch(root, paths) : { ...NO_LESSONS } };
+}
+
+export async function reviewScope(root, planPath, options = {}) {
+  return withLessons(root, await planReviewScope(root, planPath, options));
+}
+
+async function planReviewScope(root, planPath, { full = false } = {}) {
   const text = await readText(path.resolve(root, planPath));
   // Computed once, before any early return, so every plan-mode answer carries the field.
   const headers = await reviewUnitHeaders(path.resolve(root, planPath), text);
@@ -4118,6 +4129,10 @@ async function spillReviewDiff(repository, base, head, contracts) {
 // unplanned fix on a branch that carries no plan is not a shipping unit, and inventing one here
 // would be the anchor again under another name.
 export async function reviewScopeRange(root, spec) {
+  return withLessons(root, await rangeReviewScope(root, spec));
+}
+
+async function rangeReviewScope(root, spec) {
   let repository = null;
   try { repository = git(root, ['rev-parse', '--show-toplevel']); } catch { repository = null; }
   const answer = { root: repository, file: null, slug: null, head: null, mode: 'unresolved', base: null, provenance: 'named-range', reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null, removed: null };
@@ -5916,9 +5931,13 @@ export async function main(args) {
       const branch = await branchCheck(root, action);
       if (branch.refuse) return output({ file: action, branch });
       const anchor = gitTry(root, ['log', '-1', '--format=%h', '--', action]) || 'unversioned';
-      const plan = parsePlan(await readText(action));
+      const text = await readText(action);
+      const plan = parsePlan(text);
       const verdict = nextPhase(plan);
-      return output(await spillContext(root, action, { file: action, branch, anchor, ...verdict, context: planContext(plan, verdict) }));
+      // The cues for the selected phase's `**Files touched:**` — never a reason for this call to fail.
+      const touched = verdict.phase ? (touchedPaths(text).find((phase) => phase.phase === verdict.phase.number)?.paths ?? []) : [];
+      const lessons = touched.length > 0 ? await lessonsMatch(root, touched) : { ...NO_LESSONS };
+      return output(await spillContext(root, action, { file: action, branch, anchor, ...verdict, lessons, context: planContext(plan, verdict) }));
     }
     const plan = parsePlan(await readText(action));
     const verdict = nextPhase(plan);
