@@ -150,3 +150,30 @@ None.
 **For Phase 2:** 1. Writers call `esq lessons add <json|->`: a lesson takes {kind:"lesson", cue, paths, body, source (B-NNN, or `<fixes-brief>@<full commit>:<line>`), fix, confidence high|medium|low, checkable?, date?}; a fact takes {kind:"fact", cue, paths, body, commit, date?}. The answer's `refuse`, `duplicate`, `gitattributes` ("added" means stage `.gitattributes`) and `backlog` (stage `docs/BACKLOG.md`) are what the skills route off.
 2. Readers: `esq next-phase --preflight` and `esq review scope` already return `lessons: {cues, omitted, stale}`; plan calls `esq lessons match <path…>` (or `--paths -`); `esq lessons show <L-id…>` returns the full entries.
 3. The body is stored as one line; a multi-line body is collapsed, a blank line or a `#`-led line is refused.
+
+### Phase 2 — completed 2026-10-18
+
+**Plan committed at:** 70436bb
+
+**Commits:** d7e7a25, d50f0b6, 032df69
+
+**Verified:** 032df69a50c72f917e2c913e64f1f4d42914f04b
+- `./scripts/audit.sh`
+
+**What got built:** Fix and converge record a lesson for a closed defect whose contrast recurs (NO_ENTRY by default), build records a repo fact for a Gotcha it observed itself and names its preflight cues, plan chains one `esq lessons match` into an investigation wave, and review marks an independently justified finding `(repeats L-<id>)`. README rows, SPEC rules and the ARCHITECTURE reader list describe each.
+
+**Verification:**
+- (auto) ./scripts/audit.sh — PASS, exit 0: structure, package, no-push, conformance, version, bounded runner and the product suites (Phase 1 suites included), 7 checks clean (25 s)
+
+**Decided for you:**
+- architecture: converge's lesson `fix` is the corrective build's implementation commit whose task names the 🟡, read from the build steps' git log; when no single commit names it, no lesson is written — undo: change the Evidence bullet under "Record what a corrective round taught" in plugin/skills/converge/SKILL.md
+- design: build names its matched cues in one `Lessons:` line after the announce and prints nothing when there are none — undo: drop that sentence from preflight step 5 in plugin/skills/build/SKILL.md
+
+**Surprises / decisions made during execution:** - `plugin/skills/build/references/decisions-and-backlog.md` was listed in Files touched but needed no change: a fact has no `checkable` key, so build never files a lesson row, and its fact write sits in SKILL.md's step 5 beside the append-log call it chains into.
+- The ARCHITECTURE ledger row already carried the reader list from Phase 1; Task 2.3 added only how plan and review use a cue.
+- Converge's Constraints said "never stage" and "never docs/BACKLOG.md"; both now except the lesson files `esq lessons add` writes, which its `lessons:` commit needs (a new LESSONS.md is untracked, so a pathspec commit cannot carry it).
+- Fix keeps the brief's commit from one `git log -1` chained into preflight's `esq brief depth` call, since it rewrites or deletes the brief before any lesson is cited.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** Last phase — the plan is complete.
