@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** d29f49a6792b5d056598e6674e4b5e2d4ce82a0b
+
 ## Context
 A user running esq cycles pays twice for what a cycle already learned. A defect that review found and fix closed leaves no trace, so the next plan touching the same files can repeat it and buy another fix round. A repo fact a build worker paid to find (the test command that works, an environment trap) is written into the `For Phase N+1` note and dies with the plan. This plan carries `docs/plans/2026-10-18-cross-cycle-lessons-ledger.brief.md`: its scope, resolved decisions and constraints stand as written. The idea comes from google-research/harness2's experience library (cue / lesson / evidence / confidence, `NO_ENTRY` by default; `harness2/core/prompts.py`, checked 2026-10-18 by the brief).
 
