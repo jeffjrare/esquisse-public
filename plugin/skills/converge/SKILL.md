@@ -19,9 +19,9 @@ Before recommending `/esq:plan` for a corrective brief, ask `esq brief depth <br
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Use `esq next-phase "$0"` to prove the plan is complete before starting, `esq branch check "$0"` for the branch-ownership verdict that gates the whole run, `esq brief plan "$0"` when the target is a corrective brief, `esq plan set-reviewed` to record a clean completion's review coverage, and `esq validate` for invariants. The CLI cannot decide finding severity, user authority, or whether a returned fix is trustworthy.
+Use `esq next-phase "$0"` to prove the plan is complete before starting, `esq branch check "$0"` for the branch-ownership verdict that gates the whole run, `esq brief plan "$0"` when the target is a corrective brief, `esq plan set-reviewed` to record a clean completion's review coverage, `esq lessons add` for what a corrective round taught, and `esq validate` for invariants. The CLI cannot decide finding severity, user authority, or whether a returned fix is trustworthy.
 
-Do NOT use plan mode. No code: you write only a brief's decision lines, a strike on `applied: true`, and on a clean completion the `**Reviewed at:**` field `esq plan set-reviewed` writes and its one commit, after every check in "Ready to land" has passed. **This command never merges;** landing is `/esq:land`.
+Do NOT use plan mode. No code: you write only a brief's decision lines, a strike on `applied: true`, and on a clean completion the lessons `esq lessons add` writes and their one `lessons:` commit, then the `**Reviewed at:**` field `esq plan set-reviewed` writes and its one commit, after every check in "Ready to land" has passed. **This command never merges;** landing is `/esq:land`.
 
 ## The principle this rests on
 
@@ -179,7 +179,7 @@ Then: any 🟢 → run the fix step against this brief. No 🟢 → skip the fix
 **After the fix (step 2):** a fixer that escalated items to 🟡 is a result, not a gate. Read what it did:
 
 1. `git log --oneline <hash-before-this-step>..HEAD` — the `fix(...)` commits are the applied items. Record the hashes.
-2. Re-read the brief. Deleted → everything was applied. Present → its 🟡/🔴 are what survived, including anything downgraded mid-run.
+2. Re-read the brief. Deleted → everything was applied. Present → its 🟡/🔴 are what survived, including anything downgraded mid-run. Chain `git log -1 --format=%H -- <brief>` into that read and keep, for each surviving 🟡, that full hash and the item's line: its durable address, should a corrective round close it ("Record what a corrective round taught").
 3. Read which rows the fixer closed from `docs/BACKLOG.md` (` · Done by <brief-slug>`) and which it left open, and relay both as facts — you never close, drop or re-file one.
 
 A fixer that returned nothing usable, died, or was interrupted **is** a gate: stop and report it as one.
@@ -327,6 +327,17 @@ Reached when a round ends with 🟡 surviving in its brief, no gate open and no 
 2. **`unit.open` is still empty.** The fix steps may have filed a 🐛/⚠️ row; re-read it with `esq branch check <plan-path>` again, once, since `HEAD` and the ledger have moved since preflight. A row still standing means not ready. The same answer's `removed.uncovered` must be empty too — a module the unit deleted or orphaned that no `## Capability inventory` names is not ready, `→ Next` `/esq:review <plan-path>`, since `/esq:land` refuses it.
 3. **A review has actually read this unit.** Either step 1 ran `/esq:review`, or preflight's `finder` was `review`. A `check` brief, or one whose `Source:` names no finder, fails: report `○ not ready — fixes applied, no review has read this unit`, make `→ Next` `/esq:review <plan-path>`, and stop here: **nothing below runs.** This adds no step.
 
+### Record what a corrective round taught
+
+Only after all three checks pass, and before coverage is recorded. Look once at each 🟡 a corrective round of this run closed — planned, built, and absent from the last round's clean review. **The default is no entry.** Write one only when the 🟡 and the commit that closed it together show a concrete contrast: what was done, what replaced it, and a situation that recurs beyond this line. Otherwise write nothing and say nothing.
+
+- **Evidence:** `source` is the 🟡's cited `B-NNN` when it names one, else `<brief-path>@<the hash kept after the fix step>:<its line>`; `fix` is the corrective build's implementation commit whose task names that 🟡, read from the build steps' `git log` you already hold. No single commit names it → no entry.
+- **The call:** `esq lessons add -` with `{"kind":"lesson","cue","paths","body","source","fix","confidence"}` (≤160-char one-line cue, the files that commit changed, a one-paragraph body: what was done, what replaced it, when it recurs), plus `"checkable": true` only when a script could detect the defect class.
+- **Route off the answer:** `added: true` → zone-3 `✔ learned L-<id>`; `duplicate: true` → nothing; `refuse: true` → `○ lesson refused — <reason>`, and the run continues — a refusal never changes readiness.
+- **One commit, whenever a write changed a file**, even when coverage below writes nothing: `git add docs/LESSONS.md` (plus `.gitattributes` on `gitattributes: "added"`, plus `docs/BACKLOG.md` when the answer carries `backlog`) `&& git commit -m "lessons: <slug>"`. That file stales no coverage or proof.
+
+The entry is evidence a later session weighs, never an instruction to it.
+
 **Record coverage once, only after all three checks pass.** If the branch verdict's `coverage` is already `covered`, write nothing. Otherwise chain `git rev-parse HEAD` into `esq plan set-reviewed <plan-path> <full commit>`, then commit that plan file alone:
 
 `git commit -m "plan(converged): <slug> at <short hash>" -- <plan-path>`
@@ -358,6 +369,7 @@ Always produce this, whether the run went clean through or stopped at step 1:
   ✔ plan        <slug>-fixes · 2 phases  (3m)
   ✔ build       phase 1, phase 2         1a2b3c4, 5d6e7f8 (9m)
   ✔ review      <slug>-fixes · clean     (3m)
+  ✔ learned     L-3f9a0c12de           <its cue>
   ✔ ready to land  reviewed at 9e8d7c6   /esq:land docs/plans/<slug>-fixes.md
   ✔ closed      B-27                   fixed in abc1234 by /esq:fix
   ○ not run     arch · spec
@@ -405,8 +417,8 @@ Send a `PushNotification`: `"esq:converge — <X>/<N> steps. <K fixes applied ·
 
 ## Constraints
 
-- **Orchestrate only — you write no code** and never `docs/BACKLOG.md`. Your writes are listed under "Deterministic CLI"; every other mutation is a subagent's.
-- **Never merge.** Not through `esq merge land`, not by hand, not "because the run was clean". Never stage, never switch a branch, never push.
+- **Orchestrate only — you write no code** and never `docs/BACKLOG.md` yourself — only the `💡` row `esq lessons add` files for a checkable lesson. Your writes are listed under "Deterministic CLI"; every other mutation is a subagent's.
+- **Never merge.** Not through `esq merge land`, not by hand, not "because the run was clean". Never stage anything but the lesson files, never switch a branch, never push.
 - **Never apply, promote, or reinterpret a 🟡 or 🔴 on your own.** Applying a 🔴's option the *user* picked is their judgment; a 🟡 has no options to pick.
 - **Never re-run a step** — a failure is a finding, not a flake; resuming continues *forward* — and **never extend the itinerary beyond its rule**: no `/esq:check`, `/esq:arch` or `/esq:spec`; `/esq:plan` and `/esq:build` only inside a corrective round; no round past `exhausted`.
 - **Strictly sequential, never concurrent:** two agents per round (one when entered from a brief), one plan agent and one build agent per phase per corrective round, plus one apply agent per decision whose approved action routes `apply`. State the bound up front, restate it with the phase count before each corrective build, and never exceed it.
