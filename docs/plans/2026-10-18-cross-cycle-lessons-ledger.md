@@ -119,3 +119,34 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-10-18
+
+**Plan committed at:** 84b359e
+
+**Commits:** e996710, f374094, 3ba1efd
+
+**Verified:** 3ba1efd5d0d0df159b3f4962414a17949744a7a9
+- `node --test 'tests/cli/lessons.test.mjs' 'tests/cli/esq.test.mjs' 'tests/cli/review-scope.test.mjs' 'tests/cli/plan-probe.test.mjs'`
+- `node --test tests/cli/*.test.mjs`
+
+**What got built:** `esq lessons add|match|show` keep `docs/LESSONS.md`: entries whose evidence must resolve, IDs derived from that evidence (a retry is a no-op), a 💡 row for a checkable lesson, and a `merge=union` line in `.gitattributes`. `esq validate` lists stale entries as advisories, a lessons-only commit stales no proof or review coverage, and `next-phase --preflight` and `review scope` carry the matched cues.
+
+**Verification:**
+- (auto) node --test 'tests/cli/lessons.test.mjs' 'tests/cli/esq.test.mjs' 'tests/cli/review-scope.test.mjs' 'tests/cli/plan-probe.test.mjs' — 137 pass, 0 fail (7 s)
+- (blast radius) node --test tests/cli/*.test.mjs — 390 pass, 0 fail (13 s): cli.mjs is imported by every CLI suite, and the harmless lists feed gate and landing
+
+**Decided for you:**
+- architecture: every line of a lesson entry after its heading ends with ` <!-- L-<id> -->`, the body is one line, and an entry holds no blank line — git's union merge coalesces lines two entries share (a blank line, the same Date or Evidence) and interleaved two entries into one broken block in the merge test — undo: drop the tag and blank-line rule in `lessonsAdd`'s renderer in plugin/lib/cli.mjs, and replace `merge=union` with ledger-aware conflict handling in `esq merge land`
+
+**Surprises / decisions made during execution:** - The plan's block shape (blank line after the heading, multi-line body) does not survive `merge=union`: git's union driver refines a conflict by diffing the two sides, so lines both entries share (blank lines, an identical `**Date:**` or `**Evidence:**`, an identical body) are emitted once and the two entries interleave. Found by Task 1.1's merge test, which lost an entry. The renderer now writes no blank line inside an entry, a one-line body, and the entry's own ID as a trailing HTML comment on every line after the heading, so no two entries share a line. The parser strips the tag. CONFORMANCE L-01 names it.
+- `pathAlternatives` was exported from `markdown.mjs` beside `expandBraces`, so `**Files touched:**` and a lesson's `**Paths:**` share one plain-path reading rather than a copy. A lone top-level directory (`src/`) is not a plain path under that reading, for lessons as for probe.
+- `tests/cli/gate.test.mjs` gained one row (`the lessons ledger` → `reuse`) in its harmless-set table, though the plan did not list that file: the plugin-runtime rule says a widened harmless list extends the test that pins it.
+- Staleness: `match` skips an entry when an evidence commit no longer resolves or any of its path spans matches no tracked file; `validate` names each such reason.
+- `esq lessons add` refusals answer `{added: false, refuse: true, reason}` on stdout at exit 1, like the other refusing verbs.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. Writers call `esq lessons add <json|->`: a lesson takes {kind:"lesson", cue, paths, body, source (B-NNN, or `<fixes-brief>@<full commit>:<line>`), fix, confidence high|medium|low, checkable?, date?}; a fact takes {kind:"fact", cue, paths, body, commit, date?}. The answer's `refuse`, `duplicate`, `gitattributes` ("added" means stage `.gitattributes`) and `backlog` (stage `docs/BACKLOG.md`) are what the skills route off.
+2. Readers: `esq next-phase --preflight` and `esq review scope` already return `lessons: {cues, omitted, stale}`; plan calls `esq lessons match <path…>` (or `--paths -`); `esq lessons show <L-id…>` returns the full entries.
+3. The body is stored as one line; a multi-line body is collapsed, a blank line or a `#`-led line is refused.
