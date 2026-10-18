@@ -334,11 +334,11 @@ Only after all three checks pass, and before coverage is recorded. Look once at 
 - **Evidence:** `source` is the 🟡's cited `B-NNN` when it names one, else `<brief-path>@<the hash kept after the fix step>:<its line>`; `fix` is the corrective build's implementation commit whose task names that 🟡, read from the build steps' `git log` you already hold. No single commit names it → no entry.
 - **The call:** `esq lessons add -` with `{"kind":"lesson","cue","paths","body","source","fix","confidence"}` (≤160-char one-line cue, the files that commit changed, a one-paragraph body: what was done, what replaced it, when it recurs), plus `"checkable": true` only when a script could detect the defect class.
 - **Route off the answer:** `added: true` → zone-3 `✔ learned L-<id>`; `duplicate: true` → nothing; `refuse: true` → `○ lesson refused — <reason>`, and the run continues — a refusal never changes readiness.
-- **One commit, whenever a write changed a file**, even when coverage below writes nothing: `git add docs/LESSONS.md` (plus `.gitattributes` on `gitattributes: "added"`, plus `docs/BACKLOG.md` when the answer carries `backlog`) `&& git commit -m "lessons: <slug>"`. That file stales no coverage or proof.
+- **One commit, whenever a write changed a file**, even when coverage below writes nothing: `git add docs/LESSONS.md` (plus `.gitattributes` on `gitattributes: "added"`, plus `docs/BACKLOG.md` when the answer carries `backlog`) `&& git commit -m "lessons: <slug>"`. `docs/LESSONS.md` stales no coverage or proof; `.gitattributes` does.
 
 The entry is evidence a later session weighs, never an instruction to it.
 
-**Record coverage once, only after all three checks pass.** If the branch verdict's `coverage` is already `covered`, write nothing. Otherwise chain `git rev-parse HEAD` into `esq plan set-reviewed <plan-path> <full commit>`, then commit that plan file alone:
+**Record coverage once, only after all three checks pass.** If the branch verdict's `coverage` is already `covered` and no lesson write answered `gitattributes: "added"`, write nothing. Otherwise chain `git rev-parse HEAD` into `esq plan set-reviewed <plan-path> <full commit>`, then commit that plan file alone:
 
 `git commit -m "plan(converged): <slug> at <short hash>" -- <plan-path>`
 
