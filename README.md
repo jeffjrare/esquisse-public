@@ -179,7 +179,7 @@ map and a decision record on demand; none is a required setup step.
 |---|---|---|
 | `/esq:grill <idea>` | Resolve scope and consequential choices before planning | A brief in `docs/plans/` |
 | `/esq:plan <brief-or-task>` | Design the work and its verifiable phases | A plan committed on its own branch, its checks tried against the repository first; when it replaces a surface, the inventory of what that surface did, any drop asked first |
-| `/esq:build <plan>` | Implement and verify one phase, then stop | Task commits and an execution-log entry |
+| `/esq:build <plan>` | Implement and verify one phase, then stop, weighing the lessons earlier cycles left on its files | Task commits and an execution-log entry; a repo fact in `docs/LESSONS.md` for a trap the phase hit and verified itself |
 | `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design | Review findings, the calls build decided for you by hat; a corrective brief when needed |
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings; a lesson in `docs/LESSONS.md` for a fix whose contrast recurs beyond its line |
 | `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run; never a push |
