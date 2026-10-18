@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-lessons-ledger-is-evidence-keyed-and-union-merged | 2026-10-18 | arch | ledgers | docs/LESSONS.md is written only by `esq lessons add`, one `## L-<hex>` block per entry whose ID hashes its resolved evidence, read by path through cues carried in existing preflights, advisory in validate, harmless to proofs and projections, and merged by a `merge=union` attribute. | Active |
 | D-a-plan-tries-its-checks-against-the-tree | 2026-10-15 | arch | verification | `/esq:plan` keeps resolving commands by reading, and adds two bounded tries before it commits. A test command whose runner lists without executing is run once in that mode. Every `grep … — no match` pattern, and the old name of every replaced seam, is run over the whole tracked tree and its hits piped into `esq plan probe <plan> --paths -`, which answers which phase's `**Files touched:**` covers each path. Every `unassigned` path is assigned, excluded by name or judged out of scope before the commit. A phase that swaps a seam carries all its consumers, mocks included. | Active |
 | D-grill-runs-on-request | 2026-10-15 | arch | skills | `/esq:grill` drops the flag for the in-body "No mandate, no run." refusal. It runs on the user's own request in this conversation, naming the command and its target, and only in the session talking to that user. A description match, the model's own initiative or a subagent delegation stops and prints the invocation. | Active |
 | D-converge-carries-a-yellow-through-plan-and-build | 2026-10-14 | func | converge | While `esq brief depth` answers `open`, a 🟡 surviving a round with no gate open opens a corrective round inside the same run: /esq:plan on the brief, /esq:build once per phase, then review → fix on the corrective plan. At `exhausted` the 🟡 is the user's scope or debt-acceptance choice, as before. | Active |
@@ -5573,3 +5574,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** One listing call and one probe call per plan, plus one re-run when corrections changed a touched list. `Files touched` becomes a parsed format, pinned in CONFORMANCE P-02. A prose item (`the suites mocking …`) is reported unread and judged, never resolved, and an unrooted span is read as a whole-segment suffix.
 **Conséquences:** Narrows D-repair-command-before-proof's plan-time reading without replacing it: build's repair of an unrunnable command and its deferral of reds a later phase owns both stay, as safety nets rather than as the normal route. The probe is read-only, exits 0 on any answer and gates nothing.
 **Alternatives rejetées:** Have the CLI run the plan's greps — executes Markdown-derived commands in the CLI. Leave it to build's repair budget — pays at runtime and can stop an unattended run. A prose-only rule to grep the whole tree — the mapping of dozens of hits onto brace-expanded touched lists is exactly the work a script settles once.
+
+## D-lessons-ledger-is-evidence-keyed-and-union-merged — The lessons ledger is CLI-written, keyed by its evidence, advisory, and union-merged
+
+**Scope:** arch
+**Topic:** ledgers
+**Date:** 2026-10-18
+**Statut:** Active
+**Fondement:** user — docs/plans/2026-10-18-cross-cycle-lessons-ledger.brief.md, Resolved decisions (one writer, evidence must resolve, never a gate)
+
+**Contexte:** docs/LESSONS.md carries lessons from closed defects and verified repo facts across cycles; it needs IDs, a merge story and a place in the gate and projection boundaries.
+**Décision:** docs/LESSONS.md is written only by `esq lessons add`, one `## L-<hex>` block per entry whose ID hashes its resolved evidence, read by path through cues carried in existing preflights, advisory in validate, harmless to proofs and projections, and merged by a `merge=union` attribute.
+**Raison:** An evidence-derived ID makes every write retry-safe and needs no worktree ID block; append-only immutable blocks make a union merge exactly right on every merge route; keeping the ledger off every gate honors never-block.
+**Tradeoff:** Gained retry safety, conflict-free merges and zero gate cost; accepted one appended `.gitattributes` line per repository, which stales a proof once.
+**Conséquences:** Any new lesson writer passes evidence the CLI resolves; a new merge path needs nothing; a lesson never authorizes and never stops a command.
+**Alternatives rejetées:** A table with sequential L-NNN IDs (needs the allocator, not retry-safe, prose in cells); teaching esq merge land a third ledger (covers only that merge route); CONVENTIONS.md (read in full every run — user rejected).
