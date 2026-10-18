@@ -178,10 +178,10 @@ map and a decision record on demand; none is a required setup step.
 | Command | Purpose | Main result |
 |---|---|---|
 | `/esq:grill <idea>` | Resolve scope and consequential choices before planning | A brief in `docs/plans/` |
-| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases | A plan committed on its own branch, its checks tried against the repository first; when it replaces a surface, the inventory of what that surface did, any drop asked first |
-| `/esq:build <plan>` | Implement and verify one phase, then stop | Task commits and an execution-log entry |
-| `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design | Review findings, the calls build decided for you by hat; a corrective brief when needed |
-| `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings |
+| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases | A plan committed on its own branch, its checks tried against the repository first, citing any lesson from `docs/LESSONS.md` that changed its design; when it replaces a surface, the inventory of what that surface did, any drop asked first |
+| `/esq:build <plan>` | Implement and verify one phase, then stop, weighing the lessons earlier cycles left on its files | Task commits and an execution-log entry; a repo fact in `docs/LESSONS.md` for a trap the phase hit and verified itself |
+| `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design | Review findings, each marked `(repeats L-<id>)` when it repeats a defect a lesson recorded; the calls build decided for you by hat; a corrective brief when needed |
+| `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings; a lesson in `docs/LESSONS.md` for a fix whose contrast recurs beyond its line |
 | `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
 | `/esq:work [item-or-text] [route]` | Investigate one item; do it now if trivial, otherwise recommend the method | Code commit and backlog close for small work; otherwise the next command |
@@ -190,7 +190,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order | `docs/ROADMAP.md`; backlog priority/rank updates when ordering |
 | `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items and plan substantive work | Inline fixes and plans; stops before building |
 | `/esq:autopilot <plan>` | Build remaining phases sequentially, one worker per phase | Code and execution logs |
-| `/esq:converge <plan-or-fixes-brief>` | Run review → fix, then plan → build → review any 🟡 left, or resume an existing brief | Readiness report; no merge |
+| `/esq:converge <plan-or-fixes-brief>` | Run review → fix, then plan → build → review any 🟡 left, or resume an existing brief | Readiness report, and a lesson for a 🟡 its corrective round closed whose contrast recurs; no merge |
 | `/esq:epic [new title-or-slug]` | Group a theme spanning several plans and backlog items | `docs/epics/<slug>.md` |
 | `/esq:worktree [name-or-action]` | Create, list, remove or merge linked worktrees | Separate working directories and reserved backlog ID blocks |
 | `/esq:status` | Orient without changing anything | Plan, backlog, pending briefs, roadmap and next action |
@@ -215,7 +215,7 @@ verification state, and merging safely.
 | Piece | Where | Responsibility |
 |---|---|---|
 | Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed |
-| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges. It answers structured questions; it makes no product choices |
+| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, and keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one). It answers structured questions; it makes no product choices |
 | Project records | `docs/` in your project, and Git | Keep plans, decisions, committed work and the execution log available to the next session |
 | Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
 
@@ -231,6 +231,7 @@ permission settings.
 | `docs/plans/*.md` | Goal, phases, verification and the execution log |
 | `docs/BACKLOG.md` | Tasks with permanent `B-NNN` IDs |
 | `docs/DECISIONS.md` | Decisions and the authority behind each one |
+| `docs/LESSONS.md` | Lessons from closed defects and verified repo facts, each tied to its evidence and the paths it is about |
 | `docs/ROADMAP.md` | Ordered `Now`, `Next` and `Later` work, with the reason for each position |
 | `docs/epics/<slug>.md` | A theme joining several plans and backlog items |
 | `docs/SPEC.md` | The live product as users experience it |

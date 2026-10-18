@@ -1,9 +1,10 @@
 import { execFileSync, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { realpathSync } from 'node:fs';
 import { appendFile, mkdir, open, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseVerified, readText, splitTableRow, tableAt, touchedPaths, touchesPath } from './markdown.mjs';
+import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseVerified, pathAlternatives, readText, splitTableRow, tableAt, touchedPaths, touchesPath } from './markdown.mjs';
 import { canonicalPlanSlug, telemetryOptedOut } from '../scripts/hook-io.mjs';
 import { MIN_SAMPLE_RUNS, compareTelemetry, discoverTelemetryFiles, renderTelemetrySummary, repoKey, summarizeTelemetry, trendWindow } from './telemetry.mjs';
 
@@ -922,6 +923,24 @@ export async function rankPlace(file, requestedId, { after = null, before = null
 // starts at `lo?`. The type cell carries its glyph (`🐛 bug`), so the glyph is what is matched.
 const TYPE_PRI = [['🐛', 'med?'], ['⚠️', 'med?'], ['☑️', 'med?'], ['✨', 'lo?'], ['💡', 'lo?']];
 const DEFAULT_PRI = 'med?';
+
+// The header `/esq:backlog` writes, for the one CLI path that creates a backlog: a checkable lesson
+// filing its `💡` in a project that has none yet.
+const BACKLOG_TEMPLATE = `# Backlog
+
+<!-- Task backlog, managed by /esq:backlog. -->
+<!-- Type: 🐛 bug | ✨ improvement | ☑️ todo | 💡 idea | ⚠️ debt -->
+<!-- Status: Open | Needs-decision | Planned | Done | Dropped -->
+<!-- Pri: hi | med | lo (confirmed); hi? | med? | lo? (suggested). -->
+<!-- Rank: CLI-only position; Epic: epic slug; Version: deployed release, Done: UA passed. -->
+
+| ID | Date | Type | Pri | Rank | Summary | Source | Epic | Version | Status |
+|----|------|------|-----|------|---------|--------|------|---------|--------|
+
+---
+
+<!-- Details: heading + prose only; required for debt and Needs-decision. -->
+`;
 
 export function priForType(type) {
   const text = String(type);
@@ -2911,7 +2930,8 @@ export async function branchResolve(root, rawSlug) {
 // Command-owned lifecycle is harmless only when it is not a known command input: an append below
 // `## Execution log` in the active plan, another plan or brief, and the two ledgers. Plain operands
 // and valid `(reads)` declarations take precedence. ROADMAP.md and epics have no blanket exemption.
-const GATE_LEDGERS = new Set(['docs/BACKLOG.md', 'docs/DECISIONS.md']);
+// `docs/LESSONS.md` is the third: written only by `esq lessons add`, and no command reads it as an input.
+const GATE_LEDGERS = new Set(['docs/BACKLOG.md', 'docs/DECISIONS.md', 'docs/LESSONS.md']);
 
 // Two bookkeeping fields are left out of the comparison, and only two: the `**Reviewed at:**` header
 // line `esq plan set-reviewed` writes and the `**Abandoned:**` line `esq plan abandon` writes, each
@@ -3277,7 +3297,9 @@ export async function gateVerify(root, planPath, { workersMoved = false, phase =
 // in either order. Anything else — code, `docs/DECISIONS.md`, and every byte under `.claude/skills/`,
 // `SKILL.md` included — invalidates. What it cannot do is certify prose: a hand edit to a projection
 // after it was mined reads as fresh, by design, because the list admits the projection files.
-const PROVENANCE_HARMLESS = new Set(['docs/SPEC.md', 'CLAUDE.md', 'docs/ARCHITECTURE.md', 'docs/BACKLOG.md']);
+// `docs/LESSONS.md` is listed so a lesson written after a review costs no re-review: an entry is
+// evidence about the change, never part of it.
+const PROVENANCE_HARMLESS = new Set(['docs/SPEC.md', 'CLAUDE.md', 'docs/ARCHITECTURE.md', 'docs/BACKLOG.md', 'docs/LESSONS.md']);
 
 // esquisse's own bookkeeping under docs/plans: plans and briefs, and the evidence captures a manual
 // confirmation commits beside its plan in `<plan-stem>.assets/`. Any other file there is a real artifact.
@@ -3940,7 +3962,18 @@ function unitRemovalBase(repository, origin, head) {
   return gitTry(repository, ['merge-base', `refs/heads/${origin}`, head]) || null;
 }
 
-export async function reviewScope(root, planPath, { full = false } = {}) {
+// Both review-scope answers carry the lessons matched against the paths they changed — an empty
+// `cues` when no ledger exists or nothing was resolved. Never a reason for either call to fail.
+async function withLessons(root, answer) {
+  const paths = Array.isArray(answer.paths) ? answer.paths.map((entry) => entry.path) : [];
+  return { ...answer, lessons: paths.length > 0 ? await lessonsMatch(root, paths) : { ...NO_LESSONS } };
+}
+
+export async function reviewScope(root, planPath, options = {}) {
+  return withLessons(root, await planReviewScope(root, planPath, options));
+}
+
+async function planReviewScope(root, planPath, { full = false } = {}) {
   const text = await readText(path.resolve(root, planPath));
   // Computed once, before any early return, so every plan-mode answer carries the field.
   const headers = await reviewUnitHeaders(path.resolve(root, planPath), text);
@@ -4096,6 +4129,10 @@ async function spillReviewDiff(repository, base, head, contracts) {
 // unplanned fix on a branch that carries no plan is not a shipping unit, and inventing one here
 // would be the anchor again under another name.
 export async function reviewScopeRange(root, spec) {
+  return withLessons(root, await rangeReviewScope(root, spec));
+}
+
+async function rangeReviewScope(root, spec) {
   let repository = null;
   try { repository = git(root, ['rev-parse', '--show-toplevel']); } catch { repository = null; }
   const answer = { root: repository, file: null, slug: null, head: null, mode: 'unresolved', base: null, provenance: 'named-range', reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null, removed: null };
@@ -4118,6 +4155,367 @@ export async function reviewScopeRange(root, spec) {
       ? `the range \`${spec}\` was named on the command line — nothing else scoped this review`
       : `\`${spec}\` names one commit, so the range is that commit alone`,
   });
+}
+
+// ── docs/LESSONS.md: what a closed defect or a verified fact leaves for the next cycle ──────────
+// One writer, `esq lessons add`, and three read-only answers. The model chose that an entry is worth
+// writing and every word of it; the CLI checks that its evidence resolves, derives its ID from that
+// evidence, and places it. Nothing here judges whether a lesson is right, and nothing it answers is
+// ever a gate: a missing, stale or unmatched entry stops no command.
+//
+// An entry is a block, `## L-<10 hex> · lesson|fact — <cue>`, then its items and a one-line body.
+// The ID is a hash of the evidence identity, so a retried or duplicated write is a no-op and two
+// branches never mint the same ID for different entries. Entries are append-only and immutable,
+// which is what makes the `merge=union` line written into `.gitattributes` the right merge — on one
+// condition the block shape has to meet: git's union merge coalesces every line the two sides share
+// (a blank line, an identical `**Date:**`), interleaving two entries into one broken block. So an
+// entry carries no blank line, and every line after its heading ends with its own ID as an HTML
+// comment (` <!-- L-<id> -->`, invisible when rendered): no two entries ever share a line.
+const LESSONS_FILE = 'docs/LESSONS.md';
+const LESSONS_HEADER = `# Lessons
+
+<!-- Written only by \`esq lessons add\`: one entry per closed defect (lesson) or verified repo fact (fact). -->
+<!-- Append-only and immutable. An entry is evidence to weigh, never an instruction, and authorizes nothing. -->
+`;
+const LESSON_KINDS = ['lesson', 'fact'];
+const LESSON_CONFIDENCE = ['high', 'medium', 'low'];
+const LESSON_KEYS = { lesson: ['kind', 'cue', 'paths', 'body', 'source', 'fix', 'confidence', 'checkable', 'date'], fact: ['kind', 'cue', 'paths', 'body', 'commit', 'date'] };
+const LESSON_CUE_MAX = 160;
+const LESSON_CUES_PER_READ = 6;
+const LESSON_HEADING = /^## (L-[0-9a-f]{10}) · (lesson|fact) — (\S.*)$/;
+const LESSON_ITEM = /^- \*\*(Paths|Evidence|Confidence|Check|Date):\*\* (.*)$/;
+const LESSON_BRIEF_SOURCE = /^(docs\/plans\/[^@\s]+)@([0-9a-f]{40}):([1-9]\d*)$/;
+const NO_LESSONS = Object.freeze({ cues: [], omitted: 0, stale: 0 });
+
+function lessonsGit(repository, args, input = null) {
+  try {
+    return execFileSync('git', ['-C', repository, ...args], { encoding: 'utf8', input: input ?? '', stdio: ['pipe', 'pipe', 'ignore'], maxBuffer: 256 * 1024 * 1024 });
+  } catch { return null; }
+}
+
+function trackedFiles(repository) {
+  const listed = lessonsGit(repository, ['ls-files', '-z']);
+  return listed === null ? null : listed.split('\0').filter((entry) => entry !== '');
+}
+
+// Which of these commits the repository still holds: one `cat-file --batch-check` for any number.
+function commitsHeld(repository, oids) {
+  const unique = [...new Set(oids)];
+  if (unique.length === 0) return new Set();
+  const answer = lessonsGit(repository, ['cat-file', '--batch-check'], `${unique.join('\n')}\n`);
+  if (answer === null) return null;
+  const held = new Set();
+  for (const line of answer.split('\n')) {
+    const [oid, type] = line.split(' ');
+    if (type === 'commit') held.add(oid);
+  }
+  return held;
+}
+
+// The tracked files a path matches, through the same reading as `esq plan probe`.
+function filesMatching(entry, files) {
+  return files.filter((file) => touchesPath(entry, file));
+}
+
+// Every block under a `## L-` heading, read leniently: an unreadable one is reported, never thrown.
+export function parseLessons(text) {
+  const lines = String(text).split('\n');
+  const entries = [];
+  const unreadable = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^## L-/.test(lines[index])) continue;
+    let end = lines.length;
+    for (let next = index + 1; next < lines.length; next += 1) if (/^#{1,2} /.test(lines[next])) { end = next; break; }
+    const heading = lines[index].match(LESSON_HEADING);
+    const line = index + 1;
+    if (!heading) { unreadable.push({ line, reason: 'its heading is not `## L-<10 hex> · lesson|fact — <cue>`' }); continue; }
+    const [, id, kind, cue] = heading;
+    const items = {};
+    const untag = (raw) => raw.replace(/\s*<!-- L-[0-9a-f]{10} -->\s*$/, '');
+    let cursor = index + 1;
+    while (cursor < end && lines[cursor].trim() === '') cursor += 1;
+    // `**Date:**` is always the last item, so a body can never be read as one.
+    for (; cursor < end; cursor += 1) {
+      const item = untag(lines[cursor]).match(LESSON_ITEM);
+      if (!item) break;
+      items[item[1]] = item[2].trim();
+      if (item[1] === 'Date') { cursor += 1; break; }
+    }
+    const body = lines.slice(cursor, end).map(untag).join('\n').trim();
+    const paths = [...(items.Paths ?? '').matchAll(/`([^`]+)`/g)].map((match) => match[1]);
+    const evidence = kind === 'lesson'
+      ? (items.Evidence ?? '').match(/^`([^`]+)` · fix `([0-9a-f]{40})`$/)
+      : (items.Evidence ?? '').match(/^commit `([0-9a-f]{40})`$/);
+    const missing = [];
+    if (paths.length === 0) missing.push('**Paths:**');
+    if (!evidence) missing.push('**Evidence:**');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(items.Date ?? '')) missing.push('**Date:**');
+    if (missing.length > 0) { unreadable.push({ line, id, reason: `${missing.join(', ')} missing or malformed` }); continue; }
+    const entry = { id, kind, cue, paths, date: items.Date, line, body };
+    if (kind === 'lesson') {
+      entry.source = evidence[1];
+      entry.fix = evidence[2];
+      const brief = entry.source.match(LESSON_BRIEF_SOURCE);
+      entry.commits = brief ? [brief[2], entry.fix] : [entry.fix];
+      entry.confidence = items.Confidence ?? null;
+      entry.check = items.Check ?? null;
+    } else {
+      entry.commit = evidence[1];
+      entry.commits = [entry.commit];
+    }
+    entries.push(entry);
+  }
+  return { entries, unreadable };
+}
+
+async function readLessons(repository) {
+  try { return await readText(path.join(repository, LESSONS_FILE)); }
+  catch (error) { if (error.code === 'ENOENT') return null; throw error; }
+}
+
+// Why an entry no longer describes this tree, or `null`: an evidence commit the repository no longer
+// holds, or a path span no tracked file matches. Advisory everywhere — `match` skips, `validate` lists.
+function lessonStaleness(entry, held, files) {
+  const reasons = [];
+  if (held) for (const oid of entry.commits) if (!held.has(oid)) reasons.push(`evidence ${oid.slice(0, 7)} no longer resolves`);
+  if (files) {
+    for (const span of entry.paths) {
+      const alternatives = pathAlternatives(span) ?? [];
+      if (!alternatives.some((alternative) => filesMatching(alternative, files).length > 0)) reasons.push(`path \`${span}\` matches no tracked file`);
+    }
+  }
+  return reasons;
+}
+
+function lessonRefusal(reason) {
+  return { added: false, refuse: true, reason: `esq lessons add: ${reason}. Nothing was written.` };
+}
+
+function resolveCommit(repository, value) {
+  if (typeof value !== 'string' || !/^[0-9a-f]{4,40}$/i.test(value.trim())) return null;
+  const oid = lessonsGit(repository, ['rev-parse', '--verify', '--quiet', `${value.trim()}^{commit}`]);
+  return oid ? oid.trim() : null;
+}
+
+export async function lessonsAdd(root, json) {
+  let repository;
+  try { repository = git(root, ['rev-parse', '--show-toplevel']); }
+  catch { return lessonRefusal('not inside a git working tree'); }
+  let value;
+  try { value = JSON.parse(json); }
+  catch (error) { return lessonRefusal(`invalid JSON — ${error.message}`); }
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return lessonRefusal('the payload must be one entry object');
+  const kind = value.kind;
+  if (!LESSON_KINDS.includes(kind)) return lessonRefusal(`"kind" must be one of ${LESSON_KINDS.join(', ')}`);
+  for (const key of Object.keys(value)) {
+    if (!LESSON_KEYS[kind].includes(key)) return lessonRefusal(`unknown key "${key}" for a ${kind} — accepted: ${LESSON_KEYS[kind].join(', ')}`);
+  }
+
+  const cue = typeof value.cue === 'string' ? value.cue.trim() : '';
+  if (cue === '') return lessonRefusal('"cue" must be a non-empty string');
+  if (/[\n\r]/.test(cue)) return lessonRefusal('"cue" must be one line');
+  if (cue.length > LESSON_CUE_MAX) return lessonRefusal(`"cue" is ${cue.length} characters, past the ${LESSON_CUE_MAX} a cue may carry`);
+  const body = typeof value.body === 'string' ? value.body.trim() : '';
+  if (body === '') return lessonRefusal('"body" must be a non-empty string');
+  if (/^\s*#/m.test(body)) return lessonRefusal('a "body" line may not start with `#` — an entry\'s structure is parsed from its headings');
+  if (/\n[ \t]*\n/.test(body)) return lessonRefusal('"body" is one paragraph, with no blank line');
+  const paragraph = body.replace(/\s+/g, ' ');
+  const date = value.date ?? new Date().toISOString().slice(0, 10);
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return lessonRefusal('"date" must be YYYY-MM-DD');
+
+  if (!Array.isArray(value.paths) || value.paths.length === 0) return lessonRefusal('"paths" must be a non-empty array of repository paths');
+  const files = trackedFiles(repository);
+  if (files === null) return lessonRefusal('git could not list the tracked files');
+  const paths = [];
+  for (const raw of value.paths) {
+    if (typeof raw !== 'string' || raw.includes('`')) return lessonRefusal(`path ${JSON.stringify(raw)} is not a plain repository path`);
+    const alternatives = pathAlternatives(raw);
+    if (alternatives === null) return lessonRefusal(`path \`${raw}\` is not a plain repository path`);
+    if (!alternatives.some((alternative) => filesMatching(alternative, files).length > 0)) return lessonRefusal(`path \`${raw}\` matches no tracked file`);
+    const span = raw.trim();
+    if (!paths.includes(span)) paths.push(span);
+  }
+
+  let evidence;
+  let identity;
+  let confidence = null;
+  let checkable = false;
+  if (kind === 'lesson') {
+    const source = typeof value.source === 'string' ? value.source.trim() : '';
+    if (/^B-\d+$/.test(source)) {
+      let ids;
+      try {
+        const { table, idColumn } = await backlogTable(path.join(repository, 'docs/BACKLOG.md'));
+        ids = new Set(table.rows.map((row) => row[idColumn]));
+      } catch { ids = new Set(); }
+      if (!ids.has(source)) return lessonRefusal(`source ${source} is not a row of docs/BACKLOG.md`);
+    } else {
+      const brief = source.match(LESSON_BRIEF_SOURCE);
+      if (!brief) return lessonRefusal('"source" must be a B-NNN row or `<fixes-brief-path>@<full commit>:<line>`');
+      if (!CORRECTIVE_BRIEF.test(brief[1])) return lessonRefusal(`source ${brief[1]} is not a fixes brief`);
+      const held = lessonsGit(repository, ['show', `${brief[2]}:${brief[1]}`]);
+      if (held === null) return lessonRefusal(`source ${brief[1]} is not held at ${brief[2].slice(0, 7)}`);
+      const line = held.split('\n')[Number(brief[3]) - 1];
+      if (line === undefined || !/^\s*- /.test(line)) return lessonRefusal(`line ${brief[3]} of ${brief[1]} at ${brief[2].slice(0, 7)} is not a \`- \` list item`);
+    }
+    const fix = resolveCommit(repository, value.fix);
+    if (!fix) return lessonRefusal(`"fix" ${JSON.stringify(value.fix ?? null)} does not resolve to a commit`);
+    if (!LESSON_CONFIDENCE.includes(value.confidence)) return lessonRefusal(`"confidence" must be one of ${LESSON_CONFIDENCE.join(', ')}`);
+    if (value.checkable !== undefined && typeof value.checkable !== 'boolean') return lessonRefusal('"checkable" must be true or false');
+    confidence = value.confidence;
+    checkable = value.checkable === true;
+    evidence = `\`${source}\` · fix \`${fix}\``;
+    identity = `lesson|${source}|${fix}`;
+  } else {
+    const commit = resolveCommit(repository, value.commit);
+    if (!commit) return lessonRefusal(`"commit" ${JSON.stringify(value.commit ?? null)} does not resolve to a commit`);
+    evidence = `commit \`${commit}\``;
+    identity = `fact|${commit}|${cue.toLowerCase().replace(/\s+/g, ' ')}`;
+  }
+  const id = `L-${createHash('sha1').update(identity).digest('hex').slice(0, 10)}`;
+
+  const file = path.join(repository, LESSONS_FILE);
+  const existing = await readLessons(repository);
+  if (existing !== null && new RegExp(`^## ${id} `, 'm').test(existing)) return { added: false, duplicate: true, id, file };
+
+  // A checkable lesson files its `💡` once: a retry interrupted after the row reuses it.
+  let check = null;
+  let backlog = null;
+  if (checkable) {
+    const backlogFile = path.join(repository, 'docs/BACKLOG.md');
+    const source = `lesson: ${id}`;
+    let created = false;
+    try { await stat(backlogFile); }
+    catch {
+      await mkdir(path.dirname(backlogFile), { recursive: true });
+      await writeFile(backlogFile, BACKLOG_TEMPLATE, 'utf8');
+      created = true;
+    }
+    const { table, idColumn } = await backlogTable(backlogFile);
+    const sourceColumn = table.header.indexOf('Source');
+    const prior = sourceColumn < 0 ? null : table.rows.find((row) => (row[sourceColumn] ?? '').includes(source));
+    if (prior) check = prior[idColumn];
+    else {
+      const row = await addRow(repository, backlogFile, { type: '💡 idea', summary: `Check candidate — ${cue.replace(/\|/g, '/')}`, source });
+      check = row.id;
+    }
+    backlog = { id: check, filed: !prior, created };
+  }
+
+  const tag = ` <!-- ${id} -->`;
+  const entry = [
+    `## ${id} · ${kind} — ${cue}`,
+    ...[
+      `- **Paths:** ${paths.map((span) => `\`${span}\``).join(', ')}`,
+      `- **Evidence:** ${evidence}`,
+      ...(confidence ? [`- **Confidence:** ${confidence}`] : []),
+      ...(check ? [`- **Check:** ${check}`] : []),
+      `- **Date:** ${date}`,
+      paragraph,
+    ].map((line) => `${line}${tag}`),
+    '',
+  ].join('\n');
+  const created = existing === null;
+  const content = created ? `${LESSONS_HEADER}\n${entry}` : `${existing.replace(/\n+$/, '')}\n\n${entry}`;
+  if (created) {
+    await mkdir(path.dirname(file), { recursive: true });
+    const temporary = `${file}.${process.pid}.tmp`;
+    await writeFile(temporary, content, 'utf8');
+    await rename(temporary, file);
+  } else {
+    await atomicWrite(file, content);
+  }
+
+  // Union merge: two branches' appended entries both survive, add/add included.
+  const attributes = path.join(repository, '.gitattributes');
+  let current = null;
+  try { current = await readText(attributes); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  let gitattributes = 'present';
+  if (current === null || !current.split('\n').some((line) => line.trim().split(/\s+/)[0] === LESSONS_FILE)) {
+    const line = `${LESSONS_FILE} merge=union\n`;
+    if (current === null) await writeFile(attributes, line, 'utf8');
+    else await atomicWrite(attributes, `${current}${current === '' || current.endsWith('\n') ? '' : '\n'}${line}`);
+    gitattributes = 'added';
+  }
+  return { added: true, id, kind, file, created, gitattributes, ...(backlog ? { backlog } : {}) };
+}
+
+// The matched cues for a set of repository paths, at most six, most specific first. Never throws: a
+// ledger that is absent, or partly unreadable, answers what parses.
+export async function lessonsMatch(root, readerPaths) {
+  try {
+    const repository = git(root, ['rev-parse', '--show-toplevel']);
+    const text = await readLessons(repository);
+    if (text === null) return { ...NO_LESSONS };
+    const { entries } = parseLessons(text);
+    if (entries.length === 0) return { ...NO_LESSONS };
+    const files = trackedFiles(repository) ?? [];
+    const held = commitsHeld(repository, entries.flatMap((entry) => entry.commits));
+    const readers = [...new Set(readerPaths.map((entry) => String(entry).trim()).filter((entry) => entry !== ''))]
+      .flatMap((entry) => pathAlternatives(entry) ?? [entry.replace(/^\.\//, '').replace(/\/+$/, '')]);
+    const readerFiles = new Set();
+    const untracked = [];
+    for (const reader of readers) {
+      const hits = filesMatching(reader, files);
+      if (hits.length === 0) untracked.push(reader);
+      for (const hit of hits) readerFiles.add(hit);
+    }
+    let stale = 0;
+    const matched = [];
+    for (const entry of entries) {
+      if (lessonStaleness(entry, held, files).length > 0) { stale += 1; continue; }
+      let specificity = -1;
+      for (const alternative of entry.paths.flatMap((span) => pathAlternatives(span) ?? [])) {
+        const meets = filesMatching(alternative, files).some((file) => readerFiles.has(file))
+          || untracked.some((reader) => touchesPath(alternative, reader) || touchesPath(reader, alternative));
+        if (meets) specificity = Math.max(specificity, alternative.length);
+      }
+      if (specificity >= 0) matched.push({ entry, specificity });
+    }
+    matched.sort((left, right) => right.specificity - left.specificity
+      || right.entry.date.localeCompare(left.entry.date)
+      || left.entry.id.localeCompare(right.entry.id));
+    return {
+      cues: matched.slice(0, LESSON_CUES_PER_READ).map(({ entry }) => ({ id: entry.id, kind: entry.kind, cue: entry.cue })),
+      omitted: Math.max(0, matched.length - LESSON_CUES_PER_READ),
+      stale,
+    };
+  } catch {
+    return { ...NO_LESSONS };
+  }
+}
+
+export async function lessonsShow(root, ids) {
+  const repository = git(root, ['rev-parse', '--show-toplevel']);
+  const text = await readLessons(repository);
+  const { entries } = parseLessons(text ?? '');
+  const found = [];
+  const missing = [];
+  for (const id of ids) {
+    const entry = entries.find((candidate) => candidate.id === id);
+    if (!entry) { missing.push(id); continue; }
+    const { commits, line, ...shown } = entry;
+    found.push(shown);
+  }
+  return { entries: found, missing };
+}
+
+// The ledger's advisories for `esq validate`: never a finding, so `valid` and the Stop hook never move.
+async function lessonsAdvisories(repository) {
+  const text = await readLessons(repository).catch(() => null);
+  if (text === null) return [];
+  const advisories = [];
+  const { entries, unreadable } = parseLessons(text);
+  for (const block of unreadable) advisories.push(`${LESSONS_FILE}:${block.line}: unreadable lesson block${block.id ? ` ${block.id}` : ''} — ${block.reason}`);
+  const seen = new Set();
+  for (const entry of entries) {
+    if (seen.has(entry.id)) advisories.push(`${LESSONS_FILE}: duplicate lesson ID ${entry.id}`);
+    seen.add(entry.id);
+  }
+  const files = trackedFiles(repository);
+  const held = commitsHeld(repository, entries.flatMap((entry) => entry.commits));
+  for (const entry of entries) for (const reason of lessonStaleness(entry, held, files)) advisories.push(`${LESSONS_FILE}: stale ${entry.id} — ${reason}`);
+  return advisories;
 }
 
 // ── Harness evidence ─────────────────────────────────────────────────────────
@@ -5435,6 +5833,8 @@ export async function validate(root) {
     }
     catch (error) { findings.push(`${relative}: ${error.message}`); }
   }
+  // The lessons ledger only ever advises: a stale or unreadable entry never decides `valid`.
+  advisories.push(...await lessonsAdvisories(repository).catch(() => []));
   return { valid: findings.length === 0, root: repository, findings, advisories };
 }
 
@@ -5531,9 +5931,13 @@ export async function main(args) {
       const branch = await branchCheck(root, action);
       if (branch.refuse) return output({ file: action, branch });
       const anchor = gitTry(root, ['log', '-1', '--format=%h', '--', action]) || 'unversioned';
-      const plan = parsePlan(await readText(action));
+      const text = await readText(action);
+      const plan = parsePlan(text);
       const verdict = nextPhase(plan);
-      return output(await spillContext(root, action, { file: action, branch, anchor, ...verdict, context: planContext(plan, verdict) }));
+      // The cues for the selected phase's `**Files touched:**` — never a reason for this call to fail.
+      const touched = verdict.phase ? (touchedPaths(text).find((phase) => phase.phase === verdict.phase.number)?.paths ?? []) : [];
+      const lessons = touched.length > 0 ? await lessonsMatch(root, touched) : { ...NO_LESSONS };
+      return output(await spillContext(root, action, { file: action, branch, anchor, ...verdict, lessons, context: planContext(plan, verdict) }));
     }
     const plan = parsePlan(await readText(action));
     const verdict = nextPhase(plan);
@@ -5629,6 +6033,39 @@ export async function main(args) {
       for await (const chunk of process.stdin) payload += chunk;
     }
     return output(await addDecisions(file, payload));
+  }
+  // The lessons ledger. `add` is its one writer: exit 1 on every refusal, the ledger byte-identical,
+  // and a duplicate is a no-op answered `duplicate: true` at exit 0. `match` and `show` are read-only.
+  if (group === 'lessons') {
+    const usage = 'usage: esq lessons add <json|-> | esq lessons match <path…> | --paths <file>|- | esq lessons show <L-id…>';
+    if (action === 'add') {
+      if (rest.length !== 1) throw new Error(usage);
+      let payload = rest[0];
+      if (payload === '-') {
+        payload = '';
+        for await (const chunk of process.stdin) payload += chunk;
+      }
+      const result = await lessonsAdd(root, payload);
+      output(result);
+      if (result.refuse) process.exitCode = 1;
+      return;
+    }
+    if (action === 'match') {
+      let listed = rest;
+      if (rest[0] === '--paths') {
+        if (rest.length !== 2) throw new Error(usage);
+        let body = '';
+        if (rest[1] === '-') { for await (const chunk of process.stdin) body += chunk; }
+        else body = await readText(path.resolve(root, rest[1]));
+        listed = body.split('\n');
+      } else if (rest.length === 0 || rest.some((arg) => arg.startsWith('--'))) throw new Error(usage);
+      return output(await lessonsMatch(root, listed));
+    }
+    if (action === 'show') {
+      if (rest.length === 0) throw new Error(usage);
+      return output(await lessonsShow(root, rest));
+    }
+    throw new Error(usage);
   }
   if (group === 'plan' && action === 'append-log') {
     // Before anything reads a path: `--help` must not depend on a plan file existing, and must not
@@ -5881,5 +6318,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
 }

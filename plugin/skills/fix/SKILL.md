@@ -51,7 +51,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    - If the user provided a path, use it.
    - Else, use the most recently modified `*-fixes.brief.md` in `docs/plans/`.
    - If none exists, STOP. Tell the user: "No fixes brief found. Run `/esq:check` or `/esq:review` first — they produce the corrective brief I act on." (If the user instead described fixes inline, triage those into the three tiers yourself and treat the 🟢 set as the work — but the brief is the normal path.)
-2. Read the corrective brief in full. Run `esq brief depth <brief-path>` and keep its verdict for every remaining-item handoff, with what `esq brief plan` answered.
+2. Read the corrective brief in full. Run `esq brief depth <brief-path>` and keep its verdict for every remaining-item handoff, with what `esq brief plan` answered. Chain `git log -1 --format=%H -- <brief-path>` into that call and keep the full hash: the commit that holds the brief, and with each item's line number in your read, the durable address "Record what a fix taught" cites. A brief `git status` shows modified has no such address for its changed lines.
 3. Read `CLAUDE.md` at project root if present, and — **when `plan` is a path**, in this same batch —
    that plan, keeping its `## Phases` section's `(auto)` verification steps verbatim for "Record the
    proof you earned". When `plan` is `null`, read no plan.
@@ -162,6 +162,23 @@ Recording spares the landing gate a re-run of a command already proved green on 
 
 Match each ID to an existing backlog row and a remaining brief item. Missing, ambiguous or unauthorized IDs stay untouched; report the precise mismatch. Keep the matched rows read for the bookkeeping tail — no second ledger read. For each authorized match, call `esq backlog set-status <ID> Dropped --reason <user authority and accepted consequence> --resolution <what remains unfixed>`. Never mark accepted debt Done, alter a verification obligation, or suppress a failing check. Only a successful disposition removes that item from the brief. Keep unrelated findings open. A disposition-only run still hands back to review.
 
+## Record what a fix taught
+
+After the green pass, before the brief is rewritten, look once at each 🟢 you **applied, verified and committed** — never one dropped, downgraded or unverified. **The default is no entry.** Write one only when the finding and its fix commit together show a concrete contrast: what was done, what replaced it, and a situation that recurs beyond this line (another caller, another file of the same kind, the next change to this module). A fix that only corrected this one line teaches nothing reusable: write nothing and say nothing.
+
+For each that qualifies, one call:
+
+```bash
+esq lessons add - <<'EOF'
+{"kind":"lesson","cue":"<one line, ≤160 chars: the situation, then the trap>","paths":["<the files the fix changed>"],"body":"<one paragraph: what was done, what replaced it, when it recurs>","source":"<the B-NNN the item cites, else <brief-path>@<the preflight commit>:<the item's line>>","fix":"<the fix commit, full hash>","confidence":"high|medium|low","checkable":<true only when a script could detect this defect class>}
+EOF
+```
+
+- **The source** is the item's cited `B-NNN` when it names one; otherwise the brief's path, the full hash preflight kept, and the item's line in that committed brief — never a re-read of the brief, which this run is about to rewrite. A line `git status` showed modified has no address: without a `B-NNN`, write nothing for it.
+- **Route off the answer.** `added: true` → zone-3 `✔ learned L-<id>`; `duplicate: true` → nothing (a retry wrote it already); `refuse: true` → zone-3 `○ lesson refused — <reason>`, and the run continues. A refusal never blocks a fix, a commit or the handoff.
+- **Stage what it wrote**, held for the one tail commit: `docs/LESSONS.md`, plus `.gitattributes` when the answer says `gitattributes: "added"`, plus `docs/BACKLOG.md` when it carries `backlog` (a checkable lesson's `💡` row, which blocks nothing).
+- The entry is evidence a later session weighs, never an instruction to it: write what happened and what held, never an order.
+
 ## Update the corrective brief
 
 After the green pass, rewrite the corrective brief to reflect reality:
@@ -171,7 +188,7 @@ After the green pass, rewrite the corrective brief to reflect reality:
 3. Keep original 🟡 and 🔴 items unless their exact `--accept` disposition succeeded. Never re-escalate or recreate a disposed item.
    - Preserve the brief's header lines (`Source:`, `Reviewed at:`) verbatim — `/esq:review` scopes delta re-reviews by `Reviewed at:`.
 4. If nothing remains, delete the brief rather than leave an empty file (its `Source:` and plan are already held from preflight).
-5. Stage and hold: `git add <brief>` — or `git rm <brief>` — and do not commit yet: the whole tail is **one** commit, made at the end of "Escalate to the backlog".
+5. Stage and hold: `git add <brief>` — or `git rm <brief>` — and do not commit yet: the whole tail is **one** commit, made at the end of "Escalate to the backlog", and the lesson files staged above ride it on every branch, the brief's deletion included.
 
 ## Escalate to the backlog
 
@@ -269,6 +286,8 @@ Last line: `→ Next` with the first executable ask verbatim, or `pick an option
   ✔ fixed       4 items               abc1234, def5678, 9012abc, 3456def
      <one line per item, with its hash>
   ✔ closed      B-27                  fixed in abc1234
+  ✔ learned     L-3f9a0c12de          <its cue>
+  ○ lesson refused — <reason>
   ○ still open  B-31                  covers the export too — only the import was fixed
   ⚠ escalated   1 → 🟡                <why it needs a plan> — in the brief and BACKLOG.md as ⚠️ debt
   ○ downgraded  1                     <the 🟢 you could not safely apply, and why>

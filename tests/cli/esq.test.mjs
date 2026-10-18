@@ -2589,7 +2589,8 @@ test('next-phase --preflight answers branch, anchor and context in one call, and
   const context = JSON.parse((await run(bin, ['next-phase', target, '--context'], { cwd: root, env })).stdout);
   assert.equal(preflight.branch.refuse, false);
   assert.equal(preflight.anchor, anchor);
-  assert.deepEqual({ ...preflight, branch: undefined, anchor: undefined }, { ...context, branch: undefined, anchor: undefined });
+  assert.deepEqual(preflight.lessons, { cues: [], omitted: 0, stale: 0 });
+  assert.deepEqual({ ...preflight, branch: undefined, anchor: undefined, lessons: undefined }, { ...context, branch: undefined, anchor: undefined, lessons: undefined });
 
   // Past the inline budget the section texts leave stdout for one file under the git dir, in order,
   // and every other byte of the answer is unchanged.
@@ -2611,6 +2612,42 @@ test('next-phase --preflight answers branch, anchor and context in one call, and
   const refused = JSON.parse((await run(bin, ['next-phase', target, '--preflight'], { cwd: root, env })).stdout);
   assert.equal(refused.branch.refuse, true);
   assert.deepEqual(Object.keys(refused).sort(), ['branch', 'file']);
+});
+
+// The selected phase's `**Files touched:**` is matched against docs/LESSONS.md in the same call, and
+// a ledger that will not parse never fails the preflight.
+test('next-phase --preflight carries the lessons matching the selected phase, and none for an unrelated one', async () => {
+  const env = { ...process.env, NODE_ENV: '', ESQ_TEST_GIT_ROOT: '' };
+  const bin = fileURLToPath(new URL('../../plugin/bin/esq', import.meta.url));
+  const root = await mkdtemp(path.join(os.tmpdir(), 'esq-cli-preflight-lessons-'));
+  const git = (...args) => spawnSync('git', ['-C', root, ...args], { env, encoding: 'utf8' }).stdout.trim();
+  const esq = (args, input) => spawnSync(process.execPath, [bin, ...args], { cwd: root, env, input, encoding: 'utf8' });
+  git('init', '-q', '-b', 'main');
+  git('config', 'user.email', 'test@example.invalid');
+  git('config', 'user.name', 'Test');
+  await mkdir(path.join(root, 'docs/plans'), { recursive: true });
+  await mkdir(path.join(root, 'src'), { recursive: true });
+  await writeFile(path.join(root, 'src/app.js'), 'export const one = 1;\n');
+  await writeFile(path.join(root, 'README.md'), '# Readme\n');
+  const planText = (touched) => `# A plan\n\n**Branch:** main\n\n**Origin:** main\n\n## Phases\n\n### Phase 1 — one\n- **Files touched:** \`${touched}\`\n- task\n\n## Execution log\n<!-- Appended by /esq:build -->\n`;
+  await writeFile(path.join(root, 'docs/plans/app.md'), planText('src/app.js'));
+  git('add', '-A');
+  git('commit', '-q', '-m', 'seed');
+  const commit = git('rev-parse', 'HEAD');
+  const added = JSON.parse(esq(['lessons', 'add', '-'], JSON.stringify({ kind: 'fact', cue: 'In this repo, app.js is loaded twice', paths: ['src/app.js'], body: 'Observed in the phase.', commit })).stdout);
+  assert.equal(added.added, true);
+  git('add', '-A');
+  git('commit', '-q', '-m', 'lessons: app');
+
+  const preflight = (plan) => JSON.parse(esq(['next-phase', plan, '--preflight']).stdout);
+  assert.deepEqual(preflight('docs/plans/app.md').lessons, { cues: [{ id: added.id, kind: 'fact', cue: 'In this repo, app.js is loaded twice' }], omitted: 0, stale: 0 });
+  await writeFile(path.join(root, 'docs/plans/app.md'), planText('README.md'));
+  git('commit', '-q', '-am', 'plan: an unrelated phase');
+  assert.deepEqual(preflight('docs/plans/app.md').lessons.cues, []);
+  await writeFile(path.join(root, 'docs/LESSONS.md'), '# Lessons\n\n## L-broken\n- nothing\n');
+  const malformed = esq(['next-phase', 'docs/plans/app.md', '--preflight']);
+  assert.equal(malformed.status, 0);
+  assert.deepEqual(JSON.parse(malformed.stdout).lessons.cues, []);
 });
 
 // ── decisions add: the registry entry the plan and build workers used to place by hand ─────────

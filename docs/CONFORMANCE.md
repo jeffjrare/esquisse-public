@@ -65,3 +65,12 @@ subject `roadmap: derive …`. `roadmapState` keys each `## Shipped` line on its
 the newest commit whose subject opens with `roadmap: derive`, and answers `roadmap.shipped.sinceDerive`
 from that commit's copy of the file. Rename either and the refresh notice silently falls back to the
 whole retained tail, nagging after every derive (B-191).
+
+## Scenario L-01 — the lessons entry `esq lessons match` reads
+
+`esq lessons add` writes each entry of `docs/LESSONS.md` as `## L-<10 hex> · <kind> — <cue>`, then a
+`- **Paths:**` item whose inline-code spans are the paths it is about. `parseLessons` finds an entry
+by that heading and `esq lessons match` matches its `**Paths:**` spans against the paths a plan,
+build or review holds. The CLI is the one writer, so no skill template writes the shape and
+`check-conformance.sh` holds no clause for it: `tests/cli/lessons.test.mjs` pins it. Every line after
+the heading ends with ` <!-- L-<id> -->`, so that the `merge=union` merge never coalesces two entries.

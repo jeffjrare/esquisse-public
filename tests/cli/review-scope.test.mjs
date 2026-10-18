@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { reviewScope, setReviewed } from '../../plugin/lib/cli.mjs';
+import { lessonsAdd, reviewScope, reviewScopeRange, setReviewed } from '../../plugin/lib/cli.mjs';
 
 // Real git, in throwaway repositories: what this verb answers is a question about git's own history —
 // which commits a review read, whether a stamp survived a rebase, what a range actually changed — and
@@ -652,6 +652,32 @@ test('review scope carries the unit-s removals, and a range carries them all unc
   assert.deepEqual(scope.removed, { base, deleted: ['src/picker.js'], orphaned: ['src/preview.js'], uncovered: ['src/preview.js'] });
   const range = (await import('../../plugin/lib/cli.mjs')).reviewScopeRange;
   assert.deepEqual((await range(root, `${base}..${head}`)).removed.uncovered, ['src/picker.js', 'src/preview.js']);
+  await rm(root, { recursive: true, force: true });
+});
+
+test('review scope carries the lessons matching its changed paths, in plan and range mode, and never fails on the ledger', async () => {
+  const root = await repo();
+  await writeFile(path.join(root, 'README.md'), '# Readme\n');
+  const base = commit(root, 'docs: readme');
+  const fact = await lessonsAdd(root, JSON.stringify({ kind: 'fact', cue: 'In this repo, app.js is loaded twice', paths: ['src/app.js'], body: 'Observed.', commit: base }));
+  assert.equal(fact.added, true);
+  commit(root, 'lessons: app');
+  git(root, 'switch', '-q', '-c', 'esq/unit');
+  const { relative } = await plan(root, 'widget');
+  await writeFile(path.join(root, 'src/app.js'), 'export const one = 2;\n');
+  const head = commit(root, 'feat(app): two');
+  const expected = { cues: [{ id: fact.id, kind: 'fact', cue: 'In this repo, app.js is loaded twice' }], omitted: 0, stale: 0 };
+
+  assert.deepEqual((await reviewScope(root, relative)).lessons, expected);
+  assert.deepEqual((await reviewScopeRange(root, `${base}..${head}`)).lessons, expected);
+  await writeFile(path.join(root, 'README.md'), '# Readme, again\n');
+  const unrelated = commit(root, 'docs: readme again');
+  assert.deepEqual((await reviewScopeRange(root, unrelated)).lessons.cues, []);
+
+  await writeFile(path.join(root, 'docs/LESSONS.md'), '# Lessons\n\n## L-broken\n');
+  const malformed = await reviewScope(root, relative);
+  assert.equal(malformed.mode, 'full');
+  assert.deepEqual(malformed.lessons.cues, []);
   await rm(root, { recursive: true, force: true });
 });
 
