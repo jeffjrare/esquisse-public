@@ -415,18 +415,26 @@ export function touchedPaths(text) {
     const paths = [];
     const unread = [];
     for (const span of texts.flatMap((item) => [...item.matchAll(/`([^`]+)`/g)].map((match) => match[1].trim()))) {
-      const alternatives = expandBraces(span).map((entry) => entry.replace(/^\.\//, '').replace(/\/+$/, ''));
-      const plain = alternatives.every((entry) => entry !== '' && PATH_SPAN.test(entry) && (entry.includes('/') || /\.[A-Za-z0-9]+$/.test(entry)));
-      if (!plain) { if (!unread.includes(span)) unread.push(span); continue; }
+      const alternatives = pathAlternatives(span);
+      if (alternatives === null) { if (!unread.includes(span)) unread.push(span); continue; }
       for (const entry of alternatives) if (!paths.includes(entry)) paths.push(entry);
     }
     return { phase: phase.number, title: phase.title, paths, unread };
   });
 }
 
+// One inline-code span read as paths: its brace group expanded, a leading `./` and a trailing `/`
+// dropped, and `null` unless every alternative has the plain path shape above. Shared by
+// `**Files touched:**` and the `**Paths:**` item of a `docs/LESSONS.md` entry, so the two read alike.
+export function pathAlternatives(span) {
+  const alternatives = expandBraces(String(span).trim()).map((entry) => entry.replace(/^\.\//, '').replace(/\/+$/, ''));
+  const plain = alternatives.every((entry) => entry !== '' && PATH_SPAN.test(entry) && (entry.includes('/') || /\.[A-Za-z0-9]+$/.test(entry)));
+  return plain ? alternatives : null;
+}
+
 // `a/{b,c/d}.ts` → `a/b.ts`, `a/c/d.ts`, nested groups included. An unbalanced brace is left as
 // written, which then fails the path shape and lands in `unread` rather than being guessed at.
-function expandBraces(span) {
+export function expandBraces(span) {
   const open = span.indexOf('{');
   if (open < 0) return [span];
   let depth = 0;

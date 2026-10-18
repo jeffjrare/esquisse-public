@@ -215,7 +215,7 @@ verification state, and merging safely.
 | Piece | Where | Responsibility |
 |---|---|---|
 | Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed |
-| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges. It answers structured questions; it makes no product choices |
+| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, and keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand; `esq lessons show` opens one). It answers structured questions; it makes no product choices |
 | Project records | `docs/` in your project, and Git | Keep plans, decisions, committed work and the execution log available to the next session |
 | Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
 
@@ -231,6 +231,7 @@ permission settings.
 | `docs/plans/*.md` | Goal, phases, verification and the execution log |
 | `docs/BACKLOG.md` | Tasks with permanent `B-NNN` IDs |
 | `docs/DECISIONS.md` | Decisions and the authority behind each one |
+| `docs/LESSONS.md` | Lessons from closed defects and verified repo facts, each tied to its evidence and the paths it is about |
 | `docs/ROADMAP.md` | Ordered `Now`, `Next` and `Later` work, with the reason for each position |
 | `docs/epics/<slug>.md` | A theme joining several plans and backlog items |
 | `docs/SPEC.md` | The live product as users experience it |
