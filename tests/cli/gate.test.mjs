@@ -576,6 +576,7 @@ test('the harmless set is exactly the command-owned lifecycle, and nothing else'
     ['a corrective brief', async (root) => { await writeFile(path.join(root, 'docs/plans/p-fixes.brief.md'), '# Brief\n'); }, 'reuse'],
     ['the backlog', async (root) => { await writeFile(path.join(root, 'docs/BACKLOG.md'), '# Backlog\n\n| B-001 |\n'); }, 'reuse'],
     ['the decisions ledger', async (root) => { await writeFile(path.join(root, 'docs/DECISIONS.md'), '# Decisions\n\nmore\n'); }, 'reuse'],
+    ['the lessons ledger', async (root) => { await writeFile(path.join(root, 'docs/LESSONS.md'), '# Lessons\n'); }, 'reuse'],
     ['the roadmap', async (root) => { await writeFile(path.join(root, 'docs/ROADMAP.md'), '# Roadmap\n\nmore\n'); }, 'run'],
     ['an epic', async (root) => { await writeFile(path.join(root, 'docs/epics/one.md'), '# Epic\n\nmore\n'); }, 'run'],
     ['the plan above its execution log', async (root, file) => {

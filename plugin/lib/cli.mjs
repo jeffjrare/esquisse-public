@@ -2930,7 +2930,8 @@ export async function branchResolve(root, rawSlug) {
 // Command-owned lifecycle is harmless only when it is not a known command input: an append below
 // `## Execution log` in the active plan, another plan or brief, and the two ledgers. Plain operands
 // and valid `(reads)` declarations take precedence. ROADMAP.md and epics have no blanket exemption.
-const GATE_LEDGERS = new Set(['docs/BACKLOG.md', 'docs/DECISIONS.md']);
+// `docs/LESSONS.md` is the third: written only by `esq lessons add`, and no command reads it as an input.
+const GATE_LEDGERS = new Set(['docs/BACKLOG.md', 'docs/DECISIONS.md', 'docs/LESSONS.md']);
 
 // Two bookkeeping fields are left out of the comparison, and only two: the `**Reviewed at:**` header
 // line `esq plan set-reviewed` writes and the `**Abandoned:**` line `esq plan abandon` writes, each
@@ -3296,7 +3297,9 @@ export async function gateVerify(root, planPath, { workersMoved = false, phase =
 // in either order. Anything else — code, `docs/DECISIONS.md`, and every byte under `.claude/skills/`,
 // `SKILL.md` included — invalidates. What it cannot do is certify prose: a hand edit to a projection
 // after it was mined reads as fresh, by design, because the list admits the projection files.
-const PROVENANCE_HARMLESS = new Set(['docs/SPEC.md', 'CLAUDE.md', 'docs/ARCHITECTURE.md', 'docs/BACKLOG.md']);
+// `docs/LESSONS.md` is listed so a lesson written after a review costs no re-review: an entry is
+// evidence about the change, never part of it.
+const PROVENANCE_HARMLESS = new Set(['docs/SPEC.md', 'CLAUDE.md', 'docs/ARCHITECTURE.md', 'docs/BACKLOG.md', 'docs/LESSONS.md']);
 
 // esquisse's own bookkeeping under docs/plans: plans and briefs, and the evidence captures a manual
 // confirmation commits beside its plan in `<plan-stem>.assets/`. Any other file there is a real artifact.
@@ -5815,6 +5818,8 @@ export async function validate(root) {
     }
     catch (error) { findings.push(`${relative}: ${error.message}`); }
   }
+  // The lessons ledger only ever advises: a stale or unreadable entry never decides `valid`.
+  advisories.push(...await lessonsAdvisories(repository).catch(() => []));
   return { valid: findings.length === 0, root: repository, findings, advisories };
 }
 

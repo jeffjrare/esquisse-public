@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { branchCheck, lessonsAdd, lessonsMatch, lessonsShow, parseLessons } from '../../plugin/lib/cli.mjs';
+import { branchCheck, lessonsAdd, lessonsMatch, lessonsShow, parseLessons, setReviewed, validate } from '../../plugin/lib/cli.mjs';
 
 // `docs/LESSONS.md` in real throwaway repositories: every guard on an entry is a reference that
 // resolves in git (a backlog row, a brief line at a commit, a fix commit, a tracked path), and a stub
@@ -235,5 +235,44 @@ test('esq branch check does not count a lesson: row in unit.open', async () => {
   commit(root, 'lessons: unit');
   const check = await branchCheck(root, plan);
   assert.deepEqual(check.unit.open, []);
+  await rm(root, { recursive: true, force: true });
+});
+
+test('validate lists stale, duplicate and unreadable lessons as advisories, and valid stays true', async () => {
+  const { root, fix } = await repo();
+  await add(root, { kind: 'fact', cue: 'kept', paths: ['src/api/users.ts'], body: 'b', commit: fix });
+  const gone = await add(root, { kind: 'fact', cue: 'gone', paths: ['src/api/orders.ts'], body: 'b', commit: fix });
+  await rm(path.join(root, 'src/api/orders.ts'));
+  const text = await ledger(root);
+  const block = text.slice(text.indexOf(`## ${gone.id}`));
+  await writeFile(path.join(root, 'docs/LESSONS.md'), `${text}\n${block}\n## L-nothex here\n`);
+  commit(root, 'chore: drop orders');
+  const result = await validate(root);
+  assert.equal(result.valid, true);
+  assert.deepEqual(result.findings, []);
+  const lessons = result.advisories.filter((line) => line.startsWith('docs/LESSONS.md'));
+  assert.ok(lessons.some((line) => line.includes(`stale ${gone.id} — path \`src/api/orders.ts\` matches no tracked file`)));
+  assert.ok(lessons.some((line) => line.includes(`duplicate lesson ID ${gone.id}`)));
+  assert.ok(lessons.some((line) => /unreadable lesson block/.test(line)));
+  await rm(root, { recursive: true, force: true });
+});
+
+test('a commit touching only docs/LESSONS.md after a review keeps the unit covered', async () => {
+  const { root, fix } = await repo();
+  git(root, 'switch', '-q', '-c', 'esq/unit');
+  const plan = 'docs/plans/2026-10-02-unit.md';
+  await writeFile(path.join(root, plan), '# Unit\n\n**Branch:** esq/unit\n\n**Origin:** main\n\n## Phases\n\n### Phase 1 — one\n- task\n\n## Execution log\n');
+  commit(root, 'plan: unit');
+  // The ledger line in .gitattributes is the one non-bookkeeping write, once per repository.
+  await writeFile(path.join(root, '.gitattributes'), 'docs/LESSONS.md merge=union\n');
+  commit(root, 'chore: union merge for lessons');
+  await setReviewed(root, plan, git(root, 'rev-parse', 'HEAD'));
+  commit(root, 'plan(unit): reviewed');
+  assert.equal((await branchCheck(root, plan)).coverage.verdict, 'covered');
+  const added = await add(root, lesson(fix));
+  assert.equal(added.gitattributes, 'present');
+  commit(root, 'lessons: unit');
+  const after = await branchCheck(root, plan);
+  assert.equal(after.coverage.verdict, 'covered', after.coverage.reason);
   await rm(root, { recursive: true, force: true });
 });
