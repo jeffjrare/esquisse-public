@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-lesson-lines-carry-their-id | 2026-10-18 | arch | lessons | After its heading, a lesson entry has no blank line, a one-line body, and every line ends with the entry's own ID as an HTML comment (` <!-- L-<id> -->`). | Active |
 | D-lessons-ledger-is-evidence-keyed-and-union-merged | 2026-10-18 | arch | ledgers | docs/LESSONS.md is written only by `esq lessons add`, one `## L-<hex>` block per entry whose ID hashes its resolved evidence, read by path through cues carried in existing preflights, advisory in validate, harmless to proofs and projections, and merged by a `merge=union` attribute. | Active |
 | D-a-plan-tries-its-checks-against-the-tree | 2026-10-15 | arch | verification | `/esq:plan` keeps resolving commands by reading, and adds two bounded tries before it commits. A test command whose runner lists without executing is run once in that mode. Every `grep … — no match` pattern, and the old name of every replaced seam, is run over the whole tracked tree and its hits piped into `esq plan probe <plan> --paths -`, which answers which phase's `**Files touched:**` covers each path. Every `unassigned` path is assigned, excluded by name or judged out of scope before the commit. A phase that swaps a seam carries all its consumers, mocks included. | Active |
 | D-grill-runs-on-request | 2026-10-15 | arch | skills | `/esq:grill` drops the flag for the in-body "No mandate, no run." refusal. It runs on the user's own request in this conversation, naming the command and its target, and only in the session talking to that user. A description match, the model's own initiative or a subagent delegation stops and prints the invocation. | Active |
@@ -5589,3 +5590,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained retry safety, conflict-free merges and zero gate cost; accepted one appended `.gitattributes` line per repository, which stales a proof once.
 **Conséquences:** Any new lesson writer passes evidence the CLI resolves; a new merge path needs nothing; a lesson never authorizes and never stops a command.
 **Alternatives rejetées:** A table with sequential L-NNN IDs (needs the allocator, not retry-safe, prose in cells); teaching esq merge land a third ledger (covers only that merge route); CONVENTIONS.md (read in full every run — user rejected).
+
+## D-lesson-lines-carry-their-id — Every line of a lesson entry carries its ID
+
+**Scope:** arch
+**Topic:** lessons
+**Date:** 2026-10-18
+**Statut:** Active
+**Fondement:** mandate — docs/plans/2026-10-18-cross-cycle-lessons-ledger.md, Recommendation: union-merged, append-only blocks written only by esq lessons add
+
+**Contexte:** docs/LESSONS.md is merged across branches by a merge=union line in .gitattributes, so two branches' appended entries never stop esq merge land. Git's union driver refines a conflict by diffing the two sides and emits each line they share once, so two entries sharing a blank line, a Date, an Evidence or a body were interleaved into one broken block.
+**Décision:** After its heading, a lesson entry has no blank line, a one-line body, and every line ends with the entry's own ID as an HTML comment (` <!-- L-<id> -->`).
+**Raison:** Union merge is correct for an append-only ledger only when no two entries share a line; the entry's ID is the one value guaranteed unique to it, and an HTML comment is invisible when the file is rendered. Teaching esq merge land a third ledger would cost more and still leave hand merges and /esq:worktree merges broken.
+**Tradeoff:** Gained: two branches' entries merge cleanly by every merge route, add/add included. Accepted: a noisier raw file and a body limited to one line.
+**Conséquences:** Any change to the entry renderer or parser keeps every post-heading line unique to its entry; tests/cli/lessons.test.mjs's two-branch merge test fails otherwise. Nothing but esq lessons add may write an entry.
+**Alternatives rejetées:** A blank-line block with merge=union (loses or interleaves entries); a table with one row per entry (rejected by the plan: prose in a cell, a sequential ID, no retry safety); conflict handling for the ledger in esq merge land (covers one merge route only).
