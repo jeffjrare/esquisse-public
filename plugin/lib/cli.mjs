@@ -4,7 +4,7 @@ import { realpathSync } from 'node:fs';
 import { appendFile, mkdir, open, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseVerified, pathAlternatives, readText, splitTableRow, tableAt, touchedPaths, touchesPath } from './markdown.mjs';
+import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseSections, parseVerified, pathAlternatives, readText, splitTableRow, stripComments, tableAt, touchedPaths, touchesPath } from './markdown.mjs';
 import { canonicalPlanSlug, telemetryOptedOut } from '../scripts/hook-io.mjs';
 import { MIN_SAMPLE_RUNS, compareTelemetry, discoverTelemetryFiles, renderTelemetrySummary, repoKey, summarizeTelemetry, trendWindow } from './telemetry.mjs';
 
@@ -3325,18 +3325,19 @@ function changedPlanContracts(repository, base, head = 'HEAD') {
   });
 }
 
-// `{ ok: true, changed }` — the paths outside the harmless list since `at` — or `{ ok: false, reason }`
-// when nothing can be proved. A short hash, a ref name, a commit this repository does not hold, or a
-// git that will not answer each fail to prove, and never read as fresh.
-function provenSince(repository, at) {
+// `{ ok: true, changed }` — the paths outside the harmless list between `at` and `upto` (HEAD unless a
+// reader names an earlier base) — or `{ ok: false, reason }` when nothing can be proved. A short hash,
+// a ref name, a commit this repository does not hold, or a git that will not answer each fail to
+// prove, and never read as fresh.
+function provenSince(repository, at, upto = 'HEAD') {
   if (typeof at !== 'string' || !FULL_OID.test(at)) {
     return { ok: false, reason: at ? `\`${at}\` is not a full 40-character commit, so it cannot prove anything` : 'no commit is recorded' };
   }
   if (!repository || !gitTry(repository, ['rev-parse', '--verify', '--quiet', `${at}^{commit}`])) {
     return { ok: false, reason: `${at.slice(0, 7)} is not a commit in this repository` };
   }
-  const diff = gitTry(repository, ['diff', '--name-only', '--no-renames', at, 'HEAD']);
-  if (diff === null) return { ok: false, reason: `git could not diff ${at.slice(0, 7)} against HEAD` };
+  const diff = gitTry(repository, ['diff', '--name-only', '--no-renames', at, upto]);
+  if (diff === null) return { ok: false, reason: `git could not diff ${at.slice(0, 7)} against ${upto}` };
   return { ok: true, changed: diff.split('\n').filter((line) => line !== '' && !provenanceHarmless(line)) };
 }
 
@@ -3357,59 +3358,186 @@ function projectionMarker(text, marker) {
   return null;
 }
 
-export async function projections(root) {
+// One projection's freshness entry, as `esq projections` reports it — the single computation landing,
+// status and the section reader share, so they can never disagree. `body` is the marker's parsed
+// commit kept for the reader; `projections()` never reports it.
+async function projectionFreshness(repository, base, projection) {
+  const entry = { name: projection.name, owner: projection.owner, file: null, marker: null, date: null, at: null, verdict: 'unproven', reason: null, changed: [] };
+  let legacy = false;
+  let body;
+  for (const candidate of projection.files) {
+    let text;
+    try { text = await readText(path.join(base, candidate)); }
+    catch { continue; }
+    const found = projectionMarker(text, projection.marker);
+    if (found) { entry.file = candidate; entry.marker = found.line; body = found.body; break; }
+    if (projectionMarker(text, 'last-synced')) legacy = true;
+  }
+  if (!entry.marker) {
+    entry.reason = legacy
+      ? `only the legacy \`last-synced\` marker exists — it records a date, never a commit; run ${projection.owner}`
+      : `no \`${projection.marker}\` marker in ${projection.files.join(' or ')}; run ${projection.owner}`;
+    return entry;
+  }
+  const parsed = MARKER_BODY.exec(body);
+  if (!parsed) {
+    entry.reason = `${entry.file}'s marker is malformed — expected \`<!-- ${projection.marker}: YYYY-MM-DD @ <full commit> -->\`; run ${projection.owner}`;
+    return entry;
+  }
+  entry.date = parsed[1];
+  entry.at = parsed[2] ?? null;
+  if (!entry.at) {
+    entry.reason = `${entry.file} records a date and no commit, so it cannot prove what tree it describes; run ${projection.owner}`;
+    return entry;
+  }
+  const since = provenSince(repository, entry.at);
+  if (!since.ok) {
+    entry.reason = `${entry.file}: ${since.reason}; run ${projection.owner}`;
+  } else if (since.changed.length > 0) {
+    entry.verdict = 'stale';
+    entry.changed = since.changed;
+    entry.reason = `${since.changed.length} path(s) outside the projection bookkeeping changed since ${entry.at.slice(0, 7)} — ${since.changed.slice(0, 5).join(', ')}${since.changed.length > 5 ? ', …' : ''}; run ${projection.owner}`;
+  } else {
+    entry.verdict = 'fresh';
+    entry.reason = `nothing outside the projection bookkeeping changed since ${entry.at.slice(0, 7)}`;
+  }
+  return entry;
+}
+
+function projectionRepository(root) {
   let repository = null;
   try { repository = git(root, ['rev-parse', '--show-toplevel']); } catch { repository = null; }
+  return repository;
+}
+
+export async function projections(root) {
+  const repository = projectionRepository(root);
   const base = repository ?? root;
   const head = repository ? gitTry(repository, ['rev-parse', 'HEAD']) : null;
   const report = [];
-  for (const projection of PROJECTIONS) {
-    const entry = { name: projection.name, owner: projection.owner, file: null, marker: null, date: null, at: null, verdict: 'unproven', reason: null, changed: [] };
-    let legacy = false;
-    for (const candidate of projection.files) {
-      let text;
-      try { text = await readText(path.join(base, candidate)); }
-      catch { continue; }
-      const found = projectionMarker(text, projection.marker);
-      if (found) { entry.file = candidate; entry.marker = found.line; entry.body = found.body; break; }
-      if (projectionMarker(text, 'last-synced')) legacy = true;
-    }
-    const body = entry.body;
-    delete entry.body;
-    if (!entry.marker) {
-      entry.reason = legacy
-        ? `only the legacy \`last-synced\` marker exists — it records a date, never a commit; run ${projection.owner}`
-        : `no \`${projection.marker}\` marker in ${projection.files.join(' or ')}; run ${projection.owner}`;
-      report.push(entry);
-      continue;
-    }
-    const parsed = MARKER_BODY.exec(body);
-    if (!parsed) {
-      entry.reason = `${entry.file}'s marker is malformed — expected \`<!-- ${projection.marker}: YYYY-MM-DD @ <full commit> -->\`; run ${projection.owner}`;
-      report.push(entry);
-      continue;
-    }
-    entry.date = parsed[1];
-    entry.at = parsed[2] ?? null;
-    if (!entry.at) {
-      entry.reason = `${entry.file} records a date and no commit, so it cannot prove what tree it describes; run ${projection.owner}`;
-      report.push(entry);
-      continue;
-    }
-    const since = provenSince(repository, entry.at);
-    if (!since.ok) {
-      entry.reason = `${entry.file}: ${since.reason}; run ${projection.owner}`;
-    } else if (since.changed.length > 0) {
-      entry.verdict = 'stale';
-      entry.changed = since.changed;
-      entry.reason = `${since.changed.length} path(s) outside the projection bookkeeping changed since ${entry.at.slice(0, 7)} — ${since.changed.slice(0, 5).join(', ')}${since.changed.length > 5 ? ', …' : ''}; run ${projection.owner}`;
-    } else {
-      entry.verdict = 'fresh';
-      entry.reason = `nothing outside the projection bookkeeping changed since ${entry.at.slice(0, 7)}`;
-    }
-    report.push(entry);
-  }
+  for (const projection of PROJECTIONS) report.push(await projectionFreshness(repository, base, projection));
   return { root: repository, head, fresh: report.every((entry) => entry.verdict === 'fresh'), projections: report };
+}
+
+// ── Section reads of a projection ────────────────────────────────────────────
+// `esq projection outline|read <spec|arch>`: the heading tree with each subtree's cost, then only the
+// sections a run chose, history comments stripped. Which sections matter is the caller's judgment;
+// the boundaries, the stripping and the freshness are structure. The text read is always the
+// projection's own document (`docs/ARCHITECTURE.md` for arch, even when its marker lives in
+// `CLAUDE.md`), and the freshness is `projections()`' entry minus its full `changed` list.
+const LEAD_LIMIT = 160;
+
+function projectionNamed(name) {
+  const projection = PROJECTIONS.find((entry) => entry.name === name);
+  if (!projection) throw new Error(`unknown projection \`${name ?? ''}\` — expected spec or arch`);
+  return projection;
+}
+
+function freshnessSummary(entry) {
+  return { verdict: entry.verdict, date: entry.date, at: entry.at, reason: entry.reason, changedCount: entry.changed.length };
+}
+
+async function projectionSource(root, name) {
+  const projection = projectionNamed(name);
+  const repository = projectionRepository(root);
+  const base = repository ?? root;
+  const entry = await projectionFreshness(repository, base, projection);
+  const file = projection.files[0];
+  let text = null;
+  try { text = await readText(path.join(base, file)); } catch { text = null; }
+  const marker = new RegExp(`^<!--\\s*${projection.marker}:.*-->\\s*$`);
+  const keep = (line) => marker.test(line);
+  return { projection, repository, entry, file, text, keep };
+}
+
+function sectionText(lines, section) {
+  return section.to >= section.from ? `${lines.slice(section.from - 1, section.to).join('\n')}\n` : '';
+}
+
+function projectionLines(text) {
+  const lines = text.split('\n');
+  if (lines.length > 0 && lines[lines.length - 1] === '') lines.pop();
+  return lines;
+}
+
+// Which of `paths` changed between the marker commit and `upto`: `[]` with a reason when the marker
+// postdates `upto` (the projection was mined after it), `null` when freshness is not provable.
+function projectionTouched(repository, entry, paths, upto) {
+  if (!entry.at || !FULL_OID.test(entry.at) || !repository || !gitTry(repository, ['rev-parse', '--verify', '--quiet', `${entry.at}^{commit}`])) {
+    return { touched: null, touchedReason: `freshness is not provable (${entry.reason}) — every rule read counts as unverified` };
+  }
+  const target = gitTry(repository, ['rev-parse', '--verify', '--quiet', `${upto}^{commit}`]);
+  if (!target) throw new Error(`--upto \`${upto}\` is not a commit in this repository`);
+  if (gitTry(repository, ['merge-base', '--is-ancestor', entry.at, target]) === null) {
+    return { touched: [], touchedReason: `the projection was mined at ${entry.at.slice(0, 7)}, after ${upto} — nothing it describes changed before ${upto}` };
+  }
+  const since = provenSince(repository, entry.at, target);
+  if (!since.ok) return { touched: null, touchedReason: `${since.reason} — every rule read counts as unverified` };
+  const changed = new Set(since.changed);
+  const wanted = [...new Set(paths.map((line) => line.trim().replace(/^\.\//, '')).filter((line) => line !== ''))];
+  return { touched: wanted.filter((file) => changed.has(file)), touchedReason: `paths changed between ${entry.at.slice(0, 7)} and ${upto}` };
+}
+
+// Over the inline budget, the sections (outline entries, or the read texts each opened by an
+// `<!-- esq:section <id> <from>-<to> -->` line) move to one file under the git dir — never the
+// working tree — named by `spill.file` with `spill.ranges` that each fit one Read.
+async function spillProjection(repository, name, kind, answer, body) {
+  if (Buffer.byteLength(JSON.stringify(answer, null, 2)) <= INLINE_OUTPUT_BUDGET) return null;
+  const gitDir = repository ? gitTry(repository, ['rev-parse', '--absolute-git-dir']) : null;
+  if (!gitDir) return null;
+  const target = path.join(gitDir, 'esq', `projection-${name}.${kind}`);
+  await mkdir(path.dirname(target), { recursive: true });
+  const temporary = `${target}.${process.pid}.tmp`;
+  await writeFile(temporary, body, 'utf8');
+  await rename(temporary, target);
+  return { spill: { file: target, ranges: readRanges(body) } };
+}
+
+export async function projectionOutline(root, name, { paths = null, upto = 'HEAD' } = {}) {
+  const { repository, entry, file, text, keep } = await projectionSource(root, name);
+  const answer = { name, file, exists: text !== null, freshness: freshnessSummary(entry) };
+  if (paths !== null) Object.assign(answer, projectionTouched(repository, entry, paths, upto));
+  if (text === null) return { ...answer, sections: [] };
+  const lines = projectionLines(text);
+  answer.bytes = Buffer.byteLength(text);
+  answer.strippedBytes = Buffer.byteLength(stripComments(text, keep));
+  answer.sections = parseSections(text).map((section) => {
+    const stripped = stripComments(sectionText(lines, section), keep);
+    const body = stripped.split('\n').slice(section.heading === null ? 0 : 1);
+    const lead = (body.find((line) => line.trim() !== '') ?? '').trim();
+    return { ...section, bytes: Buffer.byteLength(stripped), lead: lead.length > LEAD_LIMIT ? `${lead.slice(0, LEAD_LIMIT - 1)}…` : lead };
+  });
+  const spilled = await spillProjection(repository, name, 'outline.json', answer, `${readableJson(answer.sections)}\n`);
+  if (!spilled) return answer;
+  const { sections, ...rest } = answer;
+  return { ...rest, sectionCount: sections.length, ...spilled };
+}
+
+export async function projectionRead(root, name, ids = []) {
+  const { repository, entry, file, text, keep } = await projectionSource(root, name);
+  const answer = { name, file, exists: text !== null, freshness: freshnessSummary(entry) };
+  if (text === null) return { ...answer, sections: [] };
+  const all = parseSections(text);
+  const last = all.length - 1;
+  const invalid = ids.filter((id) => !/^\d+$/.test(String(id)) || Number(id) > last);
+  if (invalid.length > 0) {
+    return { refuse: true, reason: `unknown section id(s) ${invalid.join(', ')} — ${file} has ids 0–${last}; run esq projection outline ${name}`, ...answer };
+  }
+  const lines = projectionLines(text);
+  if (ids.length === 0) {
+    // No ids: the whole stripped document, as one entry with no section id.
+    answer.sections = [{ id: null, heading: null, from: 1, to: lines.length, text: stripComments(text, keep) }];
+  } else {
+    const chosen = all.filter((section) => ids.map(Number).includes(section.id));
+    // A selected section inside another selected one is emitted once, inside its parent.
+    const emitted = chosen.filter((section) => !chosen.some((other) => other !== section && other.heading !== null
+      && other.from < section.from && section.to <= other.to));
+    answer.sections = emitted.map((section) => ({ id: section.id, heading: section.heading, from: section.from, to: section.to, text: stripComments(sectionText(lines, section), keep) }));
+  }
+  const body = answer.sections.map((section) => `<!-- esq:section ${section.id} ${section.from}-${section.to} -->\n${section.text}`).join('');
+  const spilled = await spillProjection(repository, name, 'read.md', answer, body);
+  if (!spilled) return answer;
+  return { ...answer, sections: answer.sections.map(({ text: _text, ...rest }) => rest), ...spilled };
 }
 
 // Whether a clean review still covers HEAD: the plan header's `**Reviewed at:**` commit, and nothing
@@ -6167,6 +6295,38 @@ export async function main(args) {
     if (action !== undefined) throw new Error('usage: esq projections');
     return output(await projections(root));
   }
+  // Read-only, exit 0 except an unknown section id (exit 1, never a whole-file fallback): the heading
+  // tree of one projection with each subtree's cost and freshness, or the chosen sections, stripped.
+  if (group === 'projection') {
+    const usage = 'usage: esq projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] | esq projection read <spec|arch> [<id>…]';
+    const [name, ...args] = rest;
+    if (!['spec', 'arch'].includes(name)) throw new Error(usage);
+    if (action === 'outline') {
+      let source = null;
+      let upto = 'HEAD';
+      for (let index = 0; index < args.length; index += 2) {
+        if (args[index] === '--paths' && args[index + 1] !== undefined && source === null) source = args[index + 1];
+        else if (args[index] === '--upto' && args[index + 1] !== undefined) upto = args[index + 1];
+        else throw new Error(usage);
+      }
+      let listed = null;
+      if (source !== null) {
+        let body = '';
+        if (source === '-') { for await (const chunk of process.stdin) body += chunk; }
+        else body = await readText(path.resolve(root, source));
+        listed = body.split('\n');
+      }
+      return output(await projectionOutline(root, name, { paths: listed, upto }));
+    }
+    if (action === 'read') {
+      if (args.some((arg) => arg.startsWith('--'))) throw new Error(usage);
+      const result = await projectionRead(root, name, args);
+      output(result);
+      if (result.refuse) process.exitCode = 1;
+      return;
+    }
+    throw new Error(usage);
+  }
   // The plan a corrective brief corrects, and the ONLY place a `/esq:fix` run gets that path: the
   // brief it was handed is deleted by the end of the run, and `→ Next` names the plan after it is
   // gone. Refuses rather than ranks on each of its three grounds (no plan carries the slug, the
@@ -6318,5 +6478,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
 }
