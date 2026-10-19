@@ -32,7 +32,11 @@ If a pass would exceed it, stop at the bound and say what you did not cover. The
 
 ## Preflight
 
-1. Read `CLAUDE.md` at project root if present, and `docs/ARCHITECTURE.md` if present — its design-system section tells you where tokens live, what the component library is, and what the accessibility floor is meant to be. Read `docs/SPEC.md` if present: it names the features, which is how you know which screens matter rather than guessing from the router.
+1. Send `esq projection outline arch` and `esq projection outline spec` in one turn; `CLAUDE.md` is in context already (Claude Code loads it), so it is not opened again. Then read only what this run needs: arch's design-system section, which tells you where tokens live, what the component library is, and what the accessibility floor is meant to be; and the spec's outline, whose features tell you which screens matter rather than guessing from the router, reading the sections of the features the slice centres on.
+
+   <!-- shared:projection-read:start -->
+   **Projections are read by section, never whole.** `esq projection outline <spec|arch>` answers the heading tree (`id`, `heading`, `from`/`to`, subtree `bytes`, a one-line `lead`) and the projection's `freshness`; `esq projection read <spec|arch> <id…>` answers only those sections, history comments stripped. Read the overview (id 0 and `Vue d'ensemble`) and any shared-rules section alongside the feature, and pick a large parent's children by their `bytes`. An answer that spilled names `spill.file` and `spill.ranges`: Read those in one batch, never re-run it. An unknown id refuses: re-run the outline, never fall back to a whole-file Read. `exists: false` means there is no such projection.
+   <!-- shared:projection-read:end -->
 2. Note today's date in YYYY-MM-DD format.
 3. **Resolve the target.** A `B-NNN` (match leniently, as `/esq:work` does) or a sentence describing what went wrong makes this a targeted run — see `## A targeted run`; read only that row and its `## B-NNN` section in `docs/BACKLOG.md`. A screen name centres the slice on it. Nothing named centres it on the journey a user takes most often. Either way the slice is sized in `## The slice`, once Pass 1 has mapped the screens.
 4. Determine a slug from the target the user named: 3-5 lowercase words joined with hyphens, e.g. `refonte-visuelle-dashboard`. If they named no target, slug the slice's centre journey and say so.

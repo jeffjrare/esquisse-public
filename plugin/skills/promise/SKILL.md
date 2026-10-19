@@ -31,7 +31,11 @@ If a pass would exceed it, stop at the bound and name what you did not cover, wi
 
 ## Preflight
 
-1. Read `CLAUDE.md` and `docs/ARCHITECTURE.md` if present: they say how the app launches, where its pages and copy live (components, MDX, CMS exports, i18n files), and which locales ship. Read `docs/SPEC.md` if present. Read `docs/PROMISES.md` if present: it is this command's register (see `## The register`). These reads go out together in one turn.
+1. Send `esq projection outline arch` and `esq projection outline spec`, and read `docs/PROMISES.md` if present: it is this command's register (see `## The register`). These go out together in one turn. `CLAUDE.md` is in context already (Claude Code loads it), so it is not opened again. Then read only the sections this step needs: from arch, how the app launches, where its pages and copy live (components, MDX, CMS exports, i18n files) and which locales ship; from the spec, the features the target names, or with no target the outline's feature list, reading a feature's section when you test its promise.
+
+   <!-- shared:projection-read:start -->
+   **Projections are read by section, never whole.** `esq projection outline <spec|arch>` answers the heading tree (`id`, `heading`, `from`/`to`, subtree `bytes`, a one-line `lead`) and the projection's `freshness`; `esq projection read <spec|arch> <id…>` answers only those sections, history comments stripped. Read the overview (id 0 and `Vue d'ensemble`) and any shared-rules section alongside the feature, and pick a large parent's children by their `bytes`. An answer that spilled names `spill.file` and `spill.ranges`: Read those in one batch, never re-run it. An unknown id refuses: re-run the outline, never fall back to a whole-file Read. `exists: false` means there is no such projection.
+   <!-- shared:projection-read:end -->
 2. Note today's date (YYYY-MM-DD) and `git rev-parse --short HEAD`.
 3. **Resolve the mode and the target.** `--sense` or `--copy` anywhere in the arguments sets the mode, and the remaining positional is the target. Never infer a mode. A target narrows the run:
    - a page (a route, a file, or a URL of the marketing site): the promises made on that page, the screens reached from it, or the copy of that page;
