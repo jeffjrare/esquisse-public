@@ -75,3 +75,35 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-10-19
+
+**Plan committed at:** 68a5128
+
+**Commits:** a2b8077, 9576446, 58c7e24
+
+**Verified:** 58c7e2489175acdb69614a62a912112069ee0348
+- `node --test 'tests/cli/projection-read.test.mjs' 'tests/cli/landing.test.mjs'`
+- `node --test tests/cli/*.test.mjs`
+
+**What got built:** `esq projection outline <spec|arch> [--paths <file>|-] [--upto <commit>]` returns the heading tree (ids, line ranges, stripped subtree bytes, leads), raw and stripped sizes, freshness from the `projectionFreshness` helper `projections()` now shares, and `touched`; `esq projection read <spec|arch> [<id>…]` returns the chosen sections with history comments stripped, refusing an unknown id at exit 1.
+
+**Verification:**
+- (auto) node --test 'tests/cli/projection-read.test.mjs' 'tests/cli/landing.test.mjs' — 33 pass, 0 fail (landing's projections() verdicts unchanged)
+- blast radius: cli.mjs is the shared CLI module, so the whole CLI suite ran too — node --test tests/cli/*.test.mjs, 398 pass, 13 s
+
+**Decided for you:**
+- architecture: `read` with no ids answers one entry `{id: null, heading: null, from: 1, to: <last line>, text}` holding the whole stripped document, not one entry per top-level section — the contract says the whole stripped document, and per-section stripping changes the blank lines at section edges — undo: emit the top-level sections in projectionRead (plugin/lib/cli.mjs)
+- architecture: an answer over the 24 KB inline budget moves the outline entries or the section texts into `<git-dir>/esq/projection-<name>.outline.json|read.md` and names them under `spill: {file, ranges}`, so `file` keeps naming the projection document — undo: rename the key in spillProjection (plugin/lib/cli.mjs)
+- architecture: headings inside an HTML comment are not sections, and comments inside fenced code are kept as text — a changelog preamble in a comment holds `##` lines that are history, and a fenced HTML example is content — undo: drop the comment and fence tracking in structuralLines / stripComments (plugin/lib/markdown.mjs)
+
+**Surprises / decisions made during execution:** - Repair 1/3 (task route, Task 1.2): `read` with no ids first joined per-section stripped texts, which differed from the whole stripped document at section edges; it now returns the whole document as one entry (see Decided for you).
+- The first usage-string edit put an apostrophe (`subtree's`) inside the single-quoted top-level usage literal, a syntax error caught at the smoke run before any commit; reworded.
+- `--upto` naming no commit throws (exit 2) rather than answering `touched: null`: it is a caller error, not unprovable freshness.
+- On this repo the outline already shows the saving: docs/SPEC.md is 183,751 bytes raw, 151,640 stripped.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. Answers: outline `{name, file, exists, freshness{verdict,date,at,reason,changedCount}, bytes, strippedBytes, sections[{id,level,heading,from,to,bytes,lead}], touched?, touchedReason?}`; read `{…, sections[{id,heading,from,to,text}]}`. Id 0 is the preamble (heading null). Over 24 KB either answer moves its sections to `spill.file` (read it with `spill.ranges`) — skill prose should say so; on this repo `read spec` with a large section already spills.
+2. `touched` appears only with `--paths`; `null` means freshness unprovable (treat every rule as unverified), `[]` with `touchedReason` when the marker postdates `--upto`.
+3. Unknown id → `{refuse:true, reason}` exit 1; the reader should re-run outline, never fall back to a whole-file Read.
