@@ -25,7 +25,7 @@ The mining pass is where this command goes quiet for minutes. Naming what it wil
 
 ## Preflight
 
-1. Read `CLAUDE.md` at the project root if present — gives you the product name and high-level context.
+1. The product name and high-level context come from `CLAUDE.md`, which Claude Code already loads into the session: never open it again.
 2. Check whether `docs/SPEC.md` exists.
    - If it does: this is a **refresh**. Read it in full. Note the existing features list and the `<!-- last-spec: YYYY-MM-DD @ <commit> -->` marker — its date scopes which plans are new since the last pass (and it's what `/esq:arch` and `/esq:status` read to report spec staleness); a marker written before the commit existed carries the date alone, and reads the same way here.
    - If it doesn't: this is a **first run**.
@@ -96,10 +96,10 @@ Compare the mined feature list against the existing spec. Four cases, and the th
 
 - **New features** (in codebase, not in spec): add them.
 - **Unchanged features**: leave them as-is. Don't rewrite what's already accurate.
-- **A documented `Règle métier` the code no longer honors** — do NOT absorb this as an update. Code alone cannot distinguish an intended change from a regression. Collect the disagreement and resolve its authority through "Confirm before writing" before changing that rule. Intended → rewrite the rule and note it `<!-- modifié YYYY-MM-DD : <ancienne règle> → <nouvelle> -->`. Not intended → **leave that rule exactly as it was**, and report the regression; do not undo unrelated settled work.
+- **A documented `Règle métier` the code no longer honors** — do NOT absorb this as an update. Code alone cannot distinguish an intended change from a regression. Collect the disagreement and resolve its authority through "Confirm before writing" before changing that rule. Intended → rewrite the rule, and record `<ancienne règle> → <nouvelle>` with its confirmed intent in the commit body (see "Write and commit"). Not intended → **leave that rule exactly as it was**, and report the regression; do not undo unrelated settled work.
 - **Removed features** (in spec, no longer in codebase): same treatment — a feature that vanished is either a retirement or an accident. If confirmed retired, mark `**Statut:** Retiré — YYYY-MM-DD` rather than deleting, so the history survives.
 
-Non-rule changes — wording, a clearer `Fonctionnement`, a feature that gained a step — just update, with `<!-- mis à jour YYYY-MM-DD : <what changed> -->` above the section. The interrogation is for rules and disappearances only; asking about every prose tweak would drown the questions that matter in noise.
+Non-rule changes — wording, a clearer `Fonctionnement`, a feature that gained a step — just update, and name what changed in the commit body. The interrogation is for rules and disappearances only; asking about every prose tweak would drown the questions that matter in noise.
 
 ## Confirm before writing
 
@@ -125,9 +125,9 @@ Write it, commit it, and report — the steps are below. A correction after the 
 
 1. Ensure `docs/` exists.
 2. Write `docs/SPEC.md` with the confirmed content.
-3. For a complete refresh only, set the marker on the second line to today's date and the commit preflight read: `<!-- last-spec: YYYY-MM-DD @ <full commit> -->`. Never shorten the commit. A partial refresh preserves the existing marker and document-wide update date (or leaves them absent on a first run); date its settled section edits only. Without a complete marker, `esq projections` cannot certify freshness. Freshness survives exactly the bookkeeping a refresh or a landing makes — this file, `CLAUDE.md`, `docs/ARCHITECTURE.md`, Markdown under `docs/plans/`, `docs/BACKLOG.md` — so a same-day `/esq:arch` before or after this run leaves both fresh.
+3. For a complete refresh only, set the marker on the second line to today's date and the commit preflight read: `<!-- last-spec: YYYY-MM-DD @ <full commit> -->`. Never shorten the commit. A partial refresh preserves the existing marker and document-wide update date (or leaves them absent on a first run); its settled section edits are summarized in the commit body. Without a complete marker, `esq projections` cannot certify freshness. Freshness survives exactly the bookkeeping a refresh or a landing makes — this file, `CLAUDE.md`, `docs/ARCHITECTURE.md`, Markdown under `docs/plans/`, `docs/BACKLOG.md` — so a same-day `/esq:arch` before or after this run leaves both fresh.
 4. `git add docs/SPEC.md`
-5. `git commit -m "spec: <first run | refresh YYYY-MM-DD | partial refresh YYYY-MM-DD> (<N> features)"`
+5. `git commit -m "spec: <first run | refresh YYYY-MM-DD | partial refresh YYYY-MM-DD> (<N> features)" -m "<change summary>"` — the body carries the refresh's change summary, one line per item: each rule changed (`<feature> — <ancienne règle> → <nouvelle>`, with its confirmed intent), each feature added, updated or retired. A first run needs no body.
 
 <!-- conclusion:start -->
 **Your conclusion is three zones, in this order, and nothing else.** The reader wants two facts — did it work, and does it need me — before any detail.
@@ -186,3 +186,4 @@ Then `→ Next`, last and alone: the first executable ask's exact command, or `p
 - Do NOT copy from DECISIONS.md verbatim — translate decisions into plain behavioral descriptions.
 - Do NOT invent features that aren't in the codebase. If you're unsure whether something is live, say so.
 - One file. Do not split into multiple spec files unless the user explicitly asks.
+- **Write no dated history comment into `docs/SPEC.md`** — no `<!-- mis à jour … -->`, no `<!-- modifié … -->`, no changelog preamble. The change summary lives in the commit body, and git holds the history. Leave existing comments in place: readers strip them. `**Statut:** Retiré — YYYY-MM-DD` is a status, not a history comment, and stays.

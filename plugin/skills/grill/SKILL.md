@@ -28,7 +28,11 @@ If a pass would exceed it, stop at the bound and say what you did not cover. The
 
 ## Preflight
 
-1. Read `CLAUDE.md` at project root if present — project-layer conventions. Read `docs/SPEC.md` if present — it tells you which features already exist and what their business rules are. That is interrogation fuel: it converts vague questions into sharp ones ("the spec says a session expires after 30 days — does this change that, or live beside it?"), and it stops you asking the user to re-state something the product already documents.
+1. `CLAUDE.md`'s project-layer conventions are in context already: Claude Code loads it into every session, so never open it again. When `docs/SPEC.md` exists, run `esq projection outline spec` — its headings and leads tell you which features already exist — then `esq projection read spec <id…>` for the features the task touches, whose business rules you need. That is interrogation fuel: it converts vague questions into sharp ones ("the spec says a session expires after 30 days — does this change that, or live beside it?"), and it stops you asking the user to re-state something the product already documents.
+
+   <!-- shared:projection-read:start -->
+   **Projections are read by section, never whole.** `esq projection outline <spec|arch>` answers the heading tree (`id`, `heading`, `from`/`to`, subtree `bytes`, a one-line `lead`) and the projection's `freshness`; `esq projection read <spec|arch> <id…>` answers only those sections, history comments stripped. Read the overview (id 0 and `Vue d'ensemble`) and any shared-rules section alongside the feature, and pick a large parent's children by their `bytes`. An answer that spilled names `spill.file` and `spill.ranges`: Read those in one batch, never re-run it. An unknown id refuses: re-run the outline, never fall back to a whole-file Read. `exists: false` means there is no such projection.
+   <!-- shared:projection-read:end -->
 2. Note today's date in YYYY-MM-DD format
 3. Determine a slug from the user's task description: 3-5 lowercase words joined with hyphens, descriptive of the work
 4. Determine the file path: `docs/plans/<YYYY-MM-DD>-<slug>.brief.md`

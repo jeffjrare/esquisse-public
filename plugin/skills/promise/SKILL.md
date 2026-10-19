@@ -31,7 +31,11 @@ If a pass would exceed it, stop at the bound and name what you did not cover, wi
 
 ## Preflight
 
-1. Read `CLAUDE.md` and `docs/ARCHITECTURE.md` if present: they say how the app launches, where its pages and copy live (components, MDX, CMS exports, i18n files), and which locales ship. Read `docs/SPEC.md` if present. Read `docs/PROMISES.md` if present: it is this command's register (see `## The register`). These reads go out together in one turn.
+1. Send `esq projection outline arch` and `esq projection outline spec`, and read `docs/PROMISES.md` if present: it is this command's register (see `## The register`). These go out together in one turn. `CLAUDE.md` is in context already (Claude Code loads it), so it is not opened again. Then read only the sections this step needs: from arch, how the app launches, where its pages and copy live (components, MDX, CMS exports, i18n files) and which locales ship; from the spec, the features the target names, or with no target the outline's feature list, reading a feature's section when you test its promise.
+
+   <!-- shared:projection-read:start -->
+   **Projections are read by section, never whole.** `esq projection outline <spec|arch>` answers the heading tree (`id`, `heading`, `from`/`to`, subtree `bytes`, a one-line `lead`) and the projection's `freshness`; `esq projection read <spec|arch> <id…>` answers only those sections, history comments stripped. Read the overview (id 0 and `Vue d'ensemble`) and any shared-rules section alongside the feature, and pick a large parent's children by their `bytes`. An answer that spilled names `spill.file` and `spill.ranges`: Read those in one batch, never re-run it. An unknown id refuses: re-run the outline, never fall back to a whole-file Read. `exists: false` means there is no such projection.
+   <!-- shared:projection-read:end -->
 2. Note today's date (YYYY-MM-DD) and `git rev-parse --short HEAD`.
 3. **Resolve the mode and the target.** `--sense` or `--copy` anywhere in the arguments sets the mode, and the remaining positional is the target. Never infer a mode. A target narrows the run:
    - a page (a route, a file, or a URL of the marketing site): the promises made on that page, the screens reached from it, or the copy of that page;
@@ -175,7 +179,7 @@ The shipped features nobody sells (from the register's notes) are material: a pa
 - The headline says what the product does, for whom, in the reader's words. The sub-line says how. One primary action per page, and its label says what happens next.
 - Every benefit rests on a ✅ promise, and the page cites the row beside the claim on the proposal.
 - The page uses the app's own names for things: the label on the button the copy describes, the object names the app shows. Use the `--sense` vocabulary, never a third word for the same thing.
-- The voice is the product's. Read the existing copy and any brand or voice guide in the repo (`docs/BRAND.md`, a style guide, `CLAUDE.md`), and keep the language and register. An improvement is clearer and more concrete, never in a different voice.
+- The voice is the product's. Read the existing copy and any brand or voice guide in the repo (`docs/BRAND.md`, a style guide), reuse what `CLAUDE.md` already put in context, and keep the language and register. An improvement is clearer and more concrete, never in a different voice.
 - The page carries its basics: one `h1`, a `<title>` and a meta description that say the same thing as the headline, alt text on every image that carries meaning. Check current practice for page structure and metadata with at most 4 web searches, each cited with its source and date on the proposal.
 - Every locale the page ships gets its version, written in that language rather than translated word for word.
 - The copy fits its slot. Render the page with the new copy and read, at ~390 px and at desktop width, that no text overflows its container, that no line of a headline wraps to a single word, and that `scrollWidth` does not exceed `clientWidth`. Copy that breaks its layout is shortened, never shipped with the break.

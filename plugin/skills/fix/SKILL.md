@@ -52,8 +52,8 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    - Else, use the most recently modified `*-fixes.brief.md` in `docs/plans/`.
    - If none exists, STOP. Tell the user: "No fixes brief found. Run `/esq:check` or `/esq:review` first — they produce the corrective brief I act on." (If the user instead described fixes inline, triage those into the three tiers yourself and treat the 🟢 set as the work — but the brief is the normal path.)
 2. Read the corrective brief in full. Run `esq brief depth <brief-path>` and keep its verdict for every remaining-item handoff, with what `esq brief plan` answered. Chain `git log -1 --format=%H -- <brief-path>` into that call and keep the full hash: the commit that holds the brief, and with each item's line number in your read, the durable address "Record what a fix taught" cites. A brief `git status` shows modified has no such address for its changed lines.
-3. Read `CLAUDE.md` at project root if present, and — **when `plan` is a path**, in this same batch —
-   that plan, keeping its `## Phases` section's `(auto)` verification steps verbatim for "Record the
+3. `CLAUDE.md`'s conventions are in context already (Claude Code loads it), so never open it again. **When
+   `plan` is a path**, read that plan, keeping its `## Phases` section's `(auto)` verification steps verbatim for "Record the
    proof you earned". When `plan` is `null`, read no plan.
 4. Run `git status`; warn the user of unrelated uncommitted changes before you start committing.
 5. Fetch tools: call `ToolSearch "select:TaskCreate,TaskUpdate,TaskList,PushNotification"`. Continue without any unavailable.
