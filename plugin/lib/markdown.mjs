@@ -470,3 +470,127 @@ export function touchesPath(entry, candidate, { unrooted = false } = {}) {
     : part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))).join('');
   return new RegExp(`${unrooted ? '(?:^|/)' : '^'}${source}(?:/.*)?$`).test(candidate);
 }
+
+// ── Projection sections ─────────────────────────────────────────────────────
+// The spec and architecture projections, cut into the sections a reader selects. ATX headings of
+// level 2–4 only (esq's writers emit nothing else), outside fenced code and outside HTML comments — a
+// changelog preamble kept in a comment is history, never structure. CRLF is tolerated: a line's
+// trailing `\r` is ignored for detection and kept in the text.
+const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})/;
+const SECTION_HEADING = /^(#{2,4})[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$/;
+
+function sourceLines(text) {
+  const lines = text.split('\n');
+  if (lines.length > 0 && lines[lines.length - 1] === '') lines.pop();
+  return lines;
+}
+
+// Walks the lines once and reports, per line, whether it is structure (outside a fence and outside a
+// comment). A comment opened and closed on the same line does not hide that line's heading-ness,
+// because a heading line never starts with `<!--`.
+function structuralLines(lines) {
+  const flags = [];
+  let fence = null;
+  let comment = false;
+  for (const raw of lines) {
+    const line = raw.replace(/\r$/, '');
+    if (fence) {
+      flags.push(false);
+      const close = line.match(FENCE_OPEN);
+      if (close && close[1][0] === fence[0] && close[1].length >= fence.length && line.trim() === close[1]) fence = null;
+      continue;
+    }
+    if (comment) {
+      flags.push(false);
+      if (line.includes('-->')) comment = line.lastIndexOf('<!--') > line.lastIndexOf('-->');
+      continue;
+    }
+    const open = line.match(FENCE_OPEN);
+    if (open) { flags.push(false); fence = open[1]; continue; }
+    flags.push(true);
+    if (line.lastIndexOf('<!--') > line.lastIndexOf('-->')) comment = true;
+  }
+  return flags;
+}
+
+// `[{ id, level, heading, from, to }]` in document order, `from`/`to` 1-based inclusive lines. Id 0 is
+// everything before the first heading (title, marker, intro), level 1 and heading null; its `to` is 0
+// when the document opens on a heading. A section runs to the line before the next heading of the
+// same or a higher level, so it holds its children.
+export function parseSections(text) {
+  const lines = sourceLines(text);
+  const structural = structuralLines(lines);
+  const headings = [];
+  lines.forEach((raw, index) => {
+    if (!structural[index]) return;
+    const match = raw.replace(/\r$/, '').match(SECTION_HEADING);
+    if (match) headings.push({ level: match[1].length, heading: match[2], from: index + 1 });
+  });
+  const sections = [{ id: 0, level: 1, heading: null, from: 1, to: headings.length > 0 ? headings[0].from - 1 : lines.length }];
+  headings.forEach((entry, index) => {
+    const next = headings.slice(index + 1).find((later) => later.level <= entry.level);
+    sections.push({ id: index + 1, level: entry.level, heading: entry.heading, from: entry.from, to: next ? next.from - 1 : lines.length });
+  });
+  return sections;
+}
+
+// Removes every `<!-- … -->` block, single- or multi-line, outside fenced code, except a line
+// `keepLine(line)` accepts whole (the projection's own marker). A line the removal empties is dropped,
+// and the blank-line run that leaves collapses to one blank line. Nothing else in the text changes.
+export function stripComments(text, keepLine = () => false) {
+  const trailing = text.endsWith('\n');
+  const lines = sourceLines(text);
+  const out = [];
+  let fence = null;
+  let comment = false;
+  let cut = false;
+  const blank = (line) => line.replace(/\r$/, '').trim() === '';
+  const push = (line) => {
+    if (blank(line)) {
+      if (cut && (out.length === 0 || blank(out[out.length - 1]))) return;
+      out.push(line);
+      return;
+    }
+    out.push(line);
+    cut = false;
+  };
+  for (const raw of lines) {
+    const cr = raw.endsWith('\r') ? '\r' : '';
+    const line = cr ? raw.slice(0, -1) : raw;
+    if (fence) {
+      const close = line.match(FENCE_OPEN);
+      if (close && close[1][0] === fence[0] && close[1].length >= fence.length && line.trim() === close[1]) fence = null;
+      push(raw);
+      continue;
+    }
+    if (!comment) {
+      const open = line.match(FENCE_OPEN);
+      if (open) { fence = open[1]; push(raw); continue; }
+      if (keepLine(line)) { push(raw); continue; }
+    }
+    let rest = line;
+    let kept = '';
+    let changed = false;
+    while (rest.length > 0) {
+      if (comment) {
+        const close = rest.indexOf('-->');
+        changed = true;
+        if (close === -1) { rest = ''; break; }
+        rest = rest.slice(close + 3);
+        comment = false;
+        continue;
+      }
+      const start = rest.indexOf('<!--');
+      if (start === -1) { kept += rest; break; }
+      kept += rest.slice(0, start);
+      rest = rest.slice(start + 4);
+      comment = true;
+      changed = true;
+    }
+    if (!changed) { push(raw); continue; }
+    if (kept.trim() === '') { cut = true; continue; }
+    push(`${kept.replace(/[ \t]+$/, '')}${cr}`);
+  }
+  while (cut && out.length > 0 && blank(out[out.length - 1])) out.pop();
+  return out.length > 0 ? `${out.join('\n')}${trailing ? '\n' : ''}` : '';
+}
