@@ -19,7 +19,7 @@ Before recommending `/esq:plan` for a corrective brief, ask `esq brief depth <br
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Run `esq state`, `esq brief pending` and `esq validate` once, batching these independent readers. When `esq state`'s answer carries `file`, it was too large to print: that file is the whole answer, so Read it in the next turn — every range its `ranges` names, in one batch — and never re-run the command. Surface validation findings. Do not glob plans/briefs or parse backlog/roadmap facts the CLI supplies.
+Run `esq state`, `esq brief pending`, `esq validate` and `esq projections` once, batching these independent readers. When `esq state`'s answer carries `file`, it was too large to print: that file is the whole answer, so Read it in the next turn — every range its `ranges` names, in one batch — and never re-run the command. Surface validation findings. Do not glob plans/briefs or parse backlog/roadmap facts the CLI supplies.
 
 | Reader/field | Facts to retain |
 |---|---|
@@ -38,7 +38,7 @@ Run `esq state`, `esq brief pending` and `esq validate` once, batching these ind
 
 A missing backlog/roadmap is `null`; an empty Now is `roadmap.head: null`. Projection read errors remain beside healthy facts. A null live status is unknown, never Open or Done. Epic `stale` comes computed: true for a proven row mismatch, false only when every row is comparable and agrees, otherwise null; missing epics return an empty list. Check `backlog.error` **before** counts/rows: malformed tables return that field alone. Counts are unknown, never zero. An invalid plan's error is likewise a fact beside healthy results, not a reason to reconstruct the ledger by hand.
 
-Read only facts absent from those answers: healthy plan headings/Epic/log details, unresolved brief content, epic metadata and arch/spec markers. Cache each plan's phase headings, Epic, log dates, hashes and work description on its first read. All subsequent steps reuse that cache; never re-read an unchanged file. Batch independent reads. Announce the read-only scope before a long pass and report measured elapsed.
+Read only facts absent from those answers: healthy plan headings/Epic/log details, unresolved brief content and epic metadata. Cache each plan's phase headings, Epic, log dates, hashes and work description on its first read. All subsequent steps reuse that cache; never re-read an unchanged file. Batch independent reads. Announce the read-only scope before a long pass and report measured elapsed.
 
 ## 1. Settle the plan and current phase
 
@@ -94,15 +94,11 @@ Use `roadmap.entries` to resolve covered rows and known queue targets without an
 
 ## 5. Architecture/spec advisories
 
-Read CLAUDE.md's `<!-- last-arch: YYYY-MM-DD -->` (optional ` @ <commit>`) or legacy `last-synced` marker; either supplies the date. Check whether `docs/ARCHITECTURE.md` exists; last-synced without that file means the project predates arch's eviction pass — report it.
+Run `esq projections` once, in the first batch beside `esq state`. It answers one entry per projection (`spec`, `arch`) with the `verdict` and `reason` `/esq:land` reads, from the marker's recorded commit: never re-read a marker or count phases or days by hand.
 
-Count completed build phases dated **after** the marker from healthy cached logs, reading only uncached plans. Architecture staleness is notable at **>14 days OR ≥3 completed phases**. No marker → `Architecture projection never built (no marker).`
-
-Read `docs/SPEC.md` and its `<!-- last-spec: YYYY-MM-DD -->` marker:
-- Missing → `No SPEC.md — run /esq:spec to generate one.` This is optional advice.
-- No marker → age unknown.
-- Count only completed **user-facing** phases after the marker (routes, screens, commands, business rules), not refactors/infra/tooling.
-- Spec staleness is notable at **≥2 user-facing phases OR >30 days with at least one**.
+- `fresh` → one ✔ line, or nothing when the snapshot is already long.
+- `stale` → `○ <name> projection stale — <reason>`; the reason names the changed paths and the owner to run (`/esq:spec`, `/esq:arch`).
+- `unproven` → its `reason` verbatim: no file, no marker, a legacy or malformed marker, or a commit the repository lacks. A missing `docs/SPEC.md` is optional advice (`run /esq:spec to generate one`), never a gap.
 
 These are advisories; neither blocks landing or changes the primary next action.
 

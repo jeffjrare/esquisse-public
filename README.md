@@ -193,7 +193,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:converge <plan-or-fixes-brief>` | Run review → fix, then plan → build → review any 🟡 left, or resume an existing brief | Readiness report, and a lesson for a 🟡 its corrective round closed whose contrast recurs; no merge |
 | `/esq:epic [new title-or-slug]` | Group a theme spanning several plans and backlog items | `docs/epics/<slug>.md` |
 | `/esq:worktree [name-or-action]` | Create, list, remove or merge linked worktrees | Separate working directories and reserved backlog ID blocks |
-| `/esq:status` | Orient without changing anything | Plan, backlog, pending briefs, roadmap and next action |
+| `/esq:status` | Orient without changing anything | Plan, backlog, pending briefs, roadmap, whether the spec and architecture still describe the code (the verdict `/esq:land` uses), and next action |
 | `/esq:harvest` | Recover decisions from the code, history and discussion | `docs/DECISIONS.md` |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md` |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
