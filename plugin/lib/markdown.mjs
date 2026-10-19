@@ -485,6 +485,49 @@ function sourceLines(text) {
   return lines;
 }
 
+// Index of the first `<!--` in `text` that no backtick code span holds, else -1. A run of N backticks
+// opens a span the next run of exactly N on the same text closes; an unmatched run is literal. An
+// inline `` `<!-- … -->` `` documents a comment, it never is one.
+function commentOpenIndex(text) {
+  let from = 0;
+  for (;;) {
+    const open = text.indexOf('<!--', from);
+    const tick = text.indexOf('`', from);
+    if (open === -1) return -1;
+    if (tick === -1 || open < tick) return open;
+    let end = tick;
+    while (text[end] === '`') end += 1;
+    const run = end - tick;
+    let next = end;
+    from = end;
+    for (;;) {
+      const at = text.indexOf('`', next);
+      if (at === -1) break;
+      let stop = at;
+      while (text[stop] === '`') stop += 1;
+      if (stop - at === run) { from = stop; break; }
+      next = stop;
+    }
+  }
+}
+
+// Whether a comment is still open at the end of `line`, given whether one was open at its start.
+function commentOpenAfter(line, comment) {
+  let rest = line;
+  for (;;) {
+    if (comment) {
+      const close = rest.indexOf('-->');
+      if (close === -1) return true;
+      rest = rest.slice(close + 3);
+      comment = false;
+    }
+    const start = commentOpenIndex(rest);
+    if (start === -1) return false;
+    rest = rest.slice(start + 4);
+    comment = true;
+  }
+}
+
 // Walks the lines once and reports, per line, whether it is structure (outside a fence and outside a
 // comment). A comment opened and closed on the same line does not hide that line's heading-ness,
 // because a heading line never starts with `<!--`.
@@ -502,13 +545,13 @@ function structuralLines(lines) {
     }
     if (comment) {
       flags.push(false);
-      if (line.includes('-->')) comment = line.lastIndexOf('<!--') > line.lastIndexOf('-->');
+      comment = commentOpenAfter(line, true);
       continue;
     }
     const open = line.match(FENCE_OPEN);
     if (open) { flags.push(false); fence = open[1]; continue; }
     flags.push(true);
-    if (line.lastIndexOf('<!--') > line.lastIndexOf('-->')) comment = true;
+    comment = commentOpenAfter(line, false);
   }
   return flags;
 }
@@ -580,7 +623,7 @@ export function stripComments(text, keepLine = () => false) {
         comment = false;
         continue;
       }
-      const start = rest.indexOf('<!--');
+      const start = commentOpenIndex(rest);
       if (start === -1) { kept += rest; break; }
       kept += rest.slice(0, start);
       rest = rest.slice(start + 4);

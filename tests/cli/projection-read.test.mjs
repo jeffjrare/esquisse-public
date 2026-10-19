@@ -110,6 +110,25 @@ test('stripping removes single- and multi-line comments, keeps the marker and co
   assert.ok(!/\n\n\n/.test(stripped));
 });
 
+test('a comment written inside an inline code span is text, never a comment', () => {
+  const text = [
+    '# Arch',
+    '',
+    '## Markers',
+    'A marker is `<!-- last-spec: YYYY-MM-DD @ <commit> -->`, computed from the ``<!-- x -->`` line. <!-- gone -->',
+    'An unclosed opener `<!--` stays text.',
+    '',
+    '## Next',
+    'rule',
+    '',
+  ].join('\n');
+  const stripped = stripComments(text);
+  assert.ok(stripped.includes('A marker is `<!-- last-spec: YYYY-MM-DD @ <commit> -->`, computed from the ``<!-- x -->`` line.\n'), stripped);
+  assert.ok(!stripped.includes('gone'));
+  assert.ok(stripped.includes('`<!--` stays text.\n\n## Next\nrule\n'), stripped);
+  assert.deepEqual(parseSections(text).map(({ heading, from, to }) => [heading, from, to]), [[null, 1, 2], ['Markers', 3, 6], ['Next', 7, 8]]);
+});
+
 test('outline: subtree costs, leads, stripped size and freshness of a SPEC-shaped document', async () => {
   const root = await repo();
   const mined = git(root, 'rev-parse', 'HEAD');
