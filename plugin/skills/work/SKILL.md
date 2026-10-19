@@ -39,7 +39,7 @@ If a pass would exceed it, stop at the bound and say what you did not cover. The
 ## Preflight
 
 1. **Read the table, not the file.** `docs/BACKLOG.md` is an index (the `| B-NNN |` rows) followed by per-item detail sections that are the bulk of it. Read the rows to find your item, then open **only that item's** `## B-NNN` section. If it doesn't exist and the argument is item text, create it from the template in `/esq:backlog` and continue; otherwise STOP: "No `docs/BACKLOG.md` — nothing to route. Capture something with `/esq:backlog <text>` first."
-2. Read `CLAUDE.md` at project root if present — project conventions inform the sizing.
+2. Project conventions, which inform the sizing, come from `CLAUDE.md`: Claude Code already loads it into the session, so never open it again.
 3. Resolve the target item:
    - **Argument is an ID** (`B-7`, `B-007`, `#7` — match leniently, zero-padding is cosmetic) → that's the item. If no row matches, say so and stop; never invent one.
    - **No argument** → pick the top actionable item yourself. **If `docs/ROADMAP.md` exists, its order wins:** read it (the top `## Now` entry only) and take the first `B-NNN` in that entry's `covers:` line whose backlog row is still `Open` or `Needs-decision`. Say which entry you're working from and quote its `why now` in one line. Only fall through to priority when there's no roadmap, its `Now` is empty, or nothing it points at is still actionable.

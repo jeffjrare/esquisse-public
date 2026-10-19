@@ -25,7 +25,7 @@ The mining pass is where this command goes quiet for minutes. Naming what it wil
 
 ## Preflight
 
-1. Read `CLAUDE.md` at the project root if present — gives you the product name and high-level context.
+1. The product name and high-level context come from `CLAUDE.md`, which Claude Code already loads into the session: never open it again.
 2. Check whether `docs/SPEC.md` exists.
    - If it does: this is a **refresh**. Read it in full. Note the existing features list and the `<!-- last-spec: YYYY-MM-DD @ <commit> -->` marker — its date scopes which plans are new since the last pass (and it's what `/esq:arch` and `/esq:status` read to report spec staleness); a marker written before the commit existed carries the date alone, and reads the same way here.
    - If it doesn't: this is a **first run**.
