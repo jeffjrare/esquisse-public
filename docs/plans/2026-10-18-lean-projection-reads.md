@@ -107,3 +107,36 @@ None.
 **For Phase 2:** 1. Answers: outline `{name, file, exists, freshness{verdict,date,at,reason,changedCount}, bytes, strippedBytes, sections[{id,level,heading,from,to,bytes,lead}], touched?, touchedReason?}`; read `{…, sections[{id,heading,from,to,text}]}`. Id 0 is the preamble (heading null). Over 24 KB either answer moves its sections to `spill.file` (read it with `spill.ranges`) — skill prose should say so; on this repo `read spec` with a large section already spills.
 2. `touched` appears only with `--paths`; `null` means freshness unprovable (treat every rule as unverified), `[]` with `touchedReason` when the marker postdates `--upto`.
 3. Unknown id → `{refuse:true, reason}` exit 1; the reader should re-run outline, never fall back to a whole-file Read.
+
+### Phase 2 — completed 2026-10-19
+
+**Plan committed at:** d450cd4
+
+**Commits:** 4156b5d, 6a14260, ac91057, 7f67e58, 8f9dc61
+
+**Verified:** 8f9dc61450dfd9c0c6274efe1d2d318bdeb5c610
+- `git grep -niE 'read[^.]{0,40}CLAUDE\.md' -- plugin/skills ':!plugin/skills/arch' ':!plugin/skills/harvest'`
+- `git grep -lE "esq projection (outline|read)" -- plugin/skills/plan/SKILL.md plugin/skills/review/SKILL.md plugin/skills/check/SKILL.md plugin/skills/grill/SKILL.md plugin/skills/ideas/SKILL.md plugin/skills/promise/SKILL.md plugin/skills/ui/SKILL.md`
+- `./scripts/audit.sh`
+
+**What got built:** Plan, review, check, grill, ideas, promise and ui load `esq projection outline` and read only the sections they need (review and check judge a spec rule against the code at their base before filing it); no skill but arch and harvest opens `CLAUDE.md`; `/esq:status` reports projection staleness from `esq projections`; `/esq:spec` keeps refresh history in the commit body instead of dated comments.
+
+**Verification:**
+- (auto) git grep -niE 'read[^.]{0,40}CLAUDE\.md' -- plugin/skills ':!plugin/skills/arch' ':!plugin/skills/harvest' — no match (exit 1), PASS
+- (auto) git grep -lE "esq projection (outline|read)" -- <the seven reader skills> — lists all seven (check, grill, ideas, plan, promise, review, ui), PASS
+- (auto) ./scripts/audit.sh — Clean, 7 checks (package, no push, conformance, version, bounded runner, product suites), exit 0, 26 s
+
+**Decided for you:**
+- architecture: the section-reading rules (outline, read by id, overview and shared rules alongside, spill, refused id → re-run outline) are one `shared:projection-read` paragraph carried identically by the seven reader skills — one wording to keep aligned — undo: replace the block with per-skill prose in plugin/skills/{plan,review,check,grill,ideas,promise,ui}/SKILL.md
+- product: `/esq:spec` keeps the `Dernière mise à jour` header line — it is the document's date, not a history comment — undo: drop that line from the template in plugin/skills/spec/SKILL.md
+- design: `/esq:status` shows a fresh projection as one ✔ line (or nothing when the snapshot is long), a stale one as `○ <name> projection stale — <reason>`, an unproven one by its reason verbatim — undo: edit § 5 of plugin/skills/status/SKILL.md
+
+**Surprises / decisions made during execution:** - Task 2.3's CLAUDE.md drop for plan, review, check, grill, ideas, promise and ui landed inside 2.1/2.2's commits: the Read sat in the same sentence those tasks rewrote. 2.3's own commit (ac91057) covers build, fix, work, spec and promise's copy step.
+- Task 2.6 folded into 2.4 (status row) and 2.5 (spec row); no other README paragraph described what either reports or writes.
+- Check's `--paths` come from `git diff --name-only <audit-base> HEAD` piped into the outline, since its `git log --stat` listing is not a path list.
+- The verification grep's `read` matches inside `already`, so the new CLAUDE.md wording puts `CLAUDE.md` before any `already`.
+- docs/ARCHITECTURE.md's SPEC readers row (line 84) still names the old readers; it is not in this phase's files — /esq:arch's refresh owns it.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** Last phase — no next phase. Next: /esq:review on this plan.
