@@ -1,5 +1,5 @@
 # esquisse — CLAUDE.md
-<!-- last-arch: 2026-10-13 @ d865f32206941ef2827f9c6deb7f03ee2bcfbfb6 -->
+<!-- last-arch: 2026-10-19 @ 7a431ca9ba8d829f73e5d3fa71137c38e6db0cad -->
 
 esquisse is a Claude Code plugin (`esq`): twenty-three skills, a dependency-free CLI and four hook handlers (five events) running a
 plan → build → review cycle over Markdown ledgers in `docs/`; this repo is its marketplace. Why each rule: `docs/ARCHITECTURE.md`.
@@ -43,7 +43,7 @@ the README — its table row and every paragraph about it — in the same commit
 - `scripts/`: `audit.sh` (the one `run` dispatch) and its checks; `update.sh` / `release-local.sh` (release, `--release`); the
   research instruments (probes, measures, captures), reached only by `--lab`.
 - `tests/`: node suites discovered by convention. Product: `{cli,hooks,audit}`; lab: the rest. Each owns its `fixtures/`.
-- `docs/`: SPEC (`/esq:spec`), ARCHITECTURE (`/esq:arch`), DECISIONS, BACKLOG, ROADMAP, PROMISES, `epics/`, `plans/`, CONFORMANCE
+- `docs/`: SPEC (`/esq:spec`), ARCHITECTURE (`/esq:arch`), DECISIONS, BACKLOG, ROADMAP, PROMISES, LESSONS (`esq lessons` only), `epics/`, `plans/`, CONFORMANCE
   (parsed formats), AUDIT (the reading pass), MAINTAINING (cost table → `cost-budgets.mjs`). EVIDENCE and the rest: no skill reads them.
 
 ## Verification
