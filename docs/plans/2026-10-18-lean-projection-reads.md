@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 83103e6e0150b2f2d9ce3bc860379897eba59147
+
 ## Context
 Every esq skill that plans, reviews or ideates reads `docs/SPEC.md` and `docs/ARCHITECTURE.md` whole. Measured 2026-10-18 on the user's projects: events-tracker's SPEC is 426 KB (~105k tokens), 28% of it dated history comments (`<!-- mis à jour … -->`, `<!-- modifié … -->`, a 58 KB changelog preamble), and its ARCHITECTURE is 231 KB. `/esq:ideas` reads both in one turn (~160k tokens); review and check are told to read "the feature sections the diff touches" but nothing can cut a section out, so each run greps headings ad hoc. Those projections are also stale today (731 changed paths since the SPEC marker on assets-prospection, 238 on events-tracker), and only `/esq:plan` knows to distrust a stale rule; review and check can turn a rule an earlier, already-landed change superseded into a finding against the change under review — even a 🟡 corrective plan. Finally, Claude Code already loads the project's root `CLAUDE.md` into every session, yet eleven skills spend a preflight Read on it again.
 
