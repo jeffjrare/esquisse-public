@@ -32,6 +32,10 @@ What `./scripts/audit.sh` will fail you on when a skill changes. Reasoning: `doc
 - **Announce the bound before the first tool call, and report what was spent at the end.** That is an instruction the skill
   honors, not a string a script greps. A command that runs long and states nothing is the defect; the fix is to write the
   bound, not to lint for it.
+- **A skill reads `docs/SPEC.md` or `docs/ARCHITECTURE.md` through `esq projection outline|read`, never a whole-file `Read`.**
+  Outline first, then one `read` of the section ids the task needs; an unknown id re-runs the outline. *why:* whole reads
+  cost hundreds of KB per run and carry no freshness; the CLI owns the boundaries and strips history comments
+  (`D-projections-are-read-by-section-through-the-cli`).
 - **Resolving the CLI:** call `esq` from `PATH`; when `PATH` does not resolve it, use `"$CLAUDE_PLUGIN_ROOT/bin/esq"`. Stop only
   when neither runs. **Never write a prose fallback that recomputes what the CLI owns** — a ledger, a branch verdict, a context
   budget, an ID.
