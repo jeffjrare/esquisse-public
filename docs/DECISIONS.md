@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-projections-are-read-by-section-through-the-cli | 2026-10-19 | arch | projections | `esq projection outline\|read <spec\|arch>` owns section boundaries, strips history comments and carries the projection's freshness; skills read the outline then only the sections they need. | Active |
 | D-lesson-lines-carry-their-id | 2026-10-18 | arch | lessons | After its heading, a lesson entry has no blank line, a one-line body, and every line ends with the entry's own ID as an HTML comment (` <!-- L-<id> -->`). | Active |
 | D-lessons-ledger-is-evidence-keyed-and-union-merged | 2026-10-18 | arch | ledgers | docs/LESSONS.md is written only by `esq lessons add`, one `## L-<hex>` block per entry whose ID hashes its resolved evidence, read by path through cues carried in existing preflights, advisory in validate, harmless to proofs and projections, and merged by a `merge=union` attribute. | Active |
 | D-a-plan-tries-its-checks-against-the-tree | 2026-10-15 | arch | verification | `/esq:plan` keeps resolving commands by reading, and adds two bounded tries before it commits. A test command whose runner lists without executing is run once in that mode. Every `grep … — no match` pattern, and the old name of every replaced seam, is run over the whole tracked tree and its hits piped into `esq plan probe <plan> --paths -`, which answers which phase's `**Files touched:**` covers each path. Every `unassigned` path is assigned, excluded by name or judged out of scope before the commit. A phase that swaps a seam carries all its consumers, mocks included. | Active |
@@ -5605,3 +5606,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: two branches' entries merge cleanly by every merge route, add/add included. Accepted: a noisier raw file and a body limited to one line.
 **Conséquences:** Any change to the entry renderer or parser keeps every post-heading line unique to its entry; tests/cli/lessons.test.mjs's two-branch merge test fails otherwise. Nothing but esq lessons add may write an entry.
 **Alternatives rejetées:** A blank-line block with merge=union (loses or interleaves entries); a table with one row per entry (rejected by the plan: prose in a cell, a sequential ID, no retry safety); conflict handling for the ledger in esq merge land (covers one merge route only).
+
+## D-projections-are-read-by-section-through-the-cli — Projections are read by section through the CLI
+
+**Scope:** arch
+**Topic:** projections
+**Date:** 2026-10-19
+**Statut:** Active
+**Fondement:** mandate — user, 2026-10-18 session: "fix them all … lean the whole thing" on the three projection-read defects
+
+**Contexte:** Skills read docs/SPEC.md and docs/ARCHITECTURE.md whole (events-tracker: 426 KB + 231 KB, 28% of the spec dated history comments), with no freshness signal beside the text.
+**Décision:** `esq projection outline|read <spec|arch>` owns section boundaries, strips history comments and carries the projection's freshness; skills read the outline then only the sections they need.
+**Raison:** Section identity and comment stripping are structure the CLI can settle once; leaving them to prose re-derives them on every run. Freshness comes from the helper `esq projections` uses, so landing, status and readers never disagree.
+**Tradeoff:** Gained: per-run cost proportional to the sections used, deterministic freshness per path. Accepted: one CLI verb pair and positional ids that only hold within one run.
+**Conséquences:** A new projection reader goes through `esq projection`, never a whole-file Read; `/esq:spec` writes no dated history comments — git holds that history.
+**Alternatives rejetées:** grep headings + Read offsets in prose (re-derived every run, no freshness, keeps comments); a generic `esq docs` reader over any file (no current need beyond the two projections); capping the files (trims design detail, still reads every feature).
