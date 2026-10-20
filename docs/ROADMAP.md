@@ -11,6 +11,12 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ## Now
 
+### reread-cost
+**covers:** B-070
+**why now:** Confirmed hi is preserved as importance, not a mandate to buy an inconclusive study before shipping. The read-once rule and instrument exist; the frozen reading cannot support the old comparison.
+**acceptance:** Name a current redundant read and remove its cause, or establish a comparable bounded measurement before claiming savings; research never gates a demonstrated fix.
+**state:** <!-- GENERATED --> B-070 Planned [hi]; plan read-once-and-see-round-trips is missing from this checkout. lean-projection-reads (complete 2026-10-18) removed one concrete re-read (CLAUDE.md in preflight, `ac91057`) and made spec/arch reads section-sized, but it doesn't cite B-070 and leaves the named repeat targets (BACKLOG, DECISIONS) unmeasured; acceptance unproved.
+
 ## Next
 
 ## Later
@@ -26,12 +32,6 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 **why now:** Conditional follow-up, not another implementation of the shipped collection protocol. Preserve B-085 confirmed hi, but defer its unproved savings and harness-registration claim: the 2026-09-08 owner choice explicitly left both open after shipping process cleanup.
 **acceptance:** Only a concrete recurrence or relevant harness capability change earns new work; distinguish process teardown, delayed delivery and actual revival, retaining the original operational acceptance as unproved.
 **state:** <!-- GENERATED --> B-085 Planned [hi], B-087 Planned [med]; plan background-task-lifecycle is missing from this checkout (upstream completed four phases and left both acceptances open); acceptance unproved: no recurrence or harness change recorded. No active execution.
-
-### reread-cost
-**covers:** B-070
-**why now:** Confirmed hi is preserved as importance, not a mandate to buy an inconclusive study before shipping. The read-once rule and instrument exist; the frozen reading cannot support the old comparison.
-**acceptance:** Name a current redundant read and remove its cause, or establish a comparable bounded measurement before claiming savings; research never gates a demonstrated fix.
-**state:** <!-- GENERATED --> B-070 Planned [hi]; plan read-once-and-see-round-trips is missing from this checkout. lean-projection-reads (complete 2026-10-18) removed one concrete re-read (CLAUDE.md in preflight, `ac91057`) and made spec/arch reads section-sized, but it doesn't cite B-070 and leaves the named repeat targets (BACKLOG, DECISIONS) unmeasured; acceptance unproved.
 
 ### conditional-lab
 **covers:** B-094, B-133, B-095, B-118, B-047
