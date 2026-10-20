@@ -7,7 +7,7 @@
 <!-- Pri: hi | med | lo | (blank) -->
 <!-- Epic: slug of the epic this item belongs to (docs/epics/<slug>.md, via /esq:epic); blank if none. -->
 <!-- Version: release the item shipped in (e.g. v0.0.87); blank until deployed. Filled = ready for UA; Status Done = UA passed. -->
-<!-- last-sweep: 88633cb 2026-09-21 -->
+<!-- last-sweep: 11da201 2026-10-20 -->
 
 **Reconciled 2026-09-24 against public snapshot `d45188e`.** Basis: [PRIORITY-REVIEW.md](PRIORITY-REVIEW.md), current public code, and historical acceptance examined in the former development checkout before the work moved here. That history is context, not locally present plans or current runtime evidence; historical upstream commit IDs below are not refs in this snapshot. All 47 previously Open/Planned rows were reviewed, not reproduced at runtime. Current scope supersedes stale capture claims; each closure/abandonment carries its own reason. Goals remain useful features shipped quickly, fewer needless interruptions, reliable verification, beautiful design and proportionate total cost. Research and telemetry never gate delivery.
 
