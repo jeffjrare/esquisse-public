@@ -11,12 +11,6 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 
 ## Now
 
-### reread-cost
-**covers:** B-070
-**why now:** Confirmed hi is preserved as importance, not a mandate to buy an inconclusive study before shipping. The read-once rule and instrument exist; the frozen reading cannot support the old comparison.
-**acceptance:** Name a current redundant read and remove its cause, or establish a comparable bounded measurement before claiming savings; research never gates a demonstrated fix.
-**state:** <!-- GENERATED --> B-070 Planned [hi]; plan read-once-and-see-round-trips is missing from this checkout. lean-projection-reads (complete 2026-10-18) removed one concrete re-read (CLAUDE.md in preflight, `ac91057`) and made spec/arch reads section-sized, but it doesn't cite B-070 and leaves the named repeat targets (BACKLOG, DECISIONS) unmeasured; acceptance unproved.
-
 ## Next
 
 ## Later
@@ -25,7 +19,7 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 **covers:** B-169, epic:esq-decides-implementation-detail
 **why now:** parked — specialist back-end guidance isn't needed yet: Tamialog (backend-api skill) and assets-prospection (data-model, database-safety, job-queue, security-rules) already cover back-end choices with their own skills; resume when a run asks or builds badly on something no project skill covers
 **acceptance:** A real selected case proceeds without an implementation-detail question, with evidence of correct behavior and design quality; guidance stays on demand and within a stated cost bound.
-**state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no plan; not started. Never-block fixes shipped 2026-10 (`c4d820d`, `53c59f0`, `38256c2`) settle more asks inside the run but don't touch specialist guidance C. parked — specialist guidance (the epic's last unbuilt part) has no unmet need: observed projects' own skills settle back-end choices, and the plugin already ships front-end/design guidance; resume when a run asks or builds badly on something no project skill covers. Standards Part 2 (domain defaults) stays empty.
+**state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no plan; not started. Never-block fixes shipped 2026-10 (`c4d820d`, `53c59f0`, `38256c2`) settle more asks inside the run but don't touch specialist guidance C. parked — specialist guidance (the epic's last unbuilt part) has no unmet need: observed projects' own skills settle back-end choices, and the plugin already ships front-end/design guidance; resume when a run asks or builds badly on something no project skill covers. Standards Part 2 (domain defaults) stays empty. User confirmed 2026-10-20 (grill on B-169): no seen case yet, keep parked.
 
 ### background-acceptance
 **covers:** B-085, B-087
@@ -57,8 +51,8 @@ The remaining ranked backlog work has no committed implementation position: B-15
 
 ## Shipped
 <!-- Implemented work, newest first, recent entries retained; this does not assert publication. Individual dispositions are in BACKLOG.md. -->
+- 2026-10-20 · reread-cost — B-070 (done: Dropped, closing condition unproducible; reopen on a named re-read)
 - 2026-09-30 · sigpipe-site-check — B-078 (done)
 - 2026-09-30 · preparation-concision — B-182 (done: Dropped as accepted limit)
 - 2026-09-30 · verdict-under-mandate — B-190 (done)
 - 2026-09-29 · preparation-fidelity — B-189, B-188 (done)
-- 2026-09-29 · b181-closing — B-181 closed by re-scope: kept `/esq:plan` read-back item 6 (`538c7c8`) makes C1–C4 and C6 reliable (≥2/3); C5 → B-188, C7 → B-189. Fidelity-trial fix withdrawn (`a5e1666`). Evidence: `docs/preparation/2026-09-29-b181-variance.md`.
