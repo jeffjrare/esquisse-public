@@ -208,6 +208,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-189 | 2026-09-29 | 🐛 bug | hi? |  | Preparation must not assert unobserved Git state (e.g. detached HEAD) | observed: 2026-09-29-b181-variance-then-fix Phase 2 · Planned by 2026-09-29-git-state-and-copy-fidelity · Planned by 2026-09-29-git-state-rule-alone · Planned by 2026-09-29-keep-git-state-rule · Done by 2026-09-29-keep-git-state-rule |  |  | Done |
 | B-190 | 2026-09-29 | 🐛 bug | hi |  | Measurement verdicts (keep/revert after a run set) gate delivery and reach the user as a decision instead of being settled under mandate | observed: 2026-09-29-keep-git-state-rule — B-189 took 3 units and a user 🔴 after an n=3 revert rule misfired · Planned by measurement-verdict-under-mandate · Done by measurement-verdict-under-mandate | esq-decides-implementation-detail |  | Done |
 | B-191 | 2026-10-01 | 🐛 bug | med? |  | Roadmap refresh notice fires on retained Shipped tail even right after a derive | work · Planned by 2026-09-30-b191-shipped-since-derive · Done by 2026-09-30-b191-shipped-since-derive |  |  | Done |
+| B-192 | 2026-10-20 | 🐛 bug | med? | 1600 | measure-rereads looks for old read-once wording, so recent runs count as rule absent | work: B-070 |  |  | Open |
 
 ---
 
@@ -1021,3 +1022,9 @@ spending anything on hooks.
 ## B-191 — Roadmap refresh notice fires on retained Shipped tail even right after a derive
 
 **Resolution:** esq state roadmap.shipped.sinceDerive counts Shipped lines added since the last roadmap: derive commit; the roadmap notice reads it (796a5e4, 5ed0ee0); this repo answers sinceDerive 0 right after derive 11a445e, audit PASS
+
+## B-192 — measure-rereads looks for old read-once wording, so recent runs count as rule absent
+
+**What:** `READ_ONCE_NEEDLE` in `scripts/measure-rereads.mjs:64` is `'Read each file once.'`, but the shared block in the skills now reads `**Read each file once**, …` (e.g. `plugin/skills/build/SKILL.md:73`). The needle no longer matches, so runs that carry the rule are classed `ruleAbsent`.
+**Why it matters:** a rule-present versus rule-absent comparison for B-070 would put rule-carrying runs in the wrong cohort. Per the script's own header, changing the needle requires a `CLASSIFIER_VERSION` bump.
+**Notes:** found while routing B-070 (2026-10-20). A reading since 2026-09-24 showed no `ruleLoaded` cohort for `build`, though the rule shipped well before. The fix is a lab-instrument change, not a product one.
