@@ -7,7 +7,7 @@ Initial order proposed by [PRIORITY-REVIEW.md](PRIORITY-REVIEW.md), checked agai
 
 **Objective:** useful features shipped quickly, fewer unnecessary interruptions, reliable verification and beautiful, thoughtful design. Spend tokens, tool turns and elapsed time in proportion to that value. The CLI owns deterministic structure; the model owns judgment. A guard must detect a defect, resolve a reference or protect a parsed format. Optional telemetry and research never gate delivery. Deployment remains outside ESQ's scope.
 
-The sequence below is the remaining execution proposal, not a claim that work has started. Re-derived 2026-09-30 after sigpipe-site-check shipped (B-078): no open item has a current trigger, so Now stays empty; every entry is parked or conditional and the Later queue keeps its order. Order is positional unless a `needs:` edge is written. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the active sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
+The sequence below is the remaining execution proposal, not a claim that work has started. Re-derived 2026-10-20 after decisions-routed-by-hat, cross-cycle-lessons-ledger and lean-projection-reads shipped (none cites an open row): no open item has a current trigger, so Now stays empty; every entry is parked or conditional and the Later queue keeps its order. Order is positional unless a `needs:` edge is written. Existing confirmed priorities remain intact, including hi on conditional work. Backlog Rank records the active sequence, while priority-sorted backlog views still group by Pri; those views must not be read as the roadmap. No implementation is commissioned by a generated state alone.
 
 ## Now
 
@@ -19,37 +19,37 @@ The sequence below is the remaining execution proposal, not a claim that work ha
 **covers:** B-169, epic:esq-decides-implementation-detail
 **why now:** parked — specialist back-end guidance isn't needed yet: Tamialog (backend-api skill) and assets-prospection (data-model, database-safety, job-queue, security-rules) already cover back-end choices with their own skills; resume when a run asks or builds badly on something no project skill covers
 **acceptance:** A real selected case proceeds without an implementation-detail question, with evidence of correct behavior and design quality; guidance stays on demand and within a stated cost bound.
-**state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no plan; not started. parked — specialist guidance (the epic's last unbuilt part) has no unmet need: observed projects' own skills settle back-end choices, and the plugin already ships front-end/design guidance; resume when a run asks or builds badly on something no project skill covers. Standards Part 2 (domain defaults) stays empty.
+**state:** <!-- GENERATED --> B-169 Open [hi]; epic Active; no plan; not started. Never-block fixes shipped 2026-10 (`c4d820d`, `53c59f0`, `38256c2`) settle more asks inside the run but don't touch specialist guidance C. parked — specialist guidance (the epic's last unbuilt part) has no unmet need: observed projects' own skills settle back-end choices, and the plugin already ships front-end/design guidance; resume when a run asks or builds badly on something no project skill covers. Standards Part 2 (domain defaults) stays empty.
 
 ### background-acceptance
 **covers:** B-085, B-087
 **why now:** Conditional follow-up, not another implementation of the shipped collection protocol. Preserve B-085 confirmed hi, but defer its unproved savings and harness-registration claim: the 2026-09-08 owner choice explicitly left both open after shipping process cleanup.
 **acceptance:** Only a concrete recurrence or relevant harness capability change earns new work; distinguish process teardown, delayed delivery and actual revival, retaining the original operational acceptance as unproved.
-**state:** <!-- GENERATED --> Both historically Planned; upstream background-task-lifecycle completed four phases but explicitly left their acceptance open. No plan or active execution here; neither row is Done.
+**state:** <!-- GENERATED --> B-085 Planned [hi], B-087 Planned [med]; plan background-task-lifecycle is missing from this checkout (upstream completed four phases and left both acceptances open); acceptance unproved: no recurrence or harness change recorded. No active execution.
 
 ### reread-cost
 **covers:** B-070
 **why now:** Confirmed hi is preserved as importance, not a mandate to buy an inconclusive study before shipping. The read-once rule and instrument exist; the frozen reading cannot support the old comparison.
 **acceptance:** Name a current redundant read and remove its cause, or establish a comparable bounded measurement before claiming savings; research never gates a demonstrated fix.
-**state:** <!-- GENERATED --> Historically Planned; the read-once rule and B-151 measurement exist, but savings are unproved. Private plan omitted; no active execution here.
+**state:** <!-- GENERATED --> B-070 Planned [hi]; plan read-once-and-see-round-trips is missing from this checkout. lean-projection-reads (complete 2026-10-18) removed one concrete re-read (CLAUDE.md in preflight, `ac91057`) and made spec/arch reads section-sized, but it doesn't cite B-070 and leaves the named repeat targets (BACKLOG, DECISIONS) unmeasured; acceptance unproved.
 
 ### conditional-lab
 **covers:** B-094, B-133, B-095, B-118, B-047
 **why now:** Select only for a current question: mutation overlays and promotion guidance are useful when extending journeys; wider coverage and interactive-model readings have no present delivery dependency. A generic fresh-project install -> change -> review -> land walkthrough can locate adoption friction when that goal is selected.
 **acceptance:** Bound any paid run before spending; no reinstated lane, mandatory model assertion, outcome gate or whole-registry purchase merely to refresh evidence. Release audit alone never proves a user journey.
-**state:** <!-- GENERATED --> All Open; candidate lifecycle already documented, remaining B-133 gap is the point-of-use version/cost warning; no new live runs purchased.
+**state:** <!-- GENERATED --> B-094, B-133, B-095, B-118 Open [med?], B-047 Open [med]; no plan; not started. Remaining B-133 gap is the point-of-use version/cost warning; no new live runs purchased.
 
 ### codex-option
 **covers:** B-006
 **why now:** A strategic confirmed hi, explicitly parked: cross-host use has not been selected as the next product goal. Revisit when it is; clearing all old backlog items is not a prerequisite, and the old adapter plan needs reassessment against the current single corpus.
 **acceptance:** A selected cross-host use case and current capability contract justify the smallest useful port.
-**state:** <!-- GENERATED --> Historically Planned; private adapter plan omitted, parked and not executing here.
+**state:** <!-- GENERATED --> B-006 Planned [hi]; plan harness-port-adapter-layer is missing from this checkout. parked — cross-host use not selected; resume when it is. Not executing.
 
 ### sheets-option
 **covers:** B-001
 **why now:** Externally conditional integration follows product delivery until the partner workflow is selected. Do not research connector capabilities merely to keep this row warm.
 **acceptance:** Revalidate both the need and connector capability at selection time; the historical missing-connector claim is not a current market finding.
-**state:** <!-- GENERATED --> Open; historically parked, not executing.
+**state:** <!-- GENERATED --> B-001 Open [lo?]; no plan. parked — partner workflow not selected; resume when the need is selected and connector capability is revalidated.
 
 B-149 is Dropped in this public checkout: the historical briefs were intentionally omitted, so no local cleanup remains. This is not evidence that their findings were fixed; B-179 keeps the generic correction/disposition requirement.
 
