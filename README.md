@@ -321,7 +321,8 @@ only operates on planned work.
   not close its items by itself: `/esq:sweep` closes one only with evidence of its
   whole outcome.
 - `/esq:advance` works the roadmap's `Now` items — one worker per item, at most one
-  new plan per entry, at most one UI render — and stops before building. Once that work
+  new plan per entry, at most one UI render (skipped when an item beside it needs a
+  grill, which may settle the screen question) — and stops before building. Once that work
   is done it asks you in one round what only you can settle: grill an ambiguous item now
   or later, and which rendered direction to keep. A grill you accept runs right there,
   and what the round settled gets one more plan. Anything still waiting on you is

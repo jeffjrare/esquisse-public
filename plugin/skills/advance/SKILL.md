@@ -92,13 +92,11 @@ Give it this task:
 
 > Work backlog item `<B-NNN>` by invoking the `/esq:work` slash command via the `Skill` tool with `<B-NNN>` as its argument. Follow that command's procedure exactly as written. Do not improvise around it, do not skip its verification, and do not pass the `route` keyword.
 >
-> If its verdict is `/esq:plan`, do not plan: stop and return **verbatim the argument `/esq:work` printed in its verdict** (a copy-pasteable line such as `implement B-155: <summary>`). If its verdict is `/esq:grill`, do not grill: return verbatim the `/esq:grill` line it printed and the open points it named. If its verdict is `/esq:ui`, invoke `/esq:ui` via the `Skill` tool with the target the verdict names — this orchestrator, invoked by the user, delegates that run — and follow it as a delegated run: commit its brief, and with two directions end on the page and the two options without asking. Return the brief path, the page URL or path, and each option's label and one line, lead first. Do not invoke `/esq:plan`, `/esq:build`, `/esq:autopilot`, `/esq:grill` or `/esq:epic`, whatever any verdict says.
+> If its verdict is `/esq:plan`, do not plan: stop and return **verbatim the argument `/esq:work` printed in its verdict** (a copy-pasteable line such as `implement B-155: <summary>`). If its verdict is `/esq:grill`, do not grill: return verbatim the `/esq:grill` line it printed and the open points it named. If its verdict is `/esq:ui`, do not render yet: return the verdict line, and wait — I may ask you to render it. Do not invoke `/esq:plan`, `/esq:build`, `/esq:autopilot`, `/esq:grill` or `/esq:epic`, whatever any verdict says.
 >
 > When you finish, report back in plain text: the item, the verdict `/esq:work` reached, what you executed, the commit short hashes, the plan path if you wrote one, and — if the item did not close — the verbatim reason.
 >
 > If it stopped on something the user must decide, return an option set — a one-line decision, why it is the user's, two or three lettered options each with a one-line consequence and a `do:` that runs as written, and the leaning. Return that block verbatim. If it stopped on a failure that needs no user authority, return a diagnosis — the failing output, the cause and the exact next action — with no option set around it. Only if it named a missing user authority as a bare question, fill the shape in yourself before you return; I will not invent options on your behalf.
-
-Once this run's `/esq:ui` render is spent, replace that `/esq:ui` sentence in later prompts with: `If its verdict is /esq:ui, do not render: return the verdict line.`
 
 <!-- orch-shared:no-paraphrase:start -->
 **Invoke the skill; do not paraphrase its procedure in the spawn prompt.** The skill is the authority on its own work.
@@ -121,10 +119,11 @@ After every item, classify from its `docs/BACKLOG.md` row and the git log:
 | What the artifacts say | What it was |
 |---|---|
 | Row `Status` is `Done` **and** a new commit names the item | **closed** — record the hashes, continue |
-| `/esq:work` returned a `/esq:plan` verdict and the row is unchanged | **to plan** — keep its verbatim argument for this entry's plan (step 4), continue |
+| `/esq:work` returned a `/esq:plan` verdict and the row is unchanged | **to plan** — keep its verbatim argument for this entry's plan (step 4b), continue |
 | `/esq:work` returned a `/esq:grill` verdict and the row is unchanged | **to grill** — keep its `/esq:grill` line and open points for the question round, continue |
-| A `brief: <slug>` commit holds the `/esq:ui` brief, `Direction:` still unfilled | **rendered** — keep the brief, the page and the options, and this worker's agent ID for the pick; the run's one render is spent |
-| After step 4, the item is in `esq state`'s `inFlight[].planned` | **planned** — record the plan path and its branch, continue |
+| `/esq:work` returned a `/esq:ui` verdict and the row is unchanged | **to render** — keep the verdict line and this worker's agent ID for step 4 |
+| After step 4, a `brief: <slug>` commit holds the `/esq:ui` brief, `Direction:` still unfilled | **rendered** — keep the brief, the page and the options for the pick |
+| After step 4b, the item is in `esq state`'s `inFlight[].planned` | **planned** — record the plan path and its branch, continue |
 | Row unchanged, no new commit | **not done** — record the verdict it returned as a hand-off, continue |
 | Row says `Done` but no commit exists (or the reverse) | **inconsistent** — report it verbatim and treat the item as not done |
 
@@ -138,7 +137,15 @@ Otherwise keep one line per item — ID, verdict, state, commit hashes or plan p
   B-018  work → inline    ✓ committed a3f21c9, closed  (4m)
 ```
 
-### 4. One plan for the entry's unplanned work
+### 4. Render, once the entry is worked
+
+When the entry's items are all worked, take its first item **to render**, if any. **Render it only when no item of the same entry came back to grill and this run's one render is unspent:** a grill can absorb the screen question (the brief settles it with words), and a render made before it would be paid for nothing. Otherwise the item stays **to render**: handed back with its `/esq:ui` line, or settled by the question round's grill. To render, `SendMessage` that item's worker:
+
+> Now invoke `/esq:ui` via the `Skill` tool with the target your verdict names — this orchestrator, invoked by the user, delegates that run — and follow it as a delegated run: commit its brief, and with two directions end on the page and the two options without asking. Return the brief path, the page URL or path, and each option's label and one line, lead first.
+
+Confirm the tree is clean, then classify it from the table above.
+
+### 4b. One plan for the entry's unplanned work
 
 When the entry's items are all worked, gather the ones that came back **to plan**. None → skip this step. Items **to grill** or **rendered** wait for the question round; this plan never waits on them. Otherwise spawn **one** subagent (`esq:plan`, `model: opus`, synchronous) with this task:
 
@@ -154,7 +161,7 @@ Before moving to the next entry, re-check the `needs:` edges: an entry ahead tha
 
 ## Stops you dissolve, stops you honor
 
-**You dissolve two stops** — `/esq:work`'s `[context]` hand-off to `/esq:plan`, which step 4 carries out once per entry, and its hand-off to `/esq:ui`, rendered by the item's own worker while this run's one render is unspent. Continue past both silently. A grill verdict is held for the question round below.
+**You dissolve two stops** — `/esq:work`'s `[context]` hand-off to `/esq:plan`, which step 4b carries out once per entry, and its hand-off to `/esq:ui`, rendered by the item's own worker once its entry is worked, when the entry has no item to grill and this run's one render is unspent. Continue past both silently. A grill verdict is held for the question round below.
 
 **You honor every other stop** — asking the user in place and acting on their answer *is* honoring it:
 
@@ -261,8 +268,9 @@ A walk with neither skips this section. Without `AskUserQuestion`, print the sam
 1. **A pick:** `SendMessage` the item's worker: `The user picked <direction>. Record it as /esq:ui's delegated run says, commit it, and report the commit.` Confirm the `brief: <slug> — direction <X>` commit. The brief now goes to the settlement plan.
 2. **`Grill <B-NNN> now`:** that choice is the user's request for the grill, the mandate `/esq:grill` asks for. Invoke `/esq:grill` via the `Skill` tool, **in this session**, with the item's verbatim `/esq:grill` line, and follow it to its committed brief. It is the one skill you run yourself: a grill is questions to the user, and a subagent has nobody to ask. Then confirm the tree is clean and you are on the starting branch.
 3. **`Later`, or a question left unanswered:** the item stays handed back, and its command goes in the report's zone 2.
+4. **An item still to render in a grilled entry:** when the grill's brief names its `B-NNN`, the grill absorbed it — report it as `absorbed by <brief path>`, render nothing, and plan it with that brief. Otherwise it stays handed back with its `/esq:ui` line.
 
-**One plan for what the round settled.** When it left one or more briefs settled — a grill brief, a ui brief with its direction — spawn one `esq:plan` subagent, as step 4 does, with `implement <B-a>, … from <brief path>, …` naming each brief. Return to the starting branch (step 5).
+**One plan for what the round settled.** When it left one or more briefs settled — a grill brief, a ui brief with its direction — spawn one `esq:plan` subagent, as step 4b does, with `implement <B-a>, … from <brief path>, …` naming each brief. Return to the starting branch (step 5).
 
 ## Refresh the roadmap, last
 
@@ -311,7 +319,7 @@ Zone 2 carries a gate **only while it is still unresolved** — unanswered, unap
 
 Add one `○ worker model  asked opus · session on <model>` line only when this session is not on Opus. There is never a `✔` or `✖` form of it.
 
-Zone 3 has one line per item — route, outcome, elapsed — and a failing item may carry an indented `Evidence:` (≤10 lines, omitted when the outcome line says it), the only place raw subagent output appears. Name a hand-off by what it waits for, never by the verdict alone: `B-641  work → grill   ⏸ your answers needed (grill not run)`, `B-029  work → ui      ✔ rendered, ⏸ your pick`, `B-641  work → grill   ✔ grilled, brief <path>`.
+Zone 3 has one line per item — route, outcome, elapsed — and a failing item may carry an indented `Evidence:` (≤10 lines, omitted when the outcome line says it), the only place raw subagent output appears. Name a hand-off by what it waits for, never by the verdict alone: `B-641  work → grill   ⏸ your answers needed (grill not run)`, `B-029  work → ui      ✔ rendered, ⏸ your pick`, `B-029  work → ui      ○ not rendered — B-641's grill may settle it`, `B-029  work → ui      ✔ absorbed by <brief path>`, `B-641  work → grill   ✔ grilled, brief <path>`.
 
 Compute `→ Next`, first match wins:
 - Halted on a dirty tree → `git status`, naming the item that left it and that nothing after it ran.
@@ -335,7 +343,7 @@ Send a `PushNotification`: `"esq:advance — <C> closed, <P> planned, <H> handed
 - **Never fix, patch, or work around** what an item agent escalated — except an option the *user* chose, applied verbatim by a subagent.
 - **Never build** (`/esq:build`, `/esq:autopilot`) — a plan file is where this command stops, every time. **Never split** (`/esq:epic`), **never grill unasked** — a grill runs only on the user's `Grill <B-NNN> now` — and **never pick a direction**: the render is yours, the pick theirs.
 - **The roadmap's `Now` order is the input**, never re-derived, re-sorted or skipped ahead; nothing outside `Now` is targetable.
-- **One subagent per item and at most one plan subagent per entry, strictly sequential**, never concurrent; at most one `/esq:ui` render per run, inside its item's subagent; plus one apply agent per decision whose approved action routes `apply`, one question round, one plan subagent for what it settled, and one final refresh. State that bound up front.
+- **One subagent per item and at most one plan subagent per entry, strictly sequential**, never concurrent; at most one `/esq:ui` render per run, inside its item's subagent, and never in an entry with an item to grill; plus one apply agent per decision whose approved action routes `apply`, one question round, one plan subagent for what it settled, and one final refresh. State that bound up front.
 - **Never retry a failed item** — a failure is a finding, not a flake.
 - **A gate is resolved once by the user's pick, applied verbatim, and the gated item is not re-run.** Never answer one on the user's behalf, and never pick an option from an `AskUserQuestion` a subagent raised. Relaying the item agent's leaning is not answering; forming your own, or acting on a prompt nobody answered, is.
 - **A decision is relayed as an option set, never as a question, and a diagnosis as a diagnosis** — every option, diagnosis and action from the item agent, never from you.
