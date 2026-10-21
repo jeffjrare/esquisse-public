@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-advance-settles-with-the-user-after-the-walk | 2026-10-21 | arch | skills | An item worker whose `/esq:work` verdict is `/esq:ui` runs that render itself as a delegated run, at most once per advance run. After the walk and its plans, back on the starting branch, advance puts one `AskUserQuestion` round: `Grill <B-NNN> now` or `Later` per grill verdict, the two directions or `Later` per render. An accepted grill runs `/esq:grill` in the advance session, a pick is recorded by the rendering worker resumed through `SendMessage`, and one plan subagent plans the briefs the round settled. Every item still handed back to a user command counts in NEEDS YOU and makes the headline `⚠`. | Active |
 | D-projections-are-read-by-section-through-the-cli | 2026-10-19 | arch | projections | `esq projection outline\|read <spec\|arch>` owns section boundaries, strips history comments and carries the projection's freshness; skills read the outline then only the sections they need. | Active |
 | D-lesson-lines-carry-their-id | 2026-10-18 | arch | lessons | After its heading, a lesson entry has no blank line, a one-line body, and every line ends with the entry's own ID as an HTML comment (` <!-- L-<id> -->`). | Active |
 | D-lessons-ledger-is-evidence-keyed-and-union-merged | 2026-10-18 | arch | ledgers | docs/LESSONS.md is written only by `esq lessons add`, one `## L-<hex>` block per entry whose ID hashes its resolved evidence, read by path through cues carried in existing preflights, advisory in validate, harmless to proofs and projections, and merged by a `merge=union` attribute. | Active |
@@ -5621,3 +5622,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: per-run cost proportional to the sections used, deterministic freshness per path. Accepted: one CLI verb pair and positional ids that only hold within one run.
 **Conséquences:** A new projection reader goes through `esq projection`, never a whole-file Read; `/esq:spec` writes no dated history comments — git holds that history.
 **Alternatives rejetées:** grep headings + Read offsets in prose (re-derived every run, no freshness, keeps comments); a generic `esq docs` reader over any file (no current need beyond the two projections); capping the files (trims design detail, still reads every feature).
+
+## D-advance-settles-with-the-user-after-the-walk — `/esq:advance` renders a ui verdict and asks one question round after the walk
+
+**Scope:** arch
+**Topic:** skills
+**Date:** 2026-10-21
+**Statut:** Active
+**Fondement:** user — 2026-10-20, after an advance run on events-tracker handed back a grill and a ui verdict under a ✔ headline: « Just allow it to run grill maybe? What else, to make advance more lean? Not normal i have to think and doubt there », then « Go »
+
+**Contexte:** An advance run (events-tracker, the-forecast-shows-its-work, 2026-10-20) planned one item and handed two back, one to `/esq:grill` and one to `/esq:ui`, under a `✔` headline with no NEEDS YOU. The user, watching from a phone, read `work → grill` as a grill that had happened without them and had to retype two commands in a later turn.
+**Décision:** An item worker whose `/esq:work` verdict is `/esq:ui` runs that render itself as a delegated run, at most once per advance run. After the walk and its plans, back on the starting branch, advance puts one `AskUserQuestion` round: `Grill <B-NNN> now` or `Later` per grill verdict, the two directions or `Later` per render. An accepted grill runs `/esq:grill` in the advance session, a pick is recorded by the rendering worker resumed through `SendMessage`, and one plan subagent plans the briefs the round settled. Every item still handed back to a user command counts in NEEDS YOU and makes the headline `⚠`.
+**Raison:** Rendering is work the run can do, and only the pick is the user's. Asking after the walk keeps the never-block rule: nothing unattended waits on the answer, and a user who is away leaves the run exactly where the old one ended. The accepted grill is the user's request in the conversation, which is the whole of `/esq:grill`'s mandate, and the advance session is the one talking to them.
+**Tradeoff:** Gained: one sitting where two re-invocations were needed, and a report whose headline says what waits on the user. Accepted: an `/esq:ui` render is a high-effort run with captures, bounded at one per advance run; the grill reads code in the orchestrator's own context; an entry can now get a second plan, from the briefs the round settled.
+**Conséquences:** `/esq:advance`'s announce, worker prompt, classification, stops, constraints and report change; `/esq:grill`'s mandate names the advance question round; ARCHITECTURE's entry line and the README's advance row and paragraph say it.
+**Alternatives rejetées:** Hold the entry's plan until after the round so one plan covers everything (the plan would wait on a user who may be away). Spawn the grill in a subagent (it has nobody to question, D-grill-runs-on-request). Keep handing both back and only fix the headline (the user still retypes two commands).

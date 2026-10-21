@@ -209,6 +209,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-190 | 2026-09-29 | 🐛 bug | hi |  | Measurement verdicts (keep/revert after a run set) gate delivery and reach the user as a decision instead of being settled under mandate | observed: 2026-09-29-keep-git-state-rule — B-189 took 3 units and a user 🔴 after an n=3 revert rule misfired · Planned by measurement-verdict-under-mandate · Done by measurement-verdict-under-mandate | esq-decides-implementation-detail |  | Done |
 | B-191 | 2026-10-01 | 🐛 bug | med? |  | Roadmap refresh notice fires on retained Shipped tail even right after a derive | work · Planned by 2026-09-30-b191-shipped-since-derive · Done by 2026-09-30-b191-shipped-since-derive |  |  | Done |
 | B-192 | 2026-10-20 | 🐛 bug | med? | 1600 | measure-rereads looks for old read-once wording, so recent runs count as rule absent | work: B-070 |  |  | Open |
+| B-193 | 2026-10-21 | ⚡ perf | med? | 1700 | advance's roadmap refresh spawns an Opus agent to rewrite GENERATED state lines the CLI could derive (events-tracker 2026-10-20: one line, ~1 min) | observed: advance run events-tracker 2026-10-20 |  |  | Open |
 
 ---
 
