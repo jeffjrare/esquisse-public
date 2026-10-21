@@ -182,7 +182,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:build <plan>` | Implement and verify one phase, then stop, weighing the lessons earlier cycles left on its files | Task commits and an execution-log entry; a repo fact in `docs/LESSONS.md` for a trap the phase hit and verified itself |
 | `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design | Review findings, each marked `(repeats L-<id>)` when it repeats a defect a lesson recorded; the calls build decided for you by hat; a corrective brief when needed |
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings; a lesson in `docs/LESSONS.md` for a fix whose contrast recurs beyond its line |
-| `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run; never a push |
+| `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run, and the next plan still in flight; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
 | `/esq:work [item-or-text] [route]` | Investigate one item; do it now if trivial, otherwise recommend the method | Code commit and backlog close for small work; otherwise the next command |
 | `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
@@ -287,7 +287,9 @@ accounts — and once you have done it, `/esq:land <plan> --from <n>` (or saying
 done in the same session) carries on. esquisse never pushes. A plan that lands into
 another plan's branch rather than your trunk has shipped nothing yet: the report
 says where that parent stands and points at its next step, and the deployment
-steps come when the parent lands.
+steps come when the parent lands. When another plan is still in flight — a sibling from
+the same roadmap entry first — the landing ends on its next command rather than on
+"nothing to run".
 
 **Replacing a screen, an editor or a form** keeps what the old one did unless you
 say otherwise. `plan` reads the old code and lists each capability it carried — the
