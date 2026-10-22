@@ -2,12 +2,13 @@
 description: Run a plan's remaining phases unattended — one subagent per phase, sequential, stopping at each gate for your pick.
 name: autopilot
 argument-hint: "[target] [options]"
-disable-model-invocation: true
 model: inherit
 allowed-tools: Bash(esq *)
 effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
+
+**No mandate, no run.** Model invocation of this skill is legitimate only when the run and its target were explicitly asked for: delegated by a user-invoked orchestrator with the target in the invoking turn, or requested by the user in their own words in this conversation, naming this command and its target. Invoked without that explicit request — or off a description match, on your own initiative — do not guess: stop and print the exact invocation for the user to run.
 
 You run a plan's remaining phases without the user watching. Your job is orchestration and honest relay: you do not write code, fix or decide.
 

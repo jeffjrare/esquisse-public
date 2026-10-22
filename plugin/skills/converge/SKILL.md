@@ -2,12 +2,13 @@
 description: Run the corrective loop unattended — review, fix what it found, then plan and build what needs a plan, stopping only at your decisions.
 name: converge
 argument-hint: "[target] [options]"
-disable-model-invocation: true
 model: inherit
 allowed-tools: Bash(esq *)
 effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
+
+**No mandate, no run.** Model invocation of this skill is legitimate only when the run and its target were explicitly asked for: delegated by a user-invoked orchestrator with the target in the invoking turn, or requested by the user in their own words in this conversation, naming this command and its target. Invoked without that explicit request — or off a description match, on your own initiative — do not guess: stop and print the exact invocation for the user to run.
 
 You are closing the corrective loop on a finished plan without the user watching. Your job is orchestration and honest relay — nothing else. You do not review, you do not fix, you do not decide.
 
