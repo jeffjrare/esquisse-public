@@ -178,9 +178,9 @@ map and a decision record on demand; none is a required setup step.
 | Command | Purpose | Main result |
 |---|---|---|
 | `/esq:grill <idea>` | Resolve scope and consequential choices before planning | A brief in `docs/plans/` |
-| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases | A plan committed on its own branch, its checks tried against the repository first, citing any lesson from `docs/LESSONS.md` that changed its design; when it replaces a surface, the inventory of what that surface did, any drop asked first |
-| `/esq:build <plan>` | Implement and verify one phase, then stop, weighing the lessons earlier cycles left on its files | Task commits and an execution-log entry; a repo fact in `docs/LESSONS.md` for a trap the phase hit and verified itself |
-| `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design | Review findings, each marked `(repeats L-<id>)` when it repeats a defect a lesson recorded; the calls build decided for you by hat; a corrective brief when needed |
+| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases, reading the expertise skills its files touch | A plan committed on its own branch, its checks tried against the repository first, citing any lesson from `docs/LESSONS.md` that changed its design, each phase naming the expertise it loads, and a backlog row for a domain no skill covers; when it replaces a surface, the inventory of what that surface did, any drop asked first |
+| `/esq:build <plan>` | Implement and verify one phase, then stop, weighing the lessons earlier cycles left on its files and loading the expertise skills they touch | Task commits and an execution-log entry; a repo fact in `docs/LESSONS.md` for a trap the phase hit and verified itself |
+| `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design, against the expertise skills the change touches | Review findings, each marked `(repeats L-<id>)` when it repeats a defect a lesson recorded; the calls build decided for you by hat; a corrective brief when needed |
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings; a lesson in `docs/LESSONS.md` for a fix whose contrast recurs beyond its line |
 | `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run, and the next plan still in flight; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
@@ -204,6 +204,31 @@ map and a decision record on demand; none is a required setup step.
 In every example, use the actual paths the previous command reported. `review` and
 `check` need an explicit target and ask for one when it is missing.
 
+## Expertise
+
+Besides its commands, esq ships **expertise skills**: generic, dated knowledge about a
+domain where a first attempt is expensive to get wrong. They have no slash command.
+Claude invokes one on its own when the work matches its description, in any project
+where esq is installed, inside an esq flow or not.
+
+Inside esq the load does not depend on that match: `esq expertise match <path…>` answers
+which skills a set of paths touches, and `/esq:plan`, `/esq:build` and `/esq:review` load
+those skills automatically for the files a phase or a change touches. A plan names them
+in each phase's `**Expertise:**` item, together with any skill the work needs that no path
+shows, such as `esq:store-review` for a phase that submits a build.
+
+- **A project skill wins.** Where your project carries its own skill on the same topic
+  and the two disagree, Claude follows the project's.
+- **Facts are dated.** Each skill opens with an `**As of:**` date and the paths it
+  covers. When a run finds the date more than 180 days old, it says so in one line
+  before relying on a deadline, and keeps going. An old or unreadable skill never stops a run.
+
+| Skill | Covers |
+|---|---|
+| `esq:capacitor-android` | A Capacitor app's Android shell: build origins, `versionCode`, API levels, `cap sync` output, the WebView origin and its cookies, App Links, signing, backup rules, insets |
+| `esq:capacitor-ios` | A Capacitor app's iOS target: toolchain and CI without a Mac, signing, lifecycle and session survival, push (APNs vs FCM), privacy manifests, export compliance |
+| `esq:store-review` | What Google Play and App Store reviewers check, and the Console and App Store Connect forms that block a build or a review |
+
 ## How it works
 
 esquisse is a plugin, not a service or a database. **The model handles judgment:**
@@ -214,8 +239,8 @@ verification state, and merging safely.
 
 | Piece | Where | Responsibility |
 |---|---|---|
-| Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed |
-| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one), and read the spec and architecture by section (`esq projection outline` gives the heading tree, what each section costs, the projection's freshness and which given files changed since it was mined; `esq projection read` returns only the chosen sections, history comments stripped). It answers structured questions; it makes no product choices |
+| Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed; and the expertise skills Claude consults on its own |
+| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one), match paths to expertise skills (`esq expertise match` returns each skill those paths touch with its age, never its text, and the build preflight carries it), and read the spec and architecture by section (`esq projection outline` gives the heading tree, what each section costs, the projection's freshness and which given files changed since it was mined; `esq projection read` returns only the chosen sections, history comments stripped). It answers structured questions; it makes no product choices |
 | Project records | `docs/` in your project, and Git | Keep plans, decisions, committed work and the execution log available to the next session |
 | Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
 

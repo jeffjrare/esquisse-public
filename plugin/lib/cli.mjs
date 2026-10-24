@@ -4613,6 +4613,84 @@ export async function lessonsMatch(root, readerPaths) {
   }
 }
 
+// ── Expertise skills: which plugin knowledge a set of paths touches ────────────────────────────
+// An expertise skill is a `user-invocable: false` SKILL.md beside the commands, resolved relative to
+// this file the way `DEFAULT_STANDARDS` is, so one path serves the checkout and the installed plugin.
+// Its body declares `**As of:** YYYY-MM-DD` and `**Paths:**` (backticked spans). The CLI answers ids,
+// dates and the paths that matched — never the skill's body, and never which skill a phase *should*
+// load beyond what its paths say; that judgment stays the model's.
+const EXPERTISE_SKILLS_DIR = fileURLToPath(new URL('../skills/', import.meta.url));
+export const EXPERTISE_STALE_DAYS = 180;
+
+// The segments a span or a path is made of, and whether it names a directory (a trailing `/`).
+function expertiseSegments(raw) {
+  const value = String(raw).trim().replace(/^\.\//, '');
+  return { directory: value.endsWith('/'), segments: value.replace(/\/+$/, '').split('/').filter((segment) => segment !== '') };
+}
+
+function expertiseSegmentMatches(pattern, segment) {
+  const source = pattern.split('*').map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('[^/]*');
+  return new RegExp(`^${source}$`).test(segment);
+}
+
+// Pure string, segment-wise and unanchored, so a path that does not exist yet still matches. A
+// directory span matches its segments anywhere in the path; a file span must end where the path does.
+// A path through `node_modules` never matches: a vendored copy of a platform is not the project's.
+export function expertiseSpanMatches(span, candidate) {
+  const pattern = expertiseSegments(span);
+  const target = expertiseSegments(candidate);
+  if (pattern.segments.length === 0 || target.segments.includes('node_modules')) return false;
+  const width = pattern.segments.length;
+  for (let start = 0; start + width <= target.segments.length; start += 1) {
+    const ends = start + width === target.segments.length;
+    if (!pattern.directory && !ends) continue;
+    if (pattern.segments.every((segment, offset) => expertiseSegmentMatches(segment, target.segments[start + offset]))) return true;
+  }
+  return false;
+}
+
+// One SKILL.md read as an expertise skill: `null` when it is a command, `{ reason }` when it is an
+// expertise skill whose parsed lines are missing or malformed.
+export function parseExpertiseSkill(text) {
+  const frontmatter = /^---\n([\s\S]*?)\n---\n/.exec(text);
+  if (!frontmatter || !/^user-invocable:\s*false\s*$/m.test(frontmatter[1])) return null;
+  const body = text.slice(frontmatter[0].length);
+  const asOf = /^\*\*As of:\*\*\s+(\d{4}-\d{2}-\d{2})\s*$/m.exec(body)?.[1] ?? null;
+  const pathsLine = /^\*\*Paths:\*\*(.*)$/m.exec(body)?.[1] ?? null;
+  const paths = pathsLine === null ? [] : [...pathsLine.matchAll(/`([^`]+)`/g)].map((match) => match[1].trim()).filter(Boolean);
+  const date = asOf === null ? null : new Date(`${asOf}T00:00:00Z`);
+  if (asOf === null || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== asOf) return { reason: 'no parsed **As of:** YYYY-MM-DD line' };
+  if (paths.length === 0) return { reason: 'no **Paths:** line naming a backticked span' };
+  return { asOf, paths };
+}
+
+// Read-only, and never throws on a malformed skill: that skill is reported under `unread`.
+export async function expertiseMatch(readerPaths, options = {}) {
+  const directory = options.skillsDir ?? EXPERTISE_SKILLS_DIR;
+  // The caller's own calendar day, not UTC's: an age read in the evening is not a day older.
+  const now = new Date();
+  const today = options.today ?? `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const readers = [...new Set(readerPaths.map((entry) => String(entry).trim()).filter((entry) => entry !== ''))];
+  const skills = [];
+  const unread = [];
+  let names = [];
+  try { names = (await readdir(directory, { withFileTypes: true })).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort(); } catch { names = []; }
+  for (const name of names) {
+    const id = `esq:${name}`;
+    let text;
+    try { text = await readFile(path.join(directory, name, 'SKILL.md'), 'utf8'); } catch { continue; }
+    let parsed;
+    try { parsed = parseExpertiseSkill(text); } catch (error) { parsed = { reason: String(error.message ?? error) }; }
+    if (parsed === null) continue;
+    if (parsed.reason) { unread.push({ id, reason: parsed.reason }); continue; }
+    const matched = readers.filter((reader) => parsed.paths.some((span) => expertiseSpanMatches(span, reader)));
+    if (matched.length === 0) continue;
+    const ageDays = Math.floor((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${parsed.asOf}T00:00:00Z`)) / 86_400_000);
+    skills.push({ id, asOf: parsed.asOf, ageDays, stale: ageDays > EXPERTISE_STALE_DAYS, matched });
+  }
+  return { skills, unread };
+}
+
 export async function lessonsShow(root, ids) {
   const repository = git(root, ['rev-parse', '--show-toplevel']);
   const text = await readLessons(repository);
@@ -6065,7 +6143,11 @@ export async function main(args) {
       // The cues for the selected phase's `**Files touched:**` — never a reason for this call to fail.
       const touched = verdict.phase ? (touchedPaths(text).find((phase) => phase.phase === verdict.phase.number)?.paths ?? []) : [];
       const lessons = touched.length > 0 ? await lessonsMatch(root, touched) : { ...NO_LESSONS };
-      return output(await spillContext(root, action, { file: action, branch, anchor, ...verdict, lessons, context: planContext(plan, verdict) }));
+      // The expertise the same phase touches. `unread` spans count too: `pathAlternatives` refuses a
+      // bare top-level directory such as `ios/`, which is exactly what a new platform's phase names.
+      const selected = verdict.phase ? touchedPaths(text).find((phase) => phase.phase === verdict.phase.number) : null;
+      const expertise = await expertiseMatch(selected ? [...selected.paths, ...selected.unread] : []);
+      return output(await spillContext(root, action, { file: action, branch, anchor, ...verdict, lessons, expertise, context: planContext(plan, verdict) }));
     }
     const plan = parsePlan(await readText(action));
     const verdict = nextPhase(plan);
@@ -6194,6 +6276,20 @@ export async function main(args) {
       return output(await lessonsShow(root, rest));
     }
     throw new Error(usage);
+  }
+  // The expertise skills a set of paths touches: ids, dates and the matched paths, never a body.
+  if (group === 'expertise') {
+    const usage = 'usage: esq expertise match <path…> | --paths <file>|-';
+    if (action !== 'match') throw new Error(usage);
+    let listed = rest;
+    if (rest[0] === '--paths') {
+      if (rest.length !== 2) throw new Error(usage);
+      let body = '';
+      if (rest[1] === '-') { for await (const chunk of process.stdin) body += chunk; }
+      else body = await readText(path.resolve(root, rest[1]));
+      listed = body.split('\n');
+    } else if (rest.length === 0 || rest.some((arg) => arg.startsWith('--'))) throw new Error(usage);
+    return output(await expertiseMatch(listed));
   }
   if (group === 'plan' && action === 'append-log') {
     // Before anything reads a path: `--help` must not depend on a plan file existing, and must not
@@ -6478,5 +6574,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match <path…>|--paths <file>|- (the expertise skills those paths touch, with their age)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
 }

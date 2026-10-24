@@ -2590,7 +2590,8 @@ test('next-phase --preflight answers branch, anchor and context in one call, and
   assert.equal(preflight.branch.refuse, false);
   assert.equal(preflight.anchor, anchor);
   assert.deepEqual(preflight.lessons, { cues: [], omitted: 0, stale: 0 });
-  assert.deepEqual({ ...preflight, branch: undefined, anchor: undefined, lessons: undefined }, { ...context, branch: undefined, anchor: undefined, lessons: undefined });
+  assert.deepEqual(preflight.expertise, { skills: [], unread: [] });
+  assert.deepEqual({ ...preflight, branch: undefined, anchor: undefined, lessons: undefined, expertise: undefined }, { ...context, branch: undefined, anchor: undefined, lessons: undefined, expertise: undefined });
 
   // Past the inline budget the section texts leave stdout for one file under the git dir, in order,
   // and every other byte of the answer is unchanged.

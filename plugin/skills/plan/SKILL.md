@@ -102,6 +102,8 @@ Read the codebase to understand context: follow imports, read tests and types wh
 
 **Ask which of those files changed since the spec was mined, in that same wave:** chain `esq projection outline spec --paths -` (the same candidate paths on stdin; `HEAD` is the default `--upto`) beside `esq lessons match`. A feature whose code is in `touched`, or whose code you cannot map to paths, is an evidence gap: inspect that code and cite it rather than the spec text. `touched: null` means freshness is unprovable, so every rule you rely on counts as unverified. Never a stop, never a refresh prerequisite.
 
+**Ask which expertise those files touch, in that same wave:** chain `esq expertise match --paths -` (the same candidate paths on stdin, paths that do not exist yet included) beside `esq lessons match`. It answers the expertise skills (`esq:<name>`) whose `**Paths:**` meet a path, each with its `asOf`, `ageDays`, `stale` and `matched` paths; empty is the common answer. Invoke each matched skill with the `Skill` tool before writing the tasks of the phase it bears on, and name it in that phase's `**Expertise:**` item, plus any skill the work needs that no path can express (`esq:store-review` for a phase that submits a build). A `stale` skill gets one line in the report and is still read. A domain the unit touches that no expertise skill and no project skill covers gets one line in `## Risks` and, in the tail commit, one `esq backlog add --type improvement --summary "Expertise candidate: <domain> — <what the unit needed>" --source "plan: <slug>"`, unless step 9's backlog match already found an Open row naming that domain. None of this ever stops the plan.
+
 Investigate proportionally. A small bug fix needs 2-3 files. A refactor needs the touched module plus boundaries. A feature might span more. Don't read everything; read what informs the plan.
 
 For a feature, carry the brief's user, present friction and intended result into Context/Goal; with direct task input, infer them from the request and product evidence here. Distinguish assumptions from established facts. Use that result to choose an approach: a working mechanism that leaves the user's original work undone is not a useful slice. Resolve ordinary omissions within the mandate; ask only for the missing authority defined below, not for a second framing session by default.
@@ -232,6 +234,7 @@ shipped feature. Keep the promised outcome intact when splitting the work.
 ### Phase 1 — <name>
 - **Goal:** one sentence
 - **Files touched:** explicit paths
+- **Expertise:** `esq:<name>` — optional: the expertise skills this phase loads (the matches, plus any judged necessary); omit when none
 - **Tasks:** 
   - Task 1.1: <one commit's worth of work, written as the commit subject would read>
   - Task 1.2: <next atomic change>
