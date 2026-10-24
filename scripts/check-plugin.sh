@@ -96,11 +96,33 @@ fi
 # the harness actually reads.
 count=$(find "$SKILLS" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l)
 [[ "$count" -gt 0 ]] || fail "no skill found under $SKILLS"
+expertise=0
 
 for file in "$SKILLS"/*/SKILL.md; do
   [[ -f "$file" ]] || continue
   name=$(basename "$(dirname "$file")")
   grep -qF "name: $name" "$file" || fail "$name has no stable frontmatter name"
+  # An expertise skill (`user-invocable: false`) is knowledge, not a command: no
+  # model, effort or arguments to consume. What it owes is the two lines
+  # `esq expertise match` parses — a real `**As of:**` date and a `**Paths:**`
+  # line naming at least one backticked span. `disable-model-invocation` on top
+  # of `user-invocable: false` would leave nobody able to invoke it.
+  if awk 'NR == 1 && $0 != "---" { exit } NR > 1 && $0 == "---" { exit }
+          /^user-invocable:[[:space:]]*false[[:space:]]*$/ { found = 1; exit }
+          END { exit !found }' "$file"; then
+    expertise=$((expertise + 1))
+    grep -qF 'disable-model-invocation' "$file" \
+      && fail "$name is an expertise skill (user-invocable: false); disable-model-invocation would leave nobody able to invoke it"
+    as_of=$(grep -m1 -oE '^\*\*As of:\*\* [0-9]{4}-[0-9]{2}-[0-9]{2}[[:space:]]*$' "$file" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+    if [[ -z "$as_of" ]]; then
+      fail "$name is an expertise skill with no \`**As of:** YYYY-MM-DD\` line"
+    elif [[ "$(date -u -d "$as_of" +%F 2>/dev/null)" != "$as_of" ]]; then
+      fail "$name's **As of:** $as_of is not a calendar date"
+    fi
+    grep -qE '^\*\*Paths:\*\* .*`[^`]+`' "$file" \
+      || fail "$name is an expertise skill with no \`**Paths:**\` line naming a backticked path"
+    continue
+  fi
   # The unattended trio's subagents invoke the first seven via the Skill tool — roadmap for
   # /esq:advance's bare refresh only — and ui and grill run when the user asks for them in
   # the conversation; autopilot and converge run in /esq:advance's own session on the plans it
@@ -125,7 +147,7 @@ forked=$(grep -RlF 'context: fork' "$SKILLS" --include=SKILL.md 2>/dev/null || t
 [[ -z "$forked" ]] || fail "context: fork is present without a completed runtime proof: $forked"
 
 if [[ "$fails" -eq 0 ]]; then
-  printf 'plugin, embedded CLI, native hooks and %d skills validate\n' "$count"
+  printf 'plugin, embedded CLI, native hooks and %d skills (%d expertise) validate\n' "$count" "$expertise"
   exit 0
 fi
 printf '%d plugin finding(s).\n' "$fails"

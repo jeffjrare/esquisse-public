@@ -204,6 +204,25 @@ map and a decision record on demand; none is a required setup step.
 In every example, use the actual paths the previous command reported. `review` and
 `check` need an explicit target and ask for one when it is missing.
 
+## Expertise
+
+Besides its commands, esq ships **expertise skills**: generic, dated knowledge about a
+domain where a first attempt is expensive to get wrong. They have no slash command.
+Claude invokes one on its own when the work matches its description, in any project
+where esq is installed, inside an esq flow or not.
+
+- **A project skill wins.** Where your project carries its own skill on the same topic
+  and the two disagree, Claude follows the project's.
+- **Facts are dated.** Each skill opens with an `**As of:**` date and the paths it
+  covers. When a run finds the date more than 180 days old, it says so in one line
+  before relying on a deadline, and keeps going.
+
+| Skill | Covers |
+|---|---|
+| `esq:capacitor-android` | A Capacitor app's Android shell: build origins, `versionCode`, API levels, `cap sync` output, the WebView origin and its cookies, App Links, signing, backup rules, insets |
+| `esq:capacitor-ios` | A Capacitor app's iOS target: toolchain and CI without a Mac, signing, lifecycle and session survival, push (APNs vs FCM), privacy manifests, export compliance |
+| `esq:store-review` | What Google Play and App Store reviewers check, and the Console and App Store Connect forms that block a build or a review |
+
 ## How it works
 
 esquisse is a plugin, not a service or a database. **The model handles judgment:**
@@ -214,7 +233,7 @@ verification state, and merging safely.
 
 | Piece | Where | Responsibility |
 |---|---|---|
-| Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed |
+| Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed; and the expertise skills Claude consults on its own |
 | CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one), and read the spec and architecture by section (`esq projection outline` gives the heading tree, what each section costs, the projection's freshness and which given files changed since it was mined; `esq projection read` returns only the chosen sections, history comments stripped). It answers structured questions; it makes no product choices |
 | Project records | `docs/` in your project, and Git | Keep plans, decisions, committed work and the execution log available to the next session |
 | Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |

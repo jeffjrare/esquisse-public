@@ -10,7 +10,8 @@
 #
 #   1. A section cross-reference resolves inside its own skill.
 #   2. Every `/esq:<name>` mentioned has a source file.
-#   3. Every command appears in the README's command table.
+#   3. Every command appears in the README's command table, and every expertise
+#      skill in its `## Expertise` section.
 #   4. Every `references/<file>.md` a skill names exists.
 #   5. Every section a grill brief writes is named by the command that reads it.
 #
@@ -99,11 +100,36 @@ readme_section() {
   awk -v h="$1" 'index($0, "## " h) == 1 { f = 1; next } f && /^## / { exit } f' "$README"
 }
 
+# An expertise skill (`user-invocable: false` in its frontmatter) is no command:
+# a reader meets it in the README's `## Expertise` section instead, spelled
+# `esq:<name>` since it has no slash form.
+is_expertise() {
+  awk 'NR == 1 && $0 != "---" { exit } NR > 1 && $0 == "---" { exit }
+       /^user-invocable:[[:space:]]*false[[:space:]]*$/ { found = 1; exit }
+       END { exit !found }' "$CMD_DIR/$1/SKILL.md"
+}
+commands=""; experts=""
+for n in $(skill_names); do
+  if is_expertise "$n"; then experts="$experts $n"; else commands="$commands $n"; fi
+done
+
+if [ -n "$experts" ]; then
+  expertise_body=$(readme_section "Expertise")
+  if [ -z "$expertise_body" ]; then
+    finding "$README has no \"## Expertise\" section — expertise coverage cannot be verified"
+  else
+    for n in $experts; do
+      grep -qE "esq:$n([^a-z-]|\$)" <<<"$expertise_body" \
+        || finding "esq:$n is missing from the \"Expertise\" section of $README"
+    done
+  fi
+fi
+
 commands_body=$(readme_section "Commands")
 if [ -z "$commands_body" ]; then
   finding "$README has no \"## Commands\" section — command coverage cannot be verified"
 else
-  for n in $(skill_names); do
+  for n in $commands; do
     # The plain spelling, backticks or not: the claim is that a reader scanning
     # this section meets every command, not that each is typeset one way.
     grep -qE "/esq:$n([^a-z]|\$)" <<<"$commands_body" \
@@ -152,6 +178,6 @@ fi
 if [ "$findings" -gt 0 ]; then
   exit 1
 fi
-printf 'structure clean — section references, %s commands, README coverage, every references/ path and every brief section resolve\n' \
-  "$(skill_names | wc -l | tr -d ' ')"
+printf 'structure clean — section references, %s commands, %s expertise skills, README coverage, every references/ path and every brief section resolve\n' \
+  "$(wc -w <<<"$commands" | tr -d ' ')" "$(wc -w <<<"$experts" | tr -d ' ')"
 exit 0
