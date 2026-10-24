@@ -6,6 +6,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 298d5eeab206ae1db355db33265ace5320e34250
+
 ## Context
 B-169's last part, specialist guidance, was parked until "a run builds badly on something no project skill covers". That has now happened: events-tracker's Capacitor Android shell was built with no skill to guide it. Its `shell/` history shows the cost in repair commits: plugins whose native half was never registered in the synced Gradle files (`54b7ef5a`, `b78e6c66`), a WebView cookie store lost on pause (`17137b9b`), backup excludes missing a required attribute (`61758ac8`), a keystore fallback misread (`cbc44235`), and a first Play rejection for a silent button. What was learned lives in two project skills (`store-review`, and the Android section of `landing-and-deploy`), so assets-prospection and the coming iOS work can't use it. On 2026-10-23 the user widened the scope: esq ships a library of generic expertise as **real plugin skills**, not guides served by the CLI. This plan delivers the first batch (mobile) and the trigger that makes esq load it. Two later batches are out of scope: UI/design system, then data, security and testing.
 
