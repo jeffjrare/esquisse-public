@@ -131,3 +131,39 @@ Approach 1.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-10-23
+
+**Plan committed at:** 9aefa83
+
+**Commits:** f641e9e, deb2d61, 049d00c, e264535
+
+**Verified:** e264535084a3dfbf5da63d076f633bc4277ff643
+- `scripts/check-plugin.sh plugin`
+- `scripts/check-structure.sh`
+- `grep -rniE 'tamialog|events-tracker|googleverif|B-[0-9]{3}|\bD-[a-z]+(-[a-z]+)+' plugin/skills/capacitor-android plugin/skills/capacitor-ios plugin/skills/store-review`
+- `grep -h '^description:' plugin/skills/capacitor-android/SKILL.md plugin/skills/capacitor-ios/SKILL.md plugin/skills/store-review/SKILL.md | awk 'length($0) > 460 { bad = 1 } END { exit bad }'`
+
+**What got built:** Three expertise skills (`user-invocable: false`) ship in plugin/skills: capacitor-android, capacitor-ios and store-review, each opening with a parsed `**As of:** 2026-10-23`, a `**Paths:**` line, the 180-day staleness rule and the project-skill-wins rule. check-plugin.sh accepts this second skill kind (requires a calendar-valid As of and a Paths line with a backticked span, refuses disable-model-invocation on it), check-structure.sh requires each under the README's new `## Expertise` section instead of `## Commands`.
+
+**Verification:**
+- (auto) scripts/check-plugin.sh plugin — PASS: 'plugin, embedded CLI, native hooks and 26 skills (3 expertise) validate', exit 0; claude plugin validate --strict accepted user-invocable: false
+- (auto) scripts/check-structure.sh — PASS: 'structure clean — … 23 commands, 3 expertise skills, README coverage …', exit 0
+- (auto) grep -rniE 'tamialog|events-tracker|googleverif|B-[0-9]{3}|\bD-[a-z]+(-[a-z]+)+' over the three skill dirs — PASS: no match, exit 1
+- (auto) description length awk over the three skills — PASS: exit 0 (308, 309, 356 chars, all ≤ 460)
+- Task 1.1 negative case (scratch copy): a fake expertise skill with disable-model-invocation, As of 2026-02-30 and no Paths produced exactly those three findings, exit 1
+- Task 1.4 sanitization reading, each skill against its source side by side: capacitor-android vs events-tracker landing-and-deploy § The Android shell and the five shell/ repair commits — dropped the app host, the channel id, the release env-var name, requireBuildOrigins(), check-assetlinks.sh, pnpm check:play-listing, the versionCode epoch date, every B-/D- reference; capacitor-ios vs store-review § Apple and the two iOS project commits — dropped the owner's no-Mac note, the 2026-10-13 image date, every B- row, the bundle identity; store-review vs its source — dropped the review account address, the 1.0.1/1.0.2 history, the Google-sign-in flag and its row, the client file paths, the in-app deletion label and component, the category choice (kept only as a generic conditional), the pricing slug, the notification topic decision (kept as 'decide with the product owner'). A second grep for project paths, host patterns and product terms over the three skills matched nothing. Result: no account, identifier, project domain, project reference or product decision carried over.
+
+**Decided for you:**
+- architecture: a `**Paths:**` line must name at least one backticked span, and `**As of:**` must be a real calendar date (GNU date round-trip) — Phase 2's parser can read backticked spans only and compute an age — undo: relax the two regexes in scripts/check-plugin.sh
+
+**Surprises / decisions made during execution:** - Re-checked dated facts before setting As of: Play API 36 floor since 2026-08-31 (extension to 2026-11-01) confirmed; 16 KB page size from 2027-02-01 confirmed; Health apps declaration mandatory for every app confirmed; Apple Xcode 26 / iOS 26 SDK since 2026-04-28 and iOS 13 minimum since 2026-09-09 confirmed; GitHub macos-26 GA 2026-02-26 confirmed.
+- Play's App access page (9859455) does not carry the 'reusable, accessible at all times' wording the source skill quoted; store-review now states what the page says (every detail needed, unusual mechanisms such as OTP/MFA flagged in 'Any other instructions').
+- App Store Medical device status date (March 2026) was not re-verified; written as reported, with 're-check in App Store Connect'.
+- check-plugin's summary line now reads 'N skills (M expertise) validate' and check-structure's counts commands and expertise skills separately.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. The three skills' frontmatter is `user-invocable: false` (no model/effort/arguments); `**As of:** YYYY-MM-DD` and `**Paths:** ` + comma-separated backticked spans are lines of their own right after the H1 — the format `esq expertise match` parses. A span ending in `/` is a directory (`android/`, `ios/`, `*.xcodeproj/`), `*` is within one segment.
+2. README `## Expertise` exists with a table spelling each skill `esq:<name>` (no slash: check-structure's /esq:[a-z]+ rule would misread a hyphenated slash form); Phase 2 updates its intro to say esq flows load the skills automatically.
+3. check-structure.sh and check-plugin.sh each detect the kind with the same small awk over the frontmatter; scripts/test-plugin-guards.sh (--release) has no case for the new expertise branch yet.
