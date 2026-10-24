@@ -167,3 +167,33 @@ Approach 1.
 **For Phase 2:** 1. The three skills' frontmatter is `user-invocable: false` (no model/effort/arguments); `**As of:** YYYY-MM-DD` and `**Paths:** ` + comma-separated backticked spans are lines of their own right after the H1 — the format `esq expertise match` parses. A span ending in `/` is a directory (`android/`, `ios/`, `*.xcodeproj/`), `*` is within one segment.
 2. README `## Expertise` exists with a table spelling each skill `esq:<name>` (no slash: check-structure's /esq:[a-z]+ rule would misread a hyphenated slash form); Phase 2 updates its intro to say esq flows load the skills automatically.
 3. check-structure.sh and check-plugin.sh each detect the kind with the same small awk over the frontmatter; scripts/test-plugin-guards.sh (--release) has no case for the new expertise branch yet.
+
+### Phase 2 — completed 2026-10-23
+
+**Plan committed at:** 30e612d
+
+**Commits:** b4586b4, abeaf4b
+
+**Verified:** abeaf4b9ae474811d78f6ea1b1a21d700ab60370
+- `plugin/bin/esq expertise match shell/android/app/build.gradle shell/ios/App/App/Info.plist frontend/src/App.tsx`
+- `./scripts/audit.sh`
+
+**What got built:** `esq expertise match <path…>|--paths -` answers the expertise skills a set of paths touches (id, asOf, ageDays, stale, matched; `unread` for a malformed skill), and `esq next-phase --preflight` carries it as `expertise` for the selected phase's touched paths and unread spans. /esq:plan names each phase's `**Expertise:**` and files a candidate row for an uncovered domain, /esq:build loads the preflight matches plus that item, /esq:review loads the matches over its scope plus the phases' items; README and CONFORMANCE (scenario E-01) follow.
+
+**Verification:**
+- (auto) plugin/bin/esq expertise match shell/android/app/build.gradle shell/ios/App/App/Info.plist frontend/src/App.tsx — PASS: esq:capacitor-android matched on the gradle path, esq:capacitor-ios on the plist (esq:store-review also on the plist, which its Paths names), no skill lists frontend/src/App.tsx
+- (auto) ./scripts/audit.sh — PASS: 'Clean — 7 checks (product)', exit 0; structure, package, conformance (5 scenarios), product suites within 120s, the new expertise suite included
+- Task 2.1 targeted: node --test tests/cli/expertise.test.mjs — 6 pass; the two next-phase --preflight tests in tests/cli/esq.test.mjs — 2 pass
+
+**Decided for you:**
+- architecture: an expertise skill's age is counted against the caller's local calendar day, not UTC — a UTC day read 2026-10-23 skills as 1 day old the evening they were written — undo: use new Date().toISOString().slice(0, 10) in expertiseMatch (plugin/lib/cli.mjs)
+- architecture: a directory span (`ios/`) also matches a path whose last segment it is, so a phase naming only `ios/` matches — undo: require a following segment in expertiseSpanMatches (plugin/lib/cli.mjs)
+
+**Surprises / decisions made during execution:** - tests/cli/esq.test.mjs (not in Files touched) was edited: its preflight-equals-context assertion now strips the new `expertise` key beside `lessons`, and asserts it empty for a plan touching nothing mobile.
+- Fixture skills live under tests/cli/fixtures/expertise/ (outside plugin/, so none counts as a plugin skill); expertiseMatch takes `skillsDir` and `today` options for them.
+- The README's CLI row in § How it works also gained `esq expertise match`, beside `esq lessons match`.
+- Audit wall clock not separately timed; it completed within the product pass's 120 s suite bound.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** Last phase: /esq:review next. `/esq:arch` should refresh the skill count ("twenty-three skills") in CLAUDE.md and ARCHITECTURE after landing.
