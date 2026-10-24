@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-expertise-skills-declare-their-own-paths | 2026-10-24 | arch | expertise | Generic expertise ships as `user-invocable: false` skills under plugin/skills/, each declaring a parsed `**As of:**` date and `**Paths:**` line that `esq expertise match` matches against a phase's paths. | Active |
 | D-advance-builds-and-reviews-what-it-planned | 2026-10-21 | arch | skills | After the roadmap refresh, back on the starting branch, advance takes each plan it wrote this run (step 4b's and the question round's), in walk order: switches to the plan's branch over a clean tree, invokes `/esq:autopilot <plan>` in its own session, and when every phase is `completed`, `/esq:converge <plan>`, then switches back. Each announces its own bound and puts its own gates to the user. A plan found in `inFlight` at preflight stays a hand-off. Advance never runs `/esq:build` or `/esq:land`; a plan ready to land ends on `git switch <branch>`, then `/esq:land <plan>`. `autopilot` and `converge` drop `disable-model-invocation` and carry the in-body mandate refusal, so advance's `Skill` call reaches them. | Active |
 | D-advance-settles-with-the-user-after-the-walk | 2026-10-21 | arch | skills | An item worker whose `/esq:work` verdict is `/esq:ui` runs that render itself as a delegated run, at most once per advance run, once its entry is worked and only when no item of that entry came back to grill: a grill can absorb the screen question, and an item its grill brief names is planned with that brief, never rendered. After the walk and its plans, back on the starting branch, advance puts one `AskUserQuestion` round: `Grill <B-NNN> now` or `Later` per grill verdict, the two directions or `Later` per render. An accepted grill runs `/esq:grill` in the advance session, a pick is recorded by the rendering worker resumed through `SendMessage`, and one plan subagent plans the briefs the round settled. Every item still handed back to a user command counts in NEEDS YOU and makes the headline `⚠`. | Active |
 | D-projections-are-read-by-section-through-the-cli | 2026-10-19 | arch | projections | `esq projection outline\|read <spec\|arch>` owns section boundaries, strips history comments and carries the projection's freshness; skills read the outline then only the sections they need. | Active |
@@ -5653,3 +5654,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: one invocation from roadmap head to a reviewed unit. Accepted: advance's context also carries autopilot's and converge's bodies and relays, and a Now horizon of several entries now runs for hours; a plan already in flight is not built, since another session may own its branch.
 **Conséquences:** `/esq:advance`'s description, announce, dissolved stops, a new build stage, constraints and report change; `autopilot` and `converge` join the model-invocable set in `check-plugin.sh` and `skill-authoring`; ARCHITECTURE and the README's advance row and paragraph say it; `/esq:status` and `/esq:roadmap` offer advance with its new reach. SPEC § Unattended roadmap walk's `Stops before /esq:build` rule is `/esq:spec`'s to rewrite.
 **Alternatives rejetées:** Build only (the unit would end unreviewed, and converge would still be retyped). Go on through `/esq:land` (a merge into Origin with no human look at the code). Keep the stop with a one-command hand-off (still a retype for work needing no answer). Duplicate autopilot's phase loop inside advance (two authorities over one procedure).
+
+## D-expertise-skills-declare-their-own-paths — Expertise ships as plugin skills that declare their own paths
+
+**Scope:** arch
+**Topic:** expertise
+**Date:** 2026-10-24
+**Statut:** Active
+**Fondement:** user — 2026-10-23 conversation: real plugin skills chosen over CLI-served guides
+
+**Contexte:** B-169's specialist guidance was parked until a run built badly on something no project skill covered; events-tracker's Android shell did. The user wants generic expertise shipped with esq for every codebase.
+**Décision:** Generic expertise ships as `user-invocable: false` skills under plugin/skills/, each declaring a parsed `**As of:**` date and `**Paths:**` line that `esq expertise match` matches against a phase's paths.
+**Raison:** Real skills trigger by description in any session, while the per-skill Paths line lets esq flows load them deterministically with one writer per fact. A separate registry of markers would drift from the skills.
+**Tradeoff:** About 100 tokens of description per skill in every session; path matching cannot see intent, so a plan may also name a skill in a phase's **Expertise:** item.
+**Conséquences:** Each later batch (UI/design system, data/security/testing) adds skills of this shape; check-plugin.sh holds their format and check-structure.sh their README Expertise listing. The CLI never returns a skill body.
+**Alternatives rejetées:** CLI-served guides behind one skill (no free-session trigger; user declined); one plugin registry mapping markers to skills (second writer, drift).
