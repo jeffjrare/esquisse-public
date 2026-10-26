@@ -247,6 +247,7 @@ note unchanged. Only npm manifests are read today.
 | `esq:forms-and-failures` | Forms and failure states: every request ends in something visible, double submits, input kept after a failure, unsaved changes, server field errors on their fields, loading/error/empty/offline states, option sorting |
 | `esq:i18n-fr-en` | French/English for a Québec product: keys never literals, both locales in one commit with a parity check, the recipient's language in jobs and emails, Québec French and OQLF typography, `fr-CA` formats through `Intl`, plurals, Charter s. 52.1 |
 | `esq:payments-stripe` | Stripe where a mistake costs money: signatures on the raw body, events handled once by id and in any order, test vs live secrets, granting on the webhook (async payments included), refunds and disputes, GST/HST and QST registration and what Stripe Tax does not watch |
+| `esq:prisma-postgres` | Schema changes and writes that lose nothing: expand then contract, `migrate dev` vs `deploy` (Prisma 7, with Prisma 8 noted), indexes on foreign keys and filters, `CREATE INDEX CONCURRENTLY` and `lock_timeout`, unique constraints over check-then-insert, short transactions and their timeout, isolation, pool size × instances |
 | `esq:store-review` | What Google Play and App Store reviewers check, and the Console and App Store Connect forms that block a build or a review |
 
 ## How it works
