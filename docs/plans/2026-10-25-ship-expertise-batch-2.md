@@ -6,6 +6,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 52bd2e3bf048acba10a7a35e011596e6b541f1af
+
 ## Context
 The first batch (`ship-mobile-expertise-skills`) shipped three `user-invocable: false` expertise skills, the guards that accept them (`check-plugin.sh`, `check-structure.sh`) and the loader (`esq expertise match`, called by `/esq:plan`, `/esq:build` and `/esq:review`). B-194 is the next batch, the screens a person uses: forms and their failure states, the design system, accessibility, French/English parity for Québec, and dates and time zones. Today that knowledge lives only in project skills: assets-prospection's `design-system`, `form-patterns` and `component-library` (the bodies of the last two point to `.specs/coding/design-system.md`), and events-tracker's `i18n` and the time-zone rules in its `backend-api`. Any other project starts from zero. The mechanism is already in place, so this unit only writes content: no CLI, guard or skill-prose change.
 
