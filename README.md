@@ -240,6 +240,7 @@ note unchanged. Only npm manifests are read today.
 |---|---|
 | `esq:accessibility` | WCAG 2.2 AA in practice: one global focus outline, focus not obscured, dialogs that trap and restore focus, contrast as token pairs, 24×24 px targets, errors and live regions, reduced motion, `lang` |
 | `esq:auth-sessions` | Sign-in and sessions: cookie flags and `__Host-`, CSRF by method and origin (login included), rotation on login and privilege change, server-side revocation and cached-session delay, better-auth defaults, native OAuth with PKCE and verified ID tokens, account deletion that ends sessions and grants |
+| `esq:background-jobs` | Jobs that run twice, fail and restart without harm: idempotent handlers, job ids that dedupe enqueueing, bounded retries with exponential backoff and jitter, failed jobs someone sees, graceful shutdown, Redis `noeviction`, one schedule across instances |
 | `esq:capacitor-android` | A Capacitor app's Android shell: build origins, `versionCode`, API levels, `cap sync` output, the WebView origin and its cookies, App Links, signing, backup rules, insets |
 | `esq:capacitor-ios` | A Capacitor app's iOS target: toolchain and CI without a Mac, signing, lifecycle and session survival, push (APNs vs FCM), privacy manifests, export compliance |
 | `esq:dates-and-timezones` | Instants and local days: UTC instants and dates stored as dates, `new Date('YYYY-MM-DD')` as UTC, the owner's zone as a required parameter, link-tolerant zone validation, DST gaps and overlaps, Temporal's support and fallback, tests pinning clock and zone |
