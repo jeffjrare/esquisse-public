@@ -378,3 +378,34 @@ None. The user's 2026-10-25 instruction settles the split and the authority to a
 **For Phase 4:** 1. auth-sessions already points to esq:privacy-loi25 for retention after account deletion, and to nothing for web-security; web-security should point to auth-sessions for cookies, CSRF and rotation, and privacy-loi25 should own retention and destruction without restating deletion mechanics (auth-sessions owns them).
 2. Phase 4's hook check already passes against the shipped catalog: keep privacy-loi25's **Stack:** to the auth packages and web-security's to the server frameworks so no module beyond the three takes stripe, @prisma/client or bullmq.
 3. testing-pitfalls is named by prisma-postgres as the owner of testing queries against a real database; give it that rule.
+
+### Phase 4 — completed 2026-10-26
+
+**Plan committed at:** 1c928d5
+
+**Commits:** 2428647, 0dfa135, fc32a24
+
+**Verified:** fc32a24d2ac28b42bb86ebb8d391cde70a31ee69
+- `git grep -niE 'tamialog|events-tracker|goprosperia|prospection|synergie|B-[0-9]{3}|\bD-[a-z]+(-[a-z]+)+' -- plugin/expertise/web-security.md plugin/expertise/testing-pitfalls.md plugin/expertise/privacy-loi25.md`
+- `plugin/bin/esq expertise match backend/src/middleware/cors.ts frontend/src/__tests__/Form.test.tsx frontend/src/pages/PrivacyPolicy.tsx frontend/src/App.tsx`
+- `d=$(mktemp -d) && printf '{"dependencies":{"stripe":"1","@prisma/client":"1","bullmq":"1"}}' > "$d/package.json" && printf '{"hook_event_name":"SessionStart","source":"startup","cwd":"%s"}' "$d" | node plugin/scripts/session-expertise.mjs`
+- `./scripts/audit.sh`
+
+**What got built:** Three cross-cutting expertise modules under plugin/expertise/ (web-security, testing-pitfalls, privacy-loi25), each with **Paths:**, the Recommendation's **Stack:** spans, dated sources and pointers to auth-sessions, dates-and-timezones, prisma-postgres and background-jobs, plus their README rows; the catalog now holds all 15 modules.
+
+**Verification:**
+- (auto) git grep -niE 'tamialog|events-tracker|goprosperia|prospection|synergie|B-[0-9]{3}|\bD-[a-z]+(-[a-z]+)+' -- the three new modules — no match, exit 1
+- (auto) plugin/bin/esq expertise match backend/src/middleware/cors.ts frontend/src/__tests__/Form.test.tsx frontend/src/pages/PrivacyPolicy.tsx frontend/src/App.tsx — web-security on cors.ts, testing-pitfalls on Form.test.tsx, privacy-loi25 on PrivacyPolicy.tsx (forms-and-failures also on Form.test.tsx via *Form*); no entry lists App.tsx; unread empty
+- (auto) Stripe/Prisma/BullMQ temp package.json through plugin/scripts/session-expertise.mjs — additionalContext names background-jobs.md, payments-stripe.md and prisma-postgres.md and no other module
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), exit 0 in 26 s: 23 skills and 15 expertise modules validate, structure clean, SessionStart registered in hooks.json, product suites passed, conformance intact
+- Per task: scripts/check-plugin.sh plugin and scripts/check-structure.sh clean after each module (13, 14, 15 modules); descriptions 387/350/425 chars, under 460
+
+**Surprises / decisions made during execution:** - Side-by-side reading of the three modules against their sources (OWASP Top 10:2025 index, OWASP SSRF Prevention cheat sheet, MDN CORS guide, Playwright actionability, CAI business pages on the person in charge, use and communication outside Québec, consent, retention and destruction, confidentiality incidents and access rights, OPC breach guidance), all checked 2026-10-26: no project identifier; each rule states mechanism, why and a check; framework-specific remedies are named as such (Vite/Next.js prefixes, Vitest/Jest flags, Playwright); every legal or list fact carries its source and date.
+- LégisQuébec (and CanLII) refused automated reads (CloudFront 403) on 2026-10-26, so P-39.1's section numbers (3.1–3.8, 4.1, 8.1, 8.2, 9.1, 12, 14, 17, 23, 27, 32) are cited as commonly numbered, not re-read; the module says so in its Sources paragraph and asks to confirm a section on LégisQuébec before quoting it. The obligations themselves come from the CAI's pages; privacy-by-default (s. 9.1) rests on secondary sources only, marked in its rule.
+- The OPC page checked does not state when PIPEDA applies to a Québec business; the module leaves that to the project's legal reading rather than asserting a scope.
+- OWASP Top 10:2025 renumbers categories (A03 is now Software Supply Chain Failures, Injection is A05); web-security says to cite 2025 ids.
+- The phase's match check also returns forms-and-failures for Form.test.tsx (its *Form* path): expected, the criterion only requires the three new modules on their own paths.
+
+**Backlog candidates:** None.
+
+**For Phase 5:** Last phase: the plan is complete. auth-sessions' pointer to esq:privacy-loi25 and prisma-postgres' pointer to testing-pitfalls now resolve. The Rollout's (user) step remains: publish with ./scripts/update.sh and observe a Stripe project's session line.
