@@ -1,7 +1,6 @@
 ---
 name: store-review
 description: What Google Play and App Store reviewers check, and what gets a wrapped web app rejected. Use before submitting or resubmitting a build, before answering a Play Console or App Store Connect form (App access, Data safety, App Privacy, age rating, health, export compliance), and before changing how a form or button reacts when a request fails.
-user-invocable: false
 ---
 
 # Store review: Play and the App Store
@@ -9,6 +8,8 @@ user-invocable: false
 **As of:** 2026-10-23
 
 **Paths:** `play-listing/`, `fastlane/`, `*.xcprivacy`, `AndroidManifest.xml`, `Info.plist`
+
+**Stack:** `@capacitor/core`
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on a deadline, and keep going.** Before every submission, re-read Apple's [upcoming requirements](https://developer.apple.com/news/upcoming-requirements/) and Play's [policy deadlines](https://support.google.com/googleplay/android-developer/table/12921780): these facts expire.
 

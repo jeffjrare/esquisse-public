@@ -1,7 +1,6 @@
 ---
 name: capacitor-android
 description: Building and releasing a Capacitor app's Android shell. Use before creating or changing an android/ project, a Gradle file, AndroidManifest.xml, capacitor.config, assetlinks.json, a keystore or signing config, or a Capacitor plugin with a native half, and before building an AAB or APK for Play.
-user-invocable: false
 ---
 
 # Capacitor Android: the shell's rules
@@ -9,6 +8,8 @@ user-invocable: false
 **As of:** 2026-10-23
 
 **Paths:** `android/`, `AndroidManifest.xml`, `*.gradle`, `*.gradle.kts`, `capacitor.config.*`, `assetlinks.json`
+
+**Stack:** `@capacitor/android`
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on a deadline or an API level, and keep going.** Re-check a dated fact against its source before it decides anything.
 

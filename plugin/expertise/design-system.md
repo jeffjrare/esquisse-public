@@ -1,7 +1,6 @@
 ---
 name: design-system
 description: Design tokens and the theme. Use before writing any colour, background, border, badge or chip class, adding or renaming a token, changing radius, shadow or fonts, touching a Tailwind or shadcn setup, adding a dark theme or a theme switch, or judging a lint failure on colours.
-user-invocable: false
 ---
 
 # Design system: tokens, roles and the theme
@@ -9,6 +8,8 @@ user-invocable: false
 **As of:** 2026-10-25
 
 **Paths:** `components/ui/`, `styles/`, `tailwind.config.*`, `components.json`, `*tokens*`, `globals.css`
+
+**Stack:** `tailwindcss`, `@radix-ui/*`
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on a library version, and keep going.** Re-check a dated fact against its source before it decides anything.
 

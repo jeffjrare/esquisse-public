@@ -1,7 +1,6 @@
 ---
 name: dates-and-timezones
 description: Instants, local days and time zones. Use before storing or displaying a date or time, adding a date column or field, computing "today", a day boundary, a schedule or a recurrence, adding days to a date, accepting a time-zone parameter, parsing a date string, or writing a test that depends on the clock.
-user-invocable: false
 ---
 
 # Dates and time zones: an instant, a local day, and whose zone
@@ -9,6 +8,8 @@ user-invocable: false
 **As of:** 2026-10-25
 
 **Paths:** `*Date*`, `date.*`, `dates.*`, `dates/`, `*Time.*`, `*TimeZone*`, `*Timezone*`, `*time-zone*`, `*timezone*`, `timezones/`, `tz.*`
+
+**Stack:** `date-fns`, `luxon`, `dayjs`, `@js-temporal/polyfill`
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on an engine's support or behaviour, and keep going.**
 

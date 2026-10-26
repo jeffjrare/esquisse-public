@@ -423,6 +423,32 @@ export function touchedPaths(text) {
   });
 }
 
+// The `esq:<name>` ids each phase's `**Expertise:**` item names, nested bullets included — the
+// modules a plan said a phase loads beyond what its paths match. Prose around them is ignored.
+export function phaseExpertise(text) {
+  const plan = parsePlan(text);
+  const planEnd = plan.logIndex < 0 ? plan.lines.length : plan.logIndex;
+  return plan.phases.map((phase, index) => {
+    let end = plan.phases[index + 1] ? plan.phases[index + 1].line - 1 : planEnd;
+    for (let line = phase.line; line < end; line += 1) {
+      if (/^#{1,3} /.test(plan.lines[line])) { end = line; break; }
+    }
+    const items = listItems(plan.lines.slice(phase.line, end));
+    const header = items.findIndex((item) => /^\*\*Expertise:?\*\*/.test(item.text));
+    const texts = [];
+    if (header >= 0) {
+      texts.push(items[header].text);
+      for (const item of items.slice(header + 1)) {
+        if (item.indent <= items[header].indent) break;
+        texts.push(item.text);
+      }
+    }
+    const ids = [];
+    for (const item of texts) for (const match of item.matchAll(/`(esq:[a-z0-9][a-z0-9-]*)`/g)) if (!ids.includes(match[1])) ids.push(match[1]);
+    return { phase: phase.number, ids };
+  });
+}
+
 // One inline-code span read as paths: its brace group expanded, a leading `./` and a trailing `/`
 // dropped, and `null` unless every alternative has the plain path shape above. Shared by
 // `**Files touched:**` and the `**Paths:**` item of a `docs/LESSONS.md` entry, so the two read alike.

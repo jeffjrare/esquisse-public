@@ -1,7 +1,6 @@
 ---
 name: accessibility
 description: Accessibility of a web UI against WCAG 2.2 AA. Use before building or changing a UI primitive, a dialog, menu or popover, a focus style, a colour token pair, an icon-only button, a form field's label or error, a toast or async status message, an animation, or the document's language.
-user-invocable: false
 ---
 
 # Accessibility: WCAG 2.2 AA in practice
@@ -9,6 +8,8 @@ user-invocable: false
 **As of:** 2026-10-25
 
 **Paths:** `components/ui/`, `*Dialog.*`, `*Modal.*`, `*Menu.*`, `index.html`, `layouts/`
+
+**Stack:** `react`, `react-dom`, `vue`, `svelte`, `@angular/core`
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on a criterion number, and keep going.** The standard is [WCAG 2.2](https://www.w3.org/TR/WCAG22/), a W3C Recommendation, latest version dated 2024-12-12 (checked 2026-10-25); a WCAG 3 draft does not replace it. Patterns follow the [WAI-ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/) (APG). Criterion numbers below are WCAG 2.2's.
 

@@ -1,7 +1,6 @@
 ---
 name: capacitor-ios
 description: Adding or changing a Capacitor app's iOS target. Use before running cap add ios, editing an ios/ or Xcode project, Info.plist, a privacy manifest, a Podfile or Package.swift, adding push or a sign-in method to the iOS shell, setting up iOS signing or a macOS CI build, or uploading to TestFlight.
-user-invocable: false
 ---
 
 # Capacitor iOS: the target's rules
@@ -9,6 +8,8 @@ user-invocable: false
 **As of:** 2026-10-23
 
 **Paths:** `ios/`, `*.xcodeproj/`, `*.xcworkspace/`, `Info.plist`, `*.xcprivacy`, `Podfile`, `capacitor.config.*`
+
+**Stack:** `@capacitor/ios`
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on a deadline or a toolchain version, and keep going.** Re-check a dated fact against its source before it decides anything.
 
