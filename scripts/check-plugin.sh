@@ -36,14 +36,14 @@ fail() { printf '  ✗ %s\n' "$1"; fails=$((fails + 1)); }
 [[ -f "$ROOT/lib/cli.mjs" && -f "$ROOT/lib/markdown.mjs" && -f "$ROOT/lib/expertise.mjs" ]] || fail 'CLI library files are missing'
 node --check "$ROOT/lib/cli.mjs" >/dev/null 2>&1 || fail 'CLI syntax validation failed'
 [[ -f "$HOOKS" ]] || fail 'plugin/hooks/hooks.json is missing'
-for script in hook-io protect-installed validate-stop record-agent-telemetry record-session-telemetry; do
+for script in hook-io protect-installed session-expertise validate-stop record-agent-telemetry record-session-telemetry; do
   file="$ROOT/scripts/$script.mjs"
   [[ -f "$file" ]] || { fail "plugin/scripts/$script.mjs is missing"; continue; }
   node --check "$file" >/dev/null 2>&1 || fail "hook script syntax failed: $script.mjs"
 done
 if [[ -f "$HOOKS" ]]; then
-  node -e 'const h=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).hooks; if (!h?.PreToolUse || !h?.PostToolUse || !h?.Stop || !h?.SubagentStop || !h?.SessionEnd) process.exit(1)' "$HOOKS" \
-    || fail 'hooks.json does not register PreToolUse, PostToolUse, Stop, SubagentStop and SessionEnd'
+  node -e 'const h=JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).hooks; if (!h?.SessionStart || !h?.PreToolUse || !h?.PostToolUse || !h?.Stop || !h?.SubagentStop || !h?.SessionEnd) process.exit(1)' "$HOOKS" \
+    || fail 'hooks.json does not register SessionStart, PreToolUse, PostToolUse, Stop, SubagentStop and SessionEnd'
 fi
 
 # Runs `claude --bare "$@"` under the bound, with stdin from /dev/null. `--bare` is
