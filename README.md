@@ -225,6 +225,7 @@ shows, such as `esq:store-review` for a phase that submits a build.
 
 | Skill | Covers |
 |---|---|
+| `esq:accessibility` | WCAG 2.2 AA in practice: one global focus outline, focus not obscured, dialogs that trap and restore focus, contrast as token pairs, 24×24 px targets, errors and live regions, reduced motion, `lang` |
 | `esq:capacitor-android` | A Capacitor app's Android shell: build origins, `versionCode`, API levels, `cap sync` output, the WebView origin and its cookies, App Links, signing, backup rules, insets |
 | `esq:capacitor-ios` | A Capacitor app's iOS target: toolchain and CI without a Mac, signing, lifecycle and session survival, push (APNs vs FCM), privacy manifests, export compliance |
 | `esq:design-system` | Design tokens and the theme: semantic tokens over fixed shades, family roles, shadcn's `accent` and Tailwind 4's `@theme`, recorded exemptions, a theme known before first paint, twin token files, self-hosted fonts |
