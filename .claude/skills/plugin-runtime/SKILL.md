@@ -5,7 +5,7 @@ description: Rules for the esq CLI and hooks — read before editing plugin/bin,
 
 # Plugin runtime — esquisse
 
-`plugin/bin/esq` + `plugin/lib/` and the four hook handlers in `plugin/scripts/` (five events). Reasoning:
+`plugin/bin/esq` + `plugin/lib/` and the five hook handlers in `plugin/scripts/` (six events). Reasoning:
 `docs/ARCHITECTURE.md § plugin/bin/esq` and `§ plugin/hooks`.
 
 ## Rules
@@ -64,6 +64,11 @@ description: Rules for the esq CLI and hooks — read before editing plugin/bin,
   the collision it exists to prevent.
 - **Hook handlers export a pure `fn(input, environment)` and run only under `isMain(import.meta.url)`; they read stdin once via
   `hook-io.mjs`** — `tests/hooks` imports the function.
+- **The SessionStart handler (`session-expertise.mjs`) reads only dependency key names, writes nothing and fails silent.** It
+  imports `plugin/lib/expertise.mjs`, never `cli.mjs`; its output is module file names, the catalog path and the plugin's own
+  description sentences — never a package name or any manifest byte. Its bounds are constants stated before anything is read
+  (header, per-entry length, entry count), a module the stack does not use adds nothing, and any error prints nothing and
+  exits 0. `tests/hooks/session-expertise.test.mjs` pins byte-identical output under a larger catalog.
 - **The Stop hook is cheap before it is thorough.** It short-circuits on `stop_hook_active`, skips when background tasks or
   crons are live, and **asks the git question first**: if `docs/BACKLOG.md`, `docs/DECISIONS.md` and `docs/plans` carry no
   uncommitted change, it returns without running `validate` at all. Committed defects from earlier sessions are not this

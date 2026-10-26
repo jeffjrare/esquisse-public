@@ -1,6 +1,17 @@
 {
-  "description": "Protect installed plugin files, validate structured state before stopping, and record bounded telemetry for every subagent run and every esq command run in the main session.",
+  "description": "Protect installed plugin files, tell each session which expertise modules its stack uses, validate structured state before stopping, and record bounded telemetry for every subagent run and every esq command run in the main session.",
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/session-expertise.mjs\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write|Bash",

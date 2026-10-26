@@ -10,7 +10,9 @@ What `./scripts/audit.sh` will fail you on when a skill changes. Reasoning: `doc
 ## Rules
 
 - **Edit `plugin/skills/<name>/SKILL.md` and nothing else** — it is the only corpus. A skill is one entrypoint plus its
-  `references/`.
+  `references/`. **Expertise is not a skill:** it is a module at `plugin/expertise/<name>.md` (frontmatter `name` = stem and a
+  `description` of at most 460 characters, then `**As of:**`, `**Paths:**` and an optional `**Stack:**`), which Claude Code
+  never registers — an expertise-shaped `SKILL.md` would cost every session its description and fails the command checks.
 - **Frontmatter is a contract:** `name: <dir>`, `description:`, `model: opus|sonnet|haiku|inherit`,
   `effort: low|medium|high|xhigh|max`, and the body consumes `$ARGUMENTS` and `$0` (status excepted). `check-plugin.sh` asserts
   each. **There is no line cap and no skill count** — splitting into `references/` is a readability choice, not a way past a

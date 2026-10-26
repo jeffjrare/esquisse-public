@@ -5,7 +5,8 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
-| D-expertise-skills-declare-their-own-paths | 2026-10-24 | arch | expertise | Generic expertise ships as `user-invocable: false` skills under plugin/skills/, each declaring a parsed `**As of:**` date and `**Paths:**` line that `esq expertise match` matches against a phase's paths. | Active |
+| D-expertise-modules-announced-by-stack | 2026-10-26 | arch | expertise | Expertise ships as plugin/expertise/<name>.md modules (frontmatter name and description, **As of:**, **Paths:**, optional **Stack:**), outside skill discovery; esq expertise match answers their files and stack signals, a SessionStart hook announces only the stack-matched ones, and esq flows Read them. | Active |
+| D-expertise-skills-declare-their-own-paths | 2026-10-24 | arch | expertise | Generic expertise ships as `user-invocable: false` skills under plugin/skills/, each declaring a parsed `**As of:**` date and `**Paths:**` line that `esq expertise match` matches against a phase's paths. | Superseded |
 | D-advance-builds-and-reviews-what-it-planned | 2026-10-21 | arch | skills | After the roadmap refresh, back on the starting branch, advance takes each plan it wrote this run (step 4b's and the question round's), in walk order: switches to the plan's branch over a clean tree, invokes `/esq:autopilot <plan>` in its own session, and when every phase is `completed`, `/esq:converge <plan>`, then switches back. Each announces its own bound and puts its own gates to the user. A plan found in `inFlight` at preflight stays a hand-off. Advance never runs `/esq:build` or `/esq:land`; a plan ready to land ends on `git switch <branch>`, then `/esq:land <plan>`. `autopilot` and `converge` drop `disable-model-invocation` and carry the in-body mandate refusal, so advance's `Skill` call reaches them. | Active |
 | D-advance-settles-with-the-user-after-the-walk | 2026-10-21 | arch | skills | An item worker whose `/esq:work` verdict is `/esq:ui` runs that render itself as a delegated run, at most once per advance run, once its entry is worked and only when no item of that entry came back to grill: a grill can absorb the screen question, and an item its grill brief names is planned with that brief, never rendered. After the walk and its plans, back on the starting branch, advance puts one `AskUserQuestion` round: `Grill <B-NNN> now` or `Later` per grill verdict, the two directions or `Later` per render. An accepted grill runs `/esq:grill` in the advance session, a pick is recorded by the rendering worker resumed through `SendMessage`, and one plan subagent plans the briefs the round settled. Every item still handed back to a user command counts in NEEDS YOU and makes the headline `⚠`. | Active |
 | D-projections-are-read-by-section-through-the-cli | 2026-10-19 | arch | projections | `esq projection outline\|read <spec\|arch>` owns section boundaries, strips history comments and carries the projection's freshness; skills read the outline then only the sections they need. | Active |
@@ -5660,7 +5661,7 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Scope:** arch
 **Topic:** expertise
 **Date:** 2026-10-24
-**Statut:** Active
+**Statut:** Superseded by [D-expertise-modules-announced-by-stack] on 2026-10-26 — the per-skill description cost grows with the catalog; the user ruled 2026-10-25 that expertise is picked from each project's stack with no configuration. The Paths line, the As of date and the CLI-returns-no-body rule carry over.
 **Fondement:** user — 2026-10-23 conversation: real plugin skills chosen over CLI-served guides
 
 **Contexte:** B-169's specialist guidance was parked until a run built badly on something no project skill covered; events-tracker's Android shell did. The user wants generic expertise shipped with esq for every codebase.
@@ -5669,3 +5670,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** About 100 tokens of description per skill in every session; path matching cannot see intent, so a plan may also name a skill in a phase's **Expertise:** item.
 **Conséquences:** Each later batch (UI/design system, data/security/testing) adds skills of this shape; check-plugin.sh holds their format and check-structure.sh their README Expertise listing. The CLI never returns a skill body.
 **Alternatives rejetées:** CLI-served guides behind one skill (no free-session trigger; user declined); one plugin registry mapping markers to skills (second writer, drift).
+
+## D-expertise-modules-announced-by-stack — Expertise modules are announced by the project's stack, never registered as skills
+
+**Scope:** arch
+**Topic:** expertise
+**Date:** 2026-10-26
+**Statut:** Active
+**Fondement:** user — 2026-10-25: « Sépare, mais intelligemment, et de façon autonome : l'humain derrière la codebase n'a pas à configurer ça. »; per-session standing cost must not grow with the catalog
+
+**Contexte:** Eight expertise skills cost about 100 description tokens each in every session of every project, and B-195..B-197 would take the catalog to about 21. The user ruled that domains stay separate, are picked automatically from each project's stack, and need no install or configuration. Supersedes D-expertise-skills-declare-their-own-paths.
+**Décision:** Expertise ships as plugin/expertise/<name>.md modules (frontmatter name and description, **As of:**, **Paths:**, optional **Stack:**), outside skill discovery; esq expertise match answers their files and stack signals, a SessionStart hook announces only the stack-matched ones, and esq flows Read them.
+**Raison:** Only stack-driven announcement makes the standing cost track what a project uses instead of the catalog with zero configuration. Native skill paths: activates only on Read/Edit/Write and was reported never to activate in auto mode (claudeissues #90004, checked 2026-10-26), and cannot see the stack. Ids stay esq:<name> so landed plans keep resolving.
+**Tradeoff:** A domain the stack does not show is no longer described in a free session, only reachable through the fixed pointer; detection reads npm manifests only.
+**Conséquences:** Each later batch adds a module file with a **Stack:** line; check-plugin.sh validates plugin/expertise/; a fifth hook handler runs on SessionStart and writes nothing; plan, build and review read module files, never the Skill tool, for expertise.
+**Alternatives rejetées:** Native paths: frontmatter (auto-mode bug, no stack signal, plugin support undocumented). One fixed router skill (generic trigger, still ~100 tokens in an unrelated project). Per-domain marketplace plugins (each needs an install). Keep skills (cost grows with the catalog).

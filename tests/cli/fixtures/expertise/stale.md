@@ -1,7 +1,6 @@
 ---
 name: stale
-description: A fixture expertise skill whose facts are old.
-user-invocable: false
+description: A fixture expertise module whose facts are old.
 ---
 
 # Stale

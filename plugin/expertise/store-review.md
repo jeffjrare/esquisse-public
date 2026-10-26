@@ -1,7 +1,6 @@
 ---
 name: store-review
 description: What Google Play and App Store reviewers check, and what gets a wrapped web app rejected. Use before submitting or resubmitting a build, before answering a Play Console or App Store Connect form (App access, Data safety, App Privacy, age rating, health, export compliance), and before changing how a form or button reacts when a request fails.
-user-invocable: false
 ---
 
 # Store review: Play and the App Store
@@ -9,6 +8,8 @@ user-invocable: false
 **As of:** 2026-10-23
 
 **Paths:** `play-listing/`, `fastlane/`, `*.xcprivacy`, `AndroidManifest.xml`, `Info.plist`
+
+**Stack:** `@capacitor/core`
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on a deadline, and keep going.** Before every submission, re-read Apple's [upcoming requirements](https://developer.apple.com/news/upcoming-requirements/) and Play's [policy deadlines](https://support.google.com/googleplay/android-developer/table/12921780): these facts expire.
 
@@ -35,7 +36,7 @@ A reviewer is a stranger on an unknown device and network. They get one try, and
   - A target audience of 18+ keeps the app out of the Families policy. A category outside Health & Fitness keeps a general-purpose app from looking like a health app.
   - The **Health apps declaration** is mandatory for every published app, testing tracks included, even to answer that the app has no health features ([health declaration](https://support.google.com/googleplay/android-developer/answer/14738291)). The Financial features and Government apps declarations are mandatory too.
 - **Data safety changes before the feature ships, not after.** Adding a sign-in SDK (Google, for example) makes name, email, the account ID and possibly the profile photo collected through that SDK ([Data safety](https://support.google.com/googleplay/android-developer/answer/10787469)). Update the form in the same release, never later.
-- **Account deletion needs both paths:** in the app, and at a web URL declared in Data safety ([account deletion](https://support.google.com/googleplay/android-developer/answer/13327111)). The deletion is real, not a deactivation.
+- **Account deletion needs both paths:** in the app, and at a web URL declared in Data safety ([account deletion](https://support.google.com/googleplay/android-developer/answer/13327111)). The deletion is real, not a deactivation; how to carry it out (sessions, tokens, data) is `esq:auth-sessions`'s.
 - **Next deadline:** from 2027-02-01, updates of apps targeting API 35 or higher must support 16 KB memory pages on 64-bit devices ([page sizes](https://developer.android.com/guide/practices/page-sizes), checked 2026-10-23). Pure Java or Kotlin is unaffected; check the AAB for `.so` files before adding a plugin or SDK with native code.
 
 ## Apple App Store

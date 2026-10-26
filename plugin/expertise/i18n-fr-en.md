@@ -1,7 +1,6 @@
 ---
 name: i18n-fr-en
 description: French/English localisation for a Québec product. Use before adding or changing a user-facing string, a locale file, a translated validation message or accessible name, an email or notification a background job sends, a number, money or date shown to the user, a plural, or the product's French-language obligations.
-user-invocable: false
 ---
 
 # FR/EN localisation for Québec: both languages, every string
@@ -9,6 +8,8 @@ user-invocable: false
 **As of:** 2026-10-25
 
 **Paths:** `locales/`, `i18n/`, `i18n.*`, `messages/`, `*.po`, `fr.json`, `en.json`
+
+**Stack:** `i18next`, `react-i18next`, `next-intl`, `vue-i18n`
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on a statute's wording or an engine's output, and keep going.**
 

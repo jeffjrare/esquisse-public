@@ -1,7 +1,6 @@
 ---
 name: forms-and-failures
 description: Forms and what a screen shows when a request fails. Use before writing or changing a form, a submit or save button, a dialog that sends data, a shared HTTP or API client, client or server validation, or the loading, error, empty and offline states of a screen.
-user-invocable: false
 ---
 
 # Forms and failures: every request ends in something visible
@@ -9,6 +8,8 @@ user-invocable: false
 **As of:** 2026-10-25
 
 **Paths:** `forms/`, `*Form.*`, `*-form.*`, `schemas/`, `*Dialog.*`, `api-client.*`, `http.*`
+
+**Stack:** `react-hook-form`, `zod`, `formik`, `@tanstack/react-form`
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on a library's behaviour, and keep going.**
 

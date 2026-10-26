@@ -1,7 +1,6 @@
 ---
 name: capacitor-ios
 description: Adding or changing a Capacitor app's iOS target. Use before running cap add ios, editing an ios/ or Xcode project, Info.plist, a privacy manifest, a Podfile or Package.swift, adding push or a sign-in method to the iOS shell, setting up iOS signing or a macOS CI build, or uploading to TestFlight.
-user-invocable: false
 ---
 
 # Capacitor iOS: the target's rules
@@ -9,6 +8,8 @@ user-invocable: false
 **As of:** 2026-10-23
 
 **Paths:** `ios/`, `*.xcodeproj/`, `*.xcworkspace/`, `Info.plist`, `*.xcprivacy`, `Podfile`, `capacitor.config.*`
+
+**Stack:** `@capacitor/ios`
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on a deadline or a toolchain version, and keep going.** Re-check a dated fact against its source before it decides anything.
 
@@ -49,7 +50,7 @@ user-invocable: false
 - **Ship the app's own `PrivacyInfo.xcprivacy`.** List each required-reason API the app's own code uses, with its reason code (for example `CA92.1` for `UserDefaults` accessed only by the app). A missing reason is an upload error since 2024-05-01.
 - **The App Privacy label is the app's data plus every SDK's.** Each third-party SDK carries its own manifest; read them (Firebase Messaging declares device ID and diagnostics, for instance) and make the label in App Store Connect match the union ([third-party SDK requirements](https://developer.apple.com/support/third-party-SDK-requirements/)).
 - **No App Tracking Transparency prompt** unless the app itself tracks across other companies' apps or sites. Adding one without a reason invites a question from review.
-- **Sign-in methods:** offering a third-party login (Google, Facebook) brings in guideline 4.8, and in practice Sign in with Apple. Email and password alone does not. If Sign in with Apple is offered, account deletion must also revoke the user's Apple tokens through Apple's REST API.
+- **Sign-in methods:** what review requires of a third-party login (guideline 4.8) and of account deletion with Sign in with Apple is `esq:store-review`'s; verifying the provider's tokens and ending the session is `esq:auth-sessions`'s. This module owns only the shell side: the redirect scheme, the capability on the App ID and in the profile.
 
 ## Verify before calling a build done
 

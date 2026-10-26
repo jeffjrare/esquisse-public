@@ -178,9 +178,9 @@ map and a decision record on demand; none is a required setup step.
 | Command | Purpose | Main result |
 |---|---|---|
 | `/esq:grill <idea>` | Resolve scope and consequential choices before planning | A brief in `docs/plans/` |
-| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases, reading the expertise skills its files touch | A plan committed on its own branch, its checks tried against the repository first, citing any lesson from `docs/LESSONS.md` that changed its design, each phase naming the expertise it loads, and a backlog row for a domain no skill covers; when it replaces a surface, the inventory of what that surface did, any drop asked first |
-| `/esq:build <plan>` | Implement and verify one phase, then stop, weighing the lessons earlier cycles left on its files and loading the expertise skills they touch | Task commits and an execution-log entry; a repo fact in `docs/LESSONS.md` for a trap the phase hit and verified itself |
-| `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design, against the expertise skills the change touches | Review findings, each marked `(repeats L-<id>)` when it repeats a defect a lesson recorded; the calls build decided for you by hat; a corrective brief when needed |
+| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases, reading the expertise modules its files or its stack touch | A plan committed on its own branch, its checks tried against the repository first, citing any lesson from `docs/LESSONS.md` that changed its design, each phase naming the expertise it loads, and a backlog row for a domain no module or project skill covers; when it replaces a surface, the inventory of what that surface did, any drop asked first |
+| `/esq:build <plan>` | Implement and verify one phase, then stop, weighing the lessons earlier cycles left on its files and reading the expertise modules they touch or the plan names | Task commits and an execution-log entry; a repo fact in `docs/LESSONS.md` for a trap the phase hit and verified itself |
+| `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design, against the expertise modules the change touches or its plan names | Review findings, each marked `(repeats L-<id>)` when it repeats a defect a lesson recorded; the calls build decided for you by hat; a corrective brief when needed |
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings; a lesson in `docs/LESSONS.md` for a fix whose contrast recurs beyond its line |
 | `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run, and the next plan still in flight; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
@@ -206,33 +206,53 @@ In every example, use the actual paths the previous command reported. `review` a
 
 ## Expertise
 
-Besides its commands, esq ships **expertise skills**: generic, dated knowledge about a
-domain where a first attempt is expensive to get wrong. They have no slash command.
-Claude invokes one on its own when the work matches its description, in any project
-where esq is installed, inside an esq flow or not.
+Besides its commands, esq ships **expertise modules**: generic, dated knowledge about a
+domain where a first attempt is expensive to get wrong. They are plain files under
+`plugin/expertise/`, not skills, so they have no slash command and a session pays
+nothing for a module it does not read, however large the catalog grows. Nothing needs
+installing or configuring.
 
-Inside esq the load does not depend on that match: `esq expertise match <path…>` answers
-which skills a set of paths touches, and `/esq:plan`, `/esq:build` and `/esq:review` load
-those skills automatically for the files a phase or a change touches. A plan names them
-in each phase's `**Expertise:**` item, together with any skill the work needs that no path
-shows, such as `esq:store-review` for a phase that submits a build.
+Each module declares the paths it covers (`**Paths:**`) and the npm packages that show a
+project uses its domain (`**Stack:**`). `esq expertise match <path…>` answers which modules
+a set of paths touches, each with its file; `esq expertise match --all` answers every
+module, with the packages your root and tracked `package.json` files declare that match it (only
+dependency names are read, never through `node_modules`). `/esq:plan`, `/esq:build` and
+`/esq:review` read the matched modules automatically for the files a phase or a change
+touches. A plan names them in each phase's `**Expertise:**` item, together with any module
+the work needs that no path shows, such as `esq:store-review` for a phase that submits a
+build; ids written as `esq:<name>` in older plans still resolve.
+
+**Each session hears about its own stack only.** When a session starts (and again after
+`/clear` or a compaction), a hook reads the dependency names in those same `package.json`
+files and adds one short note to the session: where the modules live, one line per module
+the stack uses (`payments-stripe.md` for a project depending on `stripe`), and that
+`esq expertise match --all` lists the rest. A project whose stack uses none, or that has no
+`package.json`, gets the fixed pointer alone, and adding modules to the catalog leaves that
+note unchanged. Only npm manifests are read today.
 
 - **A project skill wins.** Where your project carries its own skill on the same topic
   and the two disagree, Claude follows the project's.
-- **Facts are dated.** Each skill opens with an `**As of:**` date and the paths it
+- **Facts are dated.** Each module opens with an `**As of:**` date and the paths it
   covers. When a run finds the date more than 180 days old, it says so in one line
-  before relying on a deadline, and keeps going. An old or unreadable skill never stops a run.
+  before relying on a deadline, and keeps going. An old or unreadable module never stops a run.
 
-| Skill | Covers |
+| Module | Covers |
 |---|---|
 | `esq:accessibility` | WCAG 2.2 AA in practice: one global focus outline, focus not obscured, dialogs that trap and restore focus, contrast as token pairs, 24×24 px targets, errors and live regions, reduced motion, `lang` |
+| `esq:auth-sessions` | Sign-in and sessions: cookie flags and `__Host-`, CSRF by method and origin (login included), rotation on login and privilege change, server-side revocation and cached-session delay, better-auth defaults, native OAuth with PKCE and verified ID tokens, account deletion that ends sessions and grants |
+| `esq:background-jobs` | Jobs that run twice, fail and restart without harm: idempotent handlers, job ids that dedupe enqueueing, bounded retries with exponential backoff and jitter, failed jobs someone sees, graceful shutdown, Redis `noeviction`, one schedule across instances |
 | `esq:capacitor-android` | A Capacitor app's Android shell: build origins, `versionCode`, API levels, `cap sync` output, the WebView origin and its cookies, App Links, signing, backup rules, insets |
 | `esq:capacitor-ios` | A Capacitor app's iOS target: toolchain and CI without a Mac, signing, lifecycle and session survival, push (APNs vs FCM), privacy manifests, export compliance |
 | `esq:dates-and-timezones` | Instants and local days: UTC instants and dates stored as dates, `new Date('YYYY-MM-DD')` as UTC, the owner's zone as a required parameter, link-tolerant zone validation, DST gaps and overlaps, Temporal's support and fallback, tests pinning clock and zone |
 | `esq:design-system` | Design tokens and the theme: semantic tokens over fixed shades, family roles, shadcn's `accent` and Tailwind 4's `@theme`, recorded exemptions, a theme known before first paint, twin token files, self-hosted fonts |
 | `esq:forms-and-failures` | Forms and failure states: every request ends in something visible, double submits, input kept after a failure, unsaved changes, server field errors on their fields, loading/error/empty/offline states, option sorting |
 | `esq:i18n-fr-en` | French/English for a Québec product: keys never literals, both locales in one commit with a parity check, the recipient's language in jobs and emails, Québec French and OQLF typography, `fr-CA` formats through `Intl`, plurals, Charter s. 52.1 |
+| `esq:payments-stripe` | Stripe where a mistake costs money: signatures on the raw body, events handled once by id and in any order, test vs live secrets, granting on the webhook (async payments included), refunds and disputes, GST/HST and QST registration and what Stripe Tax does not watch |
+| `esq:prisma-postgres` | Schema changes and writes that lose nothing: expand then contract, `migrate dev` vs `deploy` (Prisma 7, with Prisma 8 noted), indexes on foreign keys and filters, `CREATE INDEX CONCURRENTLY` and `lock_timeout`, unique constraints over check-then-insert, short transactions and their timeout, isolation, pool size × instances |
+| `esq:privacy-loi25` | Québec's Law 25 (P-39.1) and PIPEDA as engineering, never legal advice: a named person in charge, an assessment before a new system or a provider outside Québec, consent per purpose, private by default, retention then destruction or anonymisation, an incident register and notices, access and portability within 30 days |
 | `esq:store-review` | What Google Play and App Store reviewers check, and the Console and App Store Connect forms that block a build or a review |
+| `esq:testing-pitfalls` | Tests that can fail: break the code once to see red, assert what the caller observes, mocks only at boundaries you do not own and restored after each test, no shared state or order, a real PostgreSQL for queries and migrations, end-to-end waits on a state never a duration, flaky tests as findings, small reviewed snapshots |
+| `esq:web-security` | The server trusts nothing from the client: the OWASP Top 10:2025, schema validation at the boundary, parameterised queries, authorization per object (IDOR), SSRF checked after resolution, CORS with credentials on exact origins, CSP, rate limits per account and IP, secrets out of the bundle and the logs, audited and locked dependencies |
 
 ## How it works
 
@@ -244,10 +264,11 @@ verification state, and merging safely.
 
 | Piece | Where | Responsibility |
 |---|---|---|
-| Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed; and the expertise skills Claude consults on its own |
-| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one), match paths to expertise skills (`esq expertise match` returns each skill those paths touch with its age, never its text, and the build preflight carries it), and read the spec and architecture by section (`esq projection outline` gives the heading tree, what each section costs, the projection's freshness and which given files changed since it was mined; `esq projection read` returns only the chosen sections, history comments stripped). It answers structured questions; it makes no product choices |
+| Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed |
+| Expertise | `plugin/expertise/<name>.md` | Dated domain knowledge the esq flows read when a phase's files, its plan or the project's stack call for it; not registered as skills, so a module costs a session nothing until it is read |
+| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one), match paths and the project's stack to expertise modules (`esq expertise match` returns each module those paths touch with its file and age, never its text, `--all` every module with the npm packages that show it in use, and the build preflight carries the matches plus the ids the phase names), and read the spec and architecture by section (`esq projection outline` gives the heading tree, what each section costs, the projection's freshness and which given files changed since it was mined; `esq projection read` returns only the chosen sections, history comments stripped). It answers structured questions; it makes no product choices |
 | Project records | `docs/` in your project, and Git | Keep plans, decisions, committed work and the execution log available to the next session |
-| Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
+| Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Five handlers on six events: name the expertise a session's stack uses when it starts, protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
 
 Skills pre-approve exactly one tool: the plugin's own CLI (`Bash(esq *)`), so
 bookkeeping never waits on a permission prompt. Every other tool stays under your
@@ -401,7 +422,10 @@ honor it, the worker runs on your session's model.
   never prompts, responses, tool inputs or source code. Set `ESQ_TELEMETRY=off`
   before starting Claude Code to turn it off. It never blocks or authorizes anything.
 - **Hooks** protect the installed plugin from direct edits and, when a session stops
-  after changing a record, validate it once.
+  after changing a record, validate it once. At session start, one reads only the
+  dependency names in your `package.json` files to name the expertise your stack uses:
+  it runs nothing from the project, writes nothing, sends nothing anywhere and repeats
+  none of your manifest's content, and on any error it stays silent.
 - **Codex as a second opinion (opt-in).** With `ESQ_CODEX=on`, `/esq:plan` asks the
   local `codex` CLI for a blind counter-plan and a pre-mortem of the written plan.
   Claude judges both against the code; they never block the plan. **Opting in sends

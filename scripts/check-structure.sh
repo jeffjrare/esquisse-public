@@ -11,11 +11,12 @@
 #   1. A section cross-reference resolves inside its own skill.
 #   2. Every `/esq:<name>` mentioned has a source file.
 #   3. Every command appears in the README's command table, and every expertise
-#      skill in its `## Expertise` section.
+#      module (`plugin/expertise/<name>.md`) in its `## Expertise` section.
 #   4. Every `references/<file>.md` a skill names exists.
 #   5. Every section a grill brief writes is named by the command that reads it.
 #
-# Usage: check-structure.sh [<skills-dir>] [<readme>]
+# Usage: check-structure.sh [<skills-dir>] [<readme>] [<expertise-dir>]
+# The expertise directory defaults to `expertise/` beside the skills directory.
 # Exit 0 = clean (summary on stdout), 1 = findings (one per line), 2 = the
 # corpus is unusable.
 
@@ -24,6 +25,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 2
 
 CMD_DIR="${1:-plugin/skills}"
 README="${2:-README.md}"
+EXPERTISE_DIR="${3:-$(dirname "$CMD_DIR")/expertise}"
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib/skill-corpus.sh"
 
@@ -100,17 +102,14 @@ readme_section() {
   awk -v h="$1" 'index($0, "## " h) == 1 { f = 1; next } f && /^## / { exit } f' "$README"
 }
 
-# An expertise skill (`user-invocable: false` in its frontmatter) is no command:
-# a reader meets it in the README's `## Expertise` section instead, spelled
-# `esq:<name>` since it has no slash form.
-is_expertise() {
-  awk 'NR == 1 && $0 != "---" { exit } NR > 1 && $0 == "---" { exit }
-       /^user-invocable:[[:space:]]*false[[:space:]]*$/ { found = 1; exit }
-       END { exit !found }' "$CMD_DIR/$1/SKILL.md"
-}
+# An expertise module is no command: a reader meets it in the README's
+# `## Expertise` section instead, spelled `esq:<name>` since it has no slash form.
 commands=""; experts=""
-for n in $(skill_names); do
-  if is_expertise "$n"; then experts="$experts $n"; else commands="$commands $n"; fi
+for n in $(skill_names); do commands="$commands $n"; done
+for f in "$EXPERTISE_DIR"/*.md; do
+  [ -f "$f" ] || continue
+  n=$(basename "$f" .md)
+  experts="$experts $n"
 done
 
 if [ -n "$experts" ]; then
@@ -178,6 +177,6 @@ fi
 if [ "$findings" -gt 0 ]; then
   exit 1
 fi
-printf 'structure clean — section references, %s commands, %s expertise skills, README coverage, every references/ path and every brief section resolve\n' \
+printf 'structure clean — section references, %s commands, %s expertise modules, README coverage, every references/ path and every brief section resolve\n' \
   "$(wc -w <<<"$commands" | tr -d ' ')" "$(wc -w <<<"$experts" | tr -d ' ')"
 exit 0

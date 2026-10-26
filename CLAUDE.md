@@ -1,7 +1,7 @@
 # esquisse — CLAUDE.md
 <!-- last-arch: 2026-10-19 @ 7a431ca9ba8d829f73e5d3fa71137c38e6db0cad -->
 
-esquisse is a Claude Code plugin (`esq`): twenty-three skills, a dependency-free CLI and four hook handlers (five events) running a
+esquisse is a Claude Code plugin (`esq`): twenty-three skills, a dependency-free CLI and five hook handlers (six events) running a
 plan → build → review cycle over Markdown ledgers in `docs/`; this repo is its marketplace. Why each rule: `docs/ARCHITECTURE.md`.
 
 ## What esq is for
@@ -38,7 +38,8 @@ the README — its table row and every paragraph about it — in the same commit
 
 ## Map
 
-- `plugin/`: `skills/<name>/SKILL.md` (source of truth), `bin/esq` + `lib/` (the CLI), `hooks/` + `scripts/` (hook handlers),
+- `plugin/`: `skills/<name>/SKILL.md` (source of truth), `expertise/<name>.md` (dated domain modules, never registered as
+  skills, read by plan/build/review from `esq expertise match`), `bin/esq` + `lib/` (the CLI), `hooks/` + `scripts/` (hook handlers),
   `standards/STANDARDS.md` (the default referent `esq standards` resolves, under a project's own `docs/STANDARDS.md`).
 - `scripts/`: `audit.sh` (the one `run` dispatch) and its checks; `update.sh` / `release-local.sh` (release, `--release`); the
   research instruments (probes, measures, captures), reached only by `--lab`.

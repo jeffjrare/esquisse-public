@@ -75,17 +75,18 @@ build or review holds. The CLI is the one writer, so no skill template writes th
 `check-conformance.sh` holds no clause for it: `tests/cli/lessons.test.mjs` pins it. Every line after
 the heading ends with ` <!-- L-<id> -->`, so that the `merge=union` merge never coalesces two entries.
 
-## Scenario E-01 — the expertise skill lines `esq expertise match` reads
+## Scenario E-01 — the expertise module lines `esq expertise match` reads
 
-An expertise skill (`plugin/skills/<name>/SKILL.md` with `user-invocable: false`) carries two lines of
-its own after its H1:
+An expertise module (`plugin/expertise/<name>.md`, frontmatter `name` equal to the file stem and
+`description`) carries these lines of its own after its H1:
 
 | Token | Parsed by |
 |---|---|
-| `**As of:** YYYY-MM-DD` | `parseExpertiseSkill` reads the date, and `esq expertise match` answers `asOf`, `ageDays` and `stale` (over 180 days) from it |
-| `**Paths:**` | its inline-code spans are the paths the skill covers; `esq expertise match` matches them segment-wise against the paths a plan, build or review holds, a span ending in `/` naming a directory anywhere in the path |
+| `**As of:** YYYY-MM-DD` | `parseExpertiseModule` reads the date, and `esq expertise match` answers `asOf`, `ageDays` and `stale` (over 180 days) from it |
+| `**Paths:**` | its inline-code spans are the paths the module covers; `esq expertise match` matches them segment-wise against the paths a plan, build or review holds, a span ending in `/` naming a directory anywhere in the path |
+| `**Stack:**` (optional) | its inline-code spans are npm package names or `@scope/*`; `esq expertise match --all` answers, per module, the packages the project's root and tracked `package.json` files declare that meet one |
 
-A skill whose lines do not parse lands in `unread` and is never matched, silently for every flow that
-relies on the match. The skill author is the writer, so no skill template writes the shape and
-`check-conformance.sh` holds no clause for it: `scripts/check-plugin.sh` refuses an expertise skill
-missing either line, and `tests/cli/expertise.test.mjs` pins the reading.
+A module whose lines do not parse lands in `unread` and is never matched, silently for every flow that
+relies on the match. The module author is the writer, so no skill template writes the shape and
+`check-conformance.sh` holds no clause for it: `scripts/check-plugin.sh` refuses a module missing a
+line or carrying a malformed one, and `tests/cli/expertise.test.mjs` pins the reading.
