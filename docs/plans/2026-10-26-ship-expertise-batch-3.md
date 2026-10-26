@@ -341,3 +341,40 @@ None. The user's 2026-10-25 instruction settles the split and the authority to a
 **For Phase 3:** 1. The session note lists a module only through its **Stack:** line, so each new module in Phase 3 needs one (the Recommendation's spans) for a Stripe/Prisma/BullMQ project to hear about it; entries use the description's first sentence, cut to fit 160 characters, so make that sentence stand alone.
 2. tests/hooks/session-expertise.test.mjs copies the shipped catalog and expects at least one entry for @capacitor/core + react; adding modules cannot break it.
 3. Phase 4's hook check runs against the shipped catalog: a new module whose Stack includes stripe, @prisma/client or bullmq beyond the three intended (e.g. privacy-loi25 taking the auth packages only) keeps that check exact.
+
+### Phase 3 — completed 2026-10-26
+
+**Plan committed at:** 0a6f7e6
+
+**Commits:** 0aacff5, 1f07101, 40f5b90, 2031359
+
+**Verified:** 20313591ec5f9ee1221bb78ade02829b988f7ece
+- `git grep -niE 'tamialog|events-tracker|goprosperia|prospection|synergie|B-[0-9]{3}|\bD-[a-z]+(-[a-z]+)+' -- plugin/expertise/payments-stripe.md plugin/expertise/auth-sessions.md plugin/expertise/prisma-postgres.md plugin/expertise/background-jobs.md`
+- `plugin/bin/esq expertise match backend/src/webhooks/stripe.ts backend/prisma/schema.prisma backend/src/jobs/sendDigest.job.ts backend/src/auth/session.ts frontend/src/App.tsx`
+- `node --test tests/hooks/session-expertise.test.mjs`
+- `scripts/check-plugin.sh plugin`
+- `scripts/check-structure.sh`
+
+**What got built:** Four new expertise modules under plugin/expertise/ (payments-stripe, auth-sessions, prisma-postgres, background-jobs), each with **Paths:**, the Recommendation's **Stack:** spans, dated primary sources and conditional remedies, plus their README rows; capacitor-ios's sign-in bullet and store-review's account-deletion line now point to auth-sessions instead of restating it.
+
+**Verification:**
+- (auto) git grep -niE 'tamialog|events-tracker|goprosperia|prospection|synergie|B-[0-9]{3}|\bD-[a-z]+(-[a-z]+)+' -- the four new modules — no match, exit 1
+- (auto) plugin/bin/esq expertise match backend/src/webhooks/stripe.ts backend/prisma/schema.prisma backend/src/jobs/sendDigest.job.ts backend/src/auth/session.ts frontend/src/App.tsx — exactly the four new modules, each matched on its own path only; no entry lists App.tsx; unread empty
+- Per task: scripts/check-plugin.sh plugin and scripts/check-structure.sh clean after each module (12 expertise modules validate, README coverage holds); descriptions 357/326/377/311 chars, under 460
+- Extra (blast radius: the hook test copies the shipped catalog): node --test tests/hooks/session-expertise.test.mjs — 5 pass; and Phase 4's Stripe/Prisma/BullMQ hook check run early — additionalContext names background-jobs.md, payments-stripe.md and prisma-postgres.md and no other module
+- Whole ./scripts/audit.sh skipped: this phase changed only Markdown modules and README rows, whose two audit checks (check-plugin, check-structure) ran after every task; Phase 4 runs the full audit
+
+**Decided for you:**
+- architecture: prisma-postgres states its Prisma rules for Prisma ORM 7 (stable on 2026-10-26) and names Prisma 8's differing commands and timeout-less transaction as a release candidate, rather than writing for 8 — the stable line is what projects run today — undo: rewrite the Which Prisma paragraph and the conditional rules in plugin/expertise/prisma-postgres.md
+
+**Surprises / decisions made during execution:** - Side-by-side reading of the four modules against their sources (Stripe webhooks, fulfilment, disputes and Tax-in-Canada pages; CRA and Revenu Québec small-supplier pages; OWASP Session Management and CSRF cheat sheets; better-auth session-management, cookies and security pages; Prisma 7 migrate, transactions and connection-pool pages; PostgreSQL 18 CREATE INDEX; BullMQ going-to-production, retrying, job ids and job schedulers), all checked 2026-10-26: no project identifier; each rule states mechanism, why and a check; library-specific remedies are marked Conditional (better-auth, Prisma 7, BullMQ, Stripe Tax vs own rates); every tax, legal or platform fact carries its source and date. Two rules are not from a fetched page and are marked by their own wording: BullMQ's UnrecoverableError (named, not on the retrying page) and Prisma running a multi-statement migration as one implicit transaction (hedged 'confirm it applies in your version').
+- Prisma 8 is a release candidate on 2026-10-26 with renamed migrate commands and no interactive-transaction timeout; the module names Prisma 7 and flags 8 (Decided for you).
+- Stripe Tax monitors registration thresholds only outside the business's home country, so a Québec business must track the $30,000 GST/QST small-supplier limit itself — written as its own rule.
+- auth-sessions and payments-stripe point to esq:privacy-loi25 and esq:background-jobs; privacy-loi25 lands in Phase 4, so that pointer resolves only then.
+- README rows are inserted in alphabetical order.
+
+**Backlog candidates:** None.
+
+**For Phase 4:** 1. auth-sessions already points to esq:privacy-loi25 for retention after account deletion, and to nothing for web-security; web-security should point to auth-sessions for cookies, CSRF and rotation, and privacy-loi25 should own retention and destruction without restating deletion mechanics (auth-sessions owns them).
+2. Phase 4's hook check already passes against the shipped catalog: keep privacy-loi25's **Stack:** to the auth packages and web-security's to the server frameworks so no module beyond the three takes stripe, @prisma/client or bullmq.
+3. testing-pitfalls is named by prisma-postgres as the owner of testing queries against a real database; give it that rule.
