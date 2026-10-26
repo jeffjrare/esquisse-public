@@ -33,7 +33,7 @@ fail() { printf '  ✗ %s\n' "$1"; fails=$((fails + 1)); }
 [[ -f "$PLUGIN" ]] || { printf 'plugin manifest is missing: %s\n' "$PLUGIN" >&2; exit 2; }
 [[ -d "$SKILLS" ]] || { printf 'skills directory is missing: %s\n' "$SKILLS" >&2; exit 2; }
 [[ -x "$ROOT/bin/esq" ]] || fail 'plugin/bin/esq is missing or not executable'
-[[ -f "$ROOT/lib/cli.mjs" && -f "$ROOT/lib/markdown.mjs" ]] || fail 'CLI library files are missing'
+[[ -f "$ROOT/lib/cli.mjs" && -f "$ROOT/lib/markdown.mjs" && -f "$ROOT/lib/expertise.mjs" ]] || fail 'CLI library files are missing'
 node --check "$ROOT/lib/cli.mjs" >/dev/null 2>&1 || fail 'CLI syntax validation failed'
 [[ -f "$HOOKS" ]] || fail 'plugin/hooks/hooks.json is missing'
 for script in hook-io protect-installed validate-stop record-agent-telemetry record-session-telemetry; do
@@ -96,33 +96,11 @@ fi
 # the harness actually reads.
 count=$(find "$SKILLS" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l)
 [[ "$count" -gt 0 ]] || fail "no skill found under $SKILLS"
-expertise=0
 
 for file in "$SKILLS"/*/SKILL.md; do
   [[ -f "$file" ]] || continue
   name=$(basename "$(dirname "$file")")
   grep -qF "name: $name" "$file" || fail "$name has no stable frontmatter name"
-  # An expertise skill (`user-invocable: false`) is knowledge, not a command: no
-  # model, effort or arguments to consume. What it owes is the two lines
-  # `esq expertise match` parses — a real `**As of:**` date and a `**Paths:**`
-  # line naming at least one backticked span. `disable-model-invocation` on top
-  # of `user-invocable: false` would leave nobody able to invoke it.
-  if awk 'NR == 1 && $0 != "---" { exit } NR > 1 && $0 == "---" { exit }
-          /^user-invocable:[[:space:]]*false[[:space:]]*$/ { found = 1; exit }
-          END { exit !found }' "$file"; then
-    expertise=$((expertise + 1))
-    grep -qF 'disable-model-invocation' "$file" \
-      && fail "$name is an expertise skill (user-invocable: false); disable-model-invocation would leave nobody able to invoke it"
-    as_of=$(grep -m1 -oE '^\*\*As of:\*\* [0-9]{4}-[0-9]{2}-[0-9]{2}[[:space:]]*$' "$file" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
-    if [[ -z "$as_of" ]]; then
-      fail "$name is an expertise skill with no \`**As of:** YYYY-MM-DD\` line"
-    elif [[ "$(date -u -d "$as_of" +%F 2>/dev/null)" != "$as_of" ]]; then
-      fail "$name's **As of:** $as_of is not a calendar date"
-    fi
-    grep -qE '^\*\*Paths:\*\* .*`[^`]+`' "$file" \
-      || fail "$name is an expertise skill with no \`**Paths:**\` line naming a backticked path"
-    continue
-  fi
   # The unattended trio's subagents invoke the first seven via the Skill tool — roadmap for
   # /esq:advance's bare refresh only — and ui and grill run when the user asks for them in
   # the conversation; autopilot and converge run in /esq:advance's own session on the plans it
@@ -143,11 +121,30 @@ for file in "$SKILLS"/*/SKILL.md; do
   fi
 done
 
+# Expertise modules: plain files under expertise/, never registered as skills. Each is read by
+# the CLI's own parser in one node pass, so the gate refuses exactly what `esq expertise match`
+# would put in `unread`, plus the two frontmatter facts the parser does not judge: the name is
+# the file stem and the description, which a session hears, stays within 460 characters.
+modules=0
+if [[ -d "$ROOT/expertise" ]]; then
+  modules=$(find "$ROOT/expertise" -maxdepth 1 -name '*.md' -type f | wc -l)
+  if [[ -f "$ROOT/lib/expertise.mjs" ]]; then
+    while IFS= read -r line; do [[ -n "$line" ]] && fail "$line"; done < <(node --input-type=module -e '
+      const [lib, dir] = process.argv.slice(1);
+      const { EXPERTISE_DESCRIPTION_MAX, readExpertiseCatalog } = await import(new URL(`file://${lib}`));
+      for (const module of await readExpertiseCatalog(dir)) {
+        const name = module.id.slice(4);
+        if (module.reason) { console.log(`expertise module ${name}: ${module.reason}`); continue; }
+        if (module.description.length > EXPERTISE_DESCRIPTION_MAX) console.log(`expertise module ${name}: description is ${module.description.length} characters, over ${EXPERTISE_DESCRIPTION_MAX}`);
+      }' "$(cd "$ROOT/lib" && pwd)/expertise.mjs" "$(cd "$ROOT/expertise" && pwd)" 2>&1 || echo 'the expertise module check could not run')
+  fi
+fi
+
 forked=$(grep -RlF 'context: fork' "$SKILLS" --include=SKILL.md 2>/dev/null || true)
 [[ -z "$forked" ]] || fail "context: fork is present without a completed runtime proof: $forked"
 
 if [[ "$fails" -eq 0 ]]; then
-  printf 'plugin, embedded CLI, native hooks and %d skills (%d expertise) validate\n' "$count" "$expertise"
+  printf 'plugin, embedded CLI, native hooks, %d skills and %d expertise modules validate\n' "$count" "$modules"
   exit 0
 fi
 printf '%d plugin finding(s).\n' "$fails"

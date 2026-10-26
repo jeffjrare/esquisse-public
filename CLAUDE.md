@@ -38,7 +38,8 @@ the README — its table row and every paragraph about it — in the same commit
 
 ## Map
 
-- `plugin/`: `skills/<name>/SKILL.md` (source of truth), `bin/esq` + `lib/` (the CLI), `hooks/` + `scripts/` (hook handlers),
+- `plugin/`: `skills/<name>/SKILL.md` (source of truth), `expertise/<name>.md` (dated domain modules, never registered as
+  skills, read by plan/build/review from `esq expertise match`), `bin/esq` + `lib/` (the CLI), `hooks/` + `scripts/` (hook handlers),
   `standards/STANDARDS.md` (the default referent `esq standards` resolves, under a project's own `docs/STANDARDS.md`).
 - `scripts/`: `audit.sh` (the one `run` dispatch) and its checks; `update.sh` / `release-local.sh` (release, `--release`); the
   research instruments (probes, measures, captures), reached only by `--lab`.
