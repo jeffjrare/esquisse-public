@@ -159,3 +159,36 @@ Approach 1.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-10-25
+
+**Plan committed at:** 5e0605c
+
+**Commits:** f28eef8, b493634, 8f852f5
+
+**Verified:** 8f852f57e2ef565a3c8405ee1c2fd8f7a69b7611
+- `scripts/check-plugin.sh plugin`
+- `scripts/check-structure.sh`
+- `grep -rniE 'tamialog|events-tracker|goprosperia|prospection|synergie|B-[0-9]{3}|\bD-[a-z]+(-[a-z]+)+' plugin/skills/forms-and-failures plugin/skills/design-system plugin/skills/accessibility`
+- `grep -h '^description:' plugin/skills/forms-and-failures/SKILL.md plugin/skills/design-system/SKILL.md plugin/skills/accessibility/SKILL.md | awk 'length($0) > 460 { bad = 1 } END { exit bad }'`
+- `plugin/bin/esq expertise match frontend/src/components/ui/button.tsx frontend/src/pages/ContactForm.tsx frontend/src/App.tsx backend/src/index.ts`
+
+**What got built:** Three new user-invocable: false expertise skills — esq:forms-and-failures, esq:design-system and esq:accessibility — each with **As of:** 2026-10-25, domain-marker **Paths:**, rules carrying mechanism, why and check, and a README ## Expertise row; store-review's request-ends-visible rule is cut to Play's Broken Functionality consequence plus a pointer to esq:forms-and-failures.
+
+**Verification:**
+- (auto) scripts/check-plugin.sh plugin — "plugin, embedded CLI, native hooks and 29 skills (6 expertise) validate", exit 0
+- (auto) scripts/check-structure.sh — "structure clean — … 6 expertise skills, README coverage …", exit 0
+- (auto) project-identifier grep over the three skill dirs — no match, exit 1 (PASS)
+- (auto) description length awk — exit 0 (lengths 289, 297, 273)
+- (auto) esq expertise match button.tsx ContactForm.tsx App.tsx index.ts — esq:accessibility and esq:design-system matched on button.tsx, esq:forms-and-failures on ContactForm.tsx; App.tsx and index.ts in no skill; unread []
+- Task 1.3 side-by-side reading (sources: assets-prospection design-system, form-patterns, component-library skills and .specs/coding/design-system.md): identifiers — no project, token name (canvas/ink-2/cat-1…), file path, cookie name, domain, decision slug or backlog id carried over; the grep backs this. Mechanism/why/check — every rule states all three; stack-specific remedies are conditional (shadcn accent, Tailwind 4 @theme, Zod/Valibot/Yup, react-hook-form setError, Radix/Headless UI/React Aria). Sources with dates — WCAG 2.2 REC 2024-12-12 and SC 1.4.3, 1.4.11, 2.4.7, 2.4.11, 2.4.13, 2.5.8, 3.3.1, 3.1.2, 4.1.3 checked on w3.org 2026-10-25; APG dialog pattern checked 2026-10-25; MDN fetch TypeError checked 2026-10-25; shadcn theming accent role and Tailwind @theme / @theme inline checked 2026-10-25. store-review keeps only the consequence and the pointer; its description trigger is unchanged.
+
+**Surprises / decisions made during execution:** - The plan's Paths starting points were used unchanged: the match step proved them, no refinement needed.
+- Tailwind's theme page does not mention @config; the JS-config fact is cited to its upgrade guide instead.
+- Each skill names one documented-but-untested rule: server field errors mapped to fields (forms), the parent-domain theme cookie beyond sibling subdomains (design-system), live-region announcement with a screen reader (accessibility).
+- README Expertise rows kept alphabetical (accessibility moved above capacitor-android).
+- Whole-suite ./scripts/audit.sh not run here: the phase adds Markdown skills and a README row only, covered by check-plugin and check-structure; Phase 2, the last phase, runs it.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. Shape to copy: plugin/skills/accessibility/SKILL.md (frontmatter name/description/user-invocable: false, As of, Paths, 180-day line, project-skill-wins line with cross-skill ownership, one documented-not-tested rule). 2. accessibility already owns `lang` on <html> and mixed-language passages, and forms-and-failures owns option sorting with localeCompare: i18n-fr-en should point to them, not restate. 3. Description lengths run ~270–300 chars against the 460 cap; README rows are alphabetical.
