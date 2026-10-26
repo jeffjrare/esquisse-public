@@ -267,3 +267,43 @@ None. The user's 2026-10-25 instruction settles the split and the authority to a
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-10-26
+
+**Plan committed at:** 869fc82
+
+**Commits:** d262f9e, b8c20cd, bd3e6dd
+
+**Verified:** bd3e6dda8d5095278e08301eeb0863c9497639e5
+- `node --test 'tests/cli/expertise.test.mjs'`
+- `scripts/check-plugin.sh plugin`
+- `scripts/check-structure.sh`
+- `git grep -lE '^user-invocable: false' -- plugin/skills`
+- `plugin/bin/esq expertise match shell/android/app/build.gradle frontend/src/locales/fr.json frontend/src/App.tsx`
+- `./scripts/audit.sh`
+
+**What got built:** The eight expertise skills now live as plugin/expertise/<name>.md modules that Claude Code does not register, each with a **Stack:** line. plugin/lib/expertise.mjs (re-exported by cli.mjs) answers each module's file, --all every module with the stack packages found in the root and tracked package.json files, and the build preflight answers a phase's **Expertise:** ids as named entries. Plan, build and review Read the module files, and check-plugin/check-structure validate and list plugin/expertise/.
+
+**Verification:**
+- (auto) node --test 'tests/cli/expertise.test.mjs' — 8 pass, 0 fail: file, --all, stack fixtures (root untracked manifest, node_modules ignored, 600 KB and malformed JSON counted in skipped=2), the named ids (esq:store-review named:true with no path, esq:nope in unread), the planned ios/ path and App.tsx matching nothing
+- (auto) scripts/check-plugin.sh plugin — exit 0, 'plugin, embedded CLI, native hooks, 23 skills and 8 expertise modules validate' (8 now; the plan's 15 is Phase 4's count)
+- (auto) scripts/check-structure.sh — 'structure clean — … 23 commands, 8 expertise modules, README coverage …'
+- (auto) git grep -lE '^user-invocable: false' -- plugin/skills — no match, exit 1
+- (auto) plugin/bin/esq expertise match shell/android/app/build.gradle frontend/src/locales/fr.json frontend/src/App.tsx — esq:capacitor-android and esq:i18n-fr-en matched, each file under plugin/expertise/ exists, no entry lists App.tsx, unread empty
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), 26 s: cli.mjs and markdown.mjs are imported across the CLI, so the whole product pass ran here
+- Mutation check of the new check-plugin branch: a wrong name, a malformed Stack span and a 584-character description each reported; a README missing esq:accessibility reds check-structure
+
+**Decided for you:**
+- architecture: check-plugin validates modules by importing the CLI's own readExpertiseCatalog in one node pass rather than re-parsing in awk — the gate refuses exactly what esq expertise match puts in unread — undo: restore an awk/grep parse in scripts/check-plugin.sh
+- architecture: the preflight's **Expertise:** ids are read by a new phaseExpertise() in markdown.mjs rather than a field on touchedPaths, so touchedPaths' answer shape is unchanged — undo: fold it into touchedPaths in plugin/lib/markdown.mjs and update tests/cli/plan-probe.test.mjs
+
+**Surprises / decisions made during execution:** - The skill-authoring project skill carried no expertise-skill shape to drop; it gained one line saying expertise is a module under plugin/expertise/, not a skill, since its 'only corpus' rule would otherwise mislead.
+- The fixture 'command' was dropped as planned; two fixtures were added (prisma for stack-only matching, badstack for a malformed Stack span).
+- tests/cli/esq.test.mjs needed no change: its preflight case still answers { skills: [], unread: [] } with no named ids.
+- Module bodies still say 'this skill' in places; left as prose.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. plugin/lib/expertise.mjs exports readExpertiseCatalog(dir), detectStack(cwd) → { packages, detection } and stackSpanMatches; it imports nothing from cli.mjs, so the SessionStart hook can import it directly. Each catalog entry carries name, description, asOf, paths, stack (or reason).
+2. detectStack honours the ESQ_TEST_GIT_ROOT seam only for rev-parse; under it ls-files yields nothing, so hook tests should use a real git fixture with NODE_ENV cleared, as tests/cli/expertise.test.mjs does.
+3. check-plugin.sh's hook script list and the hooks.json registration check (line ~38-45) are where session-expertise.mjs and SessionStart must be added.
