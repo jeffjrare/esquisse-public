@@ -192,3 +192,38 @@ Approach 1.
 **Backlog candidates:** None.
 
 **For Phase 2:** 1. Shape to copy: plugin/skills/accessibility/SKILL.md (frontmatter name/description/user-invocable: false, As of, Paths, 180-day line, project-skill-wins line with cross-skill ownership, one documented-not-tested rule). 2. accessibility already owns `lang` on <html> and mixed-language passages, and forms-and-failures owns option sorting with localeCompare: i18n-fr-en should point to them, not restate. 3. Description lengths run ~270–300 chars against the 460 cap; README rows are alphabetical.
+
+### Phase 2 — completed 2026-10-25
+
+**Plan committed at:** b6dcffd
+
+**Commits:** a2ee3c9, a559e05
+
+**Verified:** a559e05d61a13f4f0fa67a951dbcfa8d1fd7d5e2
+- `grep -rniE 'tamialog|events-tracker|goprosperia|prospection|synergie|B-[0-9]{3}|\bD-[a-z]+(-[a-z]+)+' plugin/skills/i18n-fr-en plugin/skills/dates-and-timezones`
+- `grep -h '^description:' plugin/skills/i18n-fr-en/SKILL.md plugin/skills/dates-and-timezones/SKILL.md | awk 'length($0) > 460 { bad = 1 } END { exit bad }'`
+- `plugin/bin/esq expertise match frontend/src/locales/fr.json frontend/src/lib/formatDate.ts frontend/src/lib/dates/parse.ts backend/src/services/update.ts backend/src/services/updateUser.ts frontend/src/App.tsx`
+- `./scripts/audit.sh`
+
+**What got built:** Two new user-invocable: false expertise skills — esq:i18n-fr-en and esq:dates-and-timezones — each with **As of:** 2026-10-25, domain-marker **Paths:**, rules carrying mechanism, why and check, primary sources with check dates, and a README ## Expertise row; the plugin now ships eight expertise skills.
+
+**Verification:**
+- (auto) project-identifier grep over i18n-fr-en and dates-and-timezones — no match, exit 1 (PASS); a second grep for the source project's helper names (householdZone, isSupportedTimeZone, NotificationTick, organizations.timezone) also exit 1
+- (auto) description length awk — exit 0 (lengths 330, 316)
+- (auto) esq expertise match fr.json formatDate.ts dates/parse.ts update.ts updateUser.ts App.tsx — esq:i18n-fr-en matched on fr.json, esq:dates-and-timezones on formatDate.ts and dates/parse.ts; update.ts, updateUser.ts and App.tsx in no skill; unread []
+- (auto) ./scripts/audit.sh — exit 0 in 26 s: 'Clean — 7 checks (product)', structure clean with 8 expertise skills and README coverage, 31 skills (8 expertise) validate, conformance and product suites passed
+- Task 2.2 side-by-side reading (sources: events-tracker .claude/skills/i18n and backend-api's time-zone rules): identifiers — no project name, decision slug, backlog id, helper or column name, file path or domain carried over; the greps back this. Mechanism/why/check — every rule states all three; stack-specific remedies are conditional (i18next suffixes and getFixedT, eslint-plugin-i18next / eslint-plugin-formatjs, Zod/Yup/Valibot, Prisma @db.Timestamptz/@db.Date, Temporal vs @js-temporal/polyfill, temporal-polyfill, date-fns + @date-fns/tz, Luxon, Vitest/Jest fake timers). Sources with dates — Charter C-11 s. 52.1 (history 1997, c. 24, s. 3, untouched by 2022, c. 14) and ss. 51, 52, 57 (each amended 2022, c. 14) read on the LegisQuébec consolidation 2026-10-25; OQLF spacing table 2026-10-25; MDN Date.parse 2026-10-25; Temporal support from @mdn/browser-compat-data 8.1.7 (2026-10-22) checked 2026-10-25; IANA tz link America/Montreal → America/Toronto; Intl behaviour (supportedValuesOf omitting links, resolvedOptions canonicalising, fr-CA U+00A0 vs fr-FR U+202F, PluralRules fr many, DST +24 h landing at 01:00 / 23:00 on 2026-03-08 / 2026-11-01) observed in Node 22.22 on 2026-10-25.
+
+**Decided for you:**
+- architecture: dates-and-timezones' **Paths:** narrows the plan's `*Time*` to `*Time.*`, `*TimeZone*`, `*Timezone*` — `*Time*` loaded the skill into `useTimeout.ts` and `Timeline.tsx`, while `formatTime.ts` still matches — undo: restore `*Time*` in plugin/skills/dates-and-timezones/SKILL.md's **Paths:** line
+
+**Surprises / decisions made during execution:** - The plan's OQLF typography summary was wrong on one point: the OQLF's spacing table puts a non-breaking space before `:`, `%`, `$` and inside « », but no space (a thin space tolerated) before `;`, `!` and `?` — France's convention is the one with a space there. The skill states the OQLF rule and contrasts it with France's.
+- Charter s. 52.1 itself was not amended by Bill 96 (its history note stops at 1997); the 2022 amendments that bear on a product are to ss. 51, 52 and 57 (French on terms at least as favourable). The skill cites both, and leaves applying them to the project.
+- legisquebec.gouv.qc.ca refuses WebFetch (403); the consolidation was read with curl and a browser user agent.
+- MDN's Temporal page carries no inline table; support versions come from @mdn/browser-compat-data 8.1.7, the data behind it. Safari ships Temporal only in Technology Preview and no iOS browser has it.
+- Each skill names one documented-but-untested rule: French's `many` plural category (i18n-fr-en), Temporal behind a polyfill (dates-and-timezones).
+- README Expertise rows kept alphabetical.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** Last phase — none. After landing, `/esq:arch` refreshes the stale "twenty-three skills" counts in CLAUDE.md and ARCHITECTURE, and the `(user)` rollout publishes the release with ./scripts/update.sh.
