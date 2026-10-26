@@ -307,3 +307,37 @@ None. The user's 2026-10-25 instruction settles the split and the authority to a
 **For Phase 2:** 1. plugin/lib/expertise.mjs exports readExpertiseCatalog(dir), detectStack(cwd) → { packages, detection } and stackSpanMatches; it imports nothing from cli.mjs, so the SessionStart hook can import it directly. Each catalog entry carries name, description, asOf, paths, stack (or reason).
 2. detectStack honours the ESQ_TEST_GIT_ROOT seam only for rev-parse; under it ls-files yields nothing, so hook tests should use a real git fixture with NODE_ENV cleared, as tests/cli/expertise.test.mjs does.
 3. check-plugin.sh's hook script list and the hooks.json registration check (line ~38-45) are where session-expertise.mjs and SessionStart must be added.
+
+### Phase 2 — completed 2026-10-26
+
+**Plan committed at:** d2a5ce5
+
+**Commits:** b9fe6f5, 9eabf3e
+
+**Verified:** 9eabf3eab21f2681d91c69417939cae14a3be5d4
+- `node --test 'tests/hooks/session-expertise.test.mjs'`
+- `printf '{"hook_event_name":"SessionStart","source":"startup","cwd":"%s"}' "$PWD" | node plugin/scripts/session-expertise.mjs`
+- `scripts/check-plugin.sh plugin`
+- `./scripts/audit.sh`
+
+**What got built:** A fifth hook handler, plugin/scripts/session-expertise.mjs on SessionStart (5 s timeout, every source), adds hookSpecificOutput.additionalContext naming the catalog directory once and one line per module whose **Stack:** meets a package the project declares; a project with no matching stack hears the fixed header alone. check-plugin.sh checks its syntax and the SessionStart registration; README, CLAUDE.md and plugin-runtime document it.
+
+**Verification:**
+- (auto) node --test 'tests/hooks/session-expertise.test.mjs' — 5 pass, 0 fail: Stripe module announced under a 12-segment install path with a resolving file reference (git repo with untracked root manifest, and a non-git directory), header only with no manifest, byte-identical output after adding 100 modules to a copy of the shipped catalog, malformed/empty stdin silent with exit 0 and an unreadable catalog null, no package name, version or manifest field in the output
+- (auto) printf SessionStart input with cwd=$PWD | node plugin/scripts/session-expertise.mjs — one JSON object, additionalContext the header alone on one line, 250 characters
+- (auto) scripts/check-plugin.sh plugin — exit 0, 'plugin, embedded CLI, native hooks, 23 skills and 8 expertise modules validate', SessionStart now required by its hooks.json check
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), 25 s: check-plugin.sh is an audit check, so the whole product pass ran here
+- Mutation check of the two new check-plugin conditions on a scratch copy: SessionStart removed from hooks.json and a syntax error in session-expertise.mjs each reported one finding; tree clean after
+
+**Decided for you:**
+- architecture: at most 40 stack-matched entries, any beyond folded into one 'and N more: esq expertise match --all' line — keeps the note well under SessionStart's 10,000-character additionalContext cap whatever the catalog grows to — undo: change ENTRY_LIMIT in plugin/scripts/session-expertise.mjs
+
+**Surprises / decisions made during execution:** - The output shape was checked against the hooks reference (code.claude.com/docs/en/hooks) on Claude Code 2.1.310; it is recorded in the handler's header comment. A third-party post mentions a fifth SessionStart source, fork; the handler uses no matcher, so it answers on any source.
+- sessionExpertise takes a third options argument ({dir}) so tests can point it at a fixture catalog; the hook itself calls it with (input) only.
+- README has no '§ Native hooks' heading; the hook is documented in § Expertise (a new paragraph), the How it works Hooks row (now naming five handlers on six events) and § Privacy and options.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** 1. The session note lists a module only through its **Stack:** line, so each new module in Phase 3 needs one (the Recommendation's spans) for a Stripe/Prisma/BullMQ project to hear about it; entries use the description's first sentence, cut to fit 160 characters, so make that sentence stand alone.
+2. tests/hooks/session-expertise.test.mjs copies the shipped catalog and expects at least one entry for @capacitor/core + react; adding modules cannot break it.
+3. Phase 4's hook check runs against the shipped catalog: a new module whose Stack includes stripe, @prisma/client or bullmq beyond the three intended (e.g. privacy-loi25 taking the auth packages only) keeps that check exact.
