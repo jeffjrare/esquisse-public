@@ -227,6 +227,7 @@ shows, such as `esq:store-review` for a phase that submits a build.
 |---|---|
 | `esq:capacitor-android` | A Capacitor app's Android shell: build origins, `versionCode`, API levels, `cap sync` output, the WebView origin and its cookies, App Links, signing, backup rules, insets |
 | `esq:capacitor-ios` | A Capacitor app's iOS target: toolchain and CI without a Mac, signing, lifecycle and session survival, push (APNs vs FCM), privacy manifests, export compliance |
+| `esq:forms-and-failures` | Forms and failure states: every request ends in something visible, double submits, input kept after a failure, unsaved changes, server field errors on their fields, loading/error/empty/offline states, option sorting |
 | `esq:store-review` | What Google Play and App Store reviewers check, and the Console and App Store Connect forms that block a build or a review |
 
 ## How it works
