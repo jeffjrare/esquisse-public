@@ -1,7 +1,7 @@
 # esquisse — CLAUDE.md
 <!-- last-arch: 2026-10-19 @ 7a431ca9ba8d829f73e5d3fa71137c38e6db0cad -->
 
-esquisse is a Claude Code plugin (`esq`): twenty-three skills, a dependency-free CLI and four hook handlers (five events) running a
+esquisse is a Claude Code plugin (`esq`): twenty-three skills, a dependency-free CLI and five hook handlers (six events) running a
 plan → build → review cycle over Markdown ledgers in `docs/`; this repo is its marketplace. Why each rule: `docs/ARCHITECTURE.md`.
 
 ## What esq is for

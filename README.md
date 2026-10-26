@@ -222,6 +222,14 @@ touches. A plan names them in each phase's `**Expertise:**` item, together with 
 the work needs that no path shows, such as `esq:store-review` for a phase that submits a
 build; ids written as `esq:<name>` in older plans still resolve.
 
+**Each session hears about its own stack only.** When a session starts (and again after
+`/clear` or a compaction), a hook reads the dependency names in those same `package.json`
+files and adds one short note to the session: where the modules live, one line per module
+the stack uses (`payments-stripe.md` for a project depending on `stripe`), and that
+`esq expertise match --all` lists the rest. A project whose stack uses none, or that has no
+`package.json`, gets the fixed pointer alone, and adding modules to the catalog leaves that
+note unchanged. Only npm manifests are read today.
+
 - **A project skill wins.** Where your project carries its own skill on the same topic
   and the two disagree, Claude follows the project's.
 - **Facts are dated.** Each module opens with an `**As of:**` date and the paths it
@@ -253,7 +261,7 @@ verification state, and merging safely.
 | Expertise | `plugin/expertise/<name>.md` | Dated domain knowledge the esq flows read when a phase's files, its plan or the project's stack call for it; not registered as skills, so a module costs a session nothing until it is read |
 | CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one), match paths and the project's stack to expertise modules (`esq expertise match` returns each module those paths touch with its file and age, never its text, `--all` every module with the npm packages that show it in use, and the build preflight carries the matches plus the ids the phase names), and read the spec and architecture by section (`esq projection outline` gives the heading tree, what each section costs, the projection's freshness and which given files changed since it was mined; `esq projection read` returns only the chosen sections, history comments stripped). It answers structured questions; it makes no product choices |
 | Project records | `docs/` in your project, and Git | Keep plans, decisions, committed work and the execution log available to the next session |
-| Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
+| Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Five handlers on six events: name the expertise a session's stack uses when it starts, protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
 
 Skills pre-approve exactly one tool: the plugin's own CLI (`Bash(esq *)`), so
 bookkeeping never waits on a permission prompt. Every other tool stays under your
@@ -407,7 +415,10 @@ honor it, the worker runs on your session's model.
   never prompts, responses, tool inputs or source code. Set `ESQ_TELEMETRY=off`
   before starting Claude Code to turn it off. It never blocks or authorizes anything.
 - **Hooks** protect the installed plugin from direct edits and, when a session stops
-  after changing a record, validate it once.
+  after changing a record, validate it once. At session start, one reads only the
+  dependency names in your `package.json` files to name the expertise your stack uses:
+  it runs nothing from the project, writes nothing, sends nothing anywhere and repeats
+  none of your manifest's content, and on any error it stays silent.
 - **Codex as a second opinion (opt-in).** With `ESQ_CODEX=on`, `/esq:plan` asks the
   local `codex` CLI for a blind counter-plan and a pre-mortem of the written plan.
   Claude judges both against the code; they never block the plan. **Opting in sends
