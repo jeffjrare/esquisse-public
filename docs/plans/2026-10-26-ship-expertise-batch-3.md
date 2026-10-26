@@ -6,6 +6,8 @@
 
 **Origin:** main
 
+**Reviewed at:** bda604c80e6efef8a3179e125cef141ae96d1959
+
 ## Context
 Eight expertise skills ship today as `user-invocable: false` skills under `plugin/skills/` (D-expertise-skills-declare-their-own-paths). Claude Code lists each one's description in every session of every project where esq is installed. That is about 100 tokens per skill, and the user pays for Capacitor's rules in a Python CLI. B-195 adds seven more: payments-stripe, auth-sessions, prisma-postgres, background-jobs, web-security, testing-pitfalls and a generic privacy-loi25. B-196 and B-197 add six more after that. Left as is, the standing cost reaches about 2,100 tokens per session. On 2026-10-25 the user decided the domains stay separate, but that the split must be smart and autonomous: « l'humain derrière la codebase n'a pas à configurer ça ». The per-session standing cost must not grow with the catalog, and each project's expertise is picked from its stack with no install and no per-project configuration. That answers B-195's open question about per-domain plugins: separate plugins would have to be installed, so they are ruled out.
 
