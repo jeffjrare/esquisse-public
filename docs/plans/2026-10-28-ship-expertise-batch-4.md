@@ -146,3 +146,37 @@ None. B-196 names the five domains and their scope, and batch 3 settled the patt
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-10-28
+
+**Plan committed at:** 8994e25
+
+**Commits:** a9bfa11, 6d67bed, 329db76
+
+**Verified:** 329db76861b6c9889fad7d48a98967c78c4963e0
+- `git grep -niE 'tamialog|events-tracker|goprosperia|prospection|synergie|B-[0-9]{3}|\bD-[a-z]+(-[a-z]+)+' -- plugin/expertise/deploy-vps.md plugin/expertise/observability.md plugin/expertise/transactional-email.md`
+- `plugin/bin/esq expertise match ansible/roles/app/tasks/main.yml ecosystem.config.cjs backend/src/instrument.ts backend/src/emails/passwordReset.tsx frontend/src/App.tsx`
+- `d=$(mktemp -d) && printf '{"dependencies":{"pm2":"1","nodemailer":"1","@sentry/node":"1"}}' > "$d/package.json" && printf '{"hook_event_name":"SessionStart","source":"startup","cwd":"%s"}' "$d" | node plugin/scripts/session-expertise.mjs`
+- `scripts/check-plugin.sh plugin`
+
+**What got built:** Three new expertise modules ship: deploy-vps (zero-drop reloads, nginx and Cloudflare in front, idempotent Ansible, deploy order and rollback), observability (SDK first, sourcemaps per release never served, release/environment, scrubbing, crashes reported, Capacitor layers, health and uptime, alert noise) and transactional-email (aligned SPF/DKIM/DMARC, bulk-sender rules, suppression, scanner-safe token links, text part and dark mode, CASL s. 6(6)), each with its README row; auth-sessions now points its reset link to transactional-email.
+
+**Verification:**
+- (auto) git grep for client identifiers, backlog and decision ids in the three modules: no match, exit 1 — PASS
+- (auto) plugin/bin/esq expertise match ansible/roles/app/tasks/main.yml ecosystem.config.cjs backend/src/instrument.ts backend/src/emails/passwordReset.tsx frontend/src/App.tsx: deploy-vps matched the Ansible task and ecosystem file, observability instrument.ts, transactional-email passwordReset.tsx, no entry lists App.tsx, unread empty — PASS
+- (auto) SessionStart hook on a package.json with pm2, nodemailer and @sentry/node: additionalContext names deploy-vps.md, observability.md and transactional-email.md and no other module — PASS
+- (auto) scripts/check-plugin.sh plugin: exit 0, 23 skills and 18 expertise modules validate; descriptions 354, 409 and 419 characters (under 460) — PASS
+- Side-by-side reading of the three modules against their sources: no project identifier (step 1); every rule states mechanism, why, fix and check; remedies that depend on a stack are conditional (pm2 or systemd, Sentry or Bugsink, React Email or nodemailer, nginx before or after 1.29.7); every platform, provider and legal fact cites its primary source dated 2026-10-28 (pm2 graceful start and cluster mode, nginx upstream keepalive, Cloudflare Full (strict) and restoring visitor IPs, Ansible Vault, Node --unhandled-rejections, Sentry options, sourcemaps, Vite upload and Capacitor, Bugsink sourcemaps, Gmail and Yahoo sender rules, RFC 9989, CASL s. 6 consolidated to 2026-09-30). The CRTC FAQ refused automated reads (403); the module says so and cites the statute only.
+- Suite scope: content-only phase (Markdown modules, README rows, one pointer line), so no node suite was earned here; the whole ./scripts/audit.sh runs in Phase 2, the plan's last phase. Wall-clock under a minute.
+
+**Surprises / decisions made during execution:** - DMARC is now RFC 9989 (2026, Proposed Standard), which obsoletes the RFC 7489 the plan named; transactional-email cites RFC 9989.
+- Sentry's docs mark sendDefaultPii deprecated from SDK 10.54 in favour of dataCollection, whose object form collects cookies and query parameters by default; observability states both and says to set each category deliberately. The version number comes from Sentry's docs alone.
+- nginx 1.29.7 made proxy_http_version 1.1 the default; deploy-vps makes the older setting conditional on the version.
+- The CRTC's CASL FAQ answered 403 to automated reads; the CASL line rests on the consolidated statute and says where to confirm the interpretation.
+- Sentry's docs give two conflicting defaults for environment; observability says to set it explicitly instead of naming one.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. Eighteen modules now validate; Phase 2's two bring the count to 20, and Phase 2's audit checks each has a README row (rows are alphabetical in the README table).
+2. transactional-email and observability already point to esq:capacitor-ios/-android only for build specifics; pwa-and-push owns push and should point to background-jobs for sending, as these modules do.
+3. Watch path noise: Phase 2's `*push*` span should be tried against a `pushState` or git-push file before it ships.
