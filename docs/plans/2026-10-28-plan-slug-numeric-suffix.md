@@ -54,3 +54,25 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-10-28
+
+**Plan committed at:** af5fb17
+
+**Commits:** 43dc517
+
+**Verified:** 43dc517ca90bb7afdd8e1725b6c7ca6aa49b6f99
+- `./scripts/audit.sh`
+
+**What got built:** canonicalPlanSlug now strips only the YYYY-MM-DD- prefix, so batch-2/-3/-4 are three identities in the plan index, brief→plan, branch ownership, review delta base and telemetry planSlug; the -fixes(-N) group is still stripped whole by briefSlug/correctiveChain.
+
+**Verification:**
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product suites included), 26 s
+- Targeted before commit: tests/cli/review-scope.test.mjs + branch.test.mjs 54 pass; brief plan/pending/depth tests in esq.test.mjs 10 pass; reverting the one-line fix turned all 5 new/flipped assertions red (branch, brief plan, brief pending, review scope, planSlugFrom), source restored
+
+**Surprises / decisions made during execution:** - The planned branch.test addition reads `owned-elsewhere` from both sides (thing and thing-2), and stands as its own test rather than inside the -fixes sibling test it left.
+- review-scope narrowing case: the plan’s own `brief(fixes): widget-4` is older than a sibling’s newer `widget-2-fixes-2` brief, and still wins as the base.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. Corrective chains (-fixes, -fixes-2, -fixes-2-fixes) resolve and count depth as before; historical telemetry rows for numbered plans stay merged under the un-numbered slug (append-only store, per Risks).
