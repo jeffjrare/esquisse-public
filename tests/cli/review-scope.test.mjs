@@ -339,6 +339,37 @@ test('a uniquified brief for an unrelated plan is not a baseline', async () => {
   await rm(root, { recursive: true, force: true });
 });
 
+test('a numbered sibling-s brief is never the delta base, and the plan-s own brief is', async () => {
+  const root = await repo();
+  await plan(root, 'widget-2');
+  const { relative, at } = await plan(root, 'widget-4');
+  await writeFile(path.join(root, 'src/app.js'), 'export const one = 2;\n');
+  const siblingReview = commit(root, 'feat(app): what widget-2-s review read');
+  await brief(root, 'widget-2', siblingReview.slice(0, 7));
+  await writeFile(path.join(root, 'src/app.js'), 'export const one = 3;\n');
+  commit(root, 'chore: a later commit');
+
+  // `widget-2` once folded into `widget-4`-s slug, so its brief narrowed the review of a plan it never read.
+  const scope = await reviewScope(root, relative);
+  assert.equal(scope.mode, 'full');
+  assert.equal(scope.base, at);
+  assert.equal(scope.slug, 'widget-4');
+  assert.equal(candidate(scope, 'review-brief').kept, false);
+
+  // Its own record, older than the sibling-s newer one, is the base: the fix narrows, not merely widens.
+  const ownReview = git(root, 'rev-parse', 'HEAD');
+  await brief(root, 'widget-4', ownReview.slice(0, 7));
+  await writeFile(path.join(root, 'src/app.js'), 'export const one = 4;\n');
+  const newerSibling = commit(root, 'fix(app): after widget-4-s review');
+  await brief(root, 'widget-2', newerSibling.slice(0, 7), { suffix: '-fixes-2' });
+  const narrowed = await reviewScope(root, relative);
+  assert.equal(narrowed.mode, 'delta');
+  assert.equal(narrowed.provenance, 'review-brief');
+  assert.equal(narrowed.base, ownReview);
+  assert.deepEqual(subjects(narrowed), ['fix(app): after widget-4-s review']);
+  await rm(root, { recursive: true, force: true });
+});
+
 // A commit body is not a subject. `git log --grep` searches the whole message, and a candidate is a
 // thing that narrows a review — so the identity these two pin is the subject line alone.
 

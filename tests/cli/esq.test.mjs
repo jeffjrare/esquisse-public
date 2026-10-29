@@ -741,6 +741,19 @@ test('brief plan refuses a brief whose Source names another plan, and one whose 
   );
 });
 
+test('brief plan tells numbered plans apart — a -2 plan is not its -3 or -4 sibling', async () => {
+  const fx = await identityFixture();
+  for (const n of [2, 3, 4]) await writeFile(path.join(fx.plans, `2026-10-2${n}-batch-${n}.md`), PLAN_TEXT);
+
+  // Folding the `-N` used to read three plans carrying `batch` and refuse this as ambiguous.
+  const first = await fx.brief('2026-10-26-batch-2-fixes.brief.md', '/esq:review on batch-2, 2026-10-26');
+  assert.equal((await briefPlan(first)).plan, path.join(fx.plans, '2026-10-22-batch-2.md'));
+
+  // A second-round brief keeps both readings apart: `-fixes-2` is the brief's uniquifier, `-4` the plan's name.
+  const second = await fx.brief('2026-10-27-batch-4-fixes-2.brief.md', '/esq:review on batch-4, 2026-10-27');
+  assert.equal((await briefPlan(second)).plan, path.join(fx.plans, '2026-10-24-batch-4.md'));
+});
+
 test('brief plan resolves an ordinary brief — an agreeing Source, a check Source, a date-prefixed Source, and no Source at all', async () => {
   const fx = await identityFixture();
   const alpha = path.join(fx.plans, '2026-09-14-alpha.md');
@@ -2275,6 +2288,24 @@ test('brief pending answers which briefs still owe a plan, and never the newest 
   // A plan recorded abandoned consumes nothing: `esq plan abandon` is the way back to /esq:plan.
   await write('2026-09-04-nouvelle-entree.md', `# Nouvelle entree\n\n**Abandoned:** 2026-09-05 — third corrective round refused\n\n## Phases\n\n### Phase 1 — one\n- task\n\n## Execution log\n`);
   assert.deepEqual((await briefPending(root)).pending.map((row) => row.file), ['docs/plans/2026-09-03-nouvelle-entree.brief.md']);
+});
+
+// A grill brief uniquified as `foo-2` is the input of the `foo-2` plan `/esq:plan` derives from it, so
+// an existing `foo` plan does not consume it.
+test('brief pending keeps a -2 grill brief waiting for its own plan, never the un-numbered one', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'esq-cli-pending-numbered-'));
+  await mkdir(path.join(root, 'docs/plans'), { recursive: true });
+  const plans = path.join(root, 'docs/plans');
+  const plan = (title) => `# ${title}\n\n## Phases\n\n### Phase 1 — one\n- task\n\n## Execution log\n`;
+  process.env.NODE_ENV = 'test';
+  process.env.ESQ_TEST_GIT_ROOT = root;
+
+  await writeFile(path.join(plans, '2026-09-01-foo.md'), plan('Foo'));
+  await writeFile(path.join(plans, '2026-09-02-foo-2.brief.md'), '# Brief: foo again\n');
+  assert.deepEqual((await briefPending(root)).pending.map((row) => row.file), ['docs/plans/2026-09-02-foo-2.brief.md']);
+
+  await writeFile(path.join(plans, '2026-09-03-foo-2.md'), plan('Foo 2'));
+  assert.deepEqual((await briefPending(root)).pending, []);
 });
 
 // A corrective brief is a different consumption question: /esq:plan strikes its 🟡 section rather

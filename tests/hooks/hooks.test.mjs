@@ -1158,7 +1158,8 @@ test('the plan marker admits the dated stem and the canonical slug, and stores o
   // capture the pattern admits whose canonical form is empty. It drops rather than storing a bare row.
   assert.equal(planSlugFrom('2026-09-06-'), undefined);
   assert.equal(planSlugFrom(undefined), undefined);
-  assert.equal(planSlugFrom('2026-09-06-plan-2'), 'plan');
+  // Only the date comes off: a trailing `-2` is the plan's own name, so `plan-2` is not `plan`.
+  assert.equal(planSlugFrom('2026-09-06-plan-2'), 'plan-2');
 });
 
 // ---- a direct session segment carries its repository and no plan ----------------------------

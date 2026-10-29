@@ -114,8 +114,9 @@ export async function appendRun(dataRoot, record) {
 //
 // EXACTLY TWO DECLARED FORMS ARE ADMITTED, AND NO THIRD: the canonical slug
 // `[a-z0-9][a-z0-9-]{0,63}` (64 characters) and the plan file's dated stem, that same slug behind a
-// `\d{4}-\d{2}-\d{2}-` prefix (75 = 11 + 64). The finder's `-<digits>` uniquifier lives inside the
-// 64-character budget rather than on top of it. Both are canonicalized before they are written, so
+// `\d{4}-\d{2}-\d{2}-` prefix (75 = 11 + 64). A trailing `-<digits>` is part of the slug, inside the
+// 64-character budget, and is kept: `batch-2` and `batch-4` are two plans. Both forms are canonicalized
+// (the date prefix off) before they are written, so
 // the store accumulates one spelling of an identity and a reader needs no repair path: prose stated
 // the "drop the date prefix" rule three times and was followed 0 times in 17 markers (B-128).
 const LABEL_PATTERN = /^esq:([a-z][a-z0-9-]{0,31})(?:\s+plan:((?:\d{4}-\d{2}-\d{2}-)?[a-z0-9][a-z0-9-]{0,63}))?(?:\s|$)/;
