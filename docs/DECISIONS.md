@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-a-plan-slug-keeps-its-numeric-suffix | 2026-10-29 | arch | plan-identity | `canonicalPlanSlug` strips only the `YYYY-MM-DD-` prefix; a trailing `-N` is part of a plan's identity, and the corrective `-fixes(-N)` group is stripped only by the brief and chain readers (`briefSlug`, `correctiveChain`) | Active |
 | D-expertise-modules-announced-by-stack | 2026-10-26 | arch | expertise | Expertise ships as plugin/expertise/<name>.md modules (frontmatter name and description, **As of:**, **Paths:**, optional **Stack:**), outside skill discovery; esq expertise match answers their files and stack signals, a SessionStart hook announces only the stack-matched ones, and esq flows Read them. | Active |
 | D-expertise-skills-declare-their-own-paths | 2026-10-24 | arch | expertise | Generic expertise ships as `user-invocable: false` skills under plugin/skills/, each declaring a parsed `**As of:**` date and `**Paths:**` line that `esq expertise match` matches against a phase's paths. | Superseded |
 | D-advance-builds-and-reviews-what-it-planned | 2026-10-21 | arch | skills | After the roadmap refresh, back on the starting branch, advance takes each plan it wrote this run (step 4b's and the question round's), in walk order: switches to the plan's branch over a clean tree, invokes `/esq:autopilot <plan>` in its own session, and when every phase is `completed`, `/esq:converge <plan>`, then switches back. Each announces its own bound and puts its own gates to the user. A plan found in `inFlight` at preflight stays a hand-off. Advance never runs `/esq:build` or `/esq:land`; a plan ready to land ends on `git switch <branch>`, then `/esq:land <plan>`. `autopilot` and `converge` drop `disable-model-invocation` and carry the in-body mandate refusal, so advance's `Skill` call reaches them. | Active |
@@ -5685,3 +5686,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** A domain the stack does not show is no longer described in a free session, only reachable through the fixed pointer; detection reads npm manifests only.
 **Conséquences:** Each later batch adds a module file with a **Stack:** line; check-plugin.sh validates plugin/expertise/; a fifth hook handler runs on SessionStart and writes nothing; plan, build and review read module files, never the Skill tool, for expertise.
 **Alternatives rejetées:** Native paths: frontmatter (auto-mode bug, no stack signal, plugin support undocumented). One fixed router skill (generic trigger, still ~100 tokens in an unrelated project). Per-domain marketplace plugins (each needs an install). Keep skills (cost grows with the catalog).
+
+## D-a-plan-slug-keeps-its-numeric-suffix — A plan slug keeps its numeric suffix
+
+**Scope:** arch
+**Topic:** plan-identity
+**Date:** 2026-10-29
+**Statut:** Active
+**Fondement:** mandate — B-198 task: strip the uniquifier only where one can occur (briefs), keep a plan's own numeric suffix
+
+**Contexte:** canonicalPlanSlug stripped any trailing -N, folding ship-expertise-batch-2/-3/-4 into one identity; /esq:review on batch-4 took batch-2's fixes brief as its delta base (B-198).
+**Décision:** `canonicalPlanSlug` strips only the `YYYY-MM-DD-` prefix; a trailing `-N` is part of a plan's identity, and the corrective `-fixes(-N)` group is stripped only by the brief and chain readers (`briefSlug`, `correctiveChain`)
+**Raison:** The finder that appends -2 also writes it into the branch, the commit subjects and the plan: marker, so every other record already treats it as identity. The real uniquifier on corrective briefs is already removed as one group where it occurs, so the generic strip only ever did harm.
+**Tradeoff:** Numbered plans join correctly everywhere; telemetry rows already stored under the folded slug stay merged (append-only store, no reader repair).
+**Conséquences:** Any new reader that needs a brief's uniquifier removed strips the -fixes(-N) group itself; nobody reintroduces a bare -\d+ strip in canonicalPlanSlug. Narrows D-plan-slug-canonicalized-at-the-writer without changing its two admitted forms.
+**Alternatives rejetées:** Strip -N only when the un-suffixed plan exists on disk (impure, identity changes as files appear). Change finders to a -v2 uniquifier (leaves existing -N plans mis-joined).
