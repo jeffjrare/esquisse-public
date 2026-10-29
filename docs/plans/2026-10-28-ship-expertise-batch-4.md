@@ -180,3 +180,37 @@ None. B-196 names the five domains and their scope, and batch 3 settled the patt
 **For Phase 2:** 1. Eighteen modules now validate; Phase 2's two bring the count to 20, and Phase 2's audit checks each has a README row (rows are alphabetical in the README table).
 2. transactional-email and observability already point to esq:capacitor-ios/-android only for build specifics; pwa-and-push owns push and should point to background-jobs for sending, as these modules do.
 3. Watch path noise: Phase 2's `*push*` span should be tried against a `pushState` or git-push file before it ships.
+
+### Phase 2 — completed 2026-10-28
+
+**Plan committed at:** 32f3463
+
+**Commits:** 0523459, ad5ceed
+
+**Verified:** ad5ceeda957bf0dc5614d93c0f5ee5a886bbaa0b
+- `git grep -niE 'tamialog|events-tracker|goprosperia|prospection|synergie|B-[0-9]{3}|\bD-[a-z]+(-[a-z]+)+' -- plugin/expertise/landing-seo.md plugin/expertise/pwa-and-push.md`
+- `plugin/bin/esq expertise match site/src/pages/index.astro frontend/src/sw.ts backend/src/push/send.ts frontend/src/App.tsx`
+- `d=$(mktemp -d) && printf '{"dependencies":{"astro":"1","vite-plugin-pwa":"1","web-push":"1"}}' > "$d/package.json" && printf '{"hook_event_name":"SessionStart","source":"startup","cwd":"%s"}' "$d" | node plugin/scripts/session-expertise.mjs`
+- `d=$(mktemp -d) && printf '{"dependencies":{"react":"1","next":"1","firebase":"1","express":"1","tailwindcss":"1"}}' > "$d/package.json" && printf '{"hook_event_name":"SessionStart","source":"startup","cwd":"%s"}' "$d" | node plugin/scripts/session-expertise.mjs`
+- `./scripts/audit.sh`
+
+**What got built:** Two new expertise modules ship: landing-seo (field Core Web Vitals with INP, images that reserve space and a non-lazy hero, per-page title, description and absolute canonical, Open Graph and a 1200x630 card, staging kept out by X-Robots-Tag rather than robots.txt, a sitemap of canonical URLs, reciprocal hreflang with x-default, JSON-LD matching the page, Astro's Image and sitemap integration) and pwa-and-push (the waiting worker and an update prompt, skipWaiting only from the user's reload, an uncached worker script scoped where it lives, network-first HTML and no cached authenticated API, install criteria, permission from a tap with iOS Home Screen web push, VAPID per environment and userVisibleOnly, tokens pruned on 404/410 or UNREGISTERED, FCM through HTTP v1), each with its README row; capacitor-ios and capacitor-android now point to pwa-and-push for server-side sending, and capacitor-ios to store-review for lock-screen content.
+
+**Verification:**
+- (auto) git grep for client identifiers, backlog and decision ids in landing-seo.md and pwa-and-push.md: no match, exit 1 — PASS
+- (auto) plugin/bin/esq expertise match site/src/pages/index.astro frontend/src/sw.ts backend/src/push/send.ts frontend/src/App.tsx: landing-seo matched index.astro, pwa-and-push matched sw.ts and push/send.ts, no entry lists App.tsx, unread empty — PASS
+- (auto) SessionStart hook on a package.json with astro, vite-plugin-pwa and web-push: additionalContext names landing-seo.md and pwa-and-push.md and no other module — PASS
+- (auto) SessionStart hook on react, next, firebase, express, tailwindcss: additionalContext names accessibility.md, design-system.md and web-security.md, none of the five new modules — PASS
+- (auto) ./scripts/audit.sh: Clean — 7 checks (product), exit 0; structure 23 commands and 20 expertise modules with README coverage, package 23 skills and 20 modules validate, conformance intact, product suites passed within 120 s — PASS
+- Side-by-side reading of the two modules against their sources: no project identifier (step 1); every rule states mechanism, why, fix and check; stack-dependent remedies are conditional (Astro or another generator, vite-plugin-pwa or Workbox, firebase-admin or a Google Auth Library token); every platform fact cites its primary source dated 2026-10-28 (web.dev Web Vitals, Search Central canonical, robots, noindex, sitemaps, localized versions and structured data, ogp.me, Facebook sharing images, Astro images and sitemap, web.dev SW lifecycle and install criteria, MDN register and subscribe, vite-plugin-pwa prompt, WebKit web push for iOS 16.4, RFC 8292, RFC 8030, Firebase token management and auth-server). X's card docs (402) and Firebase's FCM migration guide (404) refused automated reads; each module says so and where to confirm.
+- Path noise: src/lib/pushState.ts and scripts/git-push.sh no longer match pwa-and-push; src/hooks/usePushNotifications.ts does. Audit: one run.
+
+**Surprises / decisions made during execution:** - pwa-and-push's Paths narrow the plan's starting `*push*` to `push.*`, `*webpush*` and `*web-push*` (with `push/` and `*Push*` kept): `*push*` matched a pushState helper and a git-push script.
+- Firebase's token-management page now recommends registering Firebase Installation IDs over legacy registration tokens; pwa-and-push states it and says to check the SDK in use.
+- RFC 8030 specifies 404 for an expired subscription; 410 for an unsubscribed endpoint is push-service practice, stated as such.
+- Firebase's FCM migration guide answered 404 and X's card docs 402 to automated reads; the legacy-FCM shutdown date rests on a search quote of the guide and the X fallback is left to confirm, each said in the module.
+- Astro's docs list upgrade guides up to v7; landing-seo names no Astro major version.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** Last phase: the unit is ready for /esq:review; publishing (./scripts/update.sh) is the user's rollout step.
