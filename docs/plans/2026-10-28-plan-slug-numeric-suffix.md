@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** dc22bdb3c5555a3e2b7d6f99b142718c98fdb0bc
+
 ## Context
 `canonicalPlanSlug` (`plugin/scripts/hook-io.mjs:63`) strips the date prefix **and any trailing `-<digits>`**, on the assumption that a trailing number is always a finder's uniquifier. It is not: `ship-expertise-batch-2`, `-3` and `-4` are three plans, and every reader that joins on `normalizeSlug` (its re-export, `plugin/lib/cli.mjs:30`) folds them into `ship-expertise-batch`. B-198 records the cost: `/esq:review` on batch-4 took batch-2's `brief(fixes):` record as its delta base (`reviewBriefCandidate`, `cli.mjs:3840`, whose `Source:` check compares normalized slugs) and re-read a 2,800-line diff instead of ~600; telemetry files the three plans under one `planSlug`; `esq brief plan` on a `ship-expertise-batch-2-fixes` brief would refuse with "3 plans carry the slug". The places a `-N` uniquifier really occurs are already handled on their own: a corrective brief's `-fixes(-N)` group by `briefSlug` (`cli.mjs:41`) and `correctiveChain` (`cli.mjs:2364`), and the finders' `-2` on a plan or grill brief (`plan`/`grill`/`ui` SKILL.md step "append `-2`") becomes part of the new artifact's own slug, its branch `esq/<slug>-2` and its commit subjects. No SPEC behavior changes; `docs/SPEC.md:55` is consistent with the fix.
 
