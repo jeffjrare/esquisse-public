@@ -55,13 +55,17 @@ export const REPO_KEY_SHAPE = /^[0-9a-f]{32}$/;
 export const PLAN_SLUG_SHAPE = /^[a-z0-9][a-z0-9-]{0,63}$/;
 
 // The canonical plan slug, from anything that names a plan: a plan file's dated stem
-// (`2026-09-06-spawned-plan-identity-source`), the finder's `-2`/`-3` uniquifier, or the slug itself.
+// (`2026-09-06-spawned-plan-identity-source`) or the slug itself. Only the date comes off. A trailing
+// `-<digits>` is identity — `ship-expertise-batch-2` and `-4` are two plans, and the finder that added
+// a `-2` also wrote it into the branch, the commit subjects and the `plan:` marker. The one `-N` that
+// is a uniquifier, a corrective brief's `-fixes(-N)`, comes off as a group in `briefSlug` and
+// `correctiveChain` (D-a-plan-slug-keeps-its-numeric-suffix).
 // One definition, here, for the same reason the two shapes above are here: `plugin/lib/cli.mjs` builds
 // the join's plan index with it over plan filenames, and the agent recorder canonicalizes a declared
 // `plan:` marker with it before persisting — a second definition anywhere would de-join every row it
 // disagreed with by one character. Pure: no I/O, no lookup against `docs/plans/`, one short string.
 export function canonicalPlanSlug(raw) {
-  return raw.trim().replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/-\d+$/, '');
+  return raw.trim().replace(/^\d{4}-\d{2}-\d{2}-/, '');
 }
 
 // A harness-supplied session id, reduced to a fixed-length hex digest so it can name a file.

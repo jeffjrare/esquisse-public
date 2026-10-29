@@ -82,8 +82,9 @@ description: Rules for the esq CLI and hooks — read before editing plugin/bin,
   session identity or code content. Dedupe is the exclusive-create claim file, not scan-then-append, and under it the most
   complete record wins; the file stays append-only. `tests/hooks` has data-minimization tests that fail on a new field carrying
   content.
-- **`canonicalPlanSlug` in `hook-io.mjs` is the only definition of the plan-slug stripping** (date prefix, trailing
-  uniquifier), and the writer canonicalizes — the reader never does. The CLI builds the join's plan index with that same
+- **`canonicalPlanSlug` in `hook-io.mjs` is the only definition of the plan-slug stripping** (the date prefix only; a
+  trailing `-N` is identity, and a brief's `-fixes(-N)` group belongs to `briefSlug`/`correctiveChain`), and the writer
+  canonicalizes — the reader never does. The CLI builds the join's plan index with that same
   function. **`plan:<slug>` in the spawn description is the only plan identity**; there is no declaration log.
 - **The session writer** (`record-session-telemetry.mjs`, Stop async + SessionEnd) reads only the bytes the transcript gained
   since its per-session cursor sidecar, JSON-parses only lines that can carry a marker, runs the shared reducer with

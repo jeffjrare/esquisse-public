@@ -24,7 +24,8 @@ const CORRECTIVE_BRIEF = /-fixes(?:-\d+)?\.brief\.md$/;
 
 // `docs/plans/2026-08-19-telemetry-summary.md` → `telemetry-summary`. Slugs are what joins a plan,
 // the briefs that correct it, the commits that produced them and the backlog rows that cite it —
-// the date prefix and the finder's `-2`/`-3` uniquifier are noise on all four. The body lives in
+// the date prefix is noise on all four, and a bare trailing `-<digits>` is part of the name
+// (D-a-plan-slug-keeps-its-numeric-suffix). The body lives in
 // `plugin/scripts/hook-io.mjs` beside the shapes it feeds, because the agent recorder applies the
 // same derivation to a declared `plan:` marker; the name stays here so every call site is untouched.
 export const normalizeSlug = canonicalPlanSlug;
@@ -35,9 +36,10 @@ function planSlug(file) {
 
 // `2026-08-19-telemetry-summary-fixes.brief.md` → `telemetry-summary`, and so does the second-round
 // `-fixes-2` of the same plan: the uniquifier belongs to the brief, never to the plan it corrects, so
-// the whole `-fixes(-<n>)` group comes off in one bite. Stripping only `-fixes` would leave
-// `normalizeSlug` to eat the `-2` on its own and answer `telemetry-summary-fixes` — the slug of the
-// *plan written from* that brief, which is a different plan and a wrong identity.
+// the whole `-fixes(-<n>)` group comes off in one bite. Stripping only `-fixes` would answer
+// `telemetry-summary-fixes-2` — no plan at all — or, read loosely, `telemetry-summary-fixes`, the slug
+// of the *plan written from* the first brief: a different plan and a wrong identity. This group is the
+// only `-N` that is a uniquifier; `normalizeSlug` keeps every other one.
 function briefSlug(file) {
   return normalizeSlug(path.basename(file).replace(/\.brief\.md$/, '').replace(/-fixes(?:-\d+)?$/, ''));
 }
@@ -2378,8 +2380,8 @@ function stripCorrective(name) {
   return correctiveChain(name).stem;
 }
 
-// How many corrective rounds a name already sits above its stem. `normalizeSlug` has eaten the
-// trailing uniquifier by the time this runs, so `<stem>-fixes-2` is the *same* generation as
+// How many corrective rounds a name already sits above its stem. `correctiveChain` strips each
+// `-fixes(-N)` group whole, so `<stem>-fixes-2` is the *same* generation as
 // `<stem>-fixes` (depth 1) — a second brief in one round, never a round of its own — while
 // `<stem>-fixes-fixes` is depth 2 and `prefixes` is depth 0.
 function correctiveDepth(name) {
@@ -2391,8 +2393,8 @@ function correctiveDepth(name) {
 // re-planning the stem (`D-corrective-generations-bounded-at-two`).
 const CORRECTIVE_DEPTH_BOUND = 2;
 
-// A plan or brief path reduced to the name the two functions above read: the date prefix and the
-// trailing uniquifier off (`normalizeSlug`), and `.brief.md` stripped as one piece so a corrective
+// A plan or brief path reduced to the name the two functions above read: the date prefix off
+// (`normalizeSlug`), and `.brief.md` stripped as one piece so a corrective
 // brief's own `-fixes` group is still the last thing on the name.
 function planName(file) {
   return normalizeSlug(path.basename(file).replace(/\.brief\.md$/, '').replace(/\.md$/, ''));
@@ -2436,7 +2438,8 @@ export function briefDepth(file) {
 //
 // A brief is CONSUMED by the plan written from it, and the join is the one every other reader of
 // docs/plans already uses: `/esq:plan` derives its slug from the brief filename, so the plan it
-// writes sits beside the brief carrying that slug (`normalizeSlug` — date prefix and uniquifier off).
+// writes sits beside the brief carrying that slug (`normalizeSlug` — date prefix off; a grill brief
+// uniquified as `foo-2` waits for the `foo-2` plan `/esq:plan` derives from it, never for `foo`).
 // Nothing is deleted to record the consumption: a grill brief is durable input, cited by the plan
 // and re-read by whoever comes back to the work, and "Commit and stop" retires a corrective brief
 // only. So the fact is COMPUTED rather than stored, and mtime is not it — mtime says which brief was
@@ -2887,8 +2890,8 @@ export async function branchResolve(root, rawSlug) {
     return cut(current, `${slug} names no stem, so this is a new shipping unit cut from ${current}.`);
   }
 
-  // The stem plan is found by slug over docs/plans, never by a path guess: the date prefix and the
-  // finder's uniquifier are noise on the join, exactly as they are for a brief.
+  // The stem plan is found by slug over docs/plans, never by a path guess: the date prefix is noise
+  // on the join, exactly as it is for a brief.
   let stemFile = null;
   if (repository) {
     for (const other of await planFiles(repository)) {

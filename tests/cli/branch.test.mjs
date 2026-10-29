@@ -152,7 +152,6 @@ test('a plan and its -fixes sibling are one shipping unit and share a branch', a
   const root = await repo({ branches: ['feat-x'], checkout: 'feat-x' });
   const file = await plan(root, '2026-08-31-thing.md', { branch: 'feat-x', origin: 'main' });
   await plan(root, '2026-08-31-thing-fixes.md', { branch: 'feat-x', origin: 'main' });
-  await plan(root, '2026-09-01-thing-2.md', { branch: 'feat-x', origin: 'main' });
   await plan(root, '2026-09-02-thing-fixes-2.md', { branch: 'feat-x', origin: 'main' });
   const verdict = await branchCheck(root, file);
   assert.equal(verdict.verdict, 'ok');
@@ -161,6 +160,19 @@ test('a plan and its -fixes sibling are one shipping unit and share a branch', a
   assert.equal((await branchCheck(root, 'docs/plans/2026-08-31-thing-fixes.md')).verdict, 'ok');
   // …including a second corrective round, whose `-2` uniquifier sits outside the `-fixes` suffix.
   assert.equal((await branchCheck(root, 'docs/plans/2026-09-02-thing-fixes-2.md')).verdict, 'ok');
+});
+
+test('a plan whose name ends in a number is its own unit, not a sibling of the un-numbered one', async () => {
+  // `thing-2` is a plan of its own — the finder that added the `-2` wrote it into the branch and the
+  // commit subjects too. Folding it into `thing` is what let a numbered plan borrow a sibling's
+  // history, so recording `thing`'s branch makes it a second owner.
+  const root = await repo({ branches: ['feat-x'], checkout: 'feat-x' });
+  const file = await plan(root, '2026-08-31-thing.md', { branch: 'feat-x', origin: 'main' });
+  await plan(root, '2026-09-01-thing-2.md', { branch: 'feat-x', origin: 'main' });
+  const verdict = await branchCheck(root, file);
+  assert.equal(verdict.verdict, 'owned-elsewhere');
+  assert.equal(verdict.refuse, true);
+  assert.equal((await branchCheck(root, 'docs/plans/2026-09-01-thing-2.md')).verdict, 'owned-elsewhere');
 });
 
 test('a correction of a correction is still the same shipping unit', async () => {
