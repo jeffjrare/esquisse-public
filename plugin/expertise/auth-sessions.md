@@ -13,7 +13,7 @@ description: Sign-in, sessions and account deletion: cookies, CSRF, rotation, re
 
 **If today is more than 180 days past `**As of:**`, say so in one line before relying on a library default, and keep going.** Re-check a dated fact against its source before it decides anything.
 
-**A project skill on the same topic wins** where the two disagree. A native shell's cookie origin, Keychain storage and App-Bound Domains belong to `esq:capacitor-ios` (and the Android shell's to `esq:capacitor-android`); what App Store and Play reviewers require of sign-in methods and account deletion to `esq:store-review`; how long an account's personal information is kept after deletion to `esq:privacy-loi25`. This module owns how a session is issued, protected, rotated and ended.
+**A project skill on the same topic wins** where the two disagree. A native shell's cookie origin, Keychain storage and App-Bound Domains belong to `esq:capacitor-ios` (and the Android shell's to `esq:capacitor-android`); what App Store and Play reviewers require of sign-in methods and account deletion to `esq:store-review`; how long an account's personal information is kept after deletion to `esq:privacy-loi25`. The password-reset or magic link itself (its token, its expiry, a scanner's prefetch) and the email that carries it belong to `esq:transactional-email`. This module owns how a session is issued, protected, rotated and ended.
 
 An auth bug works on every demo: the author logs in, logs out, logs in. It shows up as someone else's session still alive, a request the user never made, or a "deleted" account that still signs in. Each rule below says how to see it first.
 
