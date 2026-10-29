@@ -6,6 +6,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 4041482392076f4c8cf165eb1645af106be2b1fd
+
 ## Context
 ship-expertise-batch-3 moved the catalog out of skill discovery. Modules are now `plugin/expertise/<name>.md` files, picked for each session from the project's `package.json` by the `SessionStart` hook and read by plan, build and review from `esq expertise match`. Fifteen modules ship. B-196 adds five that cover what keeps a product reachable and running: deploy-vps (Ansible, pm2, nginx, Cloudflare, restarts that drop no requests), transactional-email (SPF/DKIM/DMARC, deliverability, token links), landing-seo (Astro, performance, meta, OG, sitemap), pwa-and-push (service worker, cache, FCM/APNs) and observability (Bugsink, sourcemaps). The infrastructure is in place, so adding modules costs nothing in a session whose stack does not use them. This unit only writes content, its README rows and the pointers that keep one writer per fact.
 
