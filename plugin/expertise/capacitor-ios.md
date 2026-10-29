@@ -41,9 +41,9 @@ description: Adding or changing a Capacitor app's iOS target. Use before running
 
 ## Push
 
-- **Capacitor's push plugin returns an APNs token on iOS, not an FCM one** ([push notifications](https://capacitorjs.com/docs/apis/push-notifications)). A backend that sends through FCM needs either the Firebase Messaging SDK in the iOS app (to exchange for an FCM token) or a direct APNs sender. Upload the APNs auth key (`.p8`) to the push provider.
+- **Capacitor's push plugin returns an APNs token on iOS, not an FCM one** ([push notifications](https://capacitorjs.com/docs/apis/push-notifications)). A backend that sends through FCM needs the Firebase Messaging SDK in the iOS app to exchange it for an FCM token, or sends to APNs directly. Upload the APNs auth key (`.p8`) to the push provider. How the server sends, and stores and prunes tokens, is `esq:pwa-and-push`'s.
 - **The entitlement `aps-environment` must be in the signed build**, which means the Push capability on the App ID and in the provisioning profile used on CI.
-- **The app must work with push refused,** and a notification must not put sensitive personal data on the lock screen (guideline 4.5.4). User-written text (a reminder's title) shown in a notification body counts.
+- **The app must work with push refused.** What a notification may show on the lock screen (guideline 4.5.4) is `esq:store-review`'s.
 
 ## Privacy
 
