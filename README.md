@@ -381,8 +381,9 @@ only operates on planned work.
 - `/esq:advance` works the roadmap's `Now` items — one worker per item, at most one
   new plan per entry, at most one UI render (skipped when an item beside it needs a
   grill, which may settle the screen question). Once that work
-  is done it asks you in one round what only you can settle: grill an ambiguous item now
-  or later, and which rendered direction to keep. A grill you accept runs right there,
+  is done it asks you in one round what only you can settle: grill ambiguous items now
+  or later (one grill per roadmap entry, however many of its items need it), and which
+  rendered direction to keep. A grill you accept runs right there,
   and what the round settled gets one more plan. Last, each plan the run wrote is built
   with `/esq:autopilot` and reviewed with `/esq:converge`, in the same session, each
   announcing its own bound and asking you at its own gates; it stops before `/esq:land`,

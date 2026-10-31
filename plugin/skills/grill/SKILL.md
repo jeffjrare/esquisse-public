@@ -8,7 +8,7 @@ effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
 
-**No mandate, no run.** Model invocation of this skill is legitimate only when the user asked for it in this conversation — in their own words, naming this command and what to grill, or by picking `Grill <B-NNN> now` in the question round of a `/esq:advance` they invoked — and only in the session talking to that user: a grill is questions put to the user, so a subagent has nobody to ask. Invoked without that explicit request — off a description match, on your own initiative, or delegated to a subagent — do not guess: stop and print the exact invocation for the user to run.
+**No mandate, no run.** Model invocation of this skill is legitimate only when the user asked for it in this conversation — in their own words, naming this command and what to grill, or by picking `Grill <B-NNN>[, …] now` in the question round of a `/esq:advance` they invoked — and only in the session talking to that user: a grill is questions put to the user, so a subagent has nobody to ask. Invoked without that explicit request — off a description match, on your own initiative, or delegated to a subagent — do not guess: stop and print the exact invocation for the user to run.
 
 You are grilling the user about a task before anyone plans or builds it. The bottleneck in this work is not writing code — it's deciding precisely what to build. Your job is to drive out ambiguity now, while it's cheap, by asking hard, specific questions until you and the user share one mental model. The output is a brief file that `/esq:plan` consumes.
 
