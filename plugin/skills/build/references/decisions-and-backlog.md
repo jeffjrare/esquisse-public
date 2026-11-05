@@ -17,7 +17,7 @@ Report a refusal and its recovery action; never calculate an ID from the ledger 
 
 1. If `docs/BACKLOG.md` doesn't exist, create it from the template. **Read its `| B-NNN |` table rows once here** — the rows carry every field this step and the closing step below need (ID, Status, Source, Epic); the per-item detail sections are the bulk of the file and neither step reads them — the closing step below reuses this same read rather than opening the file a second time.
 2. For each candidate, dedup against existing rows by summary, then file it in one call:
-   `esq backlog add --type "<type emoji + word>" --summary "<one-phrase summary>" --source "<source>"` — the
+   `esq backlog add --type "<type emoji + word>" --concern <user|security|legal|checks|deps|ops|internal> --summary "<one-phrase summary>" --source "<source>"` — the concern is what the row is about (`user`: a user sees, gets or hits it); the
    source classified now, from evidence: `observed: <slug> Phase N` only when the finding is outside the
    promised work and this unit neither introduced nor aggravated it — it fails the same way on the unit's
    origin, nothing the unit changed (a caller, data, configuration, an interface) reaches or worsens it,
