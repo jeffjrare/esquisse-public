@@ -124,7 +124,7 @@ For each 🔴, ⚫ and 🟡 verdict without an open backlog row, add one. Check 
 Report a refusal and its recovery action; never calculate an ID from the ledger or bypass block limits. IDs are permanent: never renumber or reuse them.
 <!-- id-allocation:end -->
 
-`esq backlog add --type "🐛 bug" --summary "<summary>" --source "promise: P-<slug>" --pri "<level>" --status Open`
+`esq backlog add --type "🐛 bug" --concern user --summary "<summary>" --source "promise: P-<slug>" --pri "<level>" --status Open`
 
 - **Summary**, ≤ ~12 words: `Broken promise: <claim, shortened>`, `Partial promise: <claim> — <condition>`, or `Promised, absent: <claim>`.
 - **Priority** is suggested, never confirmed: `hi?` for a claim on the landing page or pricing that is broken or absent (the product sells what fails), `med?` for one made elsewhere and for a partial one, `lo?` for a spec-only gap.
@@ -158,7 +158,7 @@ Every finding is one of these classes, observed by a read:
 
 Each finding names the screen, the step, the read and, in one line, why a person would be lost or misled. Severity follows the harm: lost work, unguarded destruction and words that lie about money or data are `hi?`; a misleading contradiction is `med?`; leaked internals and cosmetic disagreement are `lo?`.
 
-File each finding with `esq backlog add` (the id-allocation rule above holds) with `--type "🐛 bug"`, `--source "promise --sense: <screen>"` and a detail section carrying the evidence, after checking the backlog for the same screen and class so a re-run never files twice. A screen beyond the 12 is named in the report with the invocation that covers it. Commit once: `git add docs/BACKLOG.md && git commit -m "promise: sense sweep <target or 'all'> — <n> findings"`.
+File each finding with `esq backlog add` (the id-allocation rule above holds) with `--type "🐛 bug"`, `--concern user`, `--source "promise --sense: <screen>"` and a detail section carrying the evidence, after checking the backlog for the same screen and class so a re-run never files twice. A screen beyond the 12 is named in the report with the invocation that covers it. Commit once: `git add docs/BACKLOG.md && git commit -m "promise: sense sweep <target or 'all'> — <n> findings"`.
 
 ## --copy: the copy writer
 

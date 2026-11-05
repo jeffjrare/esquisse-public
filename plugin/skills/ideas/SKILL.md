@@ -106,7 +106,7 @@ In capture mode, read the slate (the path given, else the newest file under `<gi
 
 One `esq backlog add` per picked idea, in order, chained with `&&` in a single call (they write the same file, so never side by side):
 
-`esq backlog add --type "<💡 idea for a feature, content or container idea; ✨ improvement for an adjustment>" --summary "<the title, ≤12 words>" --source "ideas: <slate file name> #<n>" --pri "<med? if a user sees or feels it, else lo?>" --status Open`
+`esq backlog add --type "<💡 idea for a feature, content or container idea; ✨ improvement for an adjustment>" --concern user --summary "<the title, ≤12 words>" --source "ideas: <slate file name> #<n>" --pri "<med? if a user sees or feels it, else lo?>" --status Open`
 
 A pick is interest, not a priority: the level stays suggested (`?`), and `/esq:backlog B-NNN pri:hi` confirms one. Then, under the backlog's `---`, add one detail section per captured row: `## B-NNN — <title>`, with **What:** (the idea's slice), **Why it matters:** (For + Value), **Notes:** (the signal, the size and the next command). Run `esq validate`, then one commit for the whole capture: `git add docs/BACKLOG.md && git commit -m "backlog: capture <n> idea(s) from /esq:ideas (<focus>)"`.
 

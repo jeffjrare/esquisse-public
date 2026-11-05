@@ -102,7 +102,7 @@ test('a checkable lesson files one 💡 row, creating the backlog, and a retry f
   const backlog = await readFile(path.join(root, 'docs/BACKLOG.md'), 'utf8');
   const rows = backlog.split('\n').filter((line) => /^\| B-\d+/.test(line));
   assert.equal(rows.length, 1);
-  assert.match(rows[0], new RegExp(`\\| 💡 idea \\| lo\\? \\| \\d+ \\| Check candidate — a save / an update both write the row \\| lesson: ${first.id} \\|`));
+  assert.match(rows[0], new RegExp(`\\| 💡 idea \\|  \\| lo\\? \\| \\d+ \\| Check candidate — a save / an update both write the row \\| lesson: ${first.id} \\|`));
   assert.ok((await ledger(root)).includes(`- **Check:** ${first.backlog.id} <!-- ${first.id} -->\n`));
 
   const again = await add(root, value);

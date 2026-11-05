@@ -60,10 +60,10 @@ test('state reports git, the plans newest first with activePlan, and the backlog
   assert.equal(result.plans[1].state, 'ready');
   assert.deepEqual(result.backlog.counts, { Open: 1, 'Needs-decision': 1, Planned: 1, Done: 1, Dropped: 0 });
   // By default an Open row is counted per priority, never listed; `rows: true` lists every open row.
-  const openRow = { id: 'B-001', pri: 'hi', rank: '', summary: 'first', status: 'Open', epic: '', source: 'manual' };
+  const openRow = { id: 'B-001', type: 'bug', concern: '', pri: 'hi', rank: '', summary: 'first', status: 'Open', epic: '', source: 'manual' };
   const routed = [
-    { id: 'B-002', pri: 'med', rank: '', summary: 'second', status: 'Needs-decision', epic: 'aug', source: 'review' },
-    { id: 'B-003', pri: '', rank: '', summary: 'third', status: 'Planned', epic: '', source: 'manual · Planned by x' },
+    { id: 'B-002', type: 'debt', concern: '', pri: 'med', rank: '', summary: 'second', status: 'Needs-decision', epic: 'aug', source: 'review' },
+    { id: 'B-003', type: 'todo', concern: '', pri: '', rank: '', summary: 'third', status: 'Planned', epic: '', source: 'manual · Planned by x' },
   ];
   assert.deepEqual(result.backlog.openPri, { hi: 1 });
   assert.deepEqual(result.backlog.rows, routed);

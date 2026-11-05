@@ -216,17 +216,95 @@ const RANK_COLUMN = 'Rank';
 // (no canonical ledger has one, but a hand-made fixture can) appends it last rather than guessing.
 // A no-op on a table that already carries the column, so callers may call it unconditionally.
 function addRankColumn(lines, table) {
-  if (table.header.includes(RANK_COLUMN)) return table;
-  const priIndex = ['Pri', 'Priority'].map((name) => table.header.indexOf(name)).find((index) => index >= 0) ?? -1;
-  const at = priIndex >= 0 ? priIndex + 1 : table.header.length;
+  return widenColumn(lines, table, RANK_COLUMN, ['Pri', 'Priority']);
+}
+
+// The one widening both lazy columns go through: `name` lands right after the first anchor the
+// header carries, else last, with the separator and every row padded in the same pass.
+function widenColumn(lines, table, name, anchors) {
+  if (table.header.includes(name)) return table;
+  const anchorIndex = anchors.map((anchor) => table.header.indexOf(anchor)).find((index) => index >= 0) ?? -1;
+  const at = anchorIndex >= 0 ? anchorIndex + 1 : table.header.length;
   const widen = (cells, value) => { const next = cells.slice(); next.splice(at, 0, value); return next; };
-  const header = widen(table.header, RANK_COLUMN);
+  const header = widen(table.header, name);
   const separator = widen(splitTableRow(lines[table.start + 1]), '---');
   const rows = table.rows.map((row) => widen(row, ''));
   lines[table.start] = formatRow(header);
   lines[table.start + 1] = formatRow(separator);
   rows.forEach((row, offset) => { lines[table.start + 2 + offset] = formatRow(row); });
   return { ...table, header, rows };
+}
+
+// What a row is *about*, beside what kind of row it is (Type). A roadmap lens orders by these words —
+// "security first, then checks" — so a row classified once is ordered by the CLI on every derive
+// instead of being re-read and re-judged by a model each time. A closed vocabulary because the CLI
+// sorts on it: a word off the list has no tier to fall in. Lazy like Rank, placed after Type.
+const CONCERN_COLUMN = 'Concern';
+export const CONCERNS = ['user', 'security', 'legal', 'checks', 'deps', 'ops', 'internal'];
+
+function concernValue(value) {
+  const text = String(value ?? '').trim();
+  if (text === 'none') return '';
+  if (!CONCERNS.includes(text)) throw new Error(`invalid concern: ${text === '' ? '(empty)' : text} — one of ${CONCERNS.join(', ')}, or none to clear it`);
+  return text;
+}
+
+// The type half of a lens term: the Type cell carries its glyph and word (`🐛 bug`), and older
+// ledgers spell the word alone or capitalized, so either one identifies it.
+const TYPE_WORDS = [
+  ['bug', '🐛', /\bbugs?\b/i],
+  ['debt', '⚠️', /\bdebt\b/i],
+  ['idea', '💡', /\bideas?\b/i],
+  ['improvement', '✨', /\b(improvements?|imp|enh|features?)\b/i],
+  ['todo', '☑️', /\btodo\b/i],
+];
+const typeWord = (cell) => TYPE_WORDS.find(([, glyph, word]) => String(cell ?? '').includes(glyph) || word.test(String(cell ?? '')))?.[0] ?? null;
+
+// The roadmap's lens in machine form: `**Tiers:** security:hi · checks:hi · debt+security:med · bug:med`.
+// Each tier is one or two words — at most one type word and one concern word, joined by `+` — and an
+// optional level. A row falls in the first tier all of whose words it matches. The levels must not
+// rise down the list, because the backlog sorts by level before rank: a later tier at a higher level
+// would put its rows above the earlier tier's in every backlog view, the contradiction the lens exists
+// to remove. Only lines above the first `## ` heading count. No line is `null`; a broken one throws.
+export function parseTiers(text) {
+  const head = String(text ?? '').split(/^## /m)[0];
+  const line = head.match(/^\*\*Tiers:\*\*[ \t]*(.*)$/m);
+  if (!line) return null;
+  const terms = line[1].replace(/<!--.*?-->/g, '').split(/[·,]/).map((term) => term.trim()).filter(Boolean);
+  if (terms.length === 0) throw new Error('docs/ROADMAP.md: **Tiers:** names no tier');
+  const tiers = [];
+  const seen = new Set();
+  let floor = Infinity;
+  for (const term of terms) {
+    const match = term.match(/^([a-z]+(?:\+[a-z]+)?)(?::(hi|med|lo))?$/);
+    if (!match) throw new Error(`docs/ROADMAP.md: tier "${term}" is not <word>[+<word>][:hi|med|lo]`);
+    const words = match[1].split('+');
+    const type = words.filter((word) => TYPE_WORDS.some(([name]) => name === word));
+    const concern = words.filter((word) => CONCERNS.includes(word));
+    const unknown = words.filter((word) => !type.includes(word) && !concern.includes(word));
+    if (unknown.length > 0) throw new Error(`docs/ROADMAP.md: tier "${term}" names ${unknown.join(', ')} — tier words are the types ${TYPE_WORDS.map(([name]) => name).join(', ')} and the concerns ${CONCERNS.join(', ')}`);
+    if (type.length > 1 || concern.length > 1) throw new Error(`docs/ROADMAP.md: tier "${term}" joins two ${type.length > 1 ? 'types' : 'concerns'}, and a row carries one, so it matches nothing`);
+    if (seen.has(match[1])) throw new Error(`docs/ROADMAP.md: tier "${match[1]}" is listed twice`);
+    seen.add(match[1]);
+    const level = match[2] ?? null;
+    if (level !== null) {
+      const rank = PRI_LEVELS.indexOf(level);
+      if (rank > floor) throw new Error(`docs/ROADMAP.md: tier "${term}" sits below a lower level — levels may only fall down the tiers, or the backlog's level sort would contradict the lens`);
+      floor = rank;
+    }
+    tiers.push({ term: match[1], type: type[0] ?? null, concern: concern[0] ?? null, level });
+  }
+  return tiers;
+}
+
+const tierOf = (tiers, type, concern) => tiers.findIndex((tier) => (tier.type === null || tier.type === type) && (tier.concern === null || tier.concern === concern));
+
+async function roadmapTiers(backlogFile) {
+  try { return parseTiers(await readText(path.join(path.dirname(backlogFile), 'ROADMAP.md'))); }
+  catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
 }
 
 // The statuses /esq:status acts on: Open and Needs-decision are the actionable rows; Planned rides along
@@ -241,10 +319,14 @@ function backlogRows({ table, idColumn, statusColumn }) {
   const summaryColumn = column('Summary');
   const epicColumn = column('Epic');
   const sourceColumn = column('Source');
+  const typeColumn = column('Type');
+  const concernColumn = column(CONCERN_COLUMN);
   return table.rows
     .filter((row) => ROW_STATUSES.has(row[statusColumn]))
     .map((row) => ({
       id: cell(row, idColumn),
+      type: cell(row, typeColumn),
+      concern: cell(row, concernColumn),
       pri: cell(row, priColumn),
       rank: cell(row, rankColumn),
       summary: cell(row, summaryColumn),
@@ -837,11 +919,20 @@ function promoteForEdges(view, { entries, edges }, lines) {
 // integers and refuses a list it cannot turn into one total order — the split that
 // D-cli-owns-structure-model-owns-judgment draws. Every refusal names what is wrong rather than
 // silently ranking part of the backlog, because a half-ranked ledger is worse than an unranked one.
-export async function rankOrder(file, requested) {
-  if (!Array.isArray(requested) || requested.length === 0) {
+//
+// With `lens`, the list is only the head — the roadmap's covered rows, in the model's order — and the
+// CLI appends every other open row by the roadmap's `**Tiers:**`: first matching tier, then the
+// current level, then the current rank, then ID. That is the half of a derive a script settles, so
+// the model no longer re-reads and re-orders hundreds of rows on every lens change. The same pass
+// aligns levels to the lens: a *suggested* or blank level becomes its tier's level, still suggested;
+// a confirmed one is the user's word and is only reported where it disagrees.
+export async function rankOrder(file, requested, { lens = false } = {}) {
+  if (!lens && (!Array.isArray(requested) || requested.length === 0)) {
     throw new Error('--order takes the whole open sequence and this list is empty — an order naming nothing orders nothing');
   }
-  const ids = requested.map((value) => normalizeId(value));
+  const tiers = lens ? await roadmapTiers(file) : null;
+  if (lens && tiers === null) throw new Error('--lens orders by the **Tiers:** line of docs/ROADMAP.md, and there is none — write the lens first');
+  const ids = (requested ?? []).map((value) => normalizeId(value));
   const seen = new Set();
   for (const id of ids) {
     if (seen.has(id)) throw new Error(`${id} appears twice in --order — a sequence names each item exactly once`);
@@ -855,17 +946,100 @@ export async function rankOrder(file, requested) {
   if (closed.length > 0) throw new Error(`${closed.join(', ')} ${closed.length === 1 ? 'is' : 'are'} not open — a rank orders the work that is still to do`);
   const open = view.rows.filter(isOpenRow);
   const omitted = open.filter((entry) => !seen.has(entry.id)).map((entry) => entry.id);
-  if (omitted.length > 0) {
+  if (!lens && omitted.length > 0) {
     throw new Error(`--order must name every open row, and ${omitted.length} ${omitted.length === 1 ? 'is' : 'are'} missing: ${omitted.join(', ')}`);
   }
-  const sequence = ids.map((id) => view.byId.get(id));
+  const typeColumn = view.table.header.indexOf('Type');
+  const concernColumn = view.table.header.indexOf(CONCERN_COLUMN);
+  const tierIndex = (entry) => (tiers ? tierOf(tiers, typeWord(entry.row[typeColumn]), concernColumn < 0 ? '' : (entry.row[concernColumn] ?? '').trim()) : -1);
+  const priOf = (entry) => (view.priColumn < 0 ? '' : (entry.row[view.priColumn] ?? '').trim());
+  const sortKey = (entry) => {
+    const tier = tierIndex(entry);
+    return [tier < 0 ? Infinity : tier, -PRI_LADDER.indexOf(priOf(entry)), rankNumber(entry) ?? Infinity];
+  };
+  const appended = omitted.map((id) => view.byId.get(id)).sort((a, b) => {
+    const [x, y] = [sortKey(a), sortKey(b)];
+    for (let index = 0; index < x.length; index += 1) if (x[index] !== y[index]) return x[index] < y[index] ? -1 : 1;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+  const sequence = [...ids.map((id) => view.byId.get(id)), ...appended];
   const roadmap = await rankEdges(file);
   assertRankEdges(roadmap, sequence);
+  const aligned = lens ? alignToTiers(view, tiers, sequence, tierIndex, priOf, lines) : {};
   const promoted = promoteForEdges(view, roadmap, lines);
   const assignments = sequence.map((entry, index) => ({ entry: { ...entry, rankIndex: view.rankColumn }, rank: (index + 1) * RANK_STEP }));
   const cleared = clearClosedRanks(view, lines);
   const written = cleared + await writeRanks(file, lines, assignments);
-  return { file, mode: 'order', ranked: assignments.map(({ entry, rank }) => ({ id: entry.id, rank })), written, ...promoted };
+  if (!lens) return { file, mode: 'order', ranked: assignments.map(({ entry, rank }) => ({ id: entry.id, rank })), written, ...promoted };
+  // Every open row is named once below, so the answer stays one Read for a backlog of hundreds.
+  const byTier = [...tiers.map((tier) => ({ tier: tier.term, ids: [] })), { tier: '(no tier)', ids: [] }];
+  for (const entry of appended) { const tier = tierIndex(entry); byTier[tier < 0 ? tiers.length : tier].ids.push(entry.id); }
+  return { file, mode: 'lens', head: ids, appended: byTier.filter((group) => group.ids.length > 0), written, ...aligned, ...promoted };
+}
+
+// The level half of a lens pass, in place over the rows about to be written. A blank or suggested
+// level takes its tier's level as a suggestion; a confirmed level is left as stated and named when
+// its tier says otherwise. A tier with no level, and a row in no tier, keep what they carry.
+function alignToTiers(view, tiers, sequence, tierIndex, priOf, lines) {
+  if (view.priColumn < 0) return {};
+  const realigned = {};
+  const confirmedApart = [];
+  let count = 0;
+  for (const entry of sequence) {
+    const tier = tiers[tierIndex(entry)];
+    if (!tier || tier.level === null) continue;
+    const current = priOf(entry);
+    if (current !== '' && !current.endsWith('?')) {
+      if (priLevel(current) !== PRI_LEVELS.indexOf(tier.level)) confirmedApart.push({ id: entry.id, pri: current, tier: `${tier.term}:${tier.level}` });
+      continue;
+    }
+    const target = `${tier.level}?`;
+    if (current === target) continue;
+    entry.row[view.priColumn] = target;
+    lines[entry.line] = formatRow(entry.row);
+    (realigned[target] ??= []).push(entry.id);
+    count += 1;
+  }
+  return { ...(count > 0 ? { realigned } : {}), ...(confirmedApart.length > 0 ? { confirmedApart } : {}) };
+}
+
+// The concern cell for one or more rows, in one atomic write; the column is added on first use.
+// Classification is the caller's judgment — this records it and refuses a word the lens cannot sort.
+export async function setConcern(file, requestedIds, concern) {
+  const value = concernValue(concern);
+  const ids = [...new Set(requestedIds.map((id) => normalizeId(id)))];
+  if (ids.length === 0) throw new Error('set-concern names at least one B-NNN');
+  let parsed = await backlogTable(file);
+  if (!parsed.table.header.includes(CONCERN_COLUMN)) {
+    widenColumn(parsed.lines, parsed.table, CONCERN_COLUMN, ['Type']);
+    parsed = backlogTableFromText(parsed.lines.join('\n'));
+  }
+  const { lines, table, idColumn } = parsed;
+  const column = table.header.indexOf(CONCERN_COLUMN);
+  const byId = new Map();
+  table.rows.forEach((row, offset) => {
+    const id = normalizeId(row[idColumn]);
+    byId.set(id, [...(byId.get(id) ?? []), { row, line: table.start + 2 + offset }]);
+  });
+  const missing = ids.filter((id) => !byId.has(id));
+  if (missing.length > 0) throw new Error(`${missing.join(', ')} ${missing.length === 1 ? 'matches' : 'match'} no row in the backlog`);
+  const doubled = ids.filter((id) => byId.get(id).length > 1);
+  if (doubled.length > 0) throw new Error(`${doubled.join(', ')} ${doubled.length === 1 ? 'appears' : 'appear'} more than once in the backlog`);
+  // A classification pass names hundreds of rows, so the answer counts them and names only the rows
+  // whose earlier concern this call replaced.
+  const replaced = {};
+  let written = 0;
+  for (const id of ids) {
+    const [match] = byId.get(id);
+    const previous = (match.row[column] ?? '').trim();
+    if (previous === value) continue;
+    if (previous !== '') replaced[id] = previous;
+    match.row[column] = value;
+    lines[match.line] = formatRow(match.row);
+    written += 1;
+  }
+  await atomicWrite(file, lines.join('\n'));
+  return { file, concern: value, count: ids.length, written, ...(Object.keys(replaced).length > 0 ? { replaced } : {}) };
 }
 
 // Mode two: one item, placed between the neighbours the caller names, touching no other row. The
@@ -939,10 +1113,11 @@ const BACKLOG_TEMPLATE = `# Backlog
 <!-- Type: 🐛 bug | ✨ improvement | ☑️ todo | 💡 idea | ⚠️ debt -->
 <!-- Status: Open | Needs-decision | Planned | Done | Dropped -->
 <!-- Pri: hi | med | lo (confirmed); hi? | med? | lo? (suggested). -->
+<!-- Concern: user | security | legal | checks | deps | ops | internal — what the row is about, for the roadmap lens. -->
 <!-- Rank: CLI-only position; Epic: epic slug; Version: deployed release, Done: UA passed. -->
 
-| ID | Date | Type | Pri | Rank | Summary | Source | Epic | Version | Status |
-|----|------|------|-----|------|---------|--------|------|---------|--------|
+| ID | Date | Type | Concern | Pri | Rank | Summary | Source | Epic | Version | Status |
+|----|------|------|---------|-----|------|---------|--------|------|---------|--------|
 
 ---
 
@@ -954,20 +1129,31 @@ export function priForType(type) {
   return TYPE_PRI.find(([glyph]) => text.includes(glyph))?.[1] ?? DEFAULT_PRI;
 }
 
-export async function addRow(root, file, { type, summary, source, pri = '', epic = '', status = 'Open' }) {
+export async function addRow(root, file, { type, summary, source, pri = '', epic = '', status = 'Open', concern = '' }) {
   const fields = { type: cellText(type, '--type'), summary: cellText(summary, '--summary'), source: cellText(source, '--source') };
   if (!STATUSES.has(status)) throw new Error(`invalid status: ${status}`);
   if (pri !== '') cellText(pri, '--pri');
   if (epic !== '') cellText(epic, '--epic');
-  const priority = pri !== '' ? pri.trim() : priForType(fields.type);
+  const concernCell = concern === '' ? '' : concernValue(concern);
+  // With no level given, a recorded lens places the row: its tier's level, suggested. A roadmap whose
+  // tiers will not parse never refuses a capture — `esq validate` names it — and falls back to the type.
+  let tiers = null;
+  if (pri === '') { try { tiers = await roadmapTiers(file); } catch { tiers = null; } }
+  const lensLevel = tiers ? tiers[tierOf(tiers, typeWord(fields.type), concernCell)]?.level ?? null : null;
+  const priority = pri !== '' ? pri.trim() : lensLevel !== null ? `${lensLevel}?` : priForType(fields.type);
   const { id, block } = await reserveId(root, file);
-  const { lines, table: parsed, idColumn, statusColumn } = await backlogTable(file);
+  let ledger = await backlogTable(file);
+  if (concernCell !== '' && !ledger.table.header.includes(CONCERN_COLUMN)) {
+    widenColumn(ledger.lines, ledger.table, CONCERN_COLUMN, ['Type']);
+    ledger = backlogTableFromText(ledger.lines.join('\n'));
+  }
+  const { lines, table: parsed, idColumn, statusColumn } = ledger;
   // The widening happens before a value is written, so a backlog meeting the column for the first
   // time is padded once and the new row is formatted against the header it will actually live under.
   const view = rankView(lines, parsed, idColumn, statusColumn);
   const { table } = view;
   const rank = ROW_STATUSES.has(status) ? String(tailRank(view)) : '';
-  const values = { ID: id, '#': id, Date: new Date().toISOString().slice(0, 10), Type: fields.type, Pri: priority, Priority: priority, [RANK_COLUMN]: rank, Summary: fields.summary, Source: fields.source, Epic: epic, Version: '', Status: status };
+  const values = { ID: id, '#': id, Date: new Date().toISOString().slice(0, 10), Type: fields.type, Pri: priority, Priority: priority, [RANK_COLUMN]: rank, Summary: fields.summary, Source: fields.source, Epic: epic, Version: '', Status: status, [CONCERN_COLUMN]: concernCell };
   const cells = table.header.map((column) => values[column] ?? '');
   clearClosedRanks(view, lines);
   lines.splice(table.end, 0, formatRow(cells));
@@ -2029,7 +2215,18 @@ async function roadmapState(repository, lookup) {
     const ids = [...new Set(item.covers?.match(/\bB-\d+\b/g) ?? [])];
     item.live = ids.map(lookup);
   }
-  return { file, head, entries, freshness: 'unassessed', shipped: shippedSinceDerive(repository, file, text) };
+  return { file, head, lens: roadmapLens(text), entries, freshness: 'unassessed', shipped: shippedSinceDerive(repository, file, text) };
+}
+
+// The owner's ordering criterion as the file records it: the words they gave (`**Lens:**`) and the
+// tiers the CLI sorts by. Read above the first horizon only; a broken tiers line is named, not thrown.
+function roadmapLens(text) {
+  const head = text.split(/^## /m)[0];
+  const words = head.match(/^\*\*Lens:\*\*[ \t]*(.*)$/m)?.[1]?.trim() ?? null;
+  const raw = head.match(/^\*\*Tiers:\*\*[ \t]*(.*)$/m)?.[1]?.trim() ?? null;
+  if (words === null && raw === null) return null;
+  try { parseTiers(text); return { text: words, tiers: raw }; }
+  catch (error) { return { text: words, tiers: raw, error: error.message }; }
 }
 
 // The `## Shipped` lines as `date · slug` keys: the prose after the slug may be edited without the
@@ -5914,6 +6111,7 @@ export async function validate(root) {
     // state every esquisse backlog is in between this column shipping and its first
     // `/esq:roadmap plan`, and validate blocks the session stop.
     const rankColumn = table.header.indexOf(RANK_COLUMN);
+    const concernColumn = table.header.indexOf(CONCERN_COLUMN);
     const priColumn = ['Pri', 'Priority'].map((name) => table.header.indexOf(name)).find((index) => index >= 0) ?? -1;
     const ranks = new Map();
     const unprioritized = [];
@@ -5923,6 +6121,8 @@ export async function validate(root) {
       if (ids.has(id)) findings.push(`duplicate backlog ID: ${id}`);
       ids.add(id);
       if (!STATUSES.has(row[statusColumn])) findings.push(`invalid backlog status for ${id}: ${row[statusColumn]}`);
+      const concern = concernColumn < 0 ? '' : (row[concernColumn] ?? '').trim();
+      if (concern !== '' && !CONCERNS.includes(concern)) findings.push(`invalid backlog concern for ${id}: ${concern}`);
       if (rankColumn < 0) continue;
       const rank = (row[rankColumn] ?? '').trim();
       if (rank !== '' && !/^\d+$/.test(rank)) findings.push(`invalid backlog rank for ${id}: ${rank}`);
@@ -5939,6 +6139,9 @@ export async function validate(root) {
   } catch (error) {
     if (error.code !== 'ENOENT') findings.push(error.message);
   }
+  // The lens tiers are a parsed format: a line that will not parse silently orders nothing.
+  try { parseTiers(await readText(path.join(repository, 'docs/ROADMAP.md'))); }
+  catch (error) { if (error.code !== 'ENOENT') findings.push(error.message); }
   try {
     const decisions = await readText(path.join(repository, 'docs/DECISIONS.md'));
     const tableIds = [...decisions.matchAll(/^\| (D-[^ |]+) \|/gm)].map((match) => match[1]);
@@ -6117,9 +6320,10 @@ export async function main(args) {
     return output(await setStatus(file, id, status, { by: flags.by ?? null, reason: flags.reason ?? null, resolution: flags.resolution ?? null }));
   }
   if (group === 'backlog' && action === 'rank') {
-    const usage = 'usage: esq backlog rank --order <B-NNN…> [--backlog <path>] | esq backlog rank <B-NNN> (--after <B-NNN>|--before <B-NNN>|--last) [--backlog <path>]';
+    const usage = 'usage: esq backlog rank --order <B-NNN…> [--lens] [--backlog <path>] | esq backlog rank <B-NNN> (--after <B-NNN>|--before <B-NNN>|--last) [--backlog <path>]';
     let mode = null;
     let last = false;
+    let lens = false;
     let after = null;
     let before = null;
     let backlog = null;
@@ -6129,6 +6333,7 @@ export async function main(args) {
       const arg = rest[index];
       if (arg === '--order') { mode = 'order'; continue; }
       if (arg === '--last') { last = true; continue; }
+      if (arg === '--lens') { lens = true; continue; }
       if (arg === '--after' || arg === '--before' || arg === '--backlog') {
         const value = rest[index + 1];
         if (value === undefined) throw new Error(usage);
@@ -6144,9 +6349,9 @@ export async function main(args) {
     const file = backlog ? path.resolve(root, backlog) : path.join(root, 'docs/BACKLOG.md');
     if (mode === 'order') {
       if (positional.length > 0 || last || after !== null || before !== null) throw new Error(usage);
-      return output(await rankOrder(file, ids));
+      return output(await rankOrder(file, ids, { lens }));
     }
-    if (positional.length !== 1) throw new Error(usage);
+    if (positional.length !== 1 || lens) throw new Error(usage);
     return output(await rankPlace(file, positional[0], { after, before, last }));
   }
   if (group === 'backlog' && action === 'set-pri') {
@@ -6157,12 +6362,20 @@ export async function main(args) {
     if (!id || !pri || positional.length > 3) throw new Error(usage);
     return output(await setPri(file, id, pri));
   }
+  if (group === 'backlog' && action === 'set-concern') {
+    const usage = `usage: esq backlog set-concern <B-NNN>[,<B-NNN>…] <${CONCERNS.join('|')}|none> [backlog]`;
+    const { positional, flags } = takeFlags(rest, [], usage);
+    if (Object.keys(flags).length > 0) throw new Error(usage);
+    const [ids, concern, file = path.join(root, 'docs/BACKLOG.md')] = positional;
+    if (!ids || !concern || positional.length > 3) throw new Error(usage);
+    return output(await setConcern(file, ids.split(',').map((id) => id.trim()).filter(Boolean), concern));
+  }
   if (group === 'backlog' && action === 'add') {
-    const usage = 'usage: esq backlog add --type <type> --summary <text> --source <text> [--pri <pri>] [--epic <epic>] [--status <status>] [backlog]';
-    const { positional, flags } = takeFlags(rest, ['type', 'summary', 'source', 'pri', 'epic', 'status'], usage);
+    const usage = 'usage: esq backlog add --type <type> --summary <text> --source <text> [--pri <pri>] [--concern <concern>] [--epic <epic>] [--status <status>] [backlog]';
+    const { positional, flags } = takeFlags(rest, ['type', 'summary', 'source', 'pri', 'concern', 'epic', 'status'], usage);
     if (!flags.type || !flags.summary || !flags.source || positional.length > 1) throw new Error(usage);
     const file = positional[0] || path.join(root, 'docs/BACKLOG.md');
-    return output(await addRow(root, file, { type: flags.type, summary: flags.summary, source: flags.source, pri: flags.pri ?? '', epic: flags.epic ?? '', status: flags.status ?? 'Open' }));
+    return output(await addRow(root, file, { type: flags.type, summary: flags.summary, source: flags.source, pri: flags.pri ?? '', concern: flags.concern ?? '', epic: flags.epic ?? '', status: flags.status ?? 'Open' }));
   }
   if (group === 'decisions' && action === 'add') {
     const [json, file = path.join(root, 'docs/DECISIONS.md')] = rest;
@@ -6509,5 +6722,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text>|backlog set-pri <B-NNN> <pri>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match [--all] <path…>|--paths <file>|- (the expertise modules those paths touch, each with its file and age; --all every module, with the stack packages that show it in use)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text> [--concern <concern>]|backlog set-pri <B-NNN> <pri>|backlog set-concern <B-NNN>[,<B-NNN>…] <concern>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank --order [<B-NNN…>] --lens (the head; the rest by the roadmap tiers)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match [--all] <path…>|--paths <file>|- (the expertise modules those paths touch, each with its file and age; --all every module, with the stack packages that show it in use)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
 }

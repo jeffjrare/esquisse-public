@@ -25,7 +25,7 @@ After resolving the mode, announce `Mode: <show & refresh | derive the order | a
 <!-- shared:resolve-cli:end -->
 
 - **B — show & refresh:** no argument and file exists.
-- **A — derive:** first token `plan` or `re-plan`, or no argument and no file.
+- **A — derive:** first token `plan`, `re-plan` or `lens`, or no argument and no file.
 - **C — edit:** any other text.
 
 B reads the roadmap and one `esq state` — its `backlog.rows` already hold every row the roadmap covers, plus `inFlight` and `plans[].state`; when the answer carries `file`, that file is the whole answer: Read it in the next turn — every range its `ranges` names, in one batch — never re-run `esq state` through a filter — then cited plans and cited epic Status. Before a completion recommendation, also read only the relevant open items' detail sections and their cited acceptance evidence already in those sources. No code, verification rerun or plan sweep. C has the same budget, including the moved entry's and neighbour's covered rows. A adds only its Gather inputs below.
@@ -38,7 +38,7 @@ Batch independent read-only calls; chain dependent writes with `&&`. Serialize s
 
 ## File contract
 
-**Durable:** horizons, sequence, covers, why now, needs, unblocks/shrinks. Change only in A or on an explicit C instruction. **Generated:** every `state:` line, rebuilt from sources on every run; never trust the stored value or invent one.
+**Durable:** the lens and its tiers, horizons, sequence, covers, why now, needs, unblocks/shrinks. Change only in A or on an explicit C instruction. **Generated:** every `state:` line, rebuilt from sources on every run; never trust the stored value or invent one.
 
 | Horizon | Meaning |
 |---|---|
@@ -46,6 +46,20 @@ Batch independent read-only calls; chain dependent writes with `&&`. Serialize s
 | `## Next` | Committed order, not started |
 | `## Later` | Ordered farther out; placement remains tentative |
 | `## Shipped` | Five most recent evicted done entries, newest first |
+
+## Lens
+
+The owner's ordering criterion is durable, stated once, above `## Now`:
+
+```markdown
+**Lens:** <the owner's words, verbatim> — <date>
+**Tiers:** security:hi · checks:hi · debt+security:med · bug:med · user:lo
+```
+
+- **Who writes it.** Only Mode A. The text after `plan`/`lens` that says *what kind of work leads* (security first, user value then bugs…) replaces the lens; text that only places items (« B-139 and B-588 only in Now », « I want B-620 tonight ») is this run's instruction and leaves the lens as it is. A bare `plan` reuses the recorded lens. No lens recorded and none given → record the default: `**Lens:** user and business value first (default)` with `**Tiers:** user:hi · security:med · legal:med · bug:med · checks:lo · ops:lo · debt:lo · internal:lo · deps:lo`.
+- **Tiers** translate the words into what the CLI sorts by: ordered terms `<word>[+<word>][:hi|med|lo]`, a word being a type (`bug improvement todo idea debt`) or a concern (`user security legal checks deps ops internal`); a row falls in the first tier it matches. Levels may only fall down the list. Put a narrower term (`debt+security`) before the broad one it would otherwise fall into. End with the work the lens names last; rows in no tier sort after every tier.
+- **The lens outranks the default.** Absent one, the default order is the one under *Gather and judge*. Either way, a risk already live (an exposed secret, data being lost, a legal exposure) may outrank it, said in its why-now.
+- **No history in the file.** The header comment carries at most the latest derive note, three lines at most; a derive replaces the previous note and trims any older log it finds. History is `git log docs/ROADMAP.md`.
 
 No horizon or total entry cap. Admission requires a real judgment about **position**, expressed in mandatory one-line `why now`. Importance alone is insufficient; say when reasoning doesn't justify the slot. Items without entries still receive backlog positions in A.
 
@@ -64,7 +78,7 @@ For example, dev-only dependency bumps can share one low-risk entry that lands f
 ### Gather and judge
 
 Read:
-1. Backlog rows: Open, Needs-decision and Planned; omit Done/Dropped. `esq state --rows` lists them all; when its answer carries `file`, Read that file whole — every `offset`/`limit` range its `ranges` names, in one batch; a single Read cuts a long file silently — and never re-run the command through a filter.
+1. Backlog rows (each with `type` and `concern`): Open, Needs-decision and Planned; omit Done/Dropped. `esq state --rows` lists them all; when its answer carries `file`, Read that file whole — every `offset`/`limit` range its `ranges` names, in one batch; a single Read cuts a long file silently — and never re-run the command through a filter.
 2. Plans: `esq state`'s `plans` (file and state, every plan), never a directory listing; read title, Epic and Execution log only of a plan that is not complete or that an entry cites.
 3. Epics: Status, Goal, Scope. Active next slices usually rise; paused/done epics' items sink.
 4. Existing decisions that constrain ordering.
@@ -75,19 +89,21 @@ Read:
 A plan is complete when every `### Phase N` under `## Phases` has a matching completed entry in its own `## Execution log`; in-progress when some phases are logged but not all, including any `⏸` entry; not started when none are. The pause glyph, not its following clause, identifies a pause.
 <!-- shared:plan-state:end -->
 
-Form units that land together; report when one backlog item needs splitting. **User and business value orders first:** what a user gets, feels or is sold (a feature, an experience gain, a promise the product breaks) leads the queue. The rest follows common sense. An item never precedes what it needs: a hard blocker is a constraint, not a signal. A risk to that value that is already live (an exposed secret, data being lost, a legal exposure) can outrank it. Then **unblocks/shrinks edges**, **cost of deferral**, **risk-adjusted size** (cheap/certain first), **priority** as last tiebreak. Internal work (infrastructure, dependencies, refactors, tooling) goes ahead of user value only when its why-now names the user value it protects or unblocks. A confirmed hi in Later is allowed only with a defended why-now.
+**Classify what is unclassified, once.** Every open row with a blank `concern` gets one from its summary (and only that row's detail when the summary cannot tell): `user` what a user gets, sees or is sold, including a defect they hit; `security`; `legal`; `checks` tests, gates, verification; `deps` dependency bumps and advisories; `ops` deploy, CI, hosting, release; `internal` refactor, tooling, code health. Write them grouped by concern, one chained call: `esq backlog set-concern B-1,B-7,… security && esq backlog set-concern … user`. A row classified once is never re-judged by a later derive.
 
-Preserve the previous Shipped tail. For unchanged covered work, retain why-now verbatim unless new evidence contradicts it. Write the new durable roadmap and generate its states from the data already gathered, using the refresh rules below without another scan. Write it **before ranking** so the CLI reads the new edges. No additional permission is needed for an invoked derive.
+Form units that land together; report when one backlog item needs splitting. **The lens orders first** (see *Lens*). Absent a lens, the default: **user and business value orders first:** what a user gets, feels or is sold (a feature, an experience gain, a promise the product breaks) leads the queue. The rest follows common sense. An item never precedes what it needs: a hard blocker is a constraint, not a signal. A risk to that value that is already live (an exposed secret, data being lost, a legal exposure) can outrank it. Then **unblocks/shrinks edges**, **cost of deferral**, **risk-adjusted size** (cheap/certain first), **priority** as last tiebreak. Internal work (infrastructure, dependencies, refactors, tooling) goes ahead of user value only when its why-now names the user value it protects or unblocks. A confirmed hi in Later is allowed only with a defended why-now.
+
+Preserve the previous Shipped tail. For unchanged covered work, retain why-now verbatim unless new evidence contradicts it. Write the new durable roadmap and generate its states from the data already gathered, using the refresh rules below without another scan. Write it **before ranking** so the CLI reads the new edges and tiers. No additional permission is needed for an invoked derive.
 
 ### Place every open item
 
 Here open work means **Open, Needs-decision and Planned**, including rows without a roadmap entry. Finish with no blank Pri or Rank among them.
 
-1. Assign only missing priorities with `esq backlog set-pri <B-NNN> <pri>`. Use hi?/med?/lo? unless cited user input confirms the level. Never clear or revise an existing level yourself. Chain these writes into one tool call.
-2. Construct the whole sequence: Now entries in order, covered IDs in covers order; then Next, then Later; then uncovered rows ordered by the same dependency/size/priority signals. Include every open ID exactly once, even if multiple entries cover it.
-3. Call `esq backlog rank --order <B-NNN> <B-NNN> …` once. If there are no open rows, skip it: an empty order is refused. The CLI assigns sparse integers, adds a missing Rank column, and refuses duplicates, omissions or needs/unblocks violations without writing. Correct a rejected argument; never bypass the refusal.
+1. Construct the head: Now entries in order, covered open IDs in covers order; then Next, then Later. Each ID once, even when several entries cover it. **The uncovered rows are the CLI's:** never list them.
+2. Call `esq backlog rank --order <head IDs…> --lens` once (an empty head is legal). The CLI appends every other open row by tier, then current level, then current rank; gives each **suggested or blank** level its tier's level, still suggested (`realigned`); leaves a confirmed level as stated and names it in `confirmedApart`; assigns sparse integers; and refuses duplicates or needs/unblocks violations without writing. Correct a rejected argument; never bypass the refusal.
+3. Only then, assign a level to an open row still blank (one in no tier, or in a tier without a level) with `esq backlog set-pri <B-NNN> <hi?|med?|lo?>`, chained in one call. Never revise a confirmed level.
 
-Report returned `promoted` suggested levels with the edge that raised them, and `contradictions` against confirmed priorities left intact. Only the CLI may promote suggested levels to satisfy edges; the model never silently overrides existing levels.
+Report `promoted` (with the edge that raised it), `realigned` as counts per level, `confirmedApart` as the user's word against the lens with the one command that would align it (`/esq:backlog B-NNN pri:<level>`), and `contradictions`. Only the CLI moves a suggested level; the model never overrides a confirmed one.
 
 <!-- shared:rank-order:start -->
 Sort by `hi → hi? → med → med? → lo → lo? → blank`, then Rank ascending (unranked last), then ID. Render ordinals within each level: hi and hi? share the hi bucket. Ordinals such as `med #3` are computed, never stored; an unranked row shows `#?`.
@@ -95,12 +111,12 @@ Sort by `hi → hi? → med → med? → lo → lo? → blank`, then Rank ascend
 
 Priority remains the primary backlog sort: a highly placed lo leads its own bucket, not the hi bucket.
 
-Report `✔ placed <M> open items · <k> levels assigned`, the order, and **one least-certain placement with what would change it**. Commit both changed files together:
+Report `✔ placed <M> open items · <c> classified · <r> levels realigned`, the lens, the order (the uncovered tail as the CLI's `appended` tiers, ids not recited), and **one least-certain placement with what would change it**. Commit both changed files together:
 `git add docs/ROADMAP.md docs/BACKLOG.md && git commit -m "roadmap: derive order (<N> entries, <M> items placed)"`.
 
 ## Mode B — Show & refresh
 
-Re-derive nothing. Resolve covers from retained sources:
+Re-derive nothing. When `esq state`'s `roadmap.lens` carries `error`, report it with the line to fix; never repair it silently. Resolve covers from retained sources:
 
 - **B-NNN:** lenient ID matching; take Status/Pri from the table. If `inFlight[].planned` includes it, use `Planned (on <branch>)` regardless of the local row. Missing row → report `⚠ B-NNN not found` and retain the entry.
 - **Plan path:** reuse `esq state`'s `plans[].state`, or call `esq next-phase <path>` once if not supplied. Missing, invalid or phase-less is not complete; report it and retain the entry.
@@ -159,7 +175,7 @@ Commit changed roadmap/backlog together as `roadmap: <what changed>`; never stag
 ## Output
 
 <!-- conclusion:start -->
-**Conclude in three zones, then the next action.** Headline: `<glyph> roadmap — <entries> · <Now count> · <blocked count> · <measured elapsed> · NEEDS YOU (<n>)`. ✔ none, ⚠ user gates, ✖ unable to finish; omit NEEDS YOU when empty.
+**Conclude in three zones, then the next action.** Headline: `<glyph> roadmap — <entries> · <Now count> · <blocked count> · lens: <a few words> · <measured elapsed> · NEEDS YOU (<n>)`; no lens recorded → `lens: none — /esq:roadmap plan <criterion>`. ✔ none, ⚠ user gates, ✖ unable to finish; omit NEEDS YOU when empty.
 
 Number user-owned asks, action first with exact commands; omit on ✔. Preserve genuine 🔴 option sets and verbatim manual steps with bracketed starting state. Then show factual results with evidence: ✔ happened, ○ deliberately not, ✖ failed. Collapse empty categories, but retain the entire ordered queue and every why-now. Name unperformed work the reader would otherwise assume ran.
 <!-- conclusion:end -->
@@ -187,6 +203,10 @@ When an action is warranted, the primary `→ Next` is executable as written and
 <!-- Managed only by /esq:roadmap. Durable order/reasons change through plan or an explicit edit. -->
 <!-- State is generated from backlog rows, plan logs and epic status on every run. -->
 <!-- No entry cap: positional reasoning earns an entry; other open work stays ranked in the backlog. -->
+<!-- Latest derive: <date> — at most three lines; history is git log. -->
+
+**Lens:** <the owner's words> — <date>
+**Tiers:** <term> · <term> · …
 
 ## Now
 

@@ -187,7 +187,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:work [item-or-text] [route]` | Investigate one item; do it now if trivial, otherwise recommend the method | Code commit and backlog close for small work; otherwise the next command |
 | `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
 | `/esq:sweep` | Reconcile backlog items against evidence of delivery | Backlog closures; questions only for unresolved cases |
-| `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order | `docs/ROADMAP.md`; backlog priority/rank updates when ordering |
+| `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order under your recorded criterion (lens) | `docs/ROADMAP.md`; backlog concern, priority and rank updates when ordering |
 | `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items, render UI directions, then ask you once what only you can settle | Inline fixes, plans, rendered directions; grills you accept; each plan it wrote built and reviewed; stops before landing |
 | `/esq:autopilot <plan>` | Build remaining phases sequentially, one worker per phase | Code and execution logs |
 | `/esq:converge <plan-or-fixes-brief>` | Run review → fix, then plan → build → review any 🟡 left, or resume an existing brief | Readiness report, and a lesson for a 🟡 its corrective round closed whose contrast recurs; no merge |
@@ -285,10 +285,10 @@ permission settings.
 |---|---|
 | `docs/plans/*.brief.md` | Scope and review findings passed between commands |
 | `docs/plans/*.md` | Goal, phases, verification and the execution log |
-| `docs/BACKLOG.md` | Tasks with permanent `B-NNN` IDs |
+| `docs/BACKLOG.md` | Tasks with permanent `B-NNN` IDs, each with its type and concern |
 | `docs/DECISIONS.md` | Decisions and the authority behind each one |
 | `docs/LESSONS.md` | Lessons from closed defects and verified repo facts, each tied to its evidence and the paths it is about |
-| `docs/ROADMAP.md` | Ordered `Now`, `Next` and `Later` work, with the reason for each position |
+| `docs/ROADMAP.md` | Your ordering criterion, then ordered `Now`, `Next` and `Later` work with the reason for each position |
 | `docs/epics/<slug>.md` | A theme joining several plans and backlog items |
 | `docs/SPEC.md` | The live product as users experience it |
 | `docs/ARCHITECTURE.md` | Components, boundaries and implementation rules |
@@ -373,8 +373,16 @@ only operates on planned work.
 
 - `/esq:backlog <text>` captures an item; `/esq:work` takes one item at a time and,
   with no argument, picks the top of the roadmap.
-- `/esq:roadmap plan` orders the open work, user and business value first, and records
-  why each item sits where it does; bare `/esq:roadmap` refreshes state without reordering; `/esq:roadmap <edit>`
+- `/esq:roadmap plan` orders the open work and records why each item sits where it does.
+  Say what leads once — `/esq:roadmap plan security first, then checks, then bugs, features last`
+  — and it becomes the roadmap's **lens**: recorded at the top of `docs/ROADMAP.md` with the tiers
+  it translates to, reused by every later bare `plan` and shown on every run, until you state
+  another. With none, the lens is user and business value first. Each open item carries a
+  **concern** (`user`, `security`, `legal`, `checks`, `deps`, `ops`, `internal`), set when it is
+  captured or classified once by the first derive, so the CLI sorts the items no roadmap entry
+  covers by the lens itself and the model only orders the entries. A derive also brings
+  suggested (`?`) priorities into line with the lens; a priority you confirmed is never changed,
+  only reported where it disagrees. Bare `/esq:roadmap` refreshes state without reordering; `/esq:roadmap <edit>`
   applies one edit per line (`add`, `X before Y`, `why X: …`) in one run and one commit. A finished plan does
   not close its items by itself: `/esq:sweep` closes one only with evidence of its
   whole outcome.

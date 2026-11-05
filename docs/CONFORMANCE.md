@@ -66,6 +66,14 @@ the newest commit whose subject opens with `roadmap: derive`, and answers `roadm
 from that commit's copy of the file. Rename either and the refresh notice silently falls back to the
 whole retained tail, nagging after every derive (B-191).
 
+## Scenario P-06 — the lens line `esq backlog rank --lens` sorts by
+
+`/esq:roadmap` records the owner's criterion above `## Now` as `**Lens:** <words>` and
+`**Tiers:** <term> · <term> …`. `parseTiers` reads only the `**Tiers:**` line, and only above the first
+`## ` heading. `rank --lens` orders the uncovered rows by it, and `esq backlog add` takes its level for a
+row given none. Rename the token and the derive is refused, while capture silently falls back to the
+type's level.
+
 ## Scenario L-01 — the lessons entry `esq lessons match` reads
 
 `esq lessons add` writes each entry of `docs/LESSONS.md` as `## L-<10 hex> · <kind> — <cue>`, then a

@@ -147,6 +147,9 @@ need P-04 backlog '| B-NNN | <today>' 'the quick-add row shape the backlog table
 need P-05 roadmap '- <today> · <slug> — ' 'the Shipped line shape `roadmapState` keys on `date · slug` for `roadmap.shipped`'
 need P-05 roadmap 'git commit -m "roadmap: derive ' 'the Mode A commit subject `roadmapState` takes as the `sinceDerive` baseline'
 
+# --- `/esq:roadmap` writes the lens line `esq backlog rank --lens` sorts by --
+need P-06 roadmap '**Tiers:** ' 'the lens tiers line `parseTiers` reads above `## Now` — renamed, `rank --lens` refuses and capture falls back to the type level'
+
 # --- the pass ---------------------------------------------------------------
 # Every target file is read once into memory and every clause is answered with
 # index(), which is the fixed-string, line-scoped compare `grep -F` performed.
