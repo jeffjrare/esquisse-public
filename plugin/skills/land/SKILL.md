@@ -2,12 +2,13 @@
 description: Land a finished, reviewed shipping unit on the branch it started from — durable prerequisites first, then the one merge engine.
 name: land
 argument-hint: "<plan> [--from <n>]"
-disable-model-invocation: true
 model: opus
 allowed-tools: Bash(esq *)
 effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
+
+**No mandate, no run.** Model invocation of this skill is legitimate only when the run and its target were explicitly asked for: delegated by `/esq:advance`, invoked by the user, on a plan that run wrote, built and reviewed, or requested by the user in their own words in this conversation, naming this command and its plan. Invoked without that explicit request — or off a description match, on your own initiative — do not guess: stop and print the exact invocation for the user to run.
 
 Land one shipping unit into its recorded origin. Read durable prerequisites, run only verification whose proof cannot be reused, then call the merge engine, then carry the unit's rollout as far as esq can. No plan mode, subagents, finder or repairs. The merge is local; publishing it (push, deploy, release) stays the user's act, and every rollout step after it that esq can run, it runs.
 
