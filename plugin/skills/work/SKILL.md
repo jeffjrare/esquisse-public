@@ -10,7 +10,7 @@ Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first p
 
 **No mandate, no run.** Model invocation of this skill is legitimate only when the run and its target were explicitly asked for: delegated by a user-invoked orchestrator with the target in the invoking turn, or requested by the user in their own words in this conversation, naming this command and its target. Invoked without that explicit request — or off a description match, on your own initiative — do not guess: stop and print the exact invocation for the user to run.
 
-Investigate one backlog item, then choose its method. Execute a trivial inline verdict: change, verify, commit, close the row. For every other verdict, print the exact command and stop; the user runs it.
+Investigate one backlog item, then choose its method. Execute a trivial inline verdict: change, verify, commit, close the row. For every other verdict, print the exact command and stop; a plan, grill or screen verdict the user asked for directly hands on to `/esq:advance <B-NNN>`, which carries the item through to a local merge.
 
 Do NOT use plan mode: capture and inline execution write and commit.
 
@@ -180,17 +180,18 @@ On a routing verdict the run stopped rather than finished, so the last three lin
   ✔ reads as    <one sentence>
   ✔ evidence    <2–4 clauses>
   ✔ sizing      <one line: why this is too big for inline>
+  ✔ routes to   /esq:plan B-155: <the scoped task, in the words the plan should start from>
   ○ not done    nothing applied — this needs a plan first
   ○ if you disagree (<product|architecture|design>)  <the runner-up method> — <the one condition that would flip it>
 
-→ Next: /esq:plan B-155: <the scoped task, in the words the plan should start from>
+→ Next: /clear, then /esq:advance B-155   (plans, builds, reviews and lands it; asks only what is yours)
 ```
 
 The headline's verdict token (`inline` · `fix` · `plan` · `ui` · `grill` · `epic`) and its outcome (`done` · `routed`) are the two facts a reader wants, and an item that routed is still `✔` — routing correctly is this command succeeding. Reserve `⚠` for a verdict you could not reach, and `NEEDS YOU` for an item that turned out to be `Needs-decision`.
 
 Rules for the output:
 
-- **`→ Next` carries the verdict's command, and it must be copy-pasteable** — real paths, real item text, no placeholders. An executed inline verdict has no command to hand off, so its `→ Next` is the next item (`/esq:work`) and the change it made is stated on the `✔ applied` line. Before executing, it still prints the change it is about to make in one line (`applying now: <file> — <the change>`), so a bad call can be interrupted.
+- **The `✔ routes to` line carries the verdict's command, and it must be copy-pasteable** — real paths, real item text, no placeholders. **`→ Next` is `/esq:advance <B-NNN>` for a `plan`, `grill` or `ui` verdict the user invoked directly** — one command takes the item from there to a local merge, so the user never chains `plan`, `autopilot`, `converge` and `land` by hand. Delegated by an orchestrator, or on a `fix`, `build` or `epic` verdict, `→ Next` is the verdict's command itself. An executed inline verdict has no command to hand off, so its `→ Next` is the next item (`/esq:work`) and the change it made is stated on the `✔ applied` line. Before executing, it still prints the change it is about to make in one line (`applying now: <file> — <the change>`), so a bad call can be interrupted.
 - **The `○ if you disagree (<hat>)` line is mandatory**, on both verdicts. It names the hat that owns the call (`product`, `architecture` or `design`) and a **falsifiable condition** ("if the retry ceiling is already decided, skip the grill and plan directly"), not a hedge.
 - Use relative paths throughout (strip `/home/…/` and cwd prefixes).
 - Prefix `→ Next` with `/clear` when the verdict starts a fresh cognitive phase (`/esq:ui`, `/esq:grill`, `/esq:plan`, `/esq:build`) — those want a clean session. Not for an inline fix.
