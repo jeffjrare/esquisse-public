@@ -50,6 +50,14 @@ test('tiers parse into type and concern words with levels that only fall', () =>
   assert.throws(() => parseTiers('**Tiers:** user:lo · security:hi'), /levels may only fall/);
   assert.throws(() => parseTiers('**Tiers:** perf:hi'), /names perf/);
   assert.throws(() => parseTiers('**Tiers:** security+legal'), /joins two concerns/);
+  assert.throws(() => parseTiers('**Tiers:** app+infra'), /joins two layers/);
+  assert.throws(() => parseTiers('**Tiers:** perf:hi'), /the layers app, infra/);
+  assert.throws(() => parseTiers('**Tiers:** bug+user+app+x'), /is not <word>/);
+  assert.deepEqual(parseTiers('**Tiers:** security+infra:hi · app:hi · bug+user+app:med').map((tier) => [tier.term, tier.type, tier.concern, tier.layer, tier.level]), [
+    ['security+infra', null, 'security', 'infra', 'hi'],
+    ['app', null, null, 'app', 'hi'],
+    ['bug+user+app', 'bug', 'user', 'app', 'med'],
+  ]);
   assert.throws(() => parseTiers('**Tiers:** bug · bug'), /listed twice/);
 });
 
@@ -105,15 +113,15 @@ test('rank --lens is refused without a tiers line, and plain --order still names
 
 test('capture under a lens takes its tier level unless a level is given; a broken lens never blocks it', async (t) => {
   const { cli, root, ledger } = await fixture(t, [row('B-001', '🐛 bug', 'med?', '100')], roadmap('security:hi · bug:med · user:lo'));
-  const security = await cli('backlog', 'add', '--type', '✨ improvement', '--summary', 'rate-limit sign-in', '--source', 'manual', '--concern', 'security');
-  const stated = await cli('backlog', 'add', '--type', '✨ improvement', '--summary', 'copy a button', '--source', 'manual', '--concern', 'user', '--pri', 'hi');
-  const typed = await cli('backlog', 'add', '--type', '🐛 bug', '--summary', 'crash on save', '--source', 'build: x Phase 1');
+  const security = await cli('backlog', 'add', '--type', '✨ improvement', '--summary', 'rate-limit sign-in', '--source', 'manual', '--concern', 'security', '--layer', 'app');
+  const stated = await cli('backlog', 'add', '--type', '✨ improvement', '--summary', 'copy a button', '--source', 'manual', '--concern', 'user', '--layer', 'app', '--pri', 'hi');
+  const typed = await cli('backlog', 'add', '--type', '🐛 bug', '--summary', 'crash on save', '--source', 'build: x Phase 1', '--concern', 'internal', '--layer', 'app');
   let rows = await ledger();
-  assert.deepEqual([security.id, stated.id, typed.id].map((id) => [rows[id].Pri, rows[id].Concern]), [['hi?', 'security'], ['hi', 'user'], ['med?', '']]);
+  assert.deepEqual([security.id, stated.id, typed.id].map((id) => [rows[id].Pri, rows[id].Concern, rows[id].Layer]), [['hi?', 'security', 'app'], ['hi', 'user', 'app'], ['med?', 'internal', 'app']]);
   const lens = (await cli('state')).roadmap.lens;
   assert.deepEqual(lens, { text: 'security first, then bugs, features last', tiers: 'security:hi · bug:med · user:lo' });
   await writeFile(path.join(root, 'docs/ROADMAP.md'), roadmap('user:lo · security:hi'));
-  const fallback = await cli('backlog', 'add', '--type', '💡 idea', '--summary', 'voice entry', '--source', 'manual', '--concern', 'user');
+  const fallback = await cli('backlog', 'add', '--type', '💡 idea', '--summary', 'voice entry', '--source', 'manual', '--concern', 'user', '--layer', 'app');
   rows = await ledger();
   assert.equal(rows[fallback.id].Pri, 'lo?');
   assert.match((await cli('state')).roadmap.lens.error, /levels may only fall/);
@@ -126,4 +134,79 @@ test('validate names a concern off the vocabulary', async (t) => {
   await writeFile(file, (await readFile(file, 'utf8')).replace('| Type |', '| Type | Concern |').replace('| --- | --- | --- |', '| --- | --- | --- | --- |').replace('| 🐛 bug |', '| 🐛 bug | perf |'));
   const validation = await run(process.execPath, [bin, 'validate'], { cwd: root, env: { ...process.env, NODE_ENV: '', ESQ_TEST_GIT_ROOT: '' } }).catch((error) => error);
   assert.match(validation.stdout, /invalid backlog concern for B-001: perf/);
+});
+
+const classified = ['--concern', 'user', '--layer', 'app'];
+
+test('add refuses an unclassified or mistyped row before reserving an ID, and lists the accepted words', async (t) => {
+  const { cli, refused, ledger } = await fixture(t, [row('B-001', '🐛 bug', 'med?', '100')]);
+  const base = ['backlog', 'add', '--summary', 'probe', '--source', 'manual'];
+  await refused(/invalid type: ⚡ perf — one of bug, debt, idea, improvement, todo/, ...base, '--type', '⚡ perf', ...classified);
+  await refused(/invalid type: ☑️ chore — one of bug, debt, idea, improvement, todo/, ...base, '--type', '☑️ chore', ...classified);
+  await refused(/missing --concern .* one of user, security, legal, checks, deps, ops, internal/, ...base, '--type', 'bug', '--layer', 'app');
+  await refused(/missing --concern/, ...base, '--type', 'bug', '--concern', 'none', '--layer', 'app');
+  await refused(/invalid concern: perf/, ...base, '--type', 'bug', '--concern', 'perf', '--layer', 'app');
+  await refused(/missing --layer .* one of app, infra/, ...base, '--type', 'bug', '--concern', 'user');
+  await refused(/missing --layer/, ...base, '--type', 'bug', '--concern', 'user', '--layer', 'none');
+  await refused(/invalid layer: cloud — one of app, infra/, ...base, '--type', 'bug', '--concern', 'user', '--layer', 'cloud');
+  // No refusal above reserved an ID: the next accepted row takes the very next number.
+  const bare = await cli(...base, '--type', 'bug', ...classified);
+  const glyphed = await cli(...base, '--type', '✨ improvement', '--concern', 'security', '--layer', 'infra');
+  assert.deepEqual([bare.id, glyphed.id], ['B-002', 'B-003']);
+  const rows = await ledger();
+  assert.deepEqual([rows['B-002'].Type, rows['B-002'].Concern, rows['B-002'].Layer], ['🐛 bug', 'user', 'app']);
+  assert.deepEqual([rows['B-003'].Type, rows['B-003'].Concern, rows['B-003'].Layer], ['✨ improvement', 'security', 'infra']);
+  assert.deepEqual(rows['B-001'].Concern + rows['B-001'].Layer, '', 'the legacy row is padded, never classified');
+  assert.deepEqual((await cli('validate')).findings, []);
+});
+
+test('set-layer and set-type write whole batches, refuse whole, and Layer lands after Concern', async (t) => {
+  const { cli, refused, ledger, file } = await fixture(t, [row('B-001', '⚡ perf', 'med?', '100'), row('B-002', 'bug', 'lo?', '200'), row('B-003', '☑️ chore', 'lo?', '300')]);
+  await refused(/invalid layer: cloud/, 'backlog', 'set-layer', 'B-001', 'cloud');
+  await refused(/B-009 matches no row/, 'backlog', 'set-layer', 'B-001,B-009', 'infra');
+  await refused(/invalid type: chore/, 'backlog', 'set-type', 'B-003', 'chore');
+  await refused(/B-009 matches no row/, 'backlog', 'set-type', 'B-001,B-009', 'bug');
+  await refused(/usage: esq backlog set-type/, 'backlog', 'set-type', 'B-001');
+  const layered = await cli('backlog', 'set-layer', 'B-001,B-002', 'infra');
+  assert.deepEqual([layered.layer, layered.count, layered.written], ['infra', 2, 2]);
+  await cli('backlog', 'set-concern', 'B-001', 'ops');
+  assert.equal(tableAt((await readFile(file, 'utf8')).split('\n')).header.slice(2, 6).join(' '), 'Type Concern Layer Pri');
+  const typed = await cli('backlog', 'set-type', 'B-001,B-003', 'improvement');
+  assert.deepEqual([typed.type, typed.written, typed.replaced], ['✨ improvement', 2, { 'B-001': '⚡ perf', 'B-003': '☑️ chore' }]);
+  await cli('backlog', 'set-type', 'B-002', '🐛 bug');
+  assert.deepEqual((await cli('backlog', 'set-layer', 'B-002', 'none')).replaced, { 'B-002': 'infra' });
+  const rows = await ledger();
+  assert.deepEqual(['B-001', 'B-002', 'B-003'].map((id) => [rows[id].Type, rows[id].Concern, rows[id].Layer]), [['✨ improvement', 'ops', 'infra'], ['🐛 bug', '', ''], ['✨ improvement', '', '']]);
+  assert.deepEqual((await cli('state', '--rows')).backlog.rows.map((entry) => [entry.id, entry.layer]), [['B-001', 'infra'], ['B-002', ''], ['B-003', '']]);
+  const validation = await cli('validate');
+  assert.deepEqual(validation.findings, []);
+  assert.equal(validation.advisories.filter((line) => /non-canonical backlog type/.test(line)).length, 0);
+});
+
+test('a ledger without Concern or Layer reads blank, and validate only advises on a drifted type', async (t) => {
+  const { cli, root, file } = await fixture(t, [row('B-001', '⚡ perf', 'med?', '100'), row('B-002', '🐛 bug', 'lo?', '200')]);
+  assert.deepEqual((await cli('state', '--rows')).backlog.rows.map((entry) => [entry.id, entry.concern, entry.layer]), [['B-001', '', ''], ['B-002', '', '']]);
+  const clean = await cli('validate');
+  assert.deepEqual(clean.findings, []);
+  assert.deepEqual(clean.advisories.filter((line) => /backlog type/.test(line)), ['non-canonical backlog type for B-001: ⚡ perf — one of 🐛 bug, ⚠️ debt, 💡 idea, ✨ improvement, ☑️ todo']);
+  await writeFile(file, (await readFile(file, 'utf8')).replace('| Type |', '| Type | Layer |').replace('| --- | --- | --- |', '| --- | --- | --- | --- |').replace('| 🐛 bug |', '| 🐛 bug | cloud |').replace('| ⚡ perf |', '| ⚡ perf | app |'));
+  const validation = await run(process.execPath, [bin, 'validate'], { cwd: root, env: { ...process.env, NODE_ENV: '', ESQ_TEST_GIT_ROOT: '' } }).catch((error) => error);
+  assert.match(validation.stdout, /invalid backlog layer for B-002: cloud/);
+});
+
+test('a layer tier sorts its rows under rank --lens and places a capture', async (t) => {
+  const { cli, ledger } = await fixture(t, [
+    row('B-001', '🐛 bug', 'lo?', '100'),
+    row('B-002', '✨ improvement', 'lo?', '200'),
+    row('B-003', '⚠️ debt', 'lo?', '300'),
+  ], roadmap('security+infra:hi · app:med'));
+  await cli('backlog', 'set-concern', 'B-001,B-003', 'security');
+  await cli('backlog', 'set-layer', 'B-001', 'app');
+  await cli('backlog', 'set-layer', 'B-003', 'infra');
+  await cli('backlog', 'set-layer', 'B-002', 'app');
+  const result = await cli('backlog', 'rank', '--order', '--lens');
+  assert.deepEqual(result.appended, [{ tier: 'security+infra', ids: ['B-003'] }, { tier: 'app', ids: ['B-001', 'B-002'] }]);
+  const captured = await cli('backlog', 'add', '--type', 'debt', '--summary', 'rotate the deploy key', '--source', 'manual', '--concern', 'security', '--layer', 'infra');
+  const rows = await ledger();
+  assert.deepEqual([rows['B-003'].Pri, rows['B-001'].Pri, rows[captured.id].Pri], ['hi?', 'med?', 'hi?']);
 });

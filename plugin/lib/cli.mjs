@@ -249,6 +249,19 @@ function concernValue(value) {
   return text;
 }
 
+// Where a row's work lives, beside what it is about: `app` is the product its users run, `infra` is
+// hosting, CI, environment, release and install. It splits a concern the roadmap would otherwise
+// blur (app security against infra security). Lazy like Concern, placed right after it.
+const LAYER_COLUMN = 'Layer';
+export const LAYERS = ['app', 'infra'];
+
+function layerValue(value) {
+  const text = String(value ?? '').trim();
+  if (text === 'none') return '';
+  if (!LAYERS.includes(text)) throw new Error(`invalid layer: ${text === '' ? '(empty)' : text} — one of ${LAYERS.join(', ')}, or none to clear it`);
+  return text;
+}
+
 // The type half of a lens term: the Type cell carries its glyph and word (`🐛 bug`), and older
 // ledgers spell the word alone or capitalized, so either one identifies it.
 const TYPE_WORDS = [
@@ -260,8 +273,22 @@ const TYPE_WORDS = [
 ];
 const typeWord = (cell) => TYPE_WORDS.find(([, glyph, word]) => String(cell ?? '').includes(glyph) || word.test(String(cell ?? '')))?.[0] ?? null;
 
+// The strict reader, for writes: the word part alone decides, so a glyph cannot carry a wrong word
+// (`☑️ chore` holds the todo glyph and is still refused). `typeWord` stays the lenient reader of
+// legacy cells and tiers. Returns the canonical cell, `🐛 bug`.
+const TYPE_NAMES = TYPE_WORDS.map(([name]) => name);
+const canonicalType = (name) => `${TYPE_WORDS.find(([word]) => word === name)[1]} ${name}`;
+const CANONICAL_TYPES = new Set(TYPE_NAMES.map(canonicalType));
+
+function typeValue(value) {
+  const text = String(value ?? '').trim();
+  const word = text.replace(/^[^A-Za-z]+/, '').toLowerCase();
+  if (!TYPE_NAMES.includes(word)) throw new Error(`invalid type: ${text === '' ? '(empty)' : text} — one of ${TYPE_NAMES.join(', ')}`);
+  return canonicalType(word);
+}
+
 // The roadmap's lens in machine form: `**Tiers:** security:hi · checks:hi · debt+security:med · bug:med`.
-// Each tier is one or two words — at most one type word and one concern word, joined by `+` — and an
+// Each tier is one to three words — at most one type, one concern and one layer word, joined by `+` — and an
 // optional level. A row falls in the first tier all of whose words it matches. The levels must not
 // rise down the list, because the backlog sorts by level before rank: a later tier at a higher level
 // would put its rows above the earlier tier's in every backlog view, the contradiction the lens exists
@@ -276,14 +303,16 @@ export function parseTiers(text) {
   const seen = new Set();
   let floor = Infinity;
   for (const term of terms) {
-    const match = term.match(/^([a-z]+(?:\+[a-z]+)?)(?::(hi|med|lo))?$/);
-    if (!match) throw new Error(`docs/ROADMAP.md: tier "${term}" is not <word>[+<word>][:hi|med|lo]`);
+    const match = term.match(/^([a-z]+(?:\+[a-z]+){0,2})(?::(hi|med|lo))?$/);
+    if (!match) throw new Error(`docs/ROADMAP.md: tier "${term}" is not <word>[+<word>[+<word>]][:hi|med|lo]`);
     const words = match[1].split('+');
-    const type = words.filter((word) => TYPE_WORDS.some(([name]) => name === word));
+    const type = words.filter((word) => TYPE_NAMES.includes(word));
     const concern = words.filter((word) => CONCERNS.includes(word));
-    const unknown = words.filter((word) => !type.includes(word) && !concern.includes(word));
-    if (unknown.length > 0) throw new Error(`docs/ROADMAP.md: tier "${term}" names ${unknown.join(', ')} — tier words are the types ${TYPE_WORDS.map(([name]) => name).join(', ')} and the concerns ${CONCERNS.join(', ')}`);
-    if (type.length > 1 || concern.length > 1) throw new Error(`docs/ROADMAP.md: tier "${term}" joins two ${type.length > 1 ? 'types' : 'concerns'}, and a row carries one, so it matches nothing`);
+    const layer = words.filter((word) => LAYERS.includes(word));
+    const unknown = words.filter((word) => !type.includes(word) && !concern.includes(word) && !layer.includes(word));
+    if (unknown.length > 0) throw new Error(`docs/ROADMAP.md: tier "${term}" names ${unknown.join(', ')} — tier words are the types ${TYPE_NAMES.join(', ')}, the concerns ${CONCERNS.join(', ')} and the layers ${LAYERS.join(', ')}`);
+    const doubled = [[type, 'types'], [concern, 'concerns'], [layer, 'layers']].find(([found]) => found.length > 1);
+    if (doubled) throw new Error(`docs/ROADMAP.md: tier "${term}" joins two ${doubled[1]}, and a row carries one, so it matches nothing`);
     if (seen.has(match[1])) throw new Error(`docs/ROADMAP.md: tier "${match[1]}" is listed twice`);
     seen.add(match[1]);
     const level = match[2] ?? null;
@@ -292,12 +321,12 @@ export function parseTiers(text) {
       if (rank > floor) throw new Error(`docs/ROADMAP.md: tier "${term}" sits below a lower level — levels may only fall down the tiers, or the backlog's level sort would contradict the lens`);
       floor = rank;
     }
-    tiers.push({ term: match[1], type: type[0] ?? null, concern: concern[0] ?? null, level });
+    tiers.push({ term: match[1], type: type[0] ?? null, concern: concern[0] ?? null, layer: layer[0] ?? null, level });
   }
   return tiers;
 }
 
-const tierOf = (tiers, type, concern) => tiers.findIndex((tier) => (tier.type === null || tier.type === type) && (tier.concern === null || tier.concern === concern));
+const tierOf = (tiers, type, concern, layer) => tiers.findIndex((tier) => (tier.type === null || tier.type === type) && (tier.concern === null || tier.concern === concern) && (tier.layer === null || tier.layer === layer));
 
 async function roadmapTiers(backlogFile) {
   try { return parseTiers(await readText(path.join(path.dirname(backlogFile), 'ROADMAP.md'))); }
@@ -321,12 +350,14 @@ function backlogRows({ table, idColumn, statusColumn }) {
   const sourceColumn = column('Source');
   const typeColumn = column('Type');
   const concernColumn = column(CONCERN_COLUMN);
+  const layerColumn = column(LAYER_COLUMN);
   return table.rows
     .filter((row) => ROW_STATUSES.has(row[statusColumn]))
     .map((row) => ({
       id: cell(row, idColumn),
       type: cell(row, typeColumn),
       concern: cell(row, concernColumn),
+      layer: cell(row, layerColumn),
       pri: cell(row, priColumn),
       rank: cell(row, rankColumn),
       summary: cell(row, summaryColumn),
@@ -951,7 +982,9 @@ export async function rankOrder(file, requested, { lens = false } = {}) {
   }
   const typeColumn = view.table.header.indexOf('Type');
   const concernColumn = view.table.header.indexOf(CONCERN_COLUMN);
-  const tierIndex = (entry) => (tiers ? tierOf(tiers, typeWord(entry.row[typeColumn]), concernColumn < 0 ? '' : (entry.row[concernColumn] ?? '').trim()) : -1);
+  const layerColumn = view.table.header.indexOf(LAYER_COLUMN);
+  const cellOf = (entry, index) => (index < 0 ? '' : (entry.row[index] ?? '').trim());
+  const tierIndex = (entry) => (tiers ? tierOf(tiers, typeWord(entry.row[typeColumn]), cellOf(entry, concernColumn), cellOf(entry, layerColumn)) : -1);
   const priOf = (entry) => (view.priColumn < 0 ? '' : (entry.row[view.priColumn] ?? '').trim());
   const sortKey = (entry) => {
     const tier = tierIndex(entry);
@@ -1003,19 +1036,28 @@ function alignToTiers(view, tiers, sequence, tierIndex, priOf, lines) {
   return { ...(count > 0 ? { realigned } : {}), ...(confirmedApart.length > 0 ? { confirmedApart } : {}) };
 }
 
-// The concern cell for one or more rows, in one atomic write; the column is added on first use.
-// Classification is the caller's judgment — this records it and refuses a word the lens cannot sort.
-export async function setConcern(file, requestedIds, concern) {
-  const value = concernValue(concern);
+// One closed-vocabulary cell for one or more rows, in one atomic write; a lazy column is added on
+// first use. Classification is the caller's judgment — this records it and refuses a word the lens
+// cannot sort. It backs set-concern, set-layer and set-type, so the three refuse alike.
+const CELL_SETTERS = {
+  concern: { column: CONCERN_COLUMN, anchors: ['Type'], value: concernValue },
+  layer: { column: LAYER_COLUMN, anchors: [CONCERN_COLUMN, 'Type'], value: layerValue },
+  type: { column: 'Type', anchors: null, value: typeValue },
+};
+
+async function setCell(file, requestedIds, kind, requested) {
+  const { column: name, anchors, value: parse } = CELL_SETTERS[kind];
+  const value = parse(requested);
   const ids = [...new Set(requestedIds.map((id) => normalizeId(id)))];
-  if (ids.length === 0) throw new Error('set-concern names at least one B-NNN');
+  if (ids.length === 0) throw new Error(`set-${kind} names at least one B-NNN`);
   let parsed = await backlogTable(file);
-  if (!parsed.table.header.includes(CONCERN_COLUMN)) {
-    widenColumn(parsed.lines, parsed.table, CONCERN_COLUMN, ['Type']);
+  if (!parsed.table.header.includes(name)) {
+    if (anchors === null) throw new Error(`the backlog has no ${name} column`);
+    widenColumn(parsed.lines, parsed.table, name, anchors);
     parsed = backlogTableFromText(parsed.lines.join('\n'));
   }
   const { lines, table, idColumn } = parsed;
-  const column = table.header.indexOf(CONCERN_COLUMN);
+  const column = table.header.indexOf(name);
   const byId = new Map();
   table.rows.forEach((row, offset) => {
     const id = normalizeId(row[idColumn]);
@@ -1026,7 +1068,7 @@ export async function setConcern(file, requestedIds, concern) {
   const doubled = ids.filter((id) => byId.get(id).length > 1);
   if (doubled.length > 0) throw new Error(`${doubled.join(', ')} ${doubled.length === 1 ? 'appears' : 'appear'} more than once in the backlog`);
   // A classification pass names hundreds of rows, so the answer counts them and names only the rows
-  // whose earlier concern this call replaced.
+  // whose earlier value this call replaced.
   const replaced = {};
   let written = 0;
   for (const id of ids) {
@@ -1039,8 +1081,12 @@ export async function setConcern(file, requestedIds, concern) {
     written += 1;
   }
   await atomicWrite(file, lines.join('\n'));
-  return { file, concern: value, count: ids.length, written, ...(Object.keys(replaced).length > 0 ? { replaced } : {}) };
+  return { file, [kind]: value, count: ids.length, written, ...(Object.keys(replaced).length > 0 ? { replaced } : {}) };
 }
+
+export const setConcern = (file, ids, concern) => setCell(file, ids, 'concern', concern);
+export const setLayer = (file, ids, layer) => setCell(file, ids, 'layer', layer);
+export const setType = (file, ids, type) => setCell(file, ids, 'type', type);
 
 // Mode two: one item, placed between the neighbours the caller names, touching no other row. The
 // sequence it is placed into is the open rows that already carry a number — an unranked row has no
@@ -1114,10 +1160,11 @@ const BACKLOG_TEMPLATE = `# Backlog
 <!-- Status: Open | Needs-decision | Planned | Done | Dropped -->
 <!-- Pri: hi | med | lo (confirmed); hi? | med? | lo? (suggested). -->
 <!-- Concern: user | security | legal | checks | deps | ops | internal — what the row is about, for the roadmap lens. -->
+<!-- Layer: app (the product its users run) | infra (hosting, CI, environment, release, install). -->
 <!-- Rank: CLI-only position; Epic: epic slug; Version: deployed release, Done: UA passed. -->
 
-| ID | Date | Type | Concern | Pri | Rank | Summary | Source | Epic | Version | Status |
-|----|------|------|---------|-----|------|---------|--------|------|---------|--------|
+| ID | Date | Type | Concern | Layer | Pri | Rank | Summary | Source | Epic | Version | Status |
+|----|------|------|---------|-------|-----|------|---------|--------|------|---------|--------|
 
 ---
 
@@ -1129,22 +1176,30 @@ export function priForType(type) {
   return TYPE_PRI.find(([glyph]) => text.includes(glyph))?.[1] ?? DEFAULT_PRI;
 }
 
-export async function addRow(root, file, { type, summary, source, pri = '', epic = '', status = 'Open', concern = '' }) {
-  const fields = { type: cellText(type, '--type'), summary: cellText(summary, '--summary'), source: cellText(source, '--source') };
+// Every row is classified where it is written: a canonical Type, a Concern and a Layer, or nothing is
+// filed. Each refusal comes before `reserveId`, so a refused call reserves no ID and writes no byte.
+export async function addRow(root, file, { type, summary, source, pri = '', epic = '', status = 'Open', concern = '', layer = '' }) {
+  const fields = { type: typeValue(cellText(type, '--type')), summary: cellText(summary, '--summary'), source: cellText(source, '--source') };
   if (!STATUSES.has(status)) throw new Error(`invalid status: ${status}`);
   if (pri !== '') cellText(pri, '--pri');
   if (epic !== '') cellText(epic, '--epic');
-  const concernCell = concern === '' ? '' : concernValue(concern);
+  const required = (value, flag, words, parse) => {
+    if (String(value ?? '').trim() === '' || String(value).trim() === 'none') throw new Error(`missing ${flag} — every row is classified when it is filed: one of ${words.join(', ')}`);
+    return parse(value);
+  };
+  const concernCell = required(concern, '--concern', CONCERNS, concernValue);
+  const layerCell = required(layer, '--layer', LAYERS, layerValue);
   // With no level given, a recorded lens places the row: its tier's level, suggested. A roadmap whose
   // tiers will not parse never refuses a capture — `esq validate` names it — and falls back to the type.
   let tiers = null;
   if (pri === '') { try { tiers = await roadmapTiers(file); } catch { tiers = null; } }
-  const lensLevel = tiers ? tiers[tierOf(tiers, typeWord(fields.type), concernCell)]?.level ?? null : null;
+  const lensLevel = tiers ? tiers[tierOf(tiers, typeWord(fields.type), concernCell, layerCell)]?.level ?? null : null;
   const priority = pri !== '' ? pri.trim() : lensLevel !== null ? `${lensLevel}?` : priForType(fields.type);
   const { id, block } = await reserveId(root, file);
   let ledger = await backlogTable(file);
-  if (concernCell !== '' && !ledger.table.header.includes(CONCERN_COLUMN)) {
-    widenColumn(ledger.lines, ledger.table, CONCERN_COLUMN, ['Type']);
+  for (const [name, anchors] of [[CONCERN_COLUMN, ['Type']], [LAYER_COLUMN, [CONCERN_COLUMN, 'Type']]]) {
+    if (ledger.table.header.includes(name)) continue;
+    widenColumn(ledger.lines, ledger.table, name, anchors);
     ledger = backlogTableFromText(ledger.lines.join('\n'));
   }
   const { lines, table: parsed, idColumn, statusColumn } = ledger;
@@ -1153,7 +1208,7 @@ export async function addRow(root, file, { type, summary, source, pri = '', epic
   const view = rankView(lines, parsed, idColumn, statusColumn);
   const { table } = view;
   const rank = ROW_STATUSES.has(status) ? String(tailRank(view)) : '';
-  const values = { ID: id, '#': id, Date: new Date().toISOString().slice(0, 10), Type: fields.type, Pri: priority, Priority: priority, [RANK_COLUMN]: rank, Summary: fields.summary, Source: fields.source, Epic: epic, Version: '', Status: status, [CONCERN_COLUMN]: concernCell };
+  const values = { ID: id, '#': id, Date: new Date().toISOString().slice(0, 10), Type: fields.type, Pri: priority, Priority: priority, [RANK_COLUMN]: rank, Summary: fields.summary, Source: fields.source, Epic: epic, Version: '', Status: status, [CONCERN_COLUMN]: concernCell, [LAYER_COLUMN]: layerCell };
   const cells = table.header.map((column) => values[column] ?? '');
   clearClosedRanks(view, lines);
   lines.splice(table.end, 0, formatRow(cells));
@@ -4729,7 +4784,7 @@ export async function lessonsAdd(root, json) {
     const prior = sourceColumn < 0 ? null : table.rows.find((row) => (row[sourceColumn] ?? '').includes(source));
     if (prior) check = prior[idColumn];
     else {
-      const row = await addRow(repository, backlogFile, { type: '💡 idea', summary: `Check candidate — ${cue.replace(/\|/g, '/')}`, source });
+      const row = await addRow(repository, backlogFile, { type: '💡 idea', summary: `Check candidate — ${cue.replace(/\|/g, '/')}`, source, concern: 'checks', layer: 'app' });
       check = row.id;
     }
     backlog = { id: check, filed: !prior, created };
@@ -6112,6 +6167,8 @@ export async function validate(root) {
     // `/esq:roadmap plan`, and validate blocks the session stop.
     const rankColumn = table.header.indexOf(RANK_COLUMN);
     const concernColumn = table.header.indexOf(CONCERN_COLUMN);
+    const layerColumn = table.header.indexOf(LAYER_COLUMN);
+    const typeColumn = table.header.indexOf('Type');
     const priColumn = ['Pri', 'Priority'].map((name) => table.header.indexOf(name)).find((index) => index >= 0) ?? -1;
     const ranks = new Map();
     const unprioritized = [];
@@ -6123,6 +6180,12 @@ export async function validate(root) {
       if (!STATUSES.has(row[statusColumn])) findings.push(`invalid backlog status for ${id}: ${row[statusColumn]}`);
       const concern = concernColumn < 0 ? '' : (row[concernColumn] ?? '').trim();
       if (concern !== '' && !CONCERNS.includes(concern)) findings.push(`invalid backlog concern for ${id}: ${concern}`);
+      const layer = layerColumn < 0 ? '' : (row[layerColumn] ?? '').trim();
+      if (layer !== '' && !LAYERS.includes(layer)) findings.push(`invalid backlog layer for ${id}: ${layer}`);
+      // Other projects' ledgers carry drifted types (`⚡ perf`, bare `bug`), still read by `typeWord`;
+      // a finding would red their session stop, so a non-canonical cell is only named.
+      const type = typeColumn < 0 ? '' : (row[typeColumn] ?? '').trim();
+      if (typeColumn >= 0 && !CANONICAL_TYPES.has(type)) advisories.push(`non-canonical backlog type for ${id}: ${type === '' ? '(empty)' : type} — one of ${[...CANONICAL_TYPES].join(', ')}`);
       if (rankColumn < 0) continue;
       const rank = (row[rankColumn] ?? '').trim();
       if (rank !== '' && !/^\d+$/.test(rank)) findings.push(`invalid backlog rank for ${id}: ${rank}`);
@@ -6362,20 +6425,21 @@ export async function main(args) {
     if (!id || !pri || positional.length > 3) throw new Error(usage);
     return output(await setPri(file, id, pri));
   }
-  if (group === 'backlog' && action === 'set-concern') {
-    const usage = `usage: esq backlog set-concern <B-NNN>[,<B-NNN>…] <${CONCERNS.join('|')}|none> [backlog]`;
+  if (group === 'backlog' && ['set-concern', 'set-layer', 'set-type'].includes(action)) {
+    const [setter, words] = { 'set-concern': [setConcern, [...CONCERNS, 'none']], 'set-layer': [setLayer, [...LAYERS, 'none']], 'set-type': [setType, TYPE_NAMES] }[action];
+    const usage = `usage: esq backlog ${action} <B-NNN>[,<B-NNN>…] <${words.join('|')}> [backlog]`;
     const { positional, flags } = takeFlags(rest, [], usage);
     if (Object.keys(flags).length > 0) throw new Error(usage);
-    const [ids, concern, file = path.join(root, 'docs/BACKLOG.md')] = positional;
-    if (!ids || !concern || positional.length > 3) throw new Error(usage);
-    return output(await setConcern(file, ids.split(',').map((id) => id.trim()).filter(Boolean), concern));
+    const [ids, value, file = path.join(root, 'docs/BACKLOG.md')] = positional;
+    if (!ids || !value || positional.length > 3) throw new Error(usage);
+    return output(await setter(file, ids.split(',').map((id) => id.trim()).filter(Boolean), value));
   }
   if (group === 'backlog' && action === 'add') {
-    const usage = 'usage: esq backlog add --type <type> --summary <text> --source <text> [--pri <pri>] [--concern <concern>] [--epic <epic>] [--status <status>] [backlog]';
-    const { positional, flags } = takeFlags(rest, ['type', 'summary', 'source', 'pri', 'concern', 'epic', 'status'], usage);
+    const usage = `usage: esq backlog add --type <${TYPE_NAMES.join('|')}> --summary <text> --source <text> --concern <${CONCERNS.join('|')}> --layer <${LAYERS.join('|')}> [--pri <pri>] [--epic <epic>] [--status <status>] [backlog]`;
+    const { positional, flags } = takeFlags(rest, ['type', 'summary', 'source', 'pri', 'concern', 'layer', 'epic', 'status'], usage);
     if (!flags.type || !flags.summary || !flags.source || positional.length > 1) throw new Error(usage);
     const file = positional[0] || path.join(root, 'docs/BACKLOG.md');
-    return output(await addRow(root, file, { type: flags.type, summary: flags.summary, source: flags.source, pri: flags.pri ?? '', concern: flags.concern ?? '', epic: flags.epic ?? '', status: flags.status ?? 'Open' }));
+    return output(await addRow(root, file, { type: flags.type, summary: flags.summary, source: flags.source, pri: flags.pri ?? '', concern: flags.concern ?? '', layer: flags.layer ?? '', epic: flags.epic ?? '', status: flags.status ?? 'Open' }));
   }
   if (group === 'decisions' && action === 'add') {
     const [json, file = path.join(root, 'docs/DECISIONS.md')] = rest;
@@ -6722,5 +6786,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text> [--concern <concern>]|backlog set-pri <B-NNN> <pri>|backlog set-concern <B-NNN>[,<B-NNN>…] <concern>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank --order [<B-NNN…>] --lens (the head; the rest by the roadmap tiers)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match [--all] <path…>|--paths <file>|- (the expertise modules those paths touch, each with its file and age; --all every module, with the stack packages that show it in use)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text> --concern <concern> --layer <app|infra>|backlog set-pri <B-NNN> <pri>|backlog set-concern <B-NNN>[,<B-NNN>…] <concern>|backlog set-layer <B-NNN>[,<B-NNN>…] <app|infra|none>|backlog set-type <B-NNN>[,<B-NNN>…] <bug|debt|idea|improvement|todo>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank --order [<B-NNN…>] --lens (the head; the rest by the roadmap tiers)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match [--all] <path…>|--paths <file>|- (the expertise modules those paths touch, each with its file and age; --all every module, with the stack packages that show it in use)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
 }

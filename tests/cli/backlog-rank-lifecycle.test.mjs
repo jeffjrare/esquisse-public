@@ -33,7 +33,7 @@ async function fixture(t, rows = [], legacy = false) {
     assert.equal(new Set(ranks.map(Number)).size, ranks.length);
     assert.deepEqual((await cli('validate')).findings, []);
   };
-  const add = (...args) => cli('backlog', 'add', '--type', '✨ improvement', '--summary', 'captured', '--source', 'observed: example', ...args);
+  const add = (...args) => cli('backlog', 'add', '--type', '✨ improvement', '--summary', 'captured', '--source', 'observed: example', '--concern', 'user', '--layer', 'app', ...args);
   return { root, file, cli, ledger, valid, add };
 }
 

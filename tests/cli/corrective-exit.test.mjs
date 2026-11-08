@@ -112,7 +112,7 @@ for (const changedCommand of [false, true]) {
 
 test('accepting a finding records Dropped, keeps history, and never certifies a failing command', async (t) => {
   const { root, target, brief } = await fixture(t);
-  cli(root, 'backlog', 'add', '--summary', 'Optional explanation omitted', '--type', 'debt', '--source', 'fix: thing-fixes-fixes · Planned by thing-fixes-fixes');
+  cli(root, 'backlog', 'add', '--summary', 'Optional explanation omitted', '--type', 'debt', '--source', 'fix: thing-fixes-fixes · Planned by thing-fixes-fixes', '--concern', 'internal', '--layer', 'app');
   const ledger = await readFile(path.join(root, 'docs/BACKLOG.md'), 'utf8');
   const id = ledger.match(/\| (B-\d+) \|/)[1];
   await writeFile(path.join(root, brief), `# Fixes\n\nSource: /esq:review on thing-fixes-fixes, 2026-09-24\n\n## 🟡 Needs a plan\n- ${id}: Optional explanation omitted.\n`);

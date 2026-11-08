@@ -110,7 +110,7 @@ test('B-003: removing a worktree preserves its committed IDs through allocation 
   const manage = (...args) => run('/bin/bash', [script, ...args], { cwd: root });
   await manage('new', 'retained');
   const retained = path.join(trees, 'retained');
-  const first = await addRow(retained, path.join(retained, 'docs/BACKLOG.md'), { type: 'bug', summary: 'retained work', source: 'manual' });
+  const first = await addRow(retained, path.join(retained, 'docs/BACKLOG.md'), { type: 'bug', summary: 'retained work', source: 'manual', concern: 'internal', layer: 'app' });
   assert.equal(first.id, 'B-1000');
   commit(retained, 'retained item');
   const retainedHead = git(retained, 'rev-parse', 'HEAD');
@@ -121,7 +121,7 @@ test('B-003: removing a worktree preserves its committed IDs through allocation 
 
   await manage('new', 'next');
   const next = path.join(trees, 'next');
-  const second = await addRow(next, path.join(next, 'docs/BACKLOG.md'), { type: 'bug', summary: 'different work', source: 'manual' });
+  const second = await addRow(next, path.join(next, 'docs/BACKLOG.md'), { type: 'bug', summary: 'different work', source: 'manual', concern: 'internal', layer: 'app' });
   assert.equal(second.id, 'B-2000');
   commit(next, 'next item');
   // Reopening the retained branch must also leave its old citations alone.
@@ -167,7 +167,7 @@ test('an unreadable retained backlog refuses allocation and releases the lock wi
   t.after(async () => {
     for (const directory of [root, retained, next]) await rm(directory, { recursive: true, force: true });
   });
-  await addRow(retained, path.join(retained, 'docs/BACKLOG.md'), { type: 'bug', summary: 'retained work', source: 'manual' });
+  await addRow(retained, path.join(retained, 'docs/BACKLOG.md'), { type: 'bug', summary: 'retained work', source: 'manual', concern: 'internal', layer: 'app' });
   commit(retained, 'retained item');
   const blob = git(retained, 'rev-parse', 'HEAD:docs/BACKLOG.md');
   git(root, 'worktree', 'remove', retained);
@@ -242,7 +242,7 @@ test('set-status records the disposition and its provenance in one write, and re
 test('a resolution supplied for an item with no detail section is stored, with its status and provenance, in one write', async () => {
   const root = await repo();
   const file = path.join(root, 'docs/BACKLOG.md');
-  const filed = await addRow(root, file, { type: '✨ improvement', summary: 'the export carries the declared expectation', source: 'manual · Planned by export' });
+  const filed = await addRow(root, file, { type: '✨ improvement', summary: 'the export carries the declared expectation', source: 'manual · Planned by export', concern: 'internal', layer: 'app' });
   const done = await setStatus(file, filed.id, 'Done', { by: 'export', resolution: 'shipped in a1b2c3d, verified by the export suite' });
   assert.equal(done.resolution, 'created');
   const text = await readFile(file, 'utf8');
@@ -250,13 +250,13 @@ test('a resolution supplied for an item with no detail section is stored, with i
   // The minimal detail section, in the format /esq:backlog writes, below the table's separator.
   assert.match(text, new RegExp(`\\n---\\n\\n## ${filed.id} — the export carries the declared expectation\\n\\n\\*\\*Resolution:\\*\\* shipped in a1b2c3d, verified by the export suite\\n$`));
   // A second item reuses the separator rather than adding another one.
-  const second = await addRow(root, file, { type: '🐛 bug', summary: 'second', source: 'manual' });
+  const second = await addRow(root, file, { type: '🐛 bug', summary: 'second', source: 'manual', concern: 'internal', layer: 'app' });
   await setStatus(file, second.id, 'Dropped', { reason: 'duplicate', resolution: 'folded into the first' });
   const after = await readFile(file, 'utf8');
   assert.equal(after.match(/^---$/gm).length, 1);
   assert.match(after, new RegExp(`## ${second.id} — second\\n\\n\\*\\*Resolution:\\*\\* folded into the first\\n$`));
   // And the binary path persists it the same way.
-  const third = await addRow(root, file, { type: '☑️ todo', summary: 'third', source: 'manual' });
+  const third = await addRow(root, file, { type: '☑️ todo', summary: 'third', source: 'manual', concern: 'internal', layer: 'app' });
   await run(process.execPath, [bin, 'backlog', 'set-status', third.id, 'Done', '--by', 'x', '--resolution', 'done by hand'], { cwd: root });
   assert.match(await readFile(file, 'utf8'), new RegExp(`## ${third.id} — third\\n\\n\\*\\*Resolution:\\*\\* done by hand\\n$`));
 });
@@ -267,15 +267,15 @@ test('an observation filed outside the unit never blocks it; a defect filed agai
   await write(root, 'docs/plans/2026-09-11-stem.md', '# Stem\n\n**Branch:** esq/stem\n\n**Origin:** main\n\n## Phases\n\n### Phase 1 — one\n- task\n\n## Execution log\n<!-- x -->\n');
   commit(root, 'plan: stem');
   const file = path.join(root, 'docs/BACKLOG.md');
-  const observed = await addRow(root, file, { type: '🐛 bug', summary: 'a pre-existing wrap at 360 px', source: 'observed: stem Phase 1' });
+  const observed = await addRow(root, file, { type: '🐛 bug', summary: 'a pre-existing wrap at 360 px', source: 'observed: stem Phase 1', concern: 'internal', layer: 'app' });
   assert.equal(observed.id, 'B-001');
   assert.deepEqual((await branchCheck(root, 'docs/plans/2026-09-11-stem.md')).unit.open, []);
-  const own = await addRow(root, file, { type: '🐛 bug', summary: 'the new guard misses the empty case', source: 'build: stem Phase 1' });
+  const own = await addRow(root, file, { type: '🐛 bug', summary: 'the new guard misses the empty case', source: 'build: stem Phase 1', concern: 'internal', layer: 'app' });
   assert.equal(own.id, 'B-002');
   assert.deepEqual((await branchCheck(root, 'docs/plans/2026-09-11-stem.md')).unit.open.map((row) => row.id), ['B-002']);
   // Capture writes the neutral tail after Pri; a row filed with no stated priority carries the
   // type's suggested `med?`. Neither cell changes the Source classification the unit reads.
-  assert.match(await readFile(file, 'utf8'), /\| B-001 \| \d{4}-\d{2}-\d{2} \| 🐛 bug \| med\? \| 100 \| a pre-existing wrap at 360 px \| observed: stem Phase 1 \|  \|  \| Open \|/);
+  assert.match(await readFile(file, 'utf8'), /\| B-001 \| \d{4}-\d{2}-\d{2} \| 🐛 bug \| internal \| app \| med\? \| 100 \| a pre-existing wrap at 360 px \| observed: stem Phase 1 \|  \|  \| Open \|/);
   await assert.rejects(addRow(root, file, { type: 'bug', summary: 'two\nlines', source: 'observed: stem' }), /line break/);
 });
 
