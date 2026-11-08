@@ -18,7 +18,7 @@ You apply corrections, not find them: `/esq:check` and `/esq:review` triaged fin
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Use `esq backlog reserve-id` for escalations and run `esq validate` before reporting.
+Use `esq backlog add` for escalations and run `esq validate` before reporting.
 
 **Resolve the brief once with `esq brief plan <brief-path>`** after preflight selects it, and keep its three fields — none is re-read, even after this run deletes the brief:
 - `plan`: the sibling plan validated against the brief's `Source:`; the only source of the plan path.
@@ -206,12 +206,8 @@ Report a refusal and its recovery action; never calculate an ID from the ledger 
 
 1. **Read BACKLOG.md's `| B-NNN |` table rows once here** (never the detail sections) and dedup by summary; the closing step reuses this read.
 2. If not present, add it:
-   - A row in the table: `| B-NNN | YYYY-MM-DD | ⚠️ debt | <pri or blank> | <one-phrase summary> | fix: <brief-slug> | | | Open/Needs-decision |`.
-
-     <!-- shared:row-header:start -->
-     Match the table's **actual header row** rather than the literal cell count above (canonical: `ID | Date | Type | Pri | Summary | Source | Epic | Version | Status`; an older backlog may lack `Epic`/`Version`) — one cell per existing column, or the `Status` lands in the wrong one.
-     <!-- shared:row-header:end -->
-   - A full detail entry below the `---` separator:
+   - A row in the table, written by the CLI: `esq backlog add --type "⚠️ debt" --concern <concern> --layer <app|infra> --summary "<one-phrase summary>" --source "fix: <brief-slug>" [--pri "<pri>"] --status <Open|Needs-decision>`. `--concern` is what the row is about, in `/esq:backlog`'s vocabulary (`user` when a user sees, gets or hits it); `--layer app` is the product its users run, `infra` is hosting, CI, environment, release and install.
+   - Then, appended below the `---` separator, a full detail entry under the ID that call returned:
 
 ```markdown
 ## B-NNN — <summary>
@@ -223,12 +219,11 @@ Report a refusal and its recovery action; never calculate an ID from the ledger 
 
 A detail section is heading and prose only — **no field lines**; `Date`, `Type`, `Pri`, `Source`, `Status`, `Epic` and `Version` live in the table row alone.
 
-3. Number each row from `esq backlog reserve-id`.
-4. **Commit the tail once:** `git add docs/BACKLOG.md && git commit -m "brief(fixes): update <slug> + escalate 🟡/🔴 items"`, over the staged brief and these rows together.
+3. **Commit the tail once:** `git add docs/BACKLOG.md && git commit -m "brief(fixes): update <slug> + escalate 🟡/🔴 items"`, over the staged brief and these rows together.
 
 **If nothing remains** (brief deleted): create no escalation row. Stage `docs/BACKLOG.md` too when a named disposition changed it, then commit the deletion and dispositions together. Use `brief(fixes): clear <slug>` and report fixed versus accepted counts separately; accepted debt was not fixed. With no ledger change, commit only the staged brief deletion.
 
-**If BACKLOG.md doesn't exist yet**, create it from the `/esq:backlog` template — header comments, the `ID | Date | Type | Pri | Summary | Source | Epic | Version | Status` table, the `---` separator — with this line verbatim:
+**If BACKLOG.md doesn't exist yet**, create it from the `/esq:backlog` template — header comments, the `ID | Date | Type | Concern | Layer | Pri | Rank | Summary | Source | Epic | Version | Status` table, the `---` separator — with this line verbatim:
 
 ```markdown
 <!-- Status: Open (actionable) | Needs-decision (blocked on user) | Planned (picked up by a plan) | Done | Dropped -->

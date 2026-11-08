@@ -186,7 +186,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run, and the next plan still in flight; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
 | `/esq:work [item-or-text] [route]` | Investigate one item; do it now if trivial, otherwise recommend the method | Code commit and backlog close for small work; otherwise the next command — `/esq:advance B-NNN` when it needs a plan, a grill or a screen direction |
-| `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
+| `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks, each classified by type, concern and layer (`app`/`infra`) when it is filed; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
 | `/esq:sweep` | Reconcile backlog items against evidence of delivery | Backlog closures; questions only for unresolved cases |
 | `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order under your recorded criterion (lens) | `docs/ROADMAP.md`; backlog concern, priority and rank updates when ordering |
 | `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items, or any one backlog item by its ID, render UI directions, then ask you once what only you can settle | Inline fixes, plans, rendered directions; grills you accept; each plan it wrote built, reviewed and landed locally; never pushes |
@@ -286,7 +286,7 @@ permission settings.
 |---|---|
 | `docs/plans/*.brief.md` | Scope and review findings passed between commands |
 | `docs/plans/*.md` | Goal, phases, verification and the execution log |
-| `docs/BACKLOG.md` | Tasks with permanent `B-NNN` IDs, each with its type and concern |
+| `docs/BACKLOG.md` | Tasks with permanent `B-NNN` IDs, each with its type, concern and layer |
 | `docs/DECISIONS.md` | Decisions and the authority behind each one |
 | `docs/LESSONS.md` | Lessons from closed defects and verified repo facts, each tied to its evidence and the paths it is about |
 | `docs/ROADMAP.md` | Your ordering criterion, then ordered `Now`, `Next` and `Later` work with the reason for each position |
@@ -379,8 +379,11 @@ only operates on planned work.
   — and it becomes the roadmap's **lens**: recorded at the top of `docs/ROADMAP.md` with the tiers
   it translates to, reused by every later bare `plan` and shown on every run, until you state
   another. With none, the lens is user and business value first. Each open item carries a
-  **concern** (`user`, `security`, `legal`, `checks`, `deps`, `ops`, `internal`), set when it is
-  captured or classified once by the first derive, so the CLI sorts the items no roadmap entry
+  **concern** (`user`, `security`, `legal`, `checks`, `deps`, `ops`, `internal`) and a **layer**
+  (`app`, the product its users run; `infra`, hosting, CI, release and install). `esq backlog add`
+  refuses a row without both, or with a type off the five, so every new item is classified when it
+  is captured; an older item's concern is classified once by the first derive. A tier can name a layer
+  (`security+infra:hi`). The CLI sorts the items no roadmap entry
   covers by the lens itself and the model only orders the entries. A derive also brings
   suggested (`?`) priorities into line with the lens; a priority you confirmed is never changed,
   only reported where it disagrees. Bare `/esq:roadmap` refreshes state without reordering; `/esq:roadmap <edit>`

@@ -210,3 +210,16 @@ test('a layer tier sorts its rows under rank --lens and places a capture', async
   const rows = await ledger();
   assert.deepEqual([rows['B-003'].Pri, rows['B-001'].Pri, rows[captured.id].Pri], ['hi?', 'med?', 'hi?']);
 });
+
+test('a split of a legacy parent files its remainder through add with the judged values', async (t) => {
+  // The parent predates Concern and Layer and carries a drifted type: the splitting command judges
+  // the remainder's values from the evidence it holds, and add writes them against the widened header.
+  const { cli, ledger, file } = await fixture(t, [row('B-001', '⚡ perf', 'med?', '100', 'Planned')]);
+  await assert.rejects(run(process.execPath, [bin, 'backlog', 'add', '--type', '⚡ perf', '--summary', 'cold start (remainder of B-001)', '--source', 'remainder: s · of B-001', '--concern', 'user', '--layer', 'app'], { cwd: path.dirname(path.dirname(file)) }), /invalid type: ⚡ perf/);
+  const remainder = await cli('backlog', 'add', '--type', 'improvement', '--summary', 'cold start (remainder of B-001)', '--source', 'remainder: s · of B-001', '--concern', 'user', '--layer', 'app');
+  await cli('backlog', 'set-status', 'B-001', 'Done', '--by', 's', '--resolution', `warm path delivered; remainder → ${remainder.id}`);
+  const rows = await ledger();
+  assert.deepEqual([rows[remainder.id].Type, rows[remainder.id].Concern, rows[remainder.id].Layer, rows[remainder.id].Source, rows[remainder.id].Status], ['✨ improvement', 'user', 'app', 'remainder: s · of B-001', 'Open']);
+  assert.deepEqual([rows['B-001'].Type, rows['B-001'].Status], ['⚡ perf', 'Done']);
+  assert.deepEqual((await cli('validate')).findings, []);
+});

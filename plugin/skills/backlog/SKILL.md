@@ -17,7 +17,7 @@ Maintain `docs/BACKLOG.md`: bugs, improvements, todos, ideas and deferred work, 
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-The CLI owns IDs, Status, Pri, Concern and Rank mutations: `esq backlog add` / `reserve-id`, `set-status <B-NNN> <status>`, `set-pri <B-NNN> <pri>`, `set-concern <B-NNN>[,…] <concern>`, and `rank`. You judge type, concern, priority, duplicates, epic, ordering, summary, resolution and whether work is done. Never hand-edit a rank or calculate an ID.
+The CLI owns IDs, Status, Pri, Type, Concern, Layer and Rank mutations: `esq backlog add` / `reserve-id`, `set-status <B-NNN> <status>`, `set-pri <B-NNN> <pri>`, `set-type <B-NNN>[,…] <type>`, `set-concern <B-NNN>[,…] <concern>`, `set-layer <B-NNN>[,…] <layer>`, and `rank`. You judge type, concern, layer, priority, duplicates, epic, ordering, summary, resolution and whether work is done. Never hand-edit a rank or calculate an ID.
 
 <!-- shared:read-once:start -->
 **Read each file once**, taking the needed slice on large files and retaining it for later steps. Re-read only if you have written to it since. A later reference to that file or a desire to double-check does not justify another read.
@@ -36,20 +36,21 @@ Batch independent read-only calls. Chain ordered writes with `&&`; serialize wri
 
 Actual table headers determine cell positions; never write a fixed-width row under a different header.
 
-`| ID | Date | Type | Concern | Pri | Rank | Summary | Source | Epic | Version | Status |`
+`| ID | Date | Type | Concern | Layer | Pri | Rank | Summary | Source | Epic | Version | Status |`
 
 - **ID:** permanent, monotonic `B-001` citation; never renumber or reuse.
-- **Type:** 🐛 bug · ✨ improvement · ☑️ todo · 💡 idea · ⚠️ debt (deferred fix).
-- **Concern:** what the row is about, which the roadmap lens orders by: `user` what a user gets, sees or is sold, including a defect they hit · `security` · `legal` · `checks` tests, gates, verification · `deps` dependency bumps and advisories · `ops` deploy, CI, hosting, release · `internal` refactor, tooling, code health. Blank until classified; `/esq:roadmap plan` classifies what is blank. The CLI adds the column on first write.
+- **Type:** 🐛 bug · ✨ improvement · ☑️ todo · 💡 idea · ⚠️ debt (deferred fix). `add` and `set-type` take the word, with or without its glyph, write the canonical cell and refuse any other word.
+- **Concern:** what the row is about, which the roadmap lens orders by: `user` what a user gets, sees or is sold, including a defect they hit · `security` · `legal` · `checks` tests, gates, verification · `deps` dependency bumps and advisories · `ops` deploy, CI, hosting, release · `internal` refactor, tooling, code health. Required by `add`; a legacy row may be blank until `/esq:roadmap plan` classifies it. The CLI adds the column on first write.
+- **Layer:** where the work lives: `app` is the product its users run, `infra` is hosting, CI, environment, release and install. Required by `add`, like Concern, and added after it on first write.
 - **Status:** `Open` unresolved · `Needs-decision` blocked on a user call · `Planned` picked up by a plan · `Done` · `Dropped`. Open/Planned do not prove execution.
 - **Pri:** confirmed `hi|med|lo`, suggested `hi?|med?|lo?`, or legacy blank. Every new/open item needs a level; never invent user confirmation.
 - **Rank:** sparse integer maintained by the CLI. Add/reopen assigns the active sequence's tail; Done/Dropped clears it. `esq backlog rank` records deliberate placement and validates roadmap edges. Blank active ranks are legacy unplaced work; these writers supply a missing Rank column without classifying it.
 - **Epic:** free-text slug joining `docs/epics/<slug>.md`; blank if none. Keep the actual slug, but capture requires no existence check.
 - **Version:** free text; blank until deployed. Filled means deployed/ready for UA; `Done` means UA passed.
 
-Older tables can lack Concern, Rank, Epic or Version, and can use `Priority` for `Pri`. Read missing cells as blank. Before writing Epic or Version into a table lacking that column, add the header and pad every row. The CLI creates rows against the actual header.
+Older tables can lack Concern, Layer, Rank, Epic or Version, and can use `Priority` for `Pri`. Read missing cells as blank. Before writing Epic or Version into a table lacking that column, add the header and pad every row. The CLI creates rows against the actual header.
 
-All structured fields live **only in the table**. Details below `---` contain a heading and prose: `What`, `Why it matters`, `Notes`, `Resolution`. On touching a legacy detail section, remove duplicate field lines (Date, Type, Concern, Pri, Rank, Summary, Source, Epic, Version, Status) in the same edit and mention the cleanup. Preserve unique qualifiers or fuller paths in Notes/Resolution. Whole-file migration requires a user request.
+All structured fields live **only in the table**. Details below `---` contain a heading and prose: `What`, `Why it matters`, `Notes`, `Resolution`. On touching a legacy detail section, remove duplicate field lines (Date, Type, Concern, Layer, Pri, Rank, Summary, Source, Epic, Version, Status) in the same edit and mention the cleanup. Preserve unique qualifiers or fuller paths in Notes/Resolution. Whole-file migration requires a user request.
 
 Preserve `<!-- last-sweep: <hash> YYYY-MM-DD -->`; only `/esq:sweep` writes it. Never add it yourself. Create a missing backlog from the template when a write needs it; listing a missing backlog reports empty.
 
@@ -58,7 +59,7 @@ Preserve `<!-- last-sweep: <hash> YYYY-MM-DD -->`; only `/esq:sweep` writes it. 
 ### Classify and deduplicate
 
 1. Honor a case-insensitive type prefix, optional colon, and strip it: `bug`; `improvement|imp|enh`; `todo`; `idea`; `debt`. Otherwise infer: broken/fails/crashes/wrong/regression → bug; should/could/nicer/cleaner/refactor → improvement; maybe/what if/one day/could we → idea; other reminders → todo. When torn, choose the more actionable type and say which; don't ask.
-2. Set confirmed priority only from a user signal: a leading or trailing `hi`/`prio hi`, `!!` or urgent/critical → hi; `med` or `!` → med; explicit lo/low/someday → lo. Judge the concern from the summary. **When `docs/ROADMAP.md` carries a `**Tiers:**` line, pass no suggested level:** the CLI gives the row its tier's level. Otherwise suggest med? for bug/todo/debt and for an improvement or idea a user would see or feel, lo? for an internal improvement/idea; bump to hi? for crash, data loss, security, broken, regression, blocks, can't ship, production, everyone; drop to lo? for cosmetic, nit, typo, polish, nice to have, someday.
+2. Set confirmed priority only from a user signal: a leading or trailing `hi`/`prio hi`, `!!` or urgent/critical → hi; `med` or `!` → med; explicit lo/low/someday → lo. Judge the concern and the layer from the summary. **When `docs/ROADMAP.md` carries a `**Tiers:**` line, pass no suggested level:** the CLI gives the row its tier's level. Otherwise suggest med? for bug/todo/debt and for an improvement or idea a user would see or feel, lo? for an internal improvement/idea; bump to hi? for crash, data loss, security, broken, regression, blocks, can't ship, production, everyone; drop to lo? for cosmetic, nit, typo, polish, nice to have, someday.
 3. Scan existing rows once for overlapping summaries. A clear duplicate in Open or Needs-decision → name its ID and stop without adding. Done/Dropped do not block re-addition. No ID arithmetic during this scan.
 4. Extract `epic:<slug>` or `epic <slug>`, stripping it from the summary. No tag → blank. If the epic plainly isn't opened yet, mention `/esq:epic new …` without blocking capture.
 
@@ -72,12 +73,12 @@ Report a refusal and its recovery action; never calculate an ID from the ledger 
 
 Tighten the cleaned summary to one phrase, roughly ≤12 words, preserving the user's meaning. Ensure any needed Epic column exists, then call:
 
-`esq backlog add --type "<emoji + type>" --concern <concern> --summary "<summary>" --source manual [--pri "<level>"] --epic "<slug or empty>" --status Open`
+`esq backlog add --type "<emoji + type>" --concern <concern> --layer <app|infra> --summary "<summary>" --source manual [--pri "<level>"] --epic "<slug or empty>" --status Open`
 
-The CLI writes today's Date, its allocated ID, a unique tail Rank, blank Version and one cell per actual header in one write. User-captured items start Open, never Needs-decision. Add a detail section only for multi-sentence context, reproduction notes or debt; one-line todos/ideas need only a row.
+A missing concern or layer, or a type off the five, is refused before any ID is spent. The CLI writes today's Date, its allocated ID, a unique tail Rank, blank Version and one cell per actual header in one write. User-captured items start Open, never Needs-decision. Add a detail section only for multi-sentence context, reproduction notes or debt; one-line todos/ideas need only a row.
 
-With the ten-column header above, the resulting row is:
-`| B-NNN | <today> | <type emoji + word> | <pri> | <CLI rank> | <summary> | manual | <epic slug or blank> | | Open |`
+With the twelve-column header above, the resulting row is:
+`| B-NNN | <today> | <type emoji + word> | <concern> | <layer> | <pri> | <CLI rank> | <summary> | manual | <epic slug or blank> | | Open |`
 This illustrates the schema, not a fixed-width fallback: a missing column must never shift Status into Version.
 
 The default tail needs no second rank call. Only a deliberate placement calls `esq backlog rank B-NNN --after B-MMM`, `--before B-MMM` or `--last`; priority remains a separate judgment and the reader's primary sort key.
@@ -99,7 +100,7 @@ Group by status, actionable first. Open is one ordered sequence:
 Sort by `hi → hi? → med → med? → lo → lo? → blank`, then Rank ascending (unranked last), then ID. Render ordinals within each level: hi and hi? share the hi bucket. Ordinals such as `med #3` are computed, never stored; an unranked row shows `#?`.
 <!-- shared:rank-order:end -->
 
-Show ID, type, concern, summary, source, priority with `?` intact, and `«epic-slug»` after the summary when present. Show Planned separately; lift Needs-decision into the user-needs zone. Cap the closed summary at about five IDs and omit empty groups. Explain suggested versus confirmed priority with `/esq:backlog B-NNN pri:hi` or `… confirm`; `/esq:epic <slug>` gives the tagged theme's full view.
+Show ID, type, concern, layer, summary, source, priority with `?` intact, and `«epic-slug»` after the summary when present. Show Planned separately; lift Needs-decision into the user-needs zone. Cap the closed summary at about five IDs and omit empty groups. Explain suggested versus confirmed priority with `/esq:backlog B-NNN pri:hi` or `… confirm`; `/esq:epic <slug>` gives the tagged theme's full view.
 
 For explicitly deferred rows, show `parked — <reason>; resume when <condition>` alongside their canonical status, using retained prose or only that item's detail if needed. Preserve those facts in detail prose when capturing/updating deferred work; no new status or column. Unknown conditions stay unspecified. Exclude these rows from automatic work advice until their condition is met; priority/rank alone never resumes them.
 
@@ -137,8 +138,9 @@ Apply the same change to every target; combine fields when requested:
 | pri:none / drop priority | Refused by the CLI; ask which level instead. |
 | version <value> / version:<value> / shipped in / deployed in | Set Version verbatim; version:none / clear version blanks it. |
 | epic:<slug> / epic <slug> / assign to epic / part of the … epic | Set Epic; epic:none / clear epic / detach from epic blanks it. Never edit the epic file; `/esq:epic <slug>` regenerates its view. |
-| type:bug etc. | Set Type. |
+| type:bug etc. | `esq backlog set-type <ids> <bug|debt|idea|improvement|todo>` (one call for the whole batch). |
 | concern:<word> / it's security | `esq backlog set-concern <ids> <concern>` (one call for the whole batch); `concern:none` clears it. |
+| layer:app / layer:infra / it's infra | `esq backlog set-layer <ids> <app|infra>` (one call for the whole batch); `layer:none` clears it. |
 | summary: <text> / rename to | Tighten as in A; update Summary and any detail heading. Always refuse multi-ID renames and ask. |
 | note: <text> / prose clearly adding context | Append Notes, creating a detail section if needed; keep existing notes unless told to replace. Multiple IDs require explicit intent to share the note. |
 
@@ -178,10 +180,11 @@ Create a missing file for a write:
 <!-- Status: Open | Needs-decision | Planned | Done | Dropped -->
 <!-- Pri: hi | med | lo (confirmed); hi? | med? | lo? (suggested). -->
 <!-- Concern: user | security | legal | checks | deps | ops | internal — what the row is about, for the roadmap lens. -->
+<!-- Layer: app (the product its users run) | infra (hosting, CI, environment, release, install). -->
 <!-- Rank: CLI-only position; Epic: epic slug; Version: deployed release, Done: UA passed. -->
 
-| ID | Date | Type | Concern | Pri | Rank | Summary | Source | Epic | Version | Status |
-|----|------|------|---------|-----|------|---------|--------|------|---------|--------|
+| ID | Date | Type | Concern | Layer | Pri | Rank | Summary | Source | Epic | Version | Status |
+|----|------|------|---------|-------|-----|------|---------|--------|------|---------|--------|
 
 ---
 
