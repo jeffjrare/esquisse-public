@@ -188,7 +188,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
 | `/esq:sweep` | Reconcile backlog items against evidence of delivery | Backlog closures; questions only for unresolved cases |
 | `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order under your recorded criterion (lens) | `docs/ROADMAP.md`; backlog concern, priority and rank updates when ordering |
-| `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items, render UI directions, then ask you once what only you can settle | Inline fixes, plans, rendered directions; grills you accept; each plan it wrote built and reviewed; stops before landing |
+| `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items, render UI directions, then ask you once what only you can settle | Inline fixes, plans, rendered directions; grills you accept; each plan it wrote built, reviewed and landed locally; never pushes |
 | `/esq:autopilot <plan>` | Build remaining phases sequentially, one worker per phase | Code and execution logs |
 | `/esq:converge <plan-or-fixes-brief>` | Run review → fix, then plan → build → review any 🟡 left, or resume an existing brief | Readiness report, and a lesson for a 🟡 its corrective round closed whose contrast recurs; no merge |
 | `/esq:epic [new title-or-slug]` | Group a theme spanning several plans and backlog items | `docs/epics/<slug>.md` |
@@ -391,11 +391,14 @@ only operates on planned work.
   grill, which may settle the screen question). Once that work
   is done it asks you in one round what only you can settle: grill ambiguous items now
   or later (one grill per roadmap entry, however many of its items need it), and which
-  rendered direction to keep. A grill you accept runs right there,
-  and what the round settled gets one more plan. Last, each plan the run wrote is built
-  with `/esq:autopilot` and reviewed with `/esq:converge`, in the same session, each
-  announcing its own bound and asking you at its own gates; it stops before `/esq:land`,
-  so the merge stays yours. Anything still waiting on you is listed under NEEDS YOU.
+  rendered direction to keep. A grill you accept runs right there; a screen it left
+  unsettled is rendered right after it and its direction asked while you are still
+  there. What the round settled gets one more plan. Last, each plan the run wrote is
+  built with `/esq:autopilot`, reviewed with `/esq:converge` and landed with
+  `/esq:land`, in the same session, each announcing its own bound and asking you at its
+  own gates. The merge is local and nothing is pushed: publishing stays yours. Anything
+  still waiting on you is one numbered list under NEEDS YOU, most valuable first, and
+  `→ Next` is always its first line.
 - `/esq:ideas [focus]` proposes grounded features, adjustments, content and container
   changes, and captures the ones you pick as backlog rows.
 - `/esq:epic new <title>` creates a theme; tag work with `epic:<slug>`.

@@ -1,5 +1,5 @@
 ---
-description: Work the roadmap's `Now` horizon unattended — one subagent per backlog item, one plan per entry, then build and review each plan it wrote. Stops before landing.
+description: Work the roadmap's `Now` horizon unattended — one subagent per backlog item, one plan per entry, then build, review and land each plan it wrote. Never pushes.
 name: advance
 argument-hint: "[target] [options]"
 disable-model-invocation: true
@@ -9,7 +9,7 @@ effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
 
-You are working the top of `docs/ROADMAP.md` without the user watching: orchestration and honest relay only — no code, no fixing, no planning, no deciding. Once the unattended work is done, you put to the user, in one round, what only they can settle: a grill they accept, which you run yourself, and a rendered direction to pick. Last, you build and review each plan this run wrote, and stop before `/esq:land`.
+You are working the top of `docs/ROADMAP.md` without the user watching: orchestration and honest relay only — no code, no fixing, no planning, no deciding. Once the unattended work is done, you put to the user, in one round, what only they can settle: a grill they accept, which you run yourself, and a rendered direction to pick. Last, you build, review and land each plan this run wrote; pushing stays the user's.
 
 ## Deterministic CLI
 
@@ -21,7 +21,7 @@ Do NOT use plan mode.
 
 ## The principle this rests on
 
-`/esq:work`'s handoff to planning is a `[context]` stop, dissolved by a fresh subagent, and so is its handoff to `/esq:ui`: rendering is work, only the pick is the user's. Every `[authority]` stop remains the user's, and is put to them **after** the unattended work, never in front of it. **A plan this run wrote is built and reviewed, never landed:** `/esq:autopilot` then `/esq:converge` run on it in this session, each under its own bound and gates; the merge is `/esq:land`'s.
+`/esq:work`'s handoff to planning is a `[context]` stop, dissolved by a fresh subagent, and so is its handoff to `/esq:ui`: rendering is work, only the pick is the user's. Every `[authority]` stop remains the user's, and is put to them **after** the unattended work, never in front of it. **A plan this run wrote is built, reviewed and landed:** `/esq:autopilot`, `/esq:converge` then `/esq:land` run on it in this session, each under its own bound and gates. The user consented to the merge when the unit's plan was asked for, and it stays local and reversible; nothing pushes (`D-advance-lands-what-it-built`).
 
 **Preserve existing shipping units.** Planning records Planned rows on its own branch, so read them from `esq state`'s `inFlight`. Never replace, absorb or duplicate an existing plan; an entry's still-unplanned items get at most one new plan.
 
@@ -38,7 +38,7 @@ Record an unworkable item and continue over eligible entries, honoring `needs:` 
 <!-- announce-open:start -->
 Print this line first, before any tool call, then continue with the first call in the same response:
 
-> `/esq:advance — working the Now horizon. Bound: one subagent per item, at most one plan per entry, at most one /esq:ui render, one extra per decision, then one question round (grills, a direction pick) and one plan for what it settles, one roadmap refresh; then, per plan this run wrote, /esq:autopilot and /esq:converge in this session, each announcing its own bound; stops before /esq:land.`
+> `/esq:advance — working the Now horizon. Bound: one subagent per item, at most one plan per entry, at most one /esq:ui render, one extra per decision, then one question round (grills, a direction pick, plus one pick for a render the grill left unsettled) and one plan for what it settles, one roadmap refresh; then, per plan this run wrote, /esq:autopilot, /esq:converge and /esq:land in this session, each announcing its own bound; never pushes.`
 
 Stop at the bound and report what remains uncovered. Announce the resolved target after preflight.
 <!-- announce-open:end -->
@@ -67,7 +67,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
 8. **Announce the resolved target:**
    <!-- announce:start -->
-   > `Advance: <N> item(s) across <E> Now entr(ies)<, scoped to `<target>`> — at most <N + E> subagents. Items that need planning get one plan per entry; I return to <branch>, then build and review each plan I wrote, and stop before /esq:land.`
+   > `Advance: <N> item(s) across <E> Now entr(ies)<, scoped to `<target>`> — at most <N + E> subagents. Items that need planning get one plan per entry; I return to <branch>, then build, review and land each plan I wrote, locally — never pushed.`
    <!-- announce:end -->
 
    `<N>` counts open, unplanned items (`<E>` is `1` on a scoped run); `<N + E>` bounds subagents before decisions, the roadmap refresh and the build stage, whose runs announce their own bound. Drop the `scoped to` clause on a bare run.
@@ -163,7 +163,7 @@ Before moving to the next entry, re-check the `needs:` edges: an entry ahead tha
 
 ## Stops you dissolve, stops you honor
 
-**You dissolve three stops** — `/esq:work`'s `[context]` hand-off to `/esq:plan`, which step 4b carries out once per entry; its hand-off to `/esq:ui`, rendered by the item's own worker once its entry is worked, when the entry has no item to grill and this run's one render is unspent; and the plan's hand-off to `/esq:autopilot`, which the build stage carries out. Continue past them silently. A grill verdict is held for the question round below.
+**You dissolve four stops** — `/esq:work`'s `[context]` hand-off to `/esq:plan`, which step 4b carries out once per entry; its hand-off to `/esq:ui`, rendered by the item's own worker once its entry is worked, when the entry has no item to grill and this run's one render is unspent; and the plan's hand-offs to `/esq:autopilot` and, once reviewed clean, to `/esq:land`, which the build stage carries out. Continue past them silently. A grill verdict is held for the question round below.
 
 **You honor every other stop** — asking the user in place and acting on their answer *is* honoring it:
 
@@ -270,7 +270,7 @@ A walk with neither skips this section. Without `AskUserQuestion`, print the sam
 1. **A pick:** `SendMessage` the item's worker: `The user picked <direction>. Record it as /esq:ui's delegated run says, commit it, and report the commit.` Confirm the `brief: <slug> — direction <X>` commit. The brief now goes to the settlement plan.
 2. **`Grill <B-a>, … now`:** that choice is the user's request for the grill, the mandate `/esq:grill` asks for. Invoke `/esq:grill` **once** via the `Skill` tool, **in this session**, with the first item's verbatim `/esq:grill` line, followed, when the entry has more, by ` — one brief that also settles <B-b>: <its open points> · <B-c>: …`, and follow it to its committed brief. You run it yourself, as you run the build stage's two: a grill is questions to the user, and a subagent has nobody to ask. Then confirm the tree is clean and you are on the starting branch.
 3. **`Later`, or a question left unanswered:** the item stays handed back, and its command goes in the report's zone 2.
-4. **An item still to render in a grilled entry:** when the grill's brief names its `B-NNN`, the grill absorbed it — report it as `absorbed by <brief path>`, render nothing, and plan it with that brief. Otherwise it stays handed back with its `/esq:ui` line.
+4. **An item still to render in a grilled entry:** when the grill's brief names its `B-NNN`, the grill absorbed it — report it as `absorbed by <brief path>`, render nothing, and plan it with that brief. Otherwise the reason it waited is gone: when this run's one render is unspent, render it now with step 4's message to its worker (a worker that no longer answers → one `esq:ui` subagent, `model: opus`, given that message and the item's `/esq:ui` line), then put its pick in **one** follow-up `AskUserQuestion` shaped as **Rendered** above — the user is present, having just answered the grill — and record the pick as point 1 does. `Later` keeps the brief and its page handed back. A grill the user put off (`Later`) still holds the render back.
 
 **One plan for what the round settled.** When it left one or more briefs settled — a grill brief, a ui brief with its direction — spawn one `esq:plan` subagent, as step 4b does, with `implement <B-a>, … from <brief path>, …` naming each brief. Return to the starting branch (step 5).
 
@@ -284,7 +284,7 @@ Spawn one synchronous `general-purpose` agent, description `esq:roadmap`, `model
 
 Relay contradictions and their `/esq:roadmap` recovery command; never reorder, promote or re-derive the queue yourself.
 
-## Build and review what this run planned, last
+## Build, review and land what this run planned, last
 
 After the refresh, on the starting branch, take each plan **this run wrote** — step 4b's and the question round's — in walk order. A plan found in `inFlight` at preflight is not one: it stays a hand-off, since another session may own its branch. None → skip this section.
 
@@ -293,10 +293,11 @@ For each plan:
 1. **Switch to its branch:** `git status --porcelain` empty → `git switch <its **Branch:**>`, and confirm it reads back. Anything else is the third halt.
 2. **Build:** invoke `/esq:autopilot <plan-path>` via the `Skill` tool, in this session — this orchestrator, invoked by the user, delegates that run — and follow it to its report. Its gates are put to the user here, as its own procedure says.
 3. **Read the artifact:** classify the phases from `grep -n -E '^#{1,3} ' <plan-path>` (autopilot's `shared:log-skeleton` reading). Any phase not `completed` → the plan stays at autopilot's own `→ Next`; skip step 4.
-4. **Review:** invoke `/esq:converge <plan-path>` the same way, and follow it to its report. A `**Reviewed at:**` field in the plan header afterwards means it is ready to land.
-5. **Return to the starting branch** as the item loop's step 5 does, then take the next plan.
+4. **Review:** invoke `/esq:converge <plan-path>` the same way, and follow it to its report. No `**Reviewed at:**` field in the plan header afterwards → the plan stays at converge's own `→ Next`; skip step 5.
+5. **Land:** invoke `/esq:land <plan-path>` the same way, and follow it to its report: it re-checks every prerequisite itself, merges locally into the plan's `**Origin:**` or refuses with the command that clears it, and runs the rollout steps esq can run. A refusal, or a rollout step that is the user's, is that plan's entry in zone 2, with land's own command.
+6. **Return to the starting branch** as the item loop's step 5 does, then take the next plan.
 
-Never re-run either command on a plan whose run ended short, never call `/esq:build` or `/esq:land` yourself, and never build a plan this run did not write.
+Never re-run a command on a plan whose run ended short, never call `/esq:build` yourself, never push, and never build or land a plan this run did not write.
 
 <!-- conclusion:start -->
 **Conclude in three zones, then `→ Next`; nothing before or after them.**
@@ -327,8 +328,8 @@ Always produce this, even on an early halt:
 
   ✔ roadmap    <what the refresh actually updated>
   ✔ build      alias-sweep — 2/2 phases   (18m)
-  ✔ review     alias-sweep — converged, ready to land   (9m)
-  ○ not run    land
+  ✔ review     alias-sweep — converged   (9m)
+  ✔ land       alias-sweep → main, merge 4c1d2e7 — local, not pushed   (3m)
 
 → Next: <the one exact command the user should run>
 ```
@@ -339,19 +340,19 @@ Add one `○ worker model  asked opus · session on <model>` line only when this
 
 Zone 3 has one line per item — route, outcome, elapsed — and a failing item may carry an indented `Evidence:` (≤10 lines, omitted when the outcome line says it), the only place raw subagent output appears. Name a hand-off by what it waits for, never by the verdict alone: `B-641  work → grill   ⏸ your answers needed (grill not run)`, `B-029  work → ui      ✔ rendered, ⏸ your pick`, `B-029  work → ui      ○ not rendered — B-641's grill may settle it`, `B-029  work → ui      ✔ absorbed by <brief path>`, `B-641  work → grill   ✔ grilled, brief <path>` (each item a shared grill settled names the same brief).
 
-Compute `→ Next`, first match wins:
-- Halted on a dirty tree → `git status`, naming the item that left it and that nothing after it ran.
-- An item paused on an unclassifiable pick, or whose repair failed, and nothing above halted → `paused by your choice — nothing to run now (resume later: /esq:work <B-NNN>)`, naming a failed repair first, never the quoted original.
-- A decision block still unresolved → `"Run option <A|B|…>'s `do:` above, then: /esq:advance <target>"` on a scoped run (always carry the target through), and the same line without the target on a bare one. Name no option as chosen.
-- A plan this run wrote stopped short in its build or review → `git switch <its branch>`, then that run's own `→ Next`.
-- A plan this run wrote is ready to land → `git switch <its branch>`, then `/esq:land <plan path>`.
-- A plan was found already planned, or written but never built because the walk halted → `git switch <its branch>`, with zone 3 naming what follows the switch: `/esq:build <plan path>` `(Phase 1)`, or `/esq:autopilot <path>` when it has two or more phases.
-- An item still needs grilling or a pick → the verdict's own command, `/esq:grill B-N: <the named ambiguity>`, or `pick a direction on <page> and record it in <brief>`, or `/esq:ui B-N` when it was not rendered.
-- An entry is blocked on a `Needs-decision` item → `/esq:backlog` to answer it.
-- Scoped run, `<target>` is closed → `/esq:advance` to walk the rest of `Now` — never report the horizon as clear.
-- Bare run, everything in `Now` is closed → `/esq:roadmap` to see what promoted into it.
+**Zone 2 is the one list of what is left to the user, and `→ Next` is its item 1, verbatim.** Never print a `→ Next` that zone 2 does not lead with: two answers to "what now" is the defect this rule exists for. Every hand-off below is a numbered zone-2 entry with its exact command, and they are ordered value first — what ships the most, soonest — first match ranking highest:
+1. Halted on a dirty tree → `git status`, naming the item that left it and that nothing after it ran.
+2. A decision block still unresolved → `"Run option <A|B|…>'s `do:` above, then: /esq:advance <target>"` on a scoped run (always carry the target through), and the same line without the target on a bare one. Name no option as chosen.
+3. A plan this run wrote whose build, review or landing stopped short → `git switch <its branch>` when that run's command needs it, then that run's own `→ Next` (a land refusal names what clears it).
+4. A rollout step `/esq:land` left to the user → its line, verbatim.
+5. A plan found already planned, or written but never built because the walk halted → `git switch <its branch>`, then `/esq:autopilot <plan path>` (`/esq:build <plan path>` when one phase remains).
+6. An item still needing a pick, a grill or a render → `pick <direction> on <page> and record it in <brief>`, `/esq:grill B-N: <the named ambiguity>`, or `/esq:ui B-N` when it was not rendered.
+7. An entry blocked on a `Needs-decision` item → `/esq:backlog` to answer it.
+8. An item paused on an unclassifiable pick, or whose repair failed → `paused by your choice — nothing to run now (resume later: /esq:work <B-NNN>)`, naming a failed repair first, never the quoted original.
 
-Send a `PushNotification`: `"esq:advance — <C> closed, <P> planned, <L> ready to land, <H> handed back. <halted: reason | horizon clear>."` The question round's notification does not replace it.
+Zone 2 empty: scoped run → `/esq:advance` to walk the rest of `Now` — never report the horizon as clear; bare run, everything in `Now` closed → `/esq:roadmap` to see what promoted into it.
+
+Send a `PushNotification`: `"esq:advance — <C> closed, <P> planned, <L> landed, <H> handed back. <halted: reason | horizon clear>."` The question round's notification does not replace it.
 
 <!-- orch-shared:notify-ask:start -->
 **Notify before you ask, too:** send `"esq:<this command> — <what gated> needs one decision: <the decision line>"` through `PushNotification` *before* the `AskUserQuestion` call, not after it.
@@ -359,11 +360,11 @@ Send a `PushNotification`: `"esq:advance — <C> closed, <P> planned, <L> ready 
 
 ## Constraints
 
-- **Orchestrate only.** You write no code, no commits, and no files — including `docs/BACKLOG.md` and `docs/ROADMAP.md`, which you read but never edit. Every mutation comes from a subagent following `/esq:work`, `/esq:ui`, `/esq:plan` or `/esq:roadmap`, or from a command you run in this session: `/esq:grill` on a grill the user accepted, `/esq:autopilot` and `/esq:converge` in the build stage. Your git actions of your own are switching to a plan's branch for the build stage and returning to the starting branch — never forced, never over a dirty tree.
+- **Orchestrate only.** You write no code, no commits, and no files — including `docs/BACKLOG.md` and `docs/ROADMAP.md`, which you read but never edit. Every mutation comes from a subagent following `/esq:work`, `/esq:ui`, `/esq:plan` or `/esq:roadmap`, or from a command you run in this session: `/esq:grill` on a grill the user accepted, `/esq:autopilot`, `/esq:converge` and `/esq:land` in the build stage. Your git actions of your own are switching to a plan's branch for the build stage and returning to the starting branch — never forced, never over a dirty tree.
 - **Never fix, patch, or work around** what an item agent escalated — except an option the *user* chose, applied verbatim by a subagent.
-- **Build only what this run planned**, through `/esq:autopilot` then `/esq:converge` in this session — never `/esq:build` or `/esq:land`, never a plan found in flight. **Never split** (`/esq:epic`), **never grill unasked** — a grill runs only on the user's `Grill <B-a>, … now`, once per entry — and **never pick a direction**: the render is yours, the pick theirs.
+- **Build and land only what this run planned**, through `/esq:autopilot`, `/esq:converge` then `/esq:land` in this session — never `/esq:build`, never a push, never a plan found in flight. **Never split** (`/esq:epic`), **never grill unasked** — a grill runs only on the user's `Grill <B-a>, … now`, once per entry — and **never pick a direction**: the render is yours, the pick theirs.
 - **The roadmap's `Now` order is the input**, never re-derived, re-sorted or skipped ahead; nothing outside `Now` is targetable.
-- **One subagent per item and at most one plan subagent per entry, strictly sequential**, never concurrent; at most one `/esq:ui` render per run, inside its item's subagent, and never in an entry with an item to grill; plus one apply agent per decision whose approved action routes `apply`, one question round with at most one grill per entry, one plan subagent for what it settled, one refresh, then one autopilot and one converge run per plan this run wrote, under the bounds they announce. State that bound up front.
+- **One subagent per item and at most one plan subagent per entry, strictly sequential**, never concurrent; at most one `/esq:ui` render per run, inside its item's subagent (or one `esq:ui` subagent when that worker no longer answers), never ahead of a grill pending in its entry; plus one apply agent per decision whose approved action routes `apply`, one question round with at most one grill per entry, one plan subagent for what it settled, one refresh, then one autopilot, one converge and one land run per plan this run wrote, under the bounds they announce. State that bound up front.
 - **Never retry a failed item** — a failure is a finding, not a flake.
 - **A gate is resolved once by the user's pick, applied verbatim, and the gated item is not re-run.** Never answer one on the user's behalf, and never pick an option from an `AskUserQuestion` a subagent raised. Relaying the item agent's leaning is not answering; forming your own, or acting on a prompt nobody answered, is.
 - **A decision is relayed as an option set, never as a question, and a diagnosis as a diagnosis** — every option, diagnosis and action from the item agent, never from you.
