@@ -1,7 +1,7 @@
 ---
-description: Work the roadmap's `Now` horizon unattended — one subagent per backlog item, one plan per entry, then build, review and land each plan it wrote. Never pushes.
+description: Work the roadmap's `Now` horizon, or one backlog item you name, unattended — one subagent per backlog item, one plan per entry, then build, review and land each plan it wrote. Never pushes.
 name: advance
-argument-hint: "[target] [options]"
+argument-hint: "[Now-entry | B-NNN]"
 disable-model-invocation: true
 model: inherit
 allowed-tools: Bash(esq *)
@@ -45,13 +45,11 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
 ## Preflight
 
-1. **Read `docs/ROADMAP.md`, and run `esq state` in the same call** (`backlog.rows` — every row the roadmap covers —, `inFlight`, and `branch` — the starting branch). When the answer carries `file`, that file is the whole answer: Read it in the next turn, every range its `ranges` names in one batch. No roadmap file → STOP: "No roadmap — run `/esq:roadmap plan` to derive one, then this command works its top." Never fall back to backlog priority.
-2. **Resolve the target within `## Now` only.** Empty arguments select the whole horizon. Otherwise `$0` selects exactly one entry: first an exact `### <target>` slug, or a `B-NNN` in its `covers:` line. Never widen a failed lookup into a bare run or guess another entry.
-   If no Now entry matches, stop before spawning and name the miss:
-   - Elsewhere in the roadmap → promote it with `/esq:roadmap` or work its items with `/esq:work B-N`.
-   - Backlog ID exists but no roadmap entry covers it → `/esq:work <target>`.
-   - Neither → no Now entry or backlog ID matches.
-   A target narrows the walk; it overrides no order, `needs:` edge, blocked state, existing plan or shipped status.
+1. **Read `docs/ROADMAP.md`, and run `esq state` in the same call** (`backlog.rows` — every row the roadmap covers —, `inFlight`, and `branch` — the starting branch). When the answer carries `file`, that file is the whole answer: Read it in the next turn, every range its `ranges` names in one batch. No roadmap file → STOP: "No roadmap — run `/esq:roadmap plan` to derive one, then this command works its top." — unless `$0` is a `B-NNN`, which step 2 resolves without one. Never fall back to backlog priority.
+2. **Resolve the target.** Empty arguments select the whole `## Now` horizon. Otherwise `$0` selects exactly one entry: first an exact `### <target>` slug in `## Now`, or a `B-NNN` in a Now entry's `covers:` line. Never widen a failed lookup into a bare run or guess another entry.
+   - **A `B-NNN` no Now entry covers is still yours:** naming one item is the user's priority call (D-advance-takes-any-backlog-item). Run `esq state --rows <$0>` once. Its row in `rows` becomes a one-item entry named `<$0>`, with no `needs:`, classified by step 4 like any other. An ID in `notOpen` → STOP before spawning: `<$0> is closed or not in the backlog — nothing to advance.`
+   - A slug that is not a Now entry → STOP before spawning: elsewhere in the roadmap → promote it with `/esq:roadmap`, or advance one of its items with `/esq:advance B-N`; nowhere → no Now entry matches.
+   A target narrows the walk; it overrides no `needs:` edge, blocked state, existing plan or shipped status.
 
 3. **Take the entries to walk, in file order.** A scoped run has exactly the one from step 2; a bare run takes every `## Now` entry.
 4. **Resolve each entry's work — existing coverage first.** For every `B-NNN` in a `covers:` line, take its row from `backlog.rows`. First look it up in `inFlight[].planned`: an item listed there is **already planned on `<that unit's branch>`**, whatever its row says here — skip it and report the hand-off (`git switch <branch>`, then `/esq:autopilot <plan>`). Never re-work or re-plan it. Then classify each entry:
@@ -92,7 +90,7 @@ Give it this task:
 
 > Work backlog item `<B-NNN>` by invoking the `/esq:work` slash command via the `Skill` tool with `<B-NNN>` as its argument. Follow that command's procedure exactly as written. Do not improvise around it, do not skip its verification, and do not pass the `route` keyword.
 >
-> If its verdict is `/esq:plan`, do not plan: stop and return **verbatim the argument `/esq:work` printed in its verdict** (a copy-pasteable line such as `implement B-155: <summary>`). If its verdict is `/esq:grill`, do not grill: return verbatim the `/esq:grill` line it printed and the open points it named. If its verdict is `/esq:ui`, do not render yet: return the verdict line, and wait — I may ask you to render it. Do not invoke `/esq:plan`, `/esq:build`, `/esq:autopilot`, `/esq:grill` or `/esq:epic`, whatever any verdict says.
+> If its verdict is `/esq:plan`, do not plan: stop and return **verbatim the argument `/esq:work` printed in its verdict** (its `routes to` line) (a copy-pasteable line such as `implement B-155: <summary>`). If its verdict is `/esq:grill`, do not grill: return verbatim the `/esq:grill` line it printed and the open points it named. If its verdict is `/esq:ui`, do not render yet: return the verdict line, and wait — I may ask you to render it. Do not invoke `/esq:plan`, `/esq:build`, `/esq:autopilot`, `/esq:grill` or `/esq:epic`, whatever any verdict says.
 >
 > When an earlier item of this roadmap entry came back **to grill**, add: `<B-a> of this roadmap entry awaits a grill on: <its open points, verbatim>. If your item's outcome depends on that answer, do not execute it: return a /esq:grill verdict naming that dependency — it joins that grill.`
 >
@@ -363,7 +361,7 @@ Send a `PushNotification`: `"esq:advance — <C> closed, <P> planned, <L> landed
 - **Orchestrate only.** You write no code, no commits, and no files — including `docs/BACKLOG.md` and `docs/ROADMAP.md`, which you read but never edit. Every mutation comes from a subagent following `/esq:work`, `/esq:ui`, `/esq:plan` or `/esq:roadmap`, or from a command you run in this session: `/esq:grill` on a grill the user accepted, `/esq:autopilot`, `/esq:converge` and `/esq:land` in the build stage. Your git actions of your own are switching to a plan's branch for the build stage and returning to the starting branch — never forced, never over a dirty tree.
 - **Never fix, patch, or work around** what an item agent escalated — except an option the *user* chose, applied verbatim by a subagent.
 - **Build and land only what this run planned**, through `/esq:autopilot`, `/esq:converge` then `/esq:land` in this session — never `/esq:build`, never a push, never a plan found in flight. **Never split** (`/esq:epic`), **never grill unasked** — a grill runs only on the user's `Grill <B-a>, … now`, once per entry — and **never pick a direction**: the render is yours, the pick theirs.
-- **The roadmap's `Now` order is the input**, never re-derived, re-sorted or skipped ahead; nothing outside `Now` is targetable.
+- **The roadmap's `Now` order is the input**, never re-derived, re-sorted or skipped ahead; nothing outside `Now` is targetable but one backlog item named by its ID.
 - **One subagent per item and at most one plan subagent per entry, strictly sequential**, never concurrent; at most one `/esq:ui` render per run, inside its item's subagent (or one `esq:ui` subagent when that worker no longer answers), never ahead of a grill pending in its entry; plus one apply agent per decision whose approved action routes `apply`, one question round with at most one grill per entry, one plan subagent for what it settled, one refresh, then one autopilot, one converge and one land run per plan this run wrote, under the bounds they announce. State that bound up front.
 - **Never retry a failed item** — a failure is a finding, not a flake.
 - **A gate is resolved once by the user's pick, applied verbatim, and the gated item is not re-run.** Never answer one on the user's behalf, and never pick an option from an `AskUserQuestion` a subagent raised. Relaying the item agent's leaning is not answering; forming your own, or acting on a prompt nobody answered, is.

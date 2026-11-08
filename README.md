@@ -154,7 +154,8 @@ one commit per page.
 
 **Small change?** `/esq:work fix the typo in the sign-in error` records the item,
 sizes it, and — when it is truly small — makes the change, verifies it and commits,
-with no plan. Anything bigger gets the exact next command instead. A real run:
+with no plan. Anything that needs a plan, a grill or a screen direction hands on to
+`/esq:advance B-NNN`, which takes it the rest of the way to a local merge. A real run:
 
 ```text
 ✔  work — B-078 · ⚠️ debt [med?] · verdict: inline · done · 59s
@@ -184,11 +185,11 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings; a lesson in `docs/LESSONS.md` for a fix whose contrast recurs beyond its line |
 | `/esq:land <plan>` | Verify readiness and merge the work into the branch it started from | A local merge or an explained refusal, then every rollout step esq can run, and the next plan still in flight; never a push |
 | `/esq:check <plan>` | Diagnose missed tasks, divergence and unplanned work phase by phase | A report and corrective brief; no review coverage |
-| `/esq:work [item-or-text] [route]` | Investigate one item; do it now if trivial, otherwise recommend the method | Code commit and backlog close for small work; otherwise the next command |
+| `/esq:work [item-or-text] [route]` | Investigate one item; do it now if trivial, otherwise recommend the method | Code commit and backlog close for small work; otherwise the next command — `/esq:advance B-NNN` when it needs a plan, a grill or a screen direction |
 | `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
 | `/esq:sweep` | Reconcile backlog items against evidence of delivery | Backlog closures; questions only for unresolved cases |
 | `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order under your recorded criterion (lens) | `docs/ROADMAP.md`; backlog concern, priority and rank updates when ordering |
-| `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items, render UI directions, then ask you once what only you can settle | Inline fixes, plans, rendered directions; grills you accept; each plan it wrote built, reviewed and landed locally; never pushes |
+| `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items, or any one backlog item by its ID, render UI directions, then ask you once what only you can settle | Inline fixes, plans, rendered directions; grills you accept; each plan it wrote built, reviewed and landed locally; never pushes |
 | `/esq:autopilot <plan>` | Build remaining phases sequentially, one worker per phase | Code and execution logs |
 | `/esq:converge <plan-or-fixes-brief>` | Run review → fix, then plan → build → review any 🟡 left, or resume an existing brief | Readiness report, and a lesson for a 🟡 its corrective round closed whose contrast recurs; no merge |
 | `/esq:epic [new title-or-slug]` | Group a theme spanning several plans and backlog items | `docs/epics/<slug>.md` |
@@ -386,7 +387,8 @@ only operates on planned work.
   applies one edit per line (`add`, `X before Y`, `why X: …`) in one run and one commit. A finished plan does
   not close its items by itself: `/esq:sweep` closes one only with evidence of its
   whole outcome.
-- `/esq:advance` works the roadmap's `Now` items — one worker per item, at most one
+- `/esq:advance` works the roadmap's `Now` items — or, given `B-NNN`, that one backlog item,
+  wherever it sits — one worker per item, at most one
   new plan per entry, at most one UI render (skipped when an item beside it needs a
   grill, which may settle the screen question). Once that work
   is done it asks you in one round what only you can settle: grill ambiguous items now

@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-advance-takes-any-backlog-item | 2026-11-08 | arch | roadmap | `/esq:advance B-NNN` works an Open backlog item no Now entry covers as a one-item entry, through to a local merge; a closed or absent ID stops before spawning, and a slug still resolves within `Now` only. `/esq:work`'s directly invoked `plan`, `grill` or `ui` verdict hands on to `/esq:advance <B-NNN>`, its command kept on a `routes to` line. | Active |
 | D-advance-lands-what-it-built | 2026-11-08 | arch | skills | After `/esq:converge` records `**Reviewed at:**` on a plan this run wrote, `/esq:advance` invokes `/esq:land <plan>` in its own session; land keeps every prerequisite and its refusals, the merge stays local and nothing pushes. A render held back for a grill whose brief did not absorb it is rendered right after that grill, its pick asked in one follow-up question. The report's zone 2 is the one value-ordered list of what is left to the user, and `→ Next` is its item 1. `land` drops `disable-model-invocation` for the in-body mandate refusal. | Active |
 | D-a-plan-slug-keeps-its-numeric-suffix | 2026-10-29 | arch | plan-identity | `canonicalPlanSlug` strips only the `YYYY-MM-DD-` prefix; a trailing `-N` is part of a plan's identity, and the corrective `-fixes(-N)` group is stripped only by the brief and chain readers (`briefSlug`, `correctiveChain`) | Active |
 | D-expertise-modules-announced-by-stack | 2026-10-26 | arch | expertise | Expertise ships as plugin/expertise/<name>.md modules (frontmatter name and description, **As of:**, **Paths:**, optional **Stack:**), outside skill discovery; esq expertise match answers their files and stack signals, a SessionStart hook announces only the stack-matched ones, and esq flows Read them. | Active |
@@ -131,7 +132,7 @@
 | D-ratio-sealed-with-its-population | 2026-08-21 | arch | telemetry | The sealed group carries `paired` and `callsPerTrip` beside the raw axes, and the table prints the ratio to two decimals rather than through `humanCount` | Active |
 | D-a-measured-figure-is-dated-not-refreshed | 2026-08-21 | arch | cost | A measurement written into a ledger carries its date and stays as measured; a correction states the old figure's error as a magnitude and never re-quotes the superseded number | Active |
 | D-a-match-is-never-read-through-a-pipe | 2026-08-21 | infra | audit | Under `pipefail`, no script pipes into an early-exiting reader: a `grep -q` test reads a here-string or a `case`, and the shape is refused by `check-sigpipe-shape.sh` rather than tolerated at the call site | Active |
-| D-advance-target-selects-within-now | 2026-08-21 | arch | roadmap | `/esq:advance` accepts an entry slug or `B-NNN` that selects within the `Now` horizon and refuses anything outside it, rather than reaching into `Next`/`Later` or falling back to the full walk | Active |
+| D-advance-target-selects-within-now | 2026-08-21 | arch | roadmap | `/esq:advance` accepts an entry slug or `B-NNN` that selects within the `Now` horizon and refuses anything outside it, rather than reaching into `Next`/`Later` or falling back to the full walk | Active — amended 2026-11-08 by [D-advance-takes-any-backlog-item]: a named `B-NNN` outside `Now` is worked as a one-item entry |
 | D-ask-shape-lives-in-zone-two | 2026-08-21 | ux | reporting | The one-line action-first ask shape is stated inside the conclusion block's zone 2 rather than as a new shared family, and guarded by an extracted check/fault-injection pair over the conclusion templates | Active — amended 2026-09-11 by D-announcements-and-asks-stay-minimal |
 | D-an-ask-cap-measures-the-rendered-line | 2026-08-22 | infra | audit | The ask-shape cap counts characters as a reader sees them, not bytes, and treats a run of two or more spaces as a column separator rather than a sentence break — both pinned by must-not-flag fault-injection cases | Active |
 | D-an-action-first-test-is-a-verb-registry | 2026-08-22 | infra | audit | "The action first" is tested positively, against a declared registry of opening action verbs, rather than by a denylist of narration words — the shape of the opener only chooses the finding message | Active |
@@ -2124,7 +2125,7 @@ every other pipeline in both files).
 **Scope:** arch
 **Topic:** roadmap
 **Date:** 2026-08-21
-**Statut:** Active
+**Statut:** Active — amended 2026-11-08 by [D-advance-takes-any-backlog-item]: a `B-NNN` no Now entry covers is worked as a one-item entry; a slug still resolves within `Now` only, and a failed lookup still never widens.
 
 **Contexte:** `/esq:advance` was the only one of the three orchestrators with no target — its preflight took every `## Now` entry unconditionally and its body never read `$ARGUMENTS` — so a seven-entry horizon was 14 sequential Opus subagents or nothing (B-077).
 **Décision:** The argument resolves to exactly one `## Now` entry — by slug heading, or by a `B-NNN` named in an entry's `covers:` — and anything it cannot resolve there is a hard stop before the first spawn, never a fallback to the full walk and never a reach into `Next` or `Later`.
@@ -5717,3 +5718,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: a reviewed unit reaches its origin in the run that planned it, and the report names one next step. Accepted: the merge into `Origin` no longer waits for a human look after the review (the review itself and land's gate are the look); advance's context also carries land's body; a grill sitting can end on one more question.
 **Conséquences:** `/esq:advance`'s description, principle, announces, build stage, question round, constraints and report change; `land` joins the model-invocable set in `check-plugin.sh` and `skill-authoring`; ARCHITECTURE, the README's advance row and paragraph, and `/esq:status`'s and `/esq:roadmap`'s advance offer say it. SPEC § Unattended roadmap walk is `/esq:spec`'s to rewrite. `D-esquisse-never-pushes` is untouched.
 **Alternatives rejetées:** Keep the stop and compress `→ Next` to one command (still a retype for a merge already consented to). Fold landing into `/esq:converge` (re-creates what D-landing-is-its-own-command removed). Order `→ Next` and zone 2 separately but more carefully (two lists drift again).
+
+## D-advance-takes-any-backlog-item — `/esq:advance B-NNN` carries any open item to a local merge, and `/esq:work` hands on to it
+
+**Scope:** arch
+**Topic:** roadmap
+**Date:** 2026-11-08
+**Statut:** Active
+**Fondement:** user — 2026-11-08: « Should we adjust the autonomy of work cmd […] or advance cmd could accept backlog item directly? », then, offered advance taking any item and work handing on to it rather than work chaining itself, « Go »
+
+**Contexte:** `/esq:work` routes an item and executes it only when trivial; a `plan`, `grill` or `ui` verdict left the user to chain `/esq:plan`, `/esq:autopilot`, `/esq:converge` and `/esq:land` by hand. `/esq:advance` does that whole chain, but refused any target outside `Now` (D-advance-target-selects-within-now).
+**Décision:** A `B-NNN` no Now entry covers resolves through `esq state --rows <B-NNN>` into a one-item entry walked like any other, with no `needs:`; an ID in `notOpen` stops before spawning. A slug still resolves within `Now` only, and a failed lookup never widens. `/esq:work`, invoked directly, prints its `plan`, `grill` or `ui` verdict on a `✔ routes to` line and ends on `→ Next: /clear, then /esq:advance <B-NNN>`; delegated, or on `fix`, `build` or `epic`, `→ Next` stays the verdict's command.
+**Raison:** A user naming one item has made the priority call the `Now` order exists to make, so refusing it protects nothing. Making `/esq:work` chain the stages itself would give two orchestrators one procedure, and advance's own item workers would start chaining too.
+**Tradeoff:** Gained: one command from any open item to a reviewed local merge. Accepted: a `B-NNN` outside `Now` skips the roadmap order on the user's word; a routed item costs one orchestrator session on top of its worker.
+**Conséquences:** `/esq:advance`'s description, argument hint, preflight, worker prompt and constraints change; `/esq:work`'s routing output gains a `routes to` line and its `→ Next` rule changes; the README's work and advance rows and paragraphs say it.
+**Alternatives rejetées:** `/esq:work` chains plan, build, review and land itself (duplicates advance, and changes what advance's workers do). Keep the refusal and send outside items to `/esq:roadmap` first (one more command for a choice the user already made).
