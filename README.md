@@ -188,7 +188,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:work [item-or-text] [route]` | Investigate one item; do it now if trivial, otherwise recommend the method | Code commit and backlog close for small work; otherwise the next command — `/esq:advance B-NNN` when it needs a plan, a grill or a screen direction |
 | `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks, each classified by type, concern and layer (`app`/`infra`) when it is filed; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
 | `/esq:sweep` | Reconcile backlog items against evidence of delivery | Backlog closures; questions only for unresolved cases |
-| `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order under your recorded criterion (lens) | `docs/ROADMAP.md`; backlog concern, priority and rank updates when ordering |
+| `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order under your recorded criterion (lens) and shows what the open work is made of | `docs/ROADMAP.md`; backlog concern, layer, priority and rank updates when ordering; a concern × layer and type table above the order, and a rebalance proposal when the head of the queue is short on user value |
 | `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items, or any one backlog item by its ID, render UI directions, then ask you once what only you can settle | Inline fixes, plans, rendered directions; grills you accept; each plan it wrote built, reviewed and landed locally; never pushes |
 | `/esq:autopilot <plan>` | Build remaining phases sequentially, one worker per phase | Code and execution logs |
 | `/esq:converge <plan-or-fixes-brief>` | Run review → fix, then plan → build → review any 🟡 left, or resume an existing brief | Readiness report, and a lesson for a 🟡 its corrective round closed whose contrast recurs; no merge |
@@ -382,11 +382,15 @@ only operates on planned work.
   **concern** (`user`, `security`, `legal`, `checks`, `deps`, `ops`, `internal`) and a **layer**
   (`app`, the product its users run; `infra`, hosting, CI, release and install). `esq backlog add`
   refuses a row without both, or with a type off the five, so every new item is classified when it
-  is captured; an older item's concern is classified once by the first derive. A tier can name a layer
+  is captured; an older item's concern and layer are classified once by the first derive. A tier can name a layer
   (`security+infra:hi`). The CLI sorts the items no roadmap entry
   covers by the lens itself and the model only orders the entries. A derive also brings
   suggested (`?`) priorities into line with the lens; a priority you confirmed is never changed,
-  only reported where it disagrees. Bare `/esq:roadmap` refreshes state without reordering; `/esq:roadmap <edit>`
+  only reported where it disagrees. Above the order, a derive prints how the open items split by
+  concern × layer and by type (`esq backlog distribution`, read-only). When more than half of the
+  first five items in the queue are known not to serve users and a user item could move up, one line says so and
+  proposes the commands that would rebalance it; nothing moves until you run them.
+  Bare `/esq:roadmap` refreshes state without reordering; `/esq:roadmap <edit>`
   applies one edit per line (`add`, `X before Y`, `why X: …`) in one run and one commit. A finished plan does
   not close its items by itself: `/esq:sweep` closes one only with evidence of its
   whole outcome.
