@@ -18,7 +18,7 @@ You are producing a planning document for a future execution session to follow. 
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Use `esq backlog reserve-id` for new backlog rows, `esq backlog set-status <B-NNN> Planned` for rows this plan picks up, `esq brief depth <path>` before opening a corrective round, and `esq validate` before committing. The CLI owns structured mutations only; approaches, architecture, phases, risk, verification quality, and UX remain your decisions.
+Use `esq backlog add --concern <concern> --layer <app|infra>` to file a backlog row, `esq backlog set-status <B-NNN> Planned` for rows this plan picks up, `esq brief depth <path>` before opening a corrective round, and `esq validate` before committing. The CLI owns structured mutations only; approaches, architecture, phases, risk, verification quality, and UX remain your decisions.
 
 Do NOT toggle plan mode. The discipline is enforced by this prompt: read the codebase, reason, write ONE file, commit it, stop. Plan mode would block the file write you need to do.
 

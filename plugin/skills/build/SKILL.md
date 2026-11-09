@@ -19,7 +19,7 @@ You are executing one phase of a plan, then stopping. Each fresh `/esq:build` in
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Use `esq next-phase "$0" --preflight` for the branch-ownership verdict, the continuity anchor, the phase classification and the plan text and log slices this command reads, and `esq validate` for invariants. Append a new entry only through `esq plan append-log "$0" '<json>'`; never hand-edit a new log entry. Use `esq backlog reserve-id` before adding a backlog row, and `esq decisions add` to write a registry entry. The CLI parses and mutates structure; architecture, scope, verification quality, risk, and UX remain your decisions.
+Use `esq next-phase "$0" --preflight` for the branch-ownership verdict, the continuity anchor, the phase classification and the plan text and log slices this command reads, and `esq validate` for invariants. Append a new entry only through `esq plan append-log "$0" '<json>'`; never hand-edit a new log entry. Use `esq backlog add --concern <concern> --layer <app|infra>` to file a backlog row, and `esq decisions add` to write a registry entry. The CLI parses and mutates structure; architecture, scope, verification quality, risk, and UX remain your decisions.
 
 Do NOT use plan mode. You need to write code.
 
