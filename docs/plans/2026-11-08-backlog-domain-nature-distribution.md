@@ -220,3 +220,38 @@ None. The brief settled every user-owned choice, and the rest is decided above.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-11-08
+
+**Plan committed at:** d876de0
+
+**Commits:** 69219fa, 423b0b1
+
+**Verified:** 423b0b1893112bee63121a46af6a4ba1d876aa8e
+- `node --test 'tests/cli/*.test.mjs'`
+- `esq backlog add --type perf --summary probe --source manual --concern user --layer app`
+- `esq backlog add --type bug --summary probe --source manual`
+- `git grep -nE '\| B-NNN \| <today>|shared:row-header' -- plugin/skills/work/SKILL.md plugin/skills/review/SKILL.md plugin/skills/check/SKILL.md plugin/skills/fix/SKILL.md`
+- `git grep -nE 'esq backlog add --' -- plugin/skills | grep -vE -- '--concern .*--layer|--layer .*--concern'`
+
+**What got built:** `esq backlog add` now refuses a row without a concern and a layer, or with a type word off the five, before reserving an ID, and writes the canonical type cell; a Layer column widens after Concern; one closed-vocabulary setter backs set-concern, set-layer and set-type; tiers take a layer word; validate names an off-list layer and advises on a drifted type. Every skill capture site calls `esq backlog add --concern --layer`, the hand-written row templates in work, review, check and fix are gone.
+
+**Verification:**
+- (auto) node --test 'tests/cli/*.test.mjs' — 422 pass, 0 fail (≈14 s), including the new refusal, no-reservation, set-layer/set-type, layer-tier, legacy-ledger and legacy-split tests; four source mutations each redden backlog-lens, source restored
+- (auto) esq backlog add --type perf … --concern user --layer app — exit 2, `invalid type: perf — one of bug, debt, idea, improvement, todo`, docs/BACKLOG.md byte-identical
+- (auto) esq backlog add --type bug --summary probe --source manual — exit 2, `missing --concern — … one of user, security, legal, checks, deps, ops, internal`
+- (auto) git grep for `| B-NNN | <today>` / shared:row-header in work, review, check, fix — no match (exit 1)
+- (auto) git grep 'esq backlog add --' in plugin/skills without both flags — no match (exit 1)
+- (extra) check-structure.sh, check-conformance.sh, check-plugin.sh — exit 0 each (the skill edits earn them; the full audit is the last phase's)
+
+**Surprises / decisions made during execution:** - `esq state --rows` rows now carry a `layer` key; the state test's expected rows were updated (esq.test.mjs), not loosened.
+- The checkable-lesson row's template (`BACKLOG_TEMPLATE`) now carries Concern and Layer, and that row is filed `checks`/`app`.
+- `--concern none` / `--layer none` on add are refused as missing, matching the plan's 'none refused on add'.
+- The legacy-split fixture lives in backlog-lens.test.mjs (Task 1.2's commit), next to the other add tests.
+- README's concern paragraph says only an older item's *concern* is classified by the derive today; Phase 3 extends that to layer and should update the sentence.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. `esq backlog set-type <ids> <word>`, `set-concern`, `set-layer` take comma-joined ids and write in one atomic call; set-layer on this repo's ledger widens Layer after Concern on first use.
+2. `esq validate` now lists one `non-canonical backlog type for B-NNN` advisory per drifted row (B-072 ☑️ chore, B-117 ☑️ task, B-3000 tech-debt, B-155 improvement, …); Phase 2's done-state is zero such advisories and no layer finding.
+3. Phase 3: README § Backlog says the derive classifies only an older item's concern — widen it to layer when roadmap's classify step fills blank layers.
