@@ -255,3 +255,32 @@ None. The brief settled every user-owned choice, and the rest is decided above.
 **For Phase 2:** 1. `esq backlog set-type <ids> <word>`, `set-concern`, `set-layer` take comma-joined ids and write in one atomic call; set-layer on this repo's ledger widens Layer after Concern on first use.
 2. `esq validate` now lists one `non-canonical backlog type for B-NNN` advisory per drifted row (B-072 ☑️ chore, B-117 ☑️ task, B-3000 tech-debt, B-155 improvement, …); Phase 2's done-state is zero such advisories and no layer finding.
 3. Phase 3: README § Backlog says the derive classifies only an older item's concern — widen it to layer when roadmap's classify step fills blank layers.
+
+### Phase 2 — completed 2026-11-08
+
+**Plan committed at:** 2fc8125
+
+**Commits:** 8fd843b
+
+**Verified:** 8fd843beb7404876fba98ad74d468936ff156ed1
+- `awk -F'|' '/^\| B-/ && ($4 !~ /^ (🐛 bug|✨ improvement|☑️ todo|💡 idea|⚠️ debt) $/ || $5 ~ /^ *$/ || $6 ~ /^ *$/)' docs/BACKLOG.md`
+- `esq validate`
+
+**What got built:** All 200 rows of docs/BACKLOG.md carry a canonical Type, a Concern and a Layer, written by one chained call of grouped esq backlog set-type, set-concern and set-layer; the Layer column widened after Concern; only table lines changed.
+
+**Verification:**
+- (auto) awk canonical-type / blank Concern / blank Layer scan over docs/BACKLOG.md — prints no row
+- (auto) esq validate — valid, 0 findings, 0 advisories
+
+**Decided for you:**
+- product: token/turn-cost and telemetry/measurement rows are classified internal, not user, so user means a feature, an output or a defect a user hits (78 user, 65 internal, 49 checks, 5 security, 3 ops) — undo: esq backlog set-concern <ids> user
+- architecture: audit.sh checks, lab instruments (probes, journeys, measures) and release/install rows are layer infra; skills, CLI, hooks and their tests are app (136 app, 64 infra) — undo: esq backlog set-layer <ids> app
+
+**Surprises / decisions made during execution:** - Drifted types normalized: B-198 bug; B-3000, B-156, B-174, B-175, B-176, B-179, B-180 debt; B-155, B-170, B-193 (⚡ perf), B-194..B-197 improvement; B-072 (☑️ chore), B-117 (☑️ task) todo.
+- B-068 has a blank Status cell; left as is (outside this phase: it touches only Type, Concern and Layer).
+
+**Backlog candidates:** None.
+
+**For Phase 3:** 1. docs/BACKLOG.md is fully classified (0 unclassified concern or layer, canonical types), so Phase 3's on-repo distribution check should see unclassified 0/0.
+2. B-068 has a blank Status, so it is not counted as open by the Phase 3 awk row filter (Open|Needs-decision|Planned), and the distribution must not count it either.
+3. Open-row concerns lean internal/checks; the imbalance line may fire on this repo, which is expected.
