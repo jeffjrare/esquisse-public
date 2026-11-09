@@ -284,3 +284,33 @@ None. The brief settled every user-owned choice, and the rest is decided above.
 **For Phase 3:** 1. docs/BACKLOG.md is fully classified (0 unclassified concern or layer, canonical types), so Phase 3's on-repo distribution check should see unclassified 0/0.
 2. B-068 has a blank Status, so it is not counted as open by the Phase 3 awk row filter (Open|Needs-decision|Planned), and the distribution must not count it either.
 3. Open-row concerns lean internal/checks; the imbalance line may fire on this repo, which is expected.
+
+### Phase 3 — completed 2026-11-08
+
+**Plan committed at:** 7669824
+
+**Commits:** 1b49fab, ed9d6e1
+
+**Verified:** ed9d6e1e83fd003450c4aa3d51f45439fc16d176
+- `node --test tests/cli/backlog-distribution.test.mjs`
+- `esq backlog distribution | node -e 'const j=JSON.parse(require("fs").readFileSync(0,"utf8"));const rows=require("fs").readFileSync("docs/BACKLOG.md","utf8").split("\n").filter(l=>/^\| B-/.test(l)&&/\| (Open|Needs-decision|Planned) \|$/.test(l)).length;const d=j.domain.reduce((a,r)=>a+r.count,0);const t=Object.values(j.type).reduce((a,n)=>a+n,0);process.exit(j.total===rows&&d===rows&&t===rows&&j.unclassified.concern===0&&j.unclassified.layer===0?0:1)'`
+- `./scripts/audit.sh`
+
+**What got built:** esq backlog distribution (read-only) counts open rows by concern × layer and by type, prints a ready cross-tab, and flags a head of five short on user value with ranked rebalance candidates (raiseTo when rank alone cannot lift them); /esq:roadmap plan fills blank layers, prints the table above the order and proposes the rebalance in one results-zone line.
+
+**Verification:**
+- (auto) node --test tests/cli/backlog-distribution.test.mjs — 10 pass, 0 fail (mutating the share threshold and the eligibility filter turned 4 tests red; source restored)
+- (auto) esq backlog distribution | node -e … (on-repo sums) — exit 0: total 17 open rows, both axes sum to 17, unclassified concern 0 and layer 0
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), exit 0 in 25s
+
+**Decided for you:**
+- product: the rebalance proposal raises each candidate to the level of the last row still in the head after the move (not the original fifth row), so that placing every candidate ahead actually restores the share; when eligible user rows run out the candidates list all of them even if the share is not fully restored — undo: change the anchor in backlogDistribution in plugin/lib/cli.mjs
+- design: the cross-tab labels a blank concern or layer "—", always shows the four count columns, and the type line omits zero counts — undo: distributionTable in plugin/lib/cli.mjs
+
+**Surprises / decisions made during execution:** - The head order breaks ID ties numerically (B-999 before B-1000), whereas rankOrder compares ID strings; numeric is the correct reading of "then ID" for a ledger holding B-3000.
+- On this repo the imbalance fires (2/5 user at the head, candidates B-199 and B-001, both raiseTo med), as Phase 2 anticipated.
+- The model-side output (table placement, imbalance-line wording, layer fill in the derive) is not proved by build, as the plan's Risks state; the first real /esq:roadmap plan is that observation.
+
+**Backlog candidates:** None.
+
+**For Phase 4:** Last phase: next is /esq:review of the plan; /esq:spec should refresh SPEC § Backlog and § Roadmap (Layer column, distribution command), as the plan Context notes.
