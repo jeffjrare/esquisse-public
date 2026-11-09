@@ -1036,6 +1036,108 @@ function alignToTiers(view, tiers, sequence, tierIndex, priOf, lines) {
   return { ...(count > 0 ? { realigned } : {}), ...(confirmedApart.length > 0 ? { confirmedApart } : {}) };
 }
 
+// What the open backlog is made of, before anyone orders it: open rows counted by concern × layer
+// and by type, plus whether the head of the shared rank order is short on user value. Read-only:
+// the roadmap prints it above its order, and the rebalance it names is only ever proposed — raising
+// a level is the user's call. Blank or off-list cells count as `(none)`, and a blank concern is
+// `unknown` at the head, never non-user: an unclassified row is not evidence of anything.
+const HEAD_WINDOW = 5;
+const MIN_USER_SHARE = 0.5;
+const NONE = '(none)';
+
+export async function backlogDistribution(file) {
+  const parsed = await backlogTable(file);
+  const rows = backlogRows(parsed).map((row) => ({
+    ...row,
+    id: normalizeId(row.id),
+    concern: CONCERNS.includes(row.concern.trim()) ? row.concern.trim() : NONE,
+    layer: LAYERS.includes(row.layer.trim()) ? row.layer.trim() : NONE,
+    kind: typeWord(row.type) ?? NONE,
+    pri: row.pri.trim(),
+    rank: row.rank.trim(),
+  }));
+  const total = rows.length;
+  const concerns = [...CONCERNS, NONE];
+  const layers = [...LAYERS, NONE];
+  const count = (concern, layer) => rows.filter((row) => row.concern === concern && row.layer === layer).length;
+  const domain = concerns.flatMap((concern) => layers.map((layer) => ({ concern, layer, count: count(concern, layer) }))).filter((cell) => cell.count > 0);
+  const type = Object.fromEntries([...TYPE_NAMES, NONE].map((name) => [name, rows.filter((row) => row.kind === name).length]));
+  const unclassified = {
+    concern: rows.filter((row) => row.concern === NONE).length,
+    layer: rows.filter((row) => row.layer === NONE).length,
+    type: type[NONE],
+  };
+
+  // The shared rank order: level (hi → hi? → … → lo? → blank), then Rank ascending, unranked last, then ID.
+  const idNumber = (row) => Number(row.id.slice(2));
+  const rankOf = (row) => (/^\d+$/.test(row.rank) ? Number(row.rank) : Infinity);
+  const ordered = rows.slice().sort((a, b) => (PRI_LADDER.indexOf(b.pri) - PRI_LADDER.indexOf(a.pri)) || (rankOf(a) - rankOf(b)) || (idNumber(a) - idNumber(b)));
+  const size = Math.min(HEAD_WINDOW, total);
+  const head = ordered.slice(0, size);
+  const nonUserOf = (list) => list.filter((row) => row.concern !== NONE && row.concern !== 'user').length;
+  const allowed = size * MIN_USER_SHARE;
+
+  // A candidate is a user row outside the head that could be worked now: not waiting on a decision,
+  // and not covered by a roadmap entry that needs another entry still holding an open row.
+  const { entries, edges } = await rankEdges(file);
+  const open = new Set(rows.map((row) => row.id));
+  const waiting = new Set(edges
+    .filter((edge) => entries.get(edge.before).covers.some((id) => open.has(id)))
+    .flatMap((edge) => entries.get(edge.after).covers));
+  const eligible = ordered.slice(size).filter((row) => row.concern === 'user' && row.status !== 'Needs-decision' && !waiting.has(row.id));
+
+  // As many candidates as restore the share: each one placed ahead pushes the head's last row out.
+  // The head sorts by level before rank, so a candidate below the level of the last row still in the
+  // head after the move cannot get there by rank alone; `raiseTo` names that level.
+  const picked = [];
+  let retained = head;
+  while (nonUserOf(retained) > allowed && picked.length < eligible.length) {
+    picked.push(eligible[picked.length]);
+    retained = head.slice(0, size - picked.length);
+  }
+  const imbalanced = nonUserOf(head) > allowed && eligible.length > 0;
+  const anchor = imbalanced ? head[Math.max(0, size - picked.length - 1)] : null;
+  const candidates = imbalanced
+    ? picked.map((row) => ({ id: row.id, pri: row.pri, raiseTo: PRI_LADDER.indexOf(row.pri) < PRI_LADDER.indexOf(anchor.pri) ? anchor.pri : null }))
+    : [];
+
+  return {
+    file,
+    statuses: [...ROW_STATUSES],
+    total,
+    domain,
+    type,
+    unclassified,
+    head: {
+      window: HEAD_WINDOW,
+      size,
+      user: head.filter((row) => row.concern === 'user').length,
+      nonUser: nonUserOf(head),
+      unknown: head.filter((row) => row.concern === NONE).length,
+      imbalanced,
+      candidates,
+    },
+    table: distributionTable(rows, concerns, layers, type),
+  };
+}
+
+// One cross-tab, ready to print: five narrow columns read on a phone.
+function distributionTable(rows, concerns, layers, type) {
+  const label = (value) => (value === NONE ? '—' : value);
+  const lines = [formatRow(['concern', ...layers.map(label), 'total']), formatRow(['---', ...layers.map(() => '---:'), '---:'])];
+  for (const concern of concerns) {
+    const counts = layers.map((layer) => rows.filter((row) => row.concern === concern && row.layer === layer).length);
+    const sum = counts.reduce((a, n) => a + n, 0);
+    if (sum > 0) lines.push(formatRow([label(concern), ...counts.map(String), String(sum)]));
+  }
+  const totals = layers.map((layer) => rows.filter((row) => row.layer === layer).length);
+  lines.push(formatRow(['**total**', ...totals.map(String), `**${rows.length}**`]));
+  const glyph = (name) => (name === NONE ? '—' : TYPE_WORDS.find(([word]) => word === name)[1]);
+  const kinds = Object.entries(type).filter(([, n]) => n > 0).map(([name, n]) => `${glyph(name)} ${n}`);
+  lines.push(`type: ${kinds.length > 0 ? kinds.join(' · ') : 'none'}`);
+  return lines;
+}
+
 // One closed-vocabulary cell for one or more rows, in one atomic write; a lazy column is added on
 // first use. Classification is the caller's judgment — this records it and refuses a word the lens
 // cannot sort. It backs set-concern, set-layer and set-type, so the three refuse alike.
@@ -6425,6 +6527,11 @@ export async function main(args) {
     if (!id || !pri || positional.length > 3) throw new Error(usage);
     return output(await setPri(file, id, pri));
   }
+  if (group === 'backlog' && action === 'distribution') {
+    const usage = 'usage: esq backlog distribution [backlog]';
+    if (rest.length > 1 || rest.some((arg) => arg.startsWith('--'))) throw new Error(usage);
+    return output(await backlogDistribution(rest[0] ? path.resolve(root, rest[0]) : path.join(root, 'docs/BACKLOG.md')));
+  }
   if (group === 'backlog' && ['set-concern', 'set-layer', 'set-type'].includes(action)) {
     const [setter, words] = { 'set-concern': [setConcern, [...CONCERNS, 'none']], 'set-layer': [setLayer, [...LAYERS, 'none']], 'set-type': [setType, TYPE_NAMES] }[action];
     const usage = `usage: esq backlog ${action} <B-NNN>[,<B-NNN>…] <${words.join('|')}> [backlog]`;
@@ -6786,5 +6893,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text> --concern <concern> --layer <app|infra>|backlog set-pri <B-NNN> <pri>|backlog set-concern <B-NNN>[,<B-NNN>…] <concern>|backlog set-layer <B-NNN>[,<B-NNN>…] <app|infra|none>|backlog set-type <B-NNN>[,<B-NNN>…] <bug|debt|idea|improvement|todo>|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank --order [<B-NNN…>] --lens (the head; the rest by the roadmap tiers)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match [--all] <path…>|--paths <file>|- (the expertise modules those paths touch, each with its file and age; --all every module, with the stack packages that show it in use)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text> --concern <concern> --layer <app|infra>|backlog set-pri <B-NNN> <pri>|backlog set-concern <B-NNN>[,<B-NNN>…] <concern>|backlog set-layer <B-NNN>[,<B-NNN>…] <app|infra|none>|backlog set-type <B-NNN>[,<B-NNN>…] <bug|debt|idea|improvement|todo>|backlog distribution [backlog] (open rows by concern × layer and type, and whether the head of the queue is short on user value; read-only)|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank --order [<B-NNN…>] --lens (the head; the rest by the roadmap tiers)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match [--all] <path…>|--paths <file>|- (the expertise modules those paths touch, each with its file and age; --all every module, with the stack packages that show it in use)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
 }
