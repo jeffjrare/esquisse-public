@@ -18,7 +18,7 @@ You are the one reader this change normally gets. Two questions, in this order: 
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Run `esq validate` before analysis, `esq review scope <plan-path-or-range>` to learn what to read and the lessons its paths match, `esq backlog reserve-id` for each out-of-scope row, and `esq plan set-reviewed` to record a clean verdict. The CLI owns parsing and IDs; materiality, severity, security, design, and UX remain your judgment.
+Run `esq validate` before analysis, `esq review scope <plan-path-or-range>` to learn what to read and the lessons its paths match, `esq backlog add` for each out-of-scope row, and `esq plan set-reviewed` to record a clean verdict. The CLI owns parsing and IDs; materiality, severity, security, design, and UX remain your judgment.
 
 Read-only on code: no code changes, no fixes applied inline, and no plan-file edits but one. You may write only the corrective brief (feeding `/esq:fix` and `/esq:plan`), `docs/BACKLOG.md` rows for out-of-scope observations, and — on a clean verdict — the plan's `**Reviewed at:**` field, through `esq plan set-reviewed` and never by hand. Do NOT use plan mode — it would block the brief write.
 
@@ -307,11 +307,7 @@ Something real **not about this change** — a latent bug in adjacent code, a fo
 Report a refusal and its recovery action; never calculate an ID from the ledger or bypass block limits. IDs are permanent: never renumber or reuse them.
 <!-- id-allocation:end -->
 
-- Row: `| B-NNN | <today> | <type emoji + word> | <blank> | <one-phrase summary> | review: <slug> | | | Open |` — Status `Open`, no priority (the user triages).
-
-<!-- shared:row-header:start -->
-Match the table's **actual header row** rather than the literal cell count above (canonical: `ID | Date | Type | Pri | Summary | Source | Epic | Version | Status`; an older backlog may lack `Epic`/`Version`) — one cell per existing column, or the `Status` lands in the wrong one.
-<!-- shared:row-header:end -->
+- Row: `esq backlog add --type "<type emoji + word>" --concern <concern> --layer <app|infra> --summary "<one-phrase summary>" --source "review: <slug>"` — Status `Open`; the CLI suggests the priority and the user triages. `--concern` is what the row is about, in `/esq:backlog`'s vocabulary (`user` when a user sees, gets or hits it); `--layer app` is the product its users run, `infra` is hosting, CI, environment, release and install. A detail section, when one is owed, is appended below the `---` afterwards.
 - Dedup against existing rows first. Create the file from the template if it's missing.
 - **The tail is one commit, naming both halves:** `git add docs/BACKLOG.md && git commit -m "brief(fixes): <slug> + backlog observations from review"`, over the brief staged above and these rows together. With nothing out of scope the tail is the brief alone: `git commit -m "brief(fixes): <slug>"`. On a clean verdict there is no brief, and the tail is the recorded field — with the rows, if any — under the `plan(reviewed):` subject above.
 - List what you captured (IDs + one line each) under a short "Logged to backlog" note. If nothing was out of scope, say nothing.

@@ -20,7 +20,7 @@ Use this explicit diagnostic for a large plan, a log/diff disagreement or suspec
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Run `esq validate` before analysis, and use `esq backlog reserve-id` for each out-of-scope row. The CLI owns parsing and IDs; materiality, severity, user authority, and conformity remain your judgment.
+Run `esq validate` before analysis, and use `esq backlog add` for each out-of-scope row. The CLI owns parsing and IDs; materiality, severity, user authority, and conformity remain your judgment.
 
 This is NOT code quality review (`/esq:review` does that). This is plan-vs-reality reconciliation.
 
@@ -255,11 +255,7 @@ If, while comparing plan against reality, you notice something real that is **ne
 Report a refusal and its recovery action; never calculate an ID from the ledger or bypass block limits. IDs are permanent: never renumber or reuse them.
 <!-- id-allocation:end -->
 
-- Row: `| B-NNN | <today> | <type emoji + word> | <blank> | <one-phrase summary> | check: <slug> | | | Open |` — Status `Open`, no priority.
-
-<!-- shared:row-header:start -->
-Match the table's **actual header row** rather than the literal cell count above (canonical: `ID | Date | Type | Pri | Summary | Source | Epic | Version | Status`; an older backlog may lack `Epic`/`Version`) — one cell per existing column, or the `Status` lands in the wrong one.
-<!-- shared:row-header:end -->
+- Row: `esq backlog add --type "<type emoji + word>" --concern <concern> --layer <app|infra> --summary "<one-phrase summary>" --source "check: <slug>"` — Status `Open`, the priority the CLI suggests. `--concern` is what the row is about, in `/esq:backlog`'s vocabulary (`user` when a user sees, gets or hits it); `--layer app` is the product its users run, `infra` is hosting, CI, environment, release and install. A detail section, when one is owed, is appended below the `---` afterwards.
 - Dedup against existing rows first. Create the file from the template if it's missing.
 - **The tail is one commit, naming both halves:** `git add docs/BACKLOG.md && git commit -m "brief(fixes): <slug> + backlog observations from check"`, over the brief staged above and these rows together. Reverting one without the other would leave a brief citing observations that no longer exist, or rows citing a brief that does not. With nothing out of scope there is nothing to add here and the tail is the brief alone: `git commit -m "brief(fixes): <slug>"`.
 - List captured rows among the report's facts. If nothing was out of scope, capture nothing and say nothing.

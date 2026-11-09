@@ -60,10 +60,10 @@ test('state reports git, the plans newest first with activePlan, and the backlog
   assert.equal(result.plans[1].state, 'ready');
   assert.deepEqual(result.backlog.counts, { Open: 1, 'Needs-decision': 1, Planned: 1, Done: 1, Dropped: 0 });
   // By default an Open row is counted per priority, never listed; `rows: true` lists every open row.
-  const openRow = { id: 'B-001', type: 'bug', concern: '', pri: 'hi', rank: '', summary: 'first', status: 'Open', epic: '', source: 'manual' };
+  const openRow = { id: 'B-001', type: 'bug', concern: '', layer: '', pri: 'hi', rank: '', summary: 'first', status: 'Open', epic: '', source: 'manual' };
   const routed = [
-    { id: 'B-002', type: 'debt', concern: '', pri: 'med', rank: '', summary: 'second', status: 'Needs-decision', epic: 'aug', source: 'review' },
-    { id: 'B-003', type: 'todo', concern: '', pri: '', rank: '', summary: 'third', status: 'Planned', epic: '', source: 'manual · Planned by x' },
+    { id: 'B-002', type: 'debt', concern: '', layer: '', pri: 'med', rank: '', summary: 'second', status: 'Needs-decision', epic: 'aug', source: 'review' },
+    { id: 'B-003', type: 'todo', concern: '', layer: '', pri: '', rank: '', summary: 'third', status: 'Planned', epic: '', source: 'manual · Planned by x' },
   ];
   assert.deepEqual(result.backlog.openPri, { hi: 1 });
   assert.deepEqual(result.backlog.rows, routed);
@@ -2357,14 +2357,15 @@ test('the first write into a nine-column backlog adds the Rank header and pads e
   const root = await rankFixture(NINE, '| B-001 | 2026-08-17 | 🐛 bug | hi | first | manual | | | Open |');
   const file = path.join(root, 'docs/BACKLOG.md');
 
-  const added = await addRow(root, file, { type: '☑️ todo', summary: 'second', source: 'manual', pri: 'lo' });
+  const added = await addRow(root, file, { type: '☑️ todo', summary: 'second', source: 'manual', pri: 'lo', concern: 'internal', layer: 'app' });
   const lines = (await readFile(file, 'utf8')).split('\n').filter((line) => line.startsWith('|'));
-  // Header, separator and both rows are ten cells wide — nobody meets a row shorter than its header.
-  assert.deepEqual(lines.map((line) => line.split('|').length - 2), [10, 10, 10, 10]);
-  assert.equal(lines[0], '| ID | Date | Type | Pri | Rank | Summary | Source | Epic | Version | Status |');
-  // The pre-existing row keeps every value it had, shifted right of the new blank cell.
-  assert.match(lines[2], /^\| B-001 \| 2026-08-17 \| 🐛 bug \| hi \|  \| first \| manual \|/);
-  assert.equal(added.row[4], '100');
+  // Header, separator and both rows are twelve cells wide (Rank, Concern and Layer widened in one
+  // write) — nobody meets a row shorter than its header.
+  assert.deepEqual(lines.map((line) => line.split('|').length - 2), [12, 12, 12, 12]);
+  assert.equal(lines[0], '| ID | Date | Type | Concern | Layer | Pri | Rank | Summary | Source | Epic | Version | Status |');
+  // The pre-existing row keeps every value it had, shifted right of the new blank cells.
+  assert.match(lines[2], /^\| B-001 \| 2026-08-17 \| 🐛 bug \|  \|  \| hi \|  \| first \| manual \|/);
+  assert.equal(added.row[6], '100');
 
   // Capture assigns only the new row's neutral tail; the legacy row stays unclassified.
   const rows = (await state(root, { rows: true })).backlog.rows;
@@ -2375,7 +2376,7 @@ test('a backlog that already carries Rank round-trips the cell, and one without 
   const wide = await rankFixture(TEN, '| B-001 | 2026-08-17 | 🐛 bug | hi | 100 | first | manual | | | Open |');
   assert.deepEqual((await state(wide, { rows: true })).backlog.rows.map((row) => row.rank), ['100']);
   // A second write neither widens it again nor disturbs the stored number.
-  await addRow(wide, path.join(wide, 'docs/BACKLOG.md'), { type: '💡 idea', summary: 'second', source: 'manual' });
+  await addRow(wide, path.join(wide, 'docs/BACKLOG.md'), { type: '💡 idea', summary: 'second', source: 'manual', concern: 'internal', layer: 'app' });
   const rows = (await state(wide, { rows: true })).backlog.rows;
   assert.deepEqual(rows.map((row) => [row.id, row.rank]), [['B-001', '100'], ['B-002', '200']]);
   assert.equal((await readFile(path.join(wide, 'docs/BACKLOG.md'), 'utf8')).match(/Rank/g).length, 1);
@@ -2387,7 +2388,7 @@ test('a backlog that already carries Rank round-trips the cell, and one without 
 test('addRow derives a suggested priority from the type when the caller states none', async () => {
   const root = await rankFixture(NINE, '| B-001 | 2026-08-17 | 🐛 bug | hi | first | manual | | | Open |');
   const file = path.join(root, 'docs/BACKLOG.md');
-  const pri = async (type) => (await addRow(root, file, { type, summary: 'x', source: 'build: s Phase 1' })).row[3];
+  const pri = async (type) => (await addRow(root, file, { type, summary: 'x', source: 'build: s Phase 1', concern: 'internal', layer: 'app' })).row[5];
 
   assert.equal(await pri('🐛 bug'), 'med?');
   assert.equal(await pri('⚠️ debt'), 'med?');
@@ -2397,8 +2398,8 @@ test('addRow derives a suggested priority from the type when the caller states n
   // A type carrying no known glyph is still never unprioritized.
   assert.equal(priForType('something else'), 'med?');
   // A stated priority is never overwritten, suggested or confirmed.
-  assert.equal((await addRow(root, file, { type: '🐛 bug', summary: 'x', source: 'manual', pri: 'hi' })).row[3], 'hi');
-  assert.equal((await addRow(root, file, { type: '💡 idea', summary: 'x', source: 'manual', pri: 'hi?' })).row[3], 'hi?');
+  assert.equal((await addRow(root, file, { type: '🐛 bug', summary: 'x', source: 'manual', pri: 'hi', concern: 'internal', layer: 'app' })).row[5], 'hi');
+  assert.equal((await addRow(root, file, { type: '💡 idea', summary: 'x', source: 'manual', pri: 'hi?', concern: 'internal', layer: 'app' })).row[5], 'hi?');
 });
 
 test('derive preserves a one-sided Rank edit and asks when both sides chose different positions', async () => {

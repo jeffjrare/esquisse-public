@@ -5,6 +5,8 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-roadmap-flags-user-value-imbalance | 2026-11-08 | prod | roadmap | esq backlog distribution flags imbalance when, among the first 5 open rows in rank order, known non-user rows outnumber half, and an eligible user row exists outside the head; it names the candidates and the level each would need, and the derive prints one line with the commands, never applying them. | Active |
+| D-backlog-row-carries-type-concern-layer | 2026-11-08 | func | backlog | A row's domain is Concern × a lazy Layer column (app \| infra), its nature the five canonical Type words; esq backlog add refuses a row missing either axis or with an off-list type, and esq validate reds an off-list layer while an off-list type stays an advisory. | Active |
 | D-advance-takes-any-backlog-item | 2026-11-08 | arch | roadmap | `/esq:advance B-NNN` works an Open backlog item no Now entry covers as a one-item entry, through to a local merge; a closed or absent ID stops before spawning, and a slug still resolves within `Now` only. `/esq:work`'s directly invoked `plan`, `grill` or `ui` verdict hands on to `/esq:advance <B-NNN>`, its command kept on a `routes to` line. | Active |
 | D-advance-lands-what-it-built | 2026-11-08 | arch | skills | After `/esq:converge` records `**Reviewed at:**` on a plan this run wrote, `/esq:advance` invokes `/esq:land <plan>` in its own session; land keeps every prerequisite and its refusals, the merge stays local and nothing pushes. A render held back for a grill whose brief did not absorb it is rendered right after that grill, its pick asked in one follow-up question. The report's zone 2 is the one value-ordered list of what is left to the user, and `→ Next` is its item 1. `land` drops `disable-model-invocation` for the in-body mandate refusal. | Active |
 | D-a-plan-slug-keeps-its-numeric-suffix | 2026-10-29 | arch | plan-identity | `canonicalPlanSlug` strips only the `YYYY-MM-DD-` prefix; a trailing `-N` is part of a plan's identity, and the corrective `-fixes(-N)` group is stripped only by the brief and chain readers (`briefSlug`, `correctiveChain`) | Active |
@@ -5733,3 +5735,33 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: one command from any open item to a reviewed local merge. Accepted: a `B-NNN` outside `Now` skips the roadmap order on the user's word; a routed item costs one orchestrator session on top of its worker.
 **Conséquences:** `/esq:advance`'s description, argument hint, preflight, worker prompt and constraints change; `/esq:work`'s routing output gains a `routes to` line and its `→ Next` rule changes; the README's work and advance rows and paragraphs say it.
 **Alternatives rejetées:** `/esq:work` chains plan, build, review and land itself (duplicates advance, and changes what advance's workers do). Keep the refusal and send outside items to `/esq:roadmap` first (one more command for a choice the user already made).
+
+## D-backlog-row-carries-type-concern-layer — Every backlog row carries a closed Type, Concern and Layer, enforced when it is written
+
+**Scope:** func
+**Topic:** backlog
+**Date:** 2026-11-08
+**Statut:** Active
+**Fondement:** user — grill brief docs/plans/2026-11-08-backlog-domain-nature-distribution.brief.md, ## Resolved decisions (2026-11-08)
+
+**Contexte:** The product owner could not see what the open backlog is made of: concerns were blank, Concern could not tell app from infra security, Type cells drifted, and nothing counted rows by attribute.
+**Décision:** A row's domain is Concern × a lazy Layer column (app | infra), its nature the five canonical Type words; esq backlog add refuses a row missing either axis or with an off-list type, and esq validate reds an off-list layer while an off-list type stays an advisory.
+**Raison:** One closed vocabulary across projects is what the CLI's tier sort and the distribution count need. Enforcing at write time makes a blank cell mean a legacy row, never a new one, without validate redding every existing project.
+**Tradeoff:** Gained reliable classification computed by the CLI; accepted that every capture call site names two more flags and legacy ledgers stay blank until their next roadmap derive.
+**Conséquences:** Every skill that files a row goes through esq backlog add with --concern and --layer; hand-written rows are gone. A new axis word or type word is a change to this rule.
+**Alternatives rejetées:** A per-project domain vocabulary (breaks the shared tier sort); validating blanks after the fact (reds every existing project's session stop); a perf type (performance is an improvement whose concern names what it serves).
+
+## D-roadmap-flags-user-value-imbalance — The roadmap flags a head short on user value, and only proposes the rebalance
+
+**Scope:** prod
+**Topic:** roadmap
+**Date:** 2026-11-08
+**Statut:** Active
+**Fondement:** mandate — the brief defers the head window and threshold to planning; CLAUDE.md maximand: every order leads with user value, never block
+
+**Contexte:** The distribution printed by /esq:roadmap plan needs a deterministic rule for when the head of the queue is short on user value.
+**Décision:** esq backlog distribution flags imbalance when, among the first 5 open rows in rank order, known non-user rows outnumber half, and an eligible user row exists outside the head; it names the candidates and the level each would need, and the derive prints one line with the commands, never applying them.
+**Raison:** A constant the CLI computes is paid once, not re-judged per run. Blank concerns count as unknown so an unclassified ledger never fires a false alarm, and level raises stay proposals because a confirmed priority is the user's.
+**Tradeoff:** Gained a value-first signal that never blocks; accepted that a user-chosen lens putting security first still shows the line.
+**Conséquences:** HEAD_WINDOW and MIN_USER_SHARE are named constants in plugin/lib/cli.mjs; changing them is a change to this rule.
+**Alternatives rejetées:** An automatic quota or CLI reordering (out of scope by the brief: the user decides); a 10-row window (covers most of a small backlog, so it measures the whole queue rather than its head).

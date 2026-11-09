@@ -19,7 +19,7 @@ You are executing one phase of a plan, then stopping. Each fresh `/esq:build` in
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Use `esq next-phase "$0" --preflight` for the branch-ownership verdict, the continuity anchor, the phase classification and the plan text and log slices this command reads, and `esq validate` for invariants. Append a new entry only through `esq plan append-log "$0" '<json>'`; never hand-edit a new log entry. Use `esq backlog reserve-id` before adding a backlog row, and `esq decisions add` to write a registry entry. The CLI parses and mutates structure; architecture, scope, verification quality, risk, and UX remain your decisions.
+Use `esq next-phase "$0" --preflight` for the branch-ownership verdict, the continuity anchor, the phase classification and the plan text and log slices this command reads, and `esq validate` for invariants. Append a new entry only through `esq plan append-log "$0" '<json>'`; never hand-edit a new log entry. Use `esq backlog add --concern <concern> --layer <app|infra>` to file a backlog row, and `esq decisions add` to write a registry entry. The CLI parses and mutates structure; architecture, scope, verification quality, risk, and UX remain your decisions.
 
 Do NOT use plan mode. You need to write code.
 
@@ -213,7 +213,7 @@ unfixed is a decision you put to the user as an option set — never one you tak
 **`observed:` is only for a finding outside the promised work that this unit neither introduced nor
 aggravated — and neither an untouched file nor a pre-existing failure establishes that alone.** An unchanged file proves nothing: a caller, data, configuration or interface this unit changed can break a consumer it never edited, and that is the unit's regression.
 A failure that already existed may be one this unit made worse, made reachable, or promised to fix. So
-file `esq backlog add --source "observed: <slug> Phase N"` only when all three hold: it fails the same way
+file `esq backlog add --concern <concern> --layer <app|infra> --source "observed: <slug> Phase N"` only when all three hold: it fails the same way
 on the unit's `**Origin:**`, nothing this unit changed reaches or worsens it, and nothing this unit
 promised (`## Done looks like`, a `Planned by` row) covers it. Anything short of that, a finding you cannot
 place included, is `build: <slug> Phase N`: it blocks, and is fixed or paused on as above. Never route a

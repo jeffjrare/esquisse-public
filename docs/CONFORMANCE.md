@@ -69,7 +69,8 @@ whole retained tail, nagging after every derive (B-191).
 ## Scenario P-06 — the lens line `esq backlog rank --lens` sorts by
 
 `/esq:roadmap` records the owner's criterion above `## Now` as `**Lens:** <words>` and
-`**Tiers:** <term> · <term> …`. `parseTiers` reads only the `**Tiers:**` line, and only above the first
+`**Tiers:** <term> · <term> …`, each term up to three words joined by `+` — a type, a concern and a layer
+(`app`, `infra`) — and an optional level. `parseTiers` reads only the `**Tiers:**` line, and only above the first
 `## ` heading. `rank --lens` orders the uncovered rows by it, and `esq backlog add` takes its level for a
 row given none. Rename the token and the derive is refused, while capture silently falls back to the
 type's level.

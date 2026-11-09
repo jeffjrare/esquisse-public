@@ -22,7 +22,7 @@ Do NOT use plan mode: capture and inline execution write and commit.
 `esq` comes from the plugin's `PATH`: call it directly, never probe it first (`which`, `command -v`). If that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"` — same command, explicit path. Stop only when neither runs, and say so in one line; never recompute by hand what the CLI owns.
 <!-- shared:resolve-cli:end -->
 
-Allocate a captured row's ID only with `esq backlog reserve-id`, and run
+Write a captured row only with `esq backlog add`, which allocates its ID, and run
 `esq validate` before the final report. The CLI owns IDs, cells and invariants; the verdict, the sizing, the type
 and priority of a row captured from free text, and whether the work is truly done remain yours.
 
@@ -72,7 +72,7 @@ Capture before every verdict, `route` included. The resulting `B-NNN` is the tar
 
 1. **Read the row's fields off the text, by reference — never by copy.** `/esq:backlog` Mode A owns those heuristics and is their single source: step 1 *Determine the type* (the `bug:`/`imp:`/`todo:`/`idea:`/`debt:` prefixes, else infer from wording), step 2 *Assign a priority (confirmed or suggested)* (a `?`-suffixed guess unless the user signaled `!!`/`!`/`lo`), step 3 *Dedup*, and step 3.5 *Detect an epic tag* (`epic:<slug>`). Follow those sections as written; do not restate them here and do not invent a second set.
 2. **A duplicate routes — it does not stop.** Mode A step 3 tells the user an overlapping `Open`/`Needs-decision` item is already tracked and stops there. You are a router with hands: say the same thing (`Already tracked as B-xxx — routing that one.`), mint nothing, and take that existing item as the target. Rows already `Done`/`Dropped` do not block a capture.
-3. **Allocate the ID** with `esq backlog reserve-id`. Honor the CLI refusal; never calculate it yourself.
+3. **The ID comes from `esq backlog add`** in step 4. Honor the CLI refusal; never calculate it yourself.
 
 <!-- id-allocation:start -->
 **Allocate IDs through the CLI:** `esq backlog add` writes a row; `esq backlog reserve-id` supplies an ID when this command writes the row. The CLI uses this worktree's reserved block, reserves one under the shared lock when needed, and never borrows main's `1-999` for a linked worktree.
@@ -80,11 +80,7 @@ Capture before every verdict, `route` included. The resulting `B-NNN` is the tar
 Report a refusal and its recovery action; never calculate an ID from the ledger or bypass block limits. IDs are permanent: never renumber or reuse them.
 <!-- id-allocation:end -->
 
-4. **Write the row and commit it alone.** `| B-NNN | <today> | <type emoji + word> | <pri or blank> | <summary ≤ ~12 words, the user's own wording where it survives> | work | <epic slug or blank> | | Open |`, with a detail section below the `---` only when the text carried more than its summary. The `Source` cell is `work`, matching `check: <slug>`'s convention of naming the capturing command. Then `git add docs/BACKLOG.md && git commit -m "backlog: add B-NNN <short summary>"` — `docs/BACKLOG.md` and nothing else.
-
-   <!-- shared:row-header:start -->
-   Match the table's **actual header row** rather than the literal cell count above (canonical: `ID | Date | Type | Pri | Summary | Source | Epic | Version | Status`; an older backlog may lack `Epic`/`Version`) — one cell per existing column, or the `Status` lands in the wrong one.
-   <!-- shared:row-header:end -->
+4. **Write the row and commit it alone.** `esq backlog add --type "<type emoji + word>" --concern <concern> --layer <app|infra> --summary "<≤ ~12 words, the user's own wording where it survives>" --source work [--pri "<pri>"] --epic "<slug or empty>" --status Open`: `--concern` is what the row is about, in `/esq:backlog`'s vocabulary (`user` when a user sees, gets or hits it); `--layer app` is the product its users run, `infra` is hosting, CI, environment, release and install. Append a detail section below the `---` afterwards, only when the text carried more than its summary. The `Source` cell is `work`, matching `check: <slug>`'s convention of naming the capturing command. Then `git add docs/BACKLOG.md && git commit -m "backlog: add B-NNN <short summary>"` — `docs/BACKLOG.md` and nothing else.
 5. **`route` still captures.** `route` disables *execution*, not target resolution: the row is minted and committed exactly as above, and what `route` withholds is the code change and the status change. A trailing `route` token is the keyword, not part of the captured summary.
 6. **An ID shape that matches no row is still a refusal.** `/esq:work B-999` is a typo, not item text — the discriminator is the shape, not the lookup. That argument keeps hitting the ID branch's "say so and stop; never invent one", or a fat finger silently mints a permanent citation key.
 
