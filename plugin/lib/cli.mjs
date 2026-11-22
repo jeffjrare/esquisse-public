@@ -1298,6 +1298,9 @@ export async function addRow(root, file, { type, summary, source, pri = '', epic
   if (pri === '') { try { tiers = await roadmapTiers(file); } catch { tiers = null; } }
   const lensLevel = tiers ? tiers[tierOf(tiers, typeWord(fields.type), concernCell, layerCell)]?.level ?? null : null;
   const priority = pri !== '' ? pri.trim() : lensLevel !== null ? `${lensLevel}?` : priForType(fields.type);
+  // A fresh repository has no backlog, and the first row a command files there creates it from the
+  // template — after every refusal above, so a refused call still writes no byte.
+  const created = await createFromTemplate(file, BACKLOG_TEMPLATE);
   const { id, block } = await reserveId(root, file);
   let ledger = await backlogTable(file);
   for (const [name, anchors] of [[CONCERN_COLUMN, ['Type']], [LAYER_COLUMN, [CONCERN_COLUMN, 'Type']]]) {
@@ -1316,7 +1319,19 @@ export async function addRow(root, file, { type, summary, source, pri = '', epic
   clearClosedRanks(view, lines);
   lines.splice(table.end, 0, formatRow(cells));
   await atomicWrite(file, lines.join('\n'));
-  return { id, block, file, row: cells };
+  return { id, block, file, row: cells, ...(created ? { created: true } : {}) };
+}
+
+// Creates a missing ledger from its template: temp file beside it, then rename, so no reader ever
+// meets a half-written header. An existing file is never touched. Answers whether it created one.
+async function createFromTemplate(file, template) {
+  try { await stat(file); return false; }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  await mkdir(path.dirname(file), { recursive: true });
+  const temporary = path.join(path.dirname(file), `.${path.basename(file)}.${process.pid}.tmp`);
+  await writeFile(temporary, template, 'utf8');
+  await rename(temporary, file);
+  return true;
 }
 
 // The execution-log payload contract, as data: one row per accepted key, its type, and what each

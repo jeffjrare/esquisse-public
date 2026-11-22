@@ -178,3 +178,28 @@ test('the walk stops at 500 entries and counts the overflow', async () => {
     assert.equal(inventory.files.length, 500);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
+
+// Harvest files module rows in a repository that has no backlog yet.
+test('esq backlog add creates docs/BACKLOG.md from the template, and a second add appends', async () => {
+  const root = await repo(null);
+  try {
+    const add = (summary) => cli(root, 'backlog', 'add', '--type', 'todo', '--summary', summary, '--source', 'intake: docs/brief.md#Billing', '--concern', 'user', '--layer', 'app');
+    const first = add('Billing module');
+    assert.equal(first.created, true);
+    const text = await readFile(path.join(root, 'docs/BACKLOG.md'), 'utf8');
+    assert.match(text, /^# Backlog\n/);
+    assert.match(text, /\| ID \| Date \| Type \|/);
+    assert.match(text, /Billing module/);
+    const second = add('Export module');
+    assert.equal(second.created, undefined);
+    assert.notEqual(second.id, first.id);
+    const after = await readFile(path.join(root, 'docs/BACKLOG.md'), 'utf8');
+    assert.match(after, /Billing module[^\n]*\n[^\n]*Export module/);
+    // A refused add on a repository with no backlog creates nothing.
+    const bare = await repo(null);
+    try {
+      assert.throws(() => execFileSync(process.execPath, [BIN, 'backlog', 'add', '--type', 'todo', '--summary', 'x', '--source', 'y', '--layer', 'app'], { cwd: bare, stdio: 'pipe' }));
+      assert.equal(porcelain(bare), '');
+    } finally { await rm(bare, { recursive: true, force: true }); }
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
