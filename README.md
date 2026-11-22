@@ -172,7 +172,10 @@ with no plan. Anything that needs a plan, a grill or a screen direction hands on
 
 **New to a codebase?** `/esq:status` orients you without changing anything.
 `/esq:spec`, `/esq:arch` and `/esq:harvest` write a product spec, an architecture
-map and a decision record on demand; none is a required setup step.
+map and a decision record on demand; none is a required setup step. Imported a folder of
+specs written elsewhere into `docs/`? `/esq:harvest` reads it once, prints what you are building
+and the contradictions it found, asks one round of questions, and turns it into decisions and one
+backlog row per module; `/esq:roadmap plan` orders them next.
 
 ## Commands
 
@@ -195,7 +198,7 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:epic [new title-or-slug]` | Group a theme spanning several plans and backlog items | `docs/epics/<slug>.md` |
 | `/esq:worktree [name-or-action]` | Create, list, remove or merge linked worktrees | Separate working directories and reserved backlog ID blocks |
 | `/esq:status` | Orient without changing anything | Plan, backlog, pending briefs, roadmap, whether the spec and architecture still describe the code (the verdict `/esq:land` uses), and next action |
-| `/esq:harvest` | Recover decisions from the code, history and discussion | `docs/DECISIONS.md` |
+| `/esq:harvest` | Recover decisions from the code, history and discussion; adopt a folder of imported specs in one pass | `docs/DECISIONS.md`; for imported specs, also an overview, the contradictions settled in one question round, and a backlog row per module and per blocking gate |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md`, free of dated history comments; what a refresh changed goes in its commit message |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
 | `/esq:ideas [focus] [features\|adjust\|content\|container]`, `/esq:ideas capture <n,…>` | Propose grounded ideas, user value first: new features, adjustments, content and container (architecture, structure, surfaces) | A ranked slate you pick from in one question; picked ideas become backlog rows with a suggested priority, the rest kept for a later `capture` |
@@ -272,7 +275,7 @@ verification state, and merging safely.
 |---|---|---|
 | Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed |
 | Expertise | `plugin/expertise/<name>.md` | Dated domain knowledge the esq flows read when a phase's files, its plan or the project's stack call for it; not registered as skills, so a module costs a session nothing until it is read |
-| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one), match paths and the project's stack to expertise modules (`esq expertise match` returns each module those paths touch with its file and age, never its text, `--all` every module with the npm packages that show it in use, and the build preflight carries the matches plus the ids the phase names), and read the spec and architecture by section (`esq projection outline` gives the heading tree, what each section costs, the projection's freshness and which given files changed since it was mined; `esq projection read` returns only the chosen sections, history comments stripped). It answers structured questions; it makes no product choices |
+| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one), match paths and the project's stack to expertise modules (`esq expertise match` returns each module those paths touch with its file and age, never its text, `--all` every module with the npm packages that show it in use, and the build preflight carries the matches plus the ids the phase names), map the specs a user imported into `docs/` (`esq intake inventory`: the files esq does not own, their headings, the codes they define and cite, the links that do not resolve, and whether an intake is pending), and read the spec and architecture by section (`esq projection outline` gives the heading tree, what each section costs, the projection's freshness and which given files changed since it was mined; `esq projection read` returns only the chosen sections, history comments stripped). It answers structured questions; it makes no product choices |
 | Project records | `docs/` in your project, and Git | Keep plans, decisions, committed work and the execution log available to the next session |
 | Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Five handlers on six events: name the expertise a session's stack uses when it starts, protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
 
@@ -382,7 +385,7 @@ only operates on planned work.
   **concern** (`user`, `security`, `legal`, `checks`, `deps`, `ops`, `internal`) and a **layer**
   (`app`, the product its users run; `infra`, hosting, CI, release and install). `esq backlog add`
   refuses a row without both, or with a type off the five, so every new item is classified when it
-  is captured; an older item's concern and layer are classified once by the first derive. A tier can name a layer
+  is captured, and creates `docs/BACKLOG.md` when the repository has none; an older item's concern and layer are classified once by the first derive. A tier can name a layer
   (`security+infra:hi`). The CLI sorts the items no roadmap entry
   covers by the lens itself and the model only orders the entries. A derive also brings
   suggested (`?`) priorities into line with the lens; a priority you confirmed is never changed,
