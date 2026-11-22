@@ -3,6 +3,7 @@ description: Build the decisions registry from codebase archaeology plus targete
 name: harvest
 argument-hint: "[target] [options]"
 disable-model-invocation: true
+allowed-tools: Bash(esq *)
 model: opus
 effort: medium
 ---
@@ -19,15 +20,18 @@ Do NOT use plan mode. You need to write a file at the end.
 
 > `/esq:harvest — building docs/DECISIONS.md. Bound: no subagents, at most 150 commits read, at most 3 questions.`
 
-If a pass would exceed it, stop at the bound and say what you did not cover. The resolved target lands in the second line, at the end of preflight.
+If a pass would exceed it, stop at the bound and say what you did not cover. The resolved target lands in the second line, at the end of preflight — and when preflight finds an imported spec folder, that line restates the bound as the intake bound before a single imported doc is read.
 <!-- announce-open:end -->
 
 Archaeology is five sub-passes over the whole repo before a single question is asked. Naming them is what keeps the silence legible.
 
 ## Preflight
 
-1. Read `CLAUDE.md` at project root if present.
-2. Read `README.md` at project root if present.
+1. **In one turn:** `esq intake inventory`, `CLAUDE.md` and `README.md` at project root if present. `esq` comes from `PATH`; if that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"`. When the answer carries `file`, it spilled: read its `ranges` together in the next turn.
+2. **`pending: true` → this run is an intake.** The docs folder holds specs esq has not adopted and there is no esq registry. Announce the intake bound as the second line instead of the one below:
+   > `Intake: <totals.files> imported docs (<totals.kb> KB). Bound: no subagents, at most 320 KB of imported docs read, one question round (at most 3 calls × 4 questions).`
+
+   Run steps 4–5, then make the named load of `${CLAUDE_SKILL_DIR}/references/intake.md` and follow it in place of steps 3 and 6 and Phases 1–4 below; the Constraints at the end of this file still hold, amended there. **`pending: false` → harvest runs exactly as below**, whatever else the inventory says.
 3. Read `docs/DECISIONS.md` if it exists — note every decision ID already there to avoid duplicates. Also note what's already captured so you don't re-ask.
 4. Fetch tools: call `ToolSearch "select:AskUserQuestion"`. Continue without it if unavailable — you'll ask in plain text instead.
 5. Note today's date in YYYY-MM-DD format.
@@ -241,5 +245,5 @@ An answer dismissing the candidate — "not a deliberate decision, just what was
 - Do NOT invent alternatives that weren't mentioned — "None documented" is honest; fabricated context is not.
 - Do NOT write entries for things already in DECISIONS.md.
 - Keep entries factual — write what was decided and why, not what you think *should* have been decided.
-- One commit, one file: only `docs/DECISIONS.md` changes in this session.
+- One commit: only `docs/DECISIONS.md` changes in this session, plus `docs/BACKLOG.md` (and the move of a foreign registry to `docs/DECISIONS.imported.md`) in an intake.
 - If the user says "stop" or "skip writing" at any point during the interrogation: do NOT write or commit. Respect the pause — that is them withdrawing the task, not you pausing to check.

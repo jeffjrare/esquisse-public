@@ -16,3 +16,10 @@ Converge's 'Record coverage once' skipped writing when the verdict read in clean
 - **Confidence:** high <!-- L-87f8bd6714 -->
 - **Date:** 2026-10-19 <!-- L-87f8bd6714 -->
 stripComments and structuralLines located comments with rest.indexOf('<!--') and lastIndexOf comparisons, so an inline `<!-- last-spec: ... -->` in ARCHITECTURE.md and SPEC.md was removed from projection reads and an inline `<!--` opened a comment that hid the following headings. Both now go through commentOpenIndex, which skips an opener held by a backtick code span (a run of N backticks closed by the next run of N). It recurs wherever a Markdown reader in plugin/lib detects comments or other inline syntax line by line: the projections document their own marker format inline. <!-- L-87f8bd6714 -->
+
+## L-29df275eef · lesson — Telling an esq ledger from an imported file by one header cell: a chat-written table shares `| # |` or `| ID |` and is taken for esq's
+- **Paths:** `plugin/lib/intake.mjs`, `tests/cli/intake.test.mjs` <!-- L-29df275eef -->
+- **Evidence:** `docs/plans/2026-11-21-spec-intake-reference-stack-fixes.brief.md@2da285cfe6bfba2bd6395511c96002550e78a07b:10` · fix `b3d5eec5b2338e8e35cf9ae6603a3165d7e04bd5` <!-- L-29df275eef -->
+- **Confidence:** high <!-- L-29df275eef -->
+- **Date:** 2026-11-22 <!-- L-29df275eef -->
+Intake's FORMAT_OWNED recognized docs/DECISIONS.md by any `| # |` header and docs/BACKLOG.md by any `| ID |`, so a model-written `| # | Decision | Status |` registry counted as esq's: intake reported not pending and a later `esq decisions add` wrote esq rows into the foreign file. The fix matches esq's leading columns as the templates write them (`| # | Date |`, `| ID | Date | Type |`, plus the older `#` backlog id header the parser still reads). It recurs whenever a new ledger name joins FORMAT_OWNED or another reader decides ownership of a file a user may have authored: a single generic cell is a shape imports share. <!-- L-29df275eef -->

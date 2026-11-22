@@ -7,7 +7,8 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { EXPERTISE_DIR } from '../../plugin/lib/expertise.mjs';
-import { ENTRY_MAX, HEADER_MAX, expertiseHeader, sessionExpertise } from '../../plugin/scripts/session-expertise.mjs';
+import { scanDocs } from '../../plugin/lib/intake.mjs';
+import { ENTRY_MAX, HEADER_MAX, INTAKE_LINE_MAX, INTAKE_PEEK, expertiseHeader, intakeLine, sessionExpertise } from '../../plugin/scripts/session-expertise.mjs';
 
 // The SessionStart handler: one line per stack-matched module, the fixed header otherwise, silent on
 // any error. Fixture repositories are real git repositories, with the git seam cleared.
@@ -100,4 +101,67 @@ test('no manifest content reaches the output', async () => {
   const text = (await run(root, dir)).hookSpecificOutput.additionalContext;
   assert.ok(text.includes('- private-domain.md: A domain module.'));
   for (const fragment of ['zz-private-dep', 'zz-other-dep', 'zz-secret', root]) assert.ok(!text.includes(fragment), fragment);
+});
+
+// The intake line: imported specs in docs/ esq has not adopted. Names are invented and marked
+// `zz-` so a leak of any of them into the line is caught.
+const REGISTRY = '# Decisions\n\n| # | Date | Scope | Topic | Décision | Statut |\n|---|------|-------|-------|----------|--------|\n';
+async function imported(root, { registry } = {}) {
+  await mkdir(path.join(root, 'docs', 'zz-modules'), { recursive: true });
+  const padding = 'zz-secret-word '.repeat(600);
+  await writeFile(path.join(root, 'docs', 'zz-secret-brief.md'), `# zz-secret-title\n\n${padding}\n`);
+  await writeFile(path.join(root, 'docs', 'zz-pricing.md'), `# Pricing\n\n${padding}\n`);
+  await writeFile(path.join(root, 'docs', 'zz-modules', 'M1-zz-billing.md'), `# M1\n\n${padding}\n`);
+  if (registry !== undefined) await writeFile(path.join(root, 'docs', 'DECISIONS.md'), registry);
+}
+
+test('pending intake adds one line of at most 200 characters, naming no file, before the expertise output', async () => {
+  const dir = await catalog(await mkdtemp(path.join(os.tmpdir(), 'esq-cat-')), [['payments-stripe', 'Stripe.', ['stripe']]]);
+  const plain = await repository({ dependencies: { stripe: '1' } });
+  const today = (await run(plain, dir)).hookSpecificOutput.additionalContext;
+  const root = await repository({ dependencies: { stripe: '1' } });
+  // A foreign DECISIONS.md (not esq's table) is a collision, still pending.
+  await imported(root, { registry: '# Decisions D1..D9\n\n## D1 — zz-secret-decision\n' });
+  const [line, ...rest] = (await run(root, dir)).hookSpecificOutput.additionalContext.split('\n');
+  assert.match(line, /^docs\/ holds 4 spec documents \(\d+ KB\) esq has not adopted — \/esq:harvest reconciles them into decisions and backlog rows\.$/);
+  assert.equal(line, intakeLine(4, Number(/\((\d+) KB\)/.exec(line)[1])));
+  assert.ok(line.length <= INTAKE_LINE_MAX, `${line.length} characters`);
+  for (const fragment of ['zz-', 'M1', 'DECISIONS', 'Pricing', root]) assert.ok(!line.includes(fragment), fragment);
+  assert.equal(rest.join('\n'), today);
+  // An empty catalog still hears the intake line, alone.
+  const empty = await mkdtemp(path.join(os.tmpdir(), 'esq-cat-'));
+  assert.equal((await run(root, empty)).hookSpecificOutput.additionalContext, line);
+});
+
+test('no pending intake leaves the output byte-identical to today, and the peek reads 4 KB of three ledgers alone', async () => {
+  const dir = await catalog(await mkdtemp(path.join(os.tmpdir(), 'esq-cat-')), [['payments-stripe', 'Stripe.', ['stripe']]]);
+  const plain = await repository({ dependencies: { stripe: '1' } });
+  const today = JSON.stringify(await run(plain, dir));
+  // An esq registry: this project already runs esq.
+  const registered = await repository({ dependencies: { stripe: '1' } });
+  await imported(registered, { registry: REGISTRY });
+  assert.equal(JSON.stringify(await run(registered, dir)), today);
+  // Under the floor: two files.
+  const small = await repository({ dependencies: { stripe: '1' } });
+  await mkdir(path.join(small, 'docs'));
+  await writeFile(path.join(small, 'docs', 'zz-one.md'), '# one\n');
+  await writeFile(path.join(small, 'docs', 'zz-two.md'), '# two\n');
+  assert.equal(JSON.stringify(await run(small, dir)), today);
+  // A registry header past the first 4 KB is not seen by the hook's peek: it is a collision there,
+  // while the full scan sees the esq registry.
+  const late = await repository(undefined);
+  await imported(late, { registry: `# Decisions\n\n${'x'.repeat(INTAKE_PEEK)}\n\n${REGISTRY}` });
+  assert.equal((await scanDocs(late)).registry, 'esq');
+  assert.equal((await scanDocs(late, { peek: INTAKE_PEEK })).registry, 'foreign');
+  // The peek reads the head of BACKLOG.md and ROADMAP.md too; the two other ledger names are never
+  // read by it: counted as esq's, unread.
+  const named = await repository(undefined);
+  await imported(named);
+  await writeFile(path.join(named, 'docs', 'BACKLOG.md'), `# zz-secret backlog\n\n${'zz '.repeat(4000)}\n`);
+  await writeFile(path.join(named, 'docs', 'SPEC.md'), `# zz-secret spec\n\n${'zz '.repeat(4000)}\n`);
+  const peeked = await scanDocs(named, { peek: INTAKE_PEEK });
+  assert.equal(peeked.ledgers['BACKLOG.md'], 'foreign');
+  assert.equal(peeked.ledgers['SPEC.md'], 'unread');
+  assert.ok(!peeked.foreign.some((file) => file.path === 'docs/SPEC.md'));
+  assert.equal((await scanDocs(named)).ledgers['SPEC.md'], 'foreign');
 });

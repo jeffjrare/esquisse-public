@@ -172,14 +172,17 @@ with no plan. Anything that needs a plan, a grill or a screen direction hands on
 
 **New to a codebase?** `/esq:status` orients you without changing anything.
 `/esq:spec`, `/esq:arch` and `/esq:harvest` write a product spec, an architecture
-map and a decision record on demand; none is a required setup step.
+map and a decision record on demand; none is a required setup step. Imported a folder of
+specs written elsewhere into `docs/`? `/esq:harvest` reads it once, prints what you are building
+and the contradictions it found, asks one round of questions, and turns it into decisions and one
+backlog row per module; `/esq:roadmap plan` orders them next.
 
 ## Commands
 
 | Command | Purpose | Main result |
 |---|---|---|
-| `/esq:grill <idea>` | Resolve scope and consequential choices before planning | A brief in `docs/plans/` |
-| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases, reading the expertise modules its files or its stack touch | A plan committed on its own branch, its checks tried against the repository first, citing any lesson from `docs/LESSONS.md` that changed its design, each phase naming the expertise it loads, and a backlog row for a domain no module or project skill covers; when it replaces a surface, the inventory of what that surface did, any drop asked first |
+| `/esq:grill <idea>` | Resolve scope and consequential choices before planning; a choice your reference stack covers is not asked | A brief in `docs/plans/` |
+| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases, starting architecture choices from your reference stack and reading the expertise modules its files or its stack touch | A plan committed on its own branch, its checks tried against the repository first, citing any lesson from `docs/LESSONS.md` that changed its design, each phase naming the expertise it loads, and a backlog row for a domain no module or project skill covers; when it replaces a surface, the inventory of what that surface did, any drop asked first |
 | `/esq:build <plan>` | Implement and verify one phase, then stop, weighing the lessons earlier cycles left on its files and reading the expertise modules they touch or the plan names | Task commits and an execution-log entry; a repo fact in `docs/LESSONS.md` for a trap the phase hit and verified itself |
 | `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design, against the expertise modules the change touches or its plan names | Review findings, each marked `(repeats L-<id>)` when it repeats a defect a lesson recorded; the calls build decided for you by hat; a corrective brief when needed |
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings; a lesson in `docs/LESSONS.md` for a fix whose contrast recurs beyond its line |
@@ -189,13 +192,13 @@ map and a decision record on demand; none is a required setup step.
 | `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks, each classified by type, concern and layer (`app`/`infra`) when it is filed; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
 | `/esq:sweep` | Reconcile backlog items against evidence of delivery | Backlog closures; questions only for unresolved cases |
 | `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order under your recorded criterion (lens) and shows what the open work is made of | `docs/ROADMAP.md`; backlog concern, layer, priority and rank updates when ordering; a concern × layer and type table above the order, and a rebalance proposal when the head of the queue is short on user value |
-| `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items, or any one backlog item by its ID, render UI directions, then ask you once what only you can settle | Inline fixes, plans, rendered directions; grills you accept; each plan it wrote built, reviewed and landed locally; never pushes |
+| `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items, or any one backlog item by its ID, render UI directions, then ask you once what only you can settle | Inline fixes, plans, rendered directions; grills you accept; each plan it wrote built, reviewed and landed locally; never pushes. In a project whose `docs/` holds imported specs esq has not adopted, it stops first and names `/esq:harvest` |
 | `/esq:autopilot <plan>` | Build remaining phases sequentially, one worker per phase | Code and execution logs |
 | `/esq:converge <plan-or-fixes-brief>` | Run review → fix, then plan → build → review any 🟡 left, or resume an existing brief | Readiness report, and a lesson for a 🟡 its corrective round closed whose contrast recurs; no merge |
 | `/esq:epic [new title-or-slug]` | Group a theme spanning several plans and backlog items | `docs/epics/<slug>.md` |
 | `/esq:worktree [name-or-action]` | Create, list, remove or merge linked worktrees | Separate working directories and reserved backlog ID blocks |
-| `/esq:status` | Orient without changing anything | Plan, backlog, pending briefs, roadmap, whether the spec and architecture still describe the code (the verdict `/esq:land` uses), and next action |
-| `/esq:harvest` | Recover decisions from the code, history and discussion | `docs/DECISIONS.md` |
+| `/esq:status` | Orient without changing anything | Plan, backlog, pending briefs, roadmap, whether the spec and architecture still describe the code (the verdict `/esq:land` uses), and next action — `/esq:harvest` when `docs/` holds imported specs esq has not adopted and no plan is under way |
+| `/esq:harvest` | Recover decisions from the code, history and discussion; adopt a folder of imported specs in one pass | `docs/DECISIONS.md`; for imported specs, also an overview, the contradictions settled in one question round, and a backlog row per module and per blocking gate |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md`, free of dated history comments; what a refresh changed goes in its commit message |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
 | `/esq:ideas [focus] [features\|adjust\|content\|container]`, `/esq:ideas capture <n,…>` | Propose grounded ideas, user value first: new features, adjustments, content and container (architecture, structure, surfaces) | A ranked slate you pick from in one question; picked ideas become backlog rows with a suggested priority, the rest kept for a later `capture` |
@@ -229,7 +232,9 @@ files and adds one short note to the session: where the modules live, one line p
 the stack uses (`payments-stripe.md` for a project depending on `stripe`), and that
 `esq expertise match --all` lists the rest. A project whose stack uses none, or that has no
 `package.json`, gets the fixed pointer alone, and adding modules to the catalog leaves that
-note unchanged. Only npm manifests are read today.
+note unchanged. Only npm manifests are read today. When `docs/` holds at least three Markdown
+files (20 KB) esq does not own and no esq decision registry, the note opens with one more line:
+how many and how large, and that `/esq:harvest` adopts them.
 
 - **A project skill wins.** Where your project carries its own skill on the same topic
   and the two disagree, Claude follows the project's.
@@ -272,9 +277,9 @@ verification state, and merging safely.
 |---|---|---|
 | Skills | `plugin/skills/<name>/SKILL.md` | The `/esq:*` commands: understand the goal, make design and scope judgments, decide when your authority is needed |
 | Expertise | `plugin/expertise/<name>.md` | Dated domain knowledge the esq flows read when a phase's files, its plan or the project's stack call for it; not registered as skills, so a module costs a session nothing until it is read |
-| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one), match paths and the project's stack to expertise modules (`esq expertise match` returns each module those paths touch with its file and age, never its text, `--all` every module with the npm packages that show it in use, and the build preflight carries the matches plus the ids the phase names), and read the spec and architecture by section (`esq projection outline` gives the heading tree, what each section costs, the projection's freshness and which given files changed since it was mined; `esq projection read` returns only the chosen sections, history comments stripped). It answers structured questions; it makes no product choices |
+| CLI | `plugin/bin/esq` and `plugin/lib/` | Parse plans and ledgers, assign IDs, check branches and review coverage, keep verification evidence, perform safe local merges, keep the lessons ledger (`esq lessons add` refuses an entry whose evidence does not resolve; `esq lessons match` returns at most six cues for the files in hand, and the build preflight and review scope carry them without an extra call; `esq lessons show` opens one), match paths and the project's stack to expertise modules (`esq expertise match` returns each module those paths touch with its file and age, never its text, `--all` every module with the npm packages that show it in use, and the build preflight carries the matches plus the ids the phase names), map the specs a user imported into `docs/` (`esq intake inventory`: the files esq does not own, their headings, the codes they define and cite, the links that do not resolve, and whether an intake is pending), return your reference stack (`esq stack`: the text of the file described under *Reference stack*, read-only), and read the spec and architecture by section (`esq projection outline` gives the heading tree, what each section costs, the projection's freshness and which given files changed since it was mined; `esq projection read` returns only the chosen sections, history comments stripped). It answers structured questions; it makes no product choices |
 | Project records | `docs/` in your project, and Git | Keep plans, decisions, committed work and the execution log available to the next session |
-| Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Five handlers on six events: name the expertise a session's stack uses when it starts, protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
+| Hooks | `plugin/hooks/hooks.json` and `plugin/scripts/` | Five handlers on six events: name the expertise a session's stack uses when it starts, and say when `docs/` holds imported specs esq has not adopted, protect the installed plugin, validate changed records when a session stops, and keep optional local usage counters |
 
 Skills pre-approve exactly one tool: the plugin's own CLI (`Bash(esq *)`), so
 bookkeeping never waits on a permission prompt. Every other tool stays under your
@@ -382,7 +387,7 @@ only operates on planned work.
   **concern** (`user`, `security`, `legal`, `checks`, `deps`, `ops`, `internal`) and a **layer**
   (`app`, the product its users run; `infra`, hosting, CI, release and install). `esq backlog add`
   refuses a row without both, or with a type off the five, so every new item is classified when it
-  is captured; an older item's concern and layer are classified once by the first derive. A tier can name a layer
+  is captured, and creates `docs/BACKLOG.md` when the repository has none; an older item's concern and layer are classified once by the first derive. A tier can name a layer
   (`security+infra:hi`). The CLI sorts the items no roadmap entry
   covers by the lens itself and the model only orders the entries. A derive also brings
   suggested (`?`) priorities into line with the lens; a priority you confirmed is never changed,
@@ -449,9 +454,12 @@ honor it, the worker runs on your session's model.
   before starting Claude Code to turn it off. It never blocks or authorizes anything.
 - **Hooks** protect the installed plugin from direct edits and, when a session stops
   after changing a record, validate it once. At session start, one reads only the
-  dependency names in your `package.json` files to name the expertise your stack uses:
-  it runs nothing from the project, writes nothing, sends nothing anywhere and repeats
-  none of your manifest's content, and on any error it stays silent.
+  dependency names in your `package.json` files to name the expertise your stack uses,
+  and the names and sizes of the files under `docs/` plus the first 4 KB of
+  `docs/DECISIONS.md`, `docs/BACKLOG.md` and `docs/ROADMAP.md` to tell whether imported specs await `/esq:harvest`: it runs
+  nothing from the project, writes nothing, sends nothing anywhere and repeats none of
+  your manifest's or documents' content (not even a file name), and on any error it
+  stays silent.
 - **Codex as a second opinion (opt-in).** With `ESQ_CODEX=on`, `/esq:plan` asks the
   local `codex` CLI for a blind counter-plan and a pre-mortem of the written plan.
   Claude judges both against the code; they never block the plan. **Opting in sends
@@ -464,6 +472,28 @@ honor it, the worker runs on your session's model.
 
   The model and effort are optional; unset, `~/.codex/config.toml` applies. A missing
   or failing `codex` costs one `Codex: not run — <reason>` line.
+
+### Reference stack
+
+If you keep repeating the same proven choices across projects (runtime, data store, auth,
+hosting, the repository that shows how), write them once in `~/.config/esq/stack.md`
+(`$XDG_CONFIG_HOME/esq/stack.md` when that is set, or any path in `ESQ_STACK`). The file lives
+outside every repository and is free Markdown; `esq stack` returns its text and parses none of it.
+`/esq:plan` and `/esq:grill` then start architecture choices from it and say so in one line
+(`Reference stack: <choice> (<path>)`). They depart only for a requirement your project states, and
+ask you only when the departure is a major architecture commitment. A plan reads at most 5 files
+from a repository the stack names, and only when a choice needs a concrete pattern. Keep the file
+short: past 16 KB it is cut at a line. With no file, nothing changes.
+
+```markdown
+# Reference stack
+
+- Runtime: Node 22, TypeScript, plain ESM
+- Data: one PostgreSQL per app; isolation by tenant column, no row-level security
+- Auth: magic-link email sessions; no third-party identity provider
+- Hosting: one container on a single VM, Caddy in front
+- Example: ~/projects/orchard-ledger shows the layout, the migrations and the auth flow
+```
 
 ## Contributing
 

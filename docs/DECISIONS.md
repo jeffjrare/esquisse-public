@@ -5,6 +5,9 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-reference-stack-is-user-scope | 2026-11-22 | arch | stack | esq stack reads $ESQ_STACK, else ${XDG_CONFIG_HOME:-~/.config}/esq/stack.md, read-only and capped at 16 KB; plan, grill and harvest intake follow a choice it covers and say so in one line, departing only for a stated project requirement, asked when it is a major architecture commitment. | Active |
+| D-intake-pending-means-no-registry | 2026-11-22 | func | intake | pending = at least 3 foreign Markdown files totalling at least 20 KB under docs/ and no docs/DECISIONS.md in esq format; a ledger- or projection-named file counts as esq-owned only in esq format. | Active |
+| D-spec-intake-runs-inside-harvest | 2026-11-22 | arch | intake | /esq:harvest gains an intake mode (esq intake inventory, one reconciliation read, one grouped question round) that writes docs/DECISIONS.md and backlog rows through esq backlog add in one commit, then names /esq:roadmap plan; ordering and epics stay with their owners. | Active |
 | D-roadmap-flags-user-value-imbalance | 2026-11-08 | prod | roadmap | esq backlog distribution flags imbalance when, among the first 5 open rows in rank order, known non-user rows outnumber half, and an eligible user row exists outside the head; it names the candidates and the level each would need, and the derive prints one line with the commands, never applying them. | Active |
 | D-backlog-row-carries-type-concern-layer | 2026-11-08 | func | backlog | A row's domain is Concern × a lazy Layer column (app \| infra), its nature the five canonical Type words; esq backlog add refuses a row missing either axis or with an off-list type, and esq validate reds an off-list layer while an off-list type stays an advisory. | Active |
 | D-advance-takes-any-backlog-item | 2026-11-08 | arch | roadmap | `/esq:advance B-NNN` works an Open backlog item no Now entry covers as a one-item entry, through to a local merge; a closed or absent ID stops before spawning, and a slug still resolves within `Now` only. `/esq:work`'s directly invoked `plan`, `grill` or `ui` verdict hands on to `/esq:advance <B-NNN>`, its command kept on a `routes to` line. | Active |
@@ -5765,3 +5768,48 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained a value-first signal that never blocks; accepted that a user-chosen lens putting security first still shows the line.
 **Conséquences:** HEAD_WINDOW and MIN_USER_SHARE are named constants in plugin/lib/cli.mjs; changing them is a change to this rule.
 **Alternatives rejetées:** An automatic quota or CLI reordering (out of scope by the brief: the user decides); a 10-row window (covers most of a small backlog, so it measures the whole queue rather than its head).
+
+## D-spec-intake-runs-inside-harvest — Adopting an imported spec folder is a /esq:harvest mode writing decisions and backlog rows only
+
+**Scope:** arch
+**Topic:** intake
+**Date:** 2026-11-22
+**Statut:** Active
+**Fondement:** user — /esq:plan request, 2026-11-21: approved "Go" on extending /esq:harvest (no new skill), detection in advance/status, a user-level reference stack
+
+**Contexte:** A greenfield project's chat-written specs (25k words, codes D1..D64, a module registry) sat in docs/ in no esq format; 18h passed from import to first code while the user routed by hand.
+**Décision:** /esq:harvest gains an intake mode (esq intake inventory, one reconciliation read, one grouped question round) that writes docs/DECISIONS.md and backlog rows through esq backlog add in one commit, then names /esq:roadmap plan; ordering and epics stay with their owners.
+**Raison:** Harvest already owns recovering decisions from artifacts and questions; widening it keeps one writer per ledger and adds no skill. The CLI maps syntax and locations, the model judges meaning and authority once.
+**Tradeoff:** Gained: one run replaces the hand-built front end. Accepted: a second command (/esq:roadmap) before /esq:advance takes over.
+**Conséquences:** A foreign docs/DECISIONS.md is moved to docs/DECISIONS.imported.md, never overwritten; imported codes survive as aliases in entry titles; esq backlog add creates a missing backlog from its template.
+**Alternatives rejetées:** A new /esq:intake skill writing every ledger and chaining into /esq:plan — breaks one-writer-per-file and the plan mandate guard. A durable docs/INTAKE.md disposition ledger — duplicates provenance already held by Fondement and Source cells.
+
+## D-intake-pending-means-no-registry — Intake is pending only when docs/ holds foreign specs and no esq registry
+
+**Scope:** func
+**Topic:** intake
+**Date:** 2026-11-22
+**Statut:** Active
+**Fondement:** mandate — docs/plans/2026-11-21-spec-intake-reference-stack.md Recommendation, under the user's 2026-11-21 approval of detection in advance/status
+
+**Contexte:** Status, advance and the SessionStart hook must route a fresh repo to the intake without nagging every project that already runs esq.
+**Décision:** pending = at least 3 foreign Markdown files totalling at least 20 KB under docs/ and no docs/DECISIONS.md in esq format; a ledger- or projection-named file counts as esq-owned only in esq format.
+**Raison:** Every adopted project has a registry, so the rule is silent there; checking format rather than name catches imported files wearing ledger names. One function in plugin/lib/intake.mjs serves the CLI and the hook so they cannot disagree.
+**Tradeoff:** Gained: zero noise on existing projects. Accepted: specs imported after a registry exists are not detected automatically.
+**Conséquences:** The SessionStart hook reads directory entries, sizes and the first 4 KB of docs/DECISIONS.md, and never a foreign doc's content or name.
+**Alternatives rejetées:** An intake marker with per-doc freshness — machinery for a rare case. Name-only exclusion — misses a hand-written ROADMAP.md or SPEC.md.
+
+## D-reference-stack-is-user-scope — The user's reference stack is a user-scope file that plan and grill take as the default
+
+**Scope:** arch
+**Topic:** stack
+**Date:** 2026-11-22
+**Statut:** Active
+**Fondement:** user — /esq:plan request, 2026-11-21: approved "Go" on a user-level reference stack used as the default by plan and grill
+
+**Contexte:** A plan over-engineered tenant isolation until the user pointed, twice, to the proven stack in their sibling repos.
+**Décision:** esq stack reads $ESQ_STACK, else ${XDG_CONFIG_HOME:-~/.config}/esq/stack.md, read-only and capped at 16 KB; plan, grill and harvest intake follow a choice it covers and say so in one line, departing only for a stated project requirement, asked when it is a major architecture commitment.
+**Raison:** The file is a recorded user preference, so a choice it covers is no longer a question; living outside every repo keeps project names out of the framework and out of ~/.claude installation state.
+**Tradeoff:** Gained: proven choices by default, fewer reverts. Accepted: the user writes the file once from the README template.
+**Conséquences:** No stack file means no behavior change; the CLI never parses the free Markdown, only returns it.
+**Alternatives rejetées:** A per-project docs/STACK.md — repeated in every repo and missing exactly on a greenfield. Auto-mining sibling repos — reads other projects without a user statement of what is proven.
