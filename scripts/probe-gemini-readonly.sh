@@ -4,7 +4,8 @@
 #
 # A research instrument run by hand, never a gate: it is not wired into
 # audit.sh, --lab or anything a skill reads, because the call runs under the
-# user's own Gemini login. Run it once after installing `gemini`, and again after
+# user's own Gemini account (API key, Vertex AI or Code Assist license). Run it
+# once after installing `gemini`, and again after
 # an edit to plugin/skills/plan/references/gemini-adversary.md or
 # gemini-readonly.toml.
 #
@@ -63,7 +64,7 @@ if ls /etc/gemini-cli/policies/*.toml "/Library/Application Support/GeminiCli/po
 fi
 printf 'PASS 1 capability precondition\n'
 
-printf 'probe: bound — one gemini call, timeout %s s, no retry, under your own Gemini login\n' "$BOUND_S"
+printf 'probe: bound — one gemini call, timeout %s s, no retry, under your own Gemini account\n' "$BOUND_S"
 rc=0
 (
   cd "$SCRATCH" &&

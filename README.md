@@ -466,8 +466,12 @@ honor it, the worker runs on your session's model.
   with both, the two run at the same time, so the plan waits no longer, and each
   one's verdicts stay attributed to it. Claude judges every answer against the code;
   none ever blocks the plan. **Opting in sends the goal text and whatever the model reads
-  in your repository to its vendor under your own login: OpenAI for Codex, Google for
-  Gemini.** Set it per project in `.claude/settings.json`:
+  in your repository to its vendor under your own account: OpenAI for Codex, Google for
+  Gemini.** Since 2026-06-18 Google serves the `gemini` CLI only through a Gemini API key
+  (`GEMINI_API_KEY`), Vertex AI or an organization's Code Assist license; a personal
+  Google sign-in, including the Google AI Plus, Pro and Ultra subscriptions, is refused,
+  and the call then costs one `Gemini: not run` line. On the API's free tier Google may
+  use what it reads to improve its products. Set it per project in `.claude/settings.json`:
 
   ```json
   { "env": { "ESQ_CODEX": "on", "ESQ_CODEX_MODEL": "gpt-6-astra", "ESQ_CODEX_EFFORT": "high",
