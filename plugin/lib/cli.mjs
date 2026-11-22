@@ -2,6 +2,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { realpathSync } from 'node:fs';
 import { appendFile, mkdir, open, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseSections, parseVerified, pathAlternatives, readText, splitTableRow, stripComments, tableAt, phaseExpertise, touchedPaths, touchesPath } from './markdown.mjs';
@@ -6421,6 +6422,49 @@ export async function standards(root, options = {}) {
   return { root: repository, project, default: fallback, findings };
 }
 
+// `esq stack`: the user's reference stack — the choices they have already proven on their own projects,
+// which `/esq:plan`, `/esq:grill` and the harvest intake start from. It is user scope, never repository
+// scope: `$ESQ_STACK`, else `${XDG_CONFIG_HOME:-$HOME/.config}/esq/stack.md`, outside every repository and
+// outside `~/.claude`. The file is free Markdown, so the CLI returns its text and parses none of it.
+// Read-only, never spilled: a reference stack is meant to be short, so text over STACK_TEXT_BUDGET is cut
+// at a line boundary with a finding. An empty or unreadable file is a finding, never an error exit.
+export const STACK_TEXT_BUDGET = 16 * 1024;
+
+export function stackPath(env = process.env) {
+  if (env.ESQ_STACK) return path.resolve(env.ESQ_STACK);
+  const config = env.XDG_CONFIG_HOME || path.join(env.HOME || os.homedir(), '.config');
+  return path.join(config, 'esq', 'stack.md');
+}
+
+export async function stack(env = process.env) {
+  const file = stackPath(env);
+  const answer = { path: file, present: false, text: null, truncated: false, findings: [] };
+  let raw;
+  try {
+    raw = await readFile(file);
+  } catch (error) {
+    if (error.code === 'ENOENT') return answer;
+    answer.present = true;
+    answer.findings.push(`${file} could not be read (${error.code ?? error.message}) — no reference stack applies`);
+    return answer;
+  }
+  answer.present = true;
+  if (raw.toString('utf8').trim() === '') {
+    answer.findings.push(`${file} is empty — no reference stack applies`);
+    return answer;
+  }
+  if (raw.length > STACK_TEXT_BUDGET) {
+    const head = raw.subarray(0, STACK_TEXT_BUDGET);
+    const newline = head.lastIndexOf(0x0a);
+    answer.text = (newline >= 0 ? head.subarray(0, newline + 1) : head).toString('utf8').replace(/\uFFFD+$/, '');
+    answer.truncated = true;
+    answer.findings.push(`${file} is ${raw.length} bytes; only the first ${Buffer.byteLength(answer.text)} were returned, cut at a line — a reference stack is meant to stay under ${STACK_TEXT_BUDGET} bytes`);
+    return answer;
+  }
+  answer.text = raw.toString('utf8');
+  return answer;
+}
+
 function renderStandards(report) {
   const out = [];
   out.push(`# Standards referent — resolved ${report.project.speaks ? 'over' : 'from'} the plugin default`);
@@ -6736,6 +6780,10 @@ export async function main(args) {
   // standards a run arbitrates a stated constraint against. Prose by default, because the reader is a
   // run that is about to decide and needs the clauses in hand; `--json` is the same resolution with
   // both paths and both texts as fields.
+  if (group === 'stack') {
+    if (action !== undefined || rest.length > 0) throw new Error('usage: esq stack');
+    return output(await stack());
+  }
   if (group === 'standards') {
     const flags = [action, ...rest].filter((flag) => flag !== undefined);
     if (flags.some((flag) => flag !== '--json')) throw new Error('usage: esq standards [--json]');
@@ -6933,5 +6981,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text> --concern <concern> --layer <app|infra>|backlog set-pri <B-NNN> <pri>|backlog set-concern <B-NNN>[,<B-NNN>…] <concern>|backlog set-layer <B-NNN>[,<B-NNN>…] <app|infra|none>|backlog set-type <B-NNN>[,<B-NNN>…] <bug|debt|idea|improvement|todo>|backlog distribution [backlog] (open rows by concern × layer and type, and whether the head of the queue is short on user value; read-only)|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank --order [<B-NNN…>] --lens (the head; the rest by the roadmap tiers)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match [--all] <path…>|--paths <file>|- (the expertise modules those paths touch, each with its file and age; --all every module, with the stack packages that show it in use)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|intake inventory (the imported spec docs under docs/ esq does not own: headings, codes defined and cited, links, and whether intake is pending; read-only)|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text> --concern <concern> --layer <app|infra>|backlog set-pri <B-NNN> <pri>|backlog set-concern <B-NNN>[,<B-NNN>…] <concern>|backlog set-layer <B-NNN>[,<B-NNN>…] <app|infra|none>|backlog set-type <B-NNN>[,<B-NNN>…] <bug|debt|idea|improvement|todo>|backlog distribution [backlog] (open rows by concern × layer and type, and whether the head of the queue is short on user value; read-only)|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank --order [<B-NNN…>] --lens (the head; the rest by the roadmap tiers)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match [--all] <path…>|--paths <file>|- (the expertise modules those paths touch, each with its file and age; --all every module, with the stack packages that show it in use)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|stack (the reference stack of the user: $ESQ_STACK, else ${XDG_CONFIG_HOME:-~/.config}/esq/stack.md, its text and findings; read-only)|intake inventory (the imported spec docs under docs/ esq does not own: headings, codes defined and cited, links, and whether intake is pending; read-only)|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
 }
