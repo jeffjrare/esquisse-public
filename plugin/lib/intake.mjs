@@ -28,8 +28,10 @@ const OWNED_FILES = new Set(['PROMISES.md', 'LESSONS.md', 'EVIDENCE.md', 'CONFOR
 const FORMAT_OWNED = {
   'SPEC.md': (text) => /<!-- last-spec:/.test(text.split('\n').slice(0, 10).join('\n')),
   'ARCHITECTURE.md': (text) => /<!-- last-arch:/.test(text.split('\n').slice(0, 10).join('\n')),
-  'DECISIONS.md': (text) => /^\|\s*#\s*\|/m.test(text),
-  'BACKLOG.md': (text) => /^\|\s*ID\s*\|/m.test(text),
+  // esq's leading columns, never a bare `| # |`: a chat-written registry numbers its rows too.
+  'DECISIONS.md': (text) => /^\|\s*#\s*\|\s*Date\s*\|/m.test(text),
+  // `#` is the id header older esq installs wrote, which the backlog parser still reads.
+  'BACKLOG.md': (text) => /^\|\s*(?:ID|#)\s*\|\s*Date\s*\|\s*Type\s*\|/m.test(text),
   'ROADMAP.md': (text) => /^## Now\b/m.test(text),
 };
 

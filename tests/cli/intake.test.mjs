@@ -130,6 +130,19 @@ test('pending: true with a foreign DECISIONS.md (a registry collision), false wi
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
+// A numbered decision table is how chat-written registries look; only esq's leading columns are esq's.
+test('pending: true with a foreign `| # | Decision | Status |` DECISIONS.md', async () => {
+  const root = await repo('foreign');
+  try {
+    await pad(root);
+    await writeFile(path.join(root, 'docs/DECISIONS.md'), '# Decisions\n\n| # | Decision | Status |\n|---|---|---|\n| D1 | Use the invented stack | Open |\n');
+    const inventory = await intakeInventory(root);
+    assert.equal(inventory.registry, 'foreign');
+    assert.equal(inventory.registryCollision, true);
+    assert.equal(inventory.pending, true);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
 // A project that runs esq through its backlog and roadmap may never have recorded a decision.
 test('pending: false with an esq BACKLOG.md and ROADMAP.md and no DECISIONS.md', async () => {
   const root = await repo(null);
