@@ -218,6 +218,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-199 | 2026-11-08 | ✨ improvement | user | app | med? |  | Classify every backlog row by domain and nature reliably; show their distribution as a radar/table | work · Planned by backlog-domain-nature-distribution · Done by backlog-domain-nature-distribution |  |  | Done |
 | B-200 | 2026-11-22 | ✨ improvement | user | app | med? |  | Add Gemini as a second opt-in adversary beside Codex in /esq:plan | work · Planned by add-gemini-opt-in-adversary · Done by add-gemini-opt-in-adversary |  |  | Done |
 | B-201 | 2026-11-22 | ✨ improvement | user | app | lo? | 2300 | Prove the Gemini adversary read-only: after gemini login, run scripts/probe-gemini-readonly.sh and record its four PASS lines (remainder of B-200) | remainder: add-gemini-opt-in-adversary · of B-200 |  |  | Open |
+| B-202 | 2026-11-22 | ✨ improvement | user | app | med | 2400 | Run the Gemini adversary through Antigravity CLI (agy) so a Google AI subscription covers it: since 2026-06-18 gemini CLI refuses personal/AI Plus/Pro/Ultra sign-in (API key or Vertex only); keep read-only via agy permissions deny of writes and shell, port the probe; absorbs B-201 | manual · user 2026-11-21, after B-200 landed (acb9c71) |  |  | Open |
 
 ---
 
