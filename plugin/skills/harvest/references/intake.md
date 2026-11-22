@@ -62,8 +62,9 @@ The writes touch the same files, so they are chained with `&&` in one call, neve
 
 1. **On `registryCollision`**, first: `git mv docs/DECISIONS.md docs/DECISIONS.imported.md`. The foreign registry is moved,
    never overwritten, and is cited from its new path.
-2. **Decisions**, through `esq decisions add -` with one array in a heredoc. One entry per settled or answered decision; an open
-   one becomes a gate row, not an entry. Each entry:
+2. **Decisions**, through `esq decisions add -` with one array in a heredoc, **only when at least one decision was settled or
+   answered**: the CLI refuses an empty array, so with none this step is skipped, never run empty. One entry per settled or
+   answered decision; an open one becomes a gate row, not an entry. Each entry:
    - keeps its source code in `title` (`D58 — Weekly order cut-off`), its `slug` derived from the title as harvest's write
      phase says;
    - cites the doc in `context` (`docs/<path> § <heading>`), with `decision`, `reason`, `tradeoff`, `consequences` and
@@ -74,8 +75,10 @@ The writes touch the same files, so they are chained with `&&` in one call, neve
    repository has none.
    - A module: `--type todo --concern user --layer app --summary "<module>: <what the user gets>" --source "intake: <path>#<heading>"`.
    - A gate: `--type todo --concern internal --layer app --summary "Gate <code>: <the open question> — blocks <module>" --source "intake: <path>#<heading>"`.
-4. **Commit once:** `git add docs/DECISIONS.md docs/BACKLOG.md && git commit -m "decisions: adopt imported specs (<N> decisions, <M> rows)"`.
-   The move from step 1 is already staged and lands in the same commit.
+4. **Commit once,** staging only the ledgers this run wrote: `git add docs/BACKLOG.md`, plus `docs/DECISIONS.md` when step 2
+   ran (a path never written is a pathspec `git add` refuses), then `git commit -m "decisions: adopt imported specs (<N> decisions,
+   <M> rows)"`. The move from step 1 is already staged and lands in the same commit. The esq `docs/BACKLOG.md` step 3 wrote is
+   what clears the pending intake when no decision was written.
 
 Never delete or edit a foreign doc. Ordering belongs to `/esq:roadmap`, epics to `/esq:epic`: a hand-written roadmap is
 reported as superseded once `/esq:roadmap plan` has run, and nothing here writes either.
@@ -91,5 +94,5 @@ The elapsed time comes last, on its own line, as harvest's write phase says.
 
 ## Constraints, amended
 
-Harvest's constraints hold, with one change: the commit carries `docs/DECISIONS.md` and `docs/BACKLOG.md`, plus the move of a
-foreign registry when there was one. Nothing writes the roadmap, an epic, a plan or a foreign doc.
+Harvest's constraints hold, with one change: the commit carries `docs/BACKLOG.md`, plus `docs/DECISIONS.md` when a decision
+was written and the move of a foreign registry when there was one. Nothing writes the roadmap, an epic, a plan or a foreign doc.
