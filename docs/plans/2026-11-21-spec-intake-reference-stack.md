@@ -139,3 +139,36 @@ None. The user approved the three-part scope on 2026-11-21 ("Go"). Thresholds, p
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-11-21
+
+**Plan committed at:** 74f1d0e
+
+**Commits:** 7250e9f, f3c5cdd, 769c722
+
+**Verified:** 769c722d198a2925e1a6210940734ee7d4b366cb
+- `node --test tests/cli/intake.test.mjs`
+- `bash scripts/check-structure.sh`
+
+**What got built:** `esq intake inventory` (new `plugin/lib/intake.mjs`, no import from cli.mjs) maps the Markdown under docs/ esq does not own — headings, codes defined and cited, link resolution, and a `pending` verdict — spilling to `<git-dir>/esq/intake.json` above the budget; `esq backlog add` now creates a missing `docs/BACKLOG.md`; `/esq:harvest` runs an intake (references/intake.md: one bounded reading, overview, one question round, decisions plus module and gate rows, one commit) when the inventory is pending.
+
+**Verification:**
+- (auto) node --test tests/cli/intake.test.mjs — 10 pass, 0 fail (foreign/owned split, heading/table/file-name definitions, undefined and doubly defined codes, link resolution, pending with no registry, with a foreign DECISIONS.md and under the floor, an esq registry, an esq ROADMAP.md excluded, the spill with git status unchanged, the 500-entry limit, backlog add creating BACKLOG.md then appending)
+- (auto) bash scripts/check-structure.sh — exit 0: the references/intake.md load resolves, 23 commands covered by the README table
+- (blast radius, not a plan step) ./scripts/audit.sh — exit 0, 7 checks clean, 26 s: cli.mjs is imported by every CLI suite and addRow is shared with lessons
+
+**Decided for you:**
+- architecture: `multiplyDefined` counts two definitions of the same kind (two headings, two table rows, two file names), so a registry's index row beside its section heading is not reported as a clash — that is how a registry is written — undo: change the filter on `multiplyDefined` in plugin/lib/intake.mjs
+- product: an intake run replaces harvest's git/config/comment archaeology and interrogation rather than running beside them, since a fresh import repository has little history and one question round is the bound — undo: plugin/skills/harvest/SKILL.md preflight step 2
+
+**Surprises / decisions made during execution:** - The plan's announce rule (bound before any tool call) and its intake bound (known only after the inventory) meet in the second line: the first line keeps the default bound, and when `pending` the resolved-target line restates the intake bound before any imported doc is read.
+- `esq decisions add` requires all six text keys (tradeoff and consequences included); the intake reference says so, since the plan's entry description named only title and context.
+- A code fence is skipped whole by the inventory (headings, codes and links inside it are not counted); the test asserts that.
+- Added a 500-entry overflow test the plan did not list, after a mutation of the limit went unnoticed by the planned cases.
+- README also gained the `esq intake inventory` clause in the CLI row and the BACKLOG-creation clause in the backlog paragraph, both behavior this phase changed.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. `plugin/skills/harvest/references/intake.md` exists; Phase 2 adds `esq stack` to its first batch before § 2 Reconcile. Harvest now carries `allowed-tools: Bash(esq *)`.
+2. `scanDocs(root)` in plugin/lib/intake.mjs is the cheap half (walk, sizes, ledger-format checks) returning {pending, reason, registry, registryCollision, foreign, bytes, ...}; Phase 3's `state().intake` should call it, not `intakeInventory`. Note it reads the content of the five format-owned names (SPEC, ARCHITECTURE, DECISIONS, BACKLOG, ROADMAP), whereas Phase 3's hook may read only the first 4 KB of DECISIONS.md: the hook needs its own narrower read or a `scanDocs` option.
+3. The usage string in cli.mjs' final throw lists `intake inventory`; add `stack` beside it in Phase 2.
