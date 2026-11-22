@@ -201,3 +201,34 @@ None. The user approved the three-part scope on 2026-11-21 ("Go"). Thresholds, p
 **Backlog candidates:** None.
 
 **For Phase 3:** Phase 3 can proceed as planned, no surprises. `esq stack` is independent of `intake.mjs`; Phase 3's hook and `state().intake` should use `scanDocs` as Phase 1's hand-off says, with the hook's narrower 4 KB read of DECISIONS.md.
+
+### Phase 3 — completed 2026-11-21
+
+**Plan committed at:** 904c1f4
+
+**Commits:** 4ef0c0d, 0736556, 0a31037
+
+**Verified:** 0a310376a4937cc9e590bdcf98d2fb7353c1d3a9
+- `./scripts/audit.sh`
+- `esq validate`
+
+**What got built:** `esq state` carries `intake: {pending, files, kb, reason}` from the same `scanDocs` as `esq intake inventory` (inline even when the answer spills); the SessionStart hook opens with one line of at most 200 characters naming a count and a size, never a file name, when intake is pending; `/esq:status` routes a pending intake to `/esq:harvest` (new rule 6, an Also line when a plan action wins) and `/esq:advance` stops before spending on an unscoped run, ahead of a missing or hand-written roadmap.
+
+**Verification:**
+- (auto) ./scripts/audit.sh — exit 0, 7 checks clean (plugin, structure, conformance, version, bounded runner, product suites within 120 s), 26 s; the product suites include tests/cli/intake.test.mjs (11 pass, the new state().intake case: below the floor, pending and equal to the inventory's verdict, files and kb, not pending with an esq registry, null with no docs/) and tests/hooks/session-expertise.test.mjs (7 pass: the line present, ≤200 characters, no fixture file name, the expertise output unchanged after it, the line alone with an empty catalog; byte-identical JSON when not pending, registry or under the floor; the peek blind past 4 KB and never reading BACKLOG.md)
+- (auto) esq validate — exit 0, valid, no findings
+- each of 6 source mutations (state intake forced false, forced non-null; peek ignored; unread skip removed; pending check removed; intake line dropped) turned its suite red, source restored
+
+**Decided for you:**
+- architecture: the hook's 4 KB peek reads docs/DECISIONS.md alone and counts SPEC, ARCHITECTURE, BACKLOG and ROADMAP as esq's unread, so an esq project with no registry is never nudged; the cost is that an import whose only bulk sits in those four names stays silent at session start while /esq:status still routes it — undo: the `peek` branch in scanDocs, plugin/lib/intake.mjs
+- design: the intake line opens the session note, before the expertise header, as the one action it names — undo: `const lines = intake ? [intake] : []` in plugin/scripts/session-expertise.mjs, push it after the expertise lines
+
+**Surprises / decisions made during execution:** - The README hook text (the *How it works* Hooks row, the session-note paragraph and the *Privacy and options* Hooks bullet) moved into Task 3.2's commit, not 3.3's, under CLAUDE.md's rule that README follows a behavior change in the same commit; the privacy bullet now names what the hook reads (names, sizes, the first 4 KB of DECISIONS.md).
+- `/esq:advance` keeps one first call (roadmap read and `esq state` together); the plan's "before reading the roadmap" is honored as precedence: on an unscoped run `intake.pending` is judged before any roadmap verdict.
+- The hook emits the intake line even when the expertise catalog is empty, where it returned null before; with intake not pending, the old null and the old text are unchanged.
+- The status rules renumber: the old rule 6 (roadmap) is 7, the old rule 7 (grill) is 8; nothing outside the skill cites those numbers.
+- Stale projections left for /esq:arch as the plan said: `.claude/skills/plugin-runtime` still says the SessionStart handler reads only dependency key names.
+
+**Backlog candidates:** None.
+
+**For Phase 4:** Last phase: the plan is complete. /esq:review next; the plugin-runtime project skill and docs/ARCHITECTURE.md's SessionStart and ledger-writer descriptions are /esq:arch's to refresh.
