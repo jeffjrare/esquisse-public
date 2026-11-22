@@ -88,8 +88,9 @@ The run covers one slice, but the mandate covers everything it was given. The pr
   - the journeys and screens it covers, and the ring or mandate that reached them;
   - the mandate's shared rules and **its requirements for those journeys**. Copy them verbatim when they came from the prompt. Point to the file and its headings when they live in a committed document, and do not copy that document;
   - the open decisions the mandate leaves to that slice;
+  - when it runs. A slice that reaches screens this one changes runs **after this slice is built and landed**, so it audits the built screens rather than a proposal. Say so in one line;
   - the line `→ /esq:ui B-NNN`.
-- **Order is value first.** The slice that gives a person value soonest runs first, for example a path that does not exist at all today. A slice that needs another slice's screens runs after it. The rows are filed in that order, and the brief lists them by ID with their invocation.
+- **Order is value first.** The slice that gives a person value soonest runs first, for example a path that does not exist at all today. A slice that needs another slice's screens runs after that slice lands. The rows are filed in that order, and the brief lists them by ID with their invocation.
 - **Account for every journey before the commit.** Each journey the mandate names is in exactly one of three places: this brief's `## In scope`, a next-slice row, or `## Out of scope` with its reason. A journey that is in none of them was lost by the cut. Place it before you commit.
 
 ## A targeted run
@@ -353,7 +354,7 @@ Tell the user, in this order:
 1. Whether the audit ran complete or a pass was cut short, and which.
 2. The direction they picked, and the brief path.
 3. The comparison page's URL or path.
-4. What still needs them: the leftover rows it filed, one line each, screens or journey steps you could not reach, and the next-slice rows with their `/esq:ui B-NNN`.
+4. What still needs them: the leftover rows it filed, one line each, and the screens or journey steps you could not reach. Then the next slices, by row ID and in one line each, saying when each comes up (for example `B-014 (2b), B-015 (2c): filed with their mandate; they come up once this slice is built`). **Print no invocation for them.** They are already in the queue, `/esq:work` and `/esq:advance` route them, and a second command beside step 6 reads as a choice the user has to make.
 5. Elapsed time, and what it spent: screens covered, journeys walked, captures taken, searches run, directions rendered.
 6. Next step: "Review the brief in your editor. When ready, `/clear` and run `/esq:plan` — it will pick up this brief automatically."
 
