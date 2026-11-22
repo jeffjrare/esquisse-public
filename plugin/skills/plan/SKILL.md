@@ -74,7 +74,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
     This is the free moment to be redirected — the target is on screen before anything has been spent on it.
 
-    **`ESQ_CODEX=on` only:** the target line ends `…; with ESQ_CODEX=on, 2 read-only Codex calls (≤15 min background, ≤10 min foreground).` instead of its period. In this same response, load `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`, then launch the blind counter-plan in the background, per its § 1.
+    **`ESQ_CODEX=on` only:** the target line ends `…; with ESQ_CODEX=on, 2 read-only Codex calls (≤15 min background, ≤10 min foreground).` instead of its period. In this same response, load `${CLAUDE_SKILL_DIR}/references/adversary.md` and `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`, then launch the blind counter-plan in the background, per § 1 of the first.
 
 <!-- shared:batch-independent:start -->
 **Batch independent, read-only calls in one turn.** A call that consumes another's result waits for it. Serialize Git mutations, writes to the same file, and reads of a file another call writes; never run them concurrently. Group ordered shell operations with `&&` in one call so failure stops the chain.
@@ -278,7 +278,7 @@ Things you couldn't decide without more input. Be specific about what would reso
 
 The `<!-- comment -->` after `## Execution log` is required — it signals to `/esq:build` that this section is reserved.
 
-**`ESQ_CODEX=on` only — `## Approaches considered`:** read the counter-plan if it has returned and judge it there, per § 1 and § 3 of `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`; a structurally different Codex approach replaces the self-invented alternative. Not returned yet: write the section without it.
+**`ESQ_CODEX=on` only — `## Approaches considered`:** read the counter-plan if it has returned and judge it there, per § 1 and § 3 of `${CLAUDE_SKILL_DIR}/references/adversary.md`; a structurally different Codex approach replaces the self-invented alternative. Not returned yet: write the section without it.
 
 ## Style for the plan content
 
@@ -385,7 +385,7 @@ registry migration.
 
 After writing the plan file and updating DECISIONS.md (if applicable):
 
-0. **`ESQ_CODEX=on` only:** run the pre-mortem, judge it and make the accepted plan edits before anything is staged, per § 2–3 of `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`. Its § 4 `Adversary` block becomes step 3's commit body, and its count line joins step 4's report.
+0. **`ESQ_CODEX=on` only:** run the pre-mortem, judge it and make the accepted plan edits before anything is staged, per § 2–3 of `${CLAUDE_SKILL_DIR}/references/adversary.md`, with the command from `references/codex-adversary.md`. Its § 4 `Adversary` block becomes step 3's commit body, and its count line joins step 4's report.
 1. **Cut the shipping unit, and fill both fields from it**, here and not earlier.
    `git branch --show-current`, run once: that is `**Origin:**`. Then `git switch -c esq/<slug>`
    from it, and that name is `**Branch:**`. Write both into the plan file's header before staging. A Git state is named only from the output of a command that ran: empty output means

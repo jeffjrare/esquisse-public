@@ -55,7 +55,7 @@ test('bash mutations of the installed cache are denied, reads and dev-tree edits
 
   // /esq:plan's Codex counter-plan reads a schema from the plugin and clears its own output under .git.
   const codex = 'd="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/codex-x-counter.json" && \\\n'
-    + 'timeout 900 codex exec -s read-only --output-schema "/config/plugins/cache/esquisse/esq/1.0/skills/plan/references/codex-counter-plan.schema.json" - <<\'PROMPT\'\ngoal\nPROMPT';
+    + 'timeout 900 codex exec -s read-only --output-schema "/config/plugins/cache/esquisse/esq/1.0/skills/plan/references/counter-plan.schema.json" - <<\'PROMPT\'\ngoal\nPROMPT';
   assert.equal(bash(codex), null);
   const carried = [
     'd=/config/plugins/cache/esquisse/esq/1.0 && rm -rf "$d/skills"',

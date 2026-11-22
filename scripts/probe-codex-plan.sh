@@ -5,7 +5,8 @@
 #
 # A research instrument, never a gate: it is not wired into audit.sh, --lab or
 # anything a skill reads, because every run spends Claude and Codex money. Re-run
-# it by hand after an edit to plugin/skills/plan/references/codex-adversary.md.
+# it by hand after an edit to plugin/skills/plan/references/adversary.md or
+# codex-adversary.md.
 #
 # What it proves, one PASS/FAIL line each, exit 0 only when all five pass:
 #   1. the counter-plan call is launched before the pre-mortem call;
@@ -24,7 +25,7 @@
 # its ambiguity stop (no question tool in -p) have no ground.
 #
 # How: a `codex` shim goes first on PATH. It logs every call's argv and stdin.
-# The counter-plan call (argv names codex-counter-plan.schema.json) sleeps past
+# The counter-plan call (argv names counter-plan.schema.json) sleeps past
 # the run under a per-run marker, so kill-on-late is forced, not hoped for. Any
 # other call execs the real `codex`, arguments unchanged, so the pre-mortem's
 # -C / -o / stdin `-` / effort flag meet the real CLI. Claude's Bash tool
@@ -95,7 +96,7 @@ cat > "$RESULT/stdin.\$id"
   printf -- '--- stdin ---\n'; cat "$RESULT/stdin.\$id"; printf -- '--- end ---\n'
 } >> "$RESULT/codex-calls.log"
 case " \$* " in
-  *codex-counter-plan.schema.json*)
+  *counter-plan.schema.json*)
     cp "$RESULT/stdin.\$id" "$RESULT/counter.stdin"
     find "$SCRATCH/docs/plans" -name '*.md' ! -name '*.brief.md' 2>/dev/null > "$RESULT/counter.plans-at-launch"
     : > "$RESULT/counter.started"
@@ -142,8 +143,8 @@ pass() { printf 'PASS %s\n' "$1"; }
 fail() { printf 'FAIL %s — %s\n' "$1" "$2"; fails=$((fails + 1)); }
 
 log="$RESULT/codex-calls.log"
-counter_line=$(grep -n -m1 '^argv:.*codex-counter-plan\.schema\.json' "$log" 2>/dev/null | cut -d: -f1)
-premortem_line=$(grep -n -m1 '^argv:.*codex-premortem\.schema\.json' "$log" 2>/dev/null | cut -d: -f1)
+counter_line=$(grep -n -m1 '^argv:.*counter-plan\.schema\.json' "$log" 2>/dev/null | cut -d: -f1)
+premortem_line=$(grep -n -m1 '^argv:.*premortem\.schema\.json' "$log" 2>/dev/null | cut -d: -f1)
 if [ -n "$counter_line" ] && [ -n "$premortem_line" ] && [ "$counter_line" -lt "$premortem_line" ]; then
   pass '1 counter-plan launched before the pre-mortem'
 else
