@@ -115,8 +115,12 @@ change there would reach through a shared component, layout or token. It walks t
 journeys end to end in the running app (steps, dead ends, labels that disagree, input lost
 on back) and checks current practice. Then it renders the directions across every screen
 they change, linked so you walk the journey, on a comparison page at the width people use
-it. A surface too big for one run (more than 3 journeys or 6 screens) is cut into slices:
-the brief names the next ones, each with the command that covers it. A real defect it
+it. Hand it a spec document (`/esq:ui docs/<spec>.md`) or a long mandate and it reads the
+whole thing. A surface too big for one run (more than 3 journeys or 6 screens) is cut into
+slices, value first. Each next slice is filed as a backlog row carrying the mandate's
+requirements for its journeys, so `/esq:ui B-NNN` (or `/esq:work`) picks it up and nothing
+is lost between runs. A screen the mandate asks for that the app does not have yet is
+rendered inside today's shell from the mandate's own content. A real defect it
 finds outside the work is filed as a backlog row, committed with the brief before it asks
 you anything. A direction answers what the screen should feel like, not just
 the defects it counted: each carries its own signature and motion, built live on the page
@@ -203,7 +207,7 @@ backlog row per module; `/esq:roadmap plan` orders them next.
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
 | `/esq:ideas [focus] [features\|adjust\|content\|container]`, `/esq:ideas capture <n,…>` | Propose grounded ideas, user value first: new features, adjustments, content and container (architecture, structure, surfaces) | A ranked slate you pick from in one question; picked ideas become backlog rows with a suggested priority, the rest kept for a later `capture` |
 | `/esq:promise [page-or-feature] [--sense \| --copy] [--all]` | Check that what the product promises works in the running app; sweep it for UX nonsense; write or improve page copy | `docs/PROMISES.md` verdicts with evidence and a backlog row per promise that does not hold, per defect seen on the way and for the part of the ask it cannot judge; `--sense` backlog rows; `--copy` a before/after page, then approved copy committed page by page |
-| `/esq:ui [screen-problem-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), live, animated and walkable, gated on contrast, focus, target size, phone width, reduced motion and states, a comparison page, each direction's HTML source committed beside a planning brief naming the next slices (the source, not the page, is what `/esq:build` builds from); backlog rows for the defects outside the work |
+| `/esq:ui [screen-problem-spec-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large, or a spec document of several journeys) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), live, animated and walkable, gated on contrast, focus, target size, phone width, reduced motion and states, a comparison page, each direction's HTML source committed beside a planning brief; each next slice filed as a backlog row holding its share of the mandate (the source, not the page, is what `/esq:build` builds from); backlog rows for the defects outside the work |
 
 In every example, use the actual paths the previous command reported. `review` and
 `check` need an explicit target and ask for one when it is missing.

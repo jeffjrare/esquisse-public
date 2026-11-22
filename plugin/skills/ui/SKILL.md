@@ -38,7 +38,13 @@ If a pass would exceed it, stop at the bound and say what you did not cover. The
    **Projections are read by section, never whole.** `esq projection outline <spec|arch>` answers the heading tree (`id`, `heading`, `from`/`to`, subtree `bytes`, a one-line `lead`) and the projection's `freshness`; `esq projection read <spec|arch> <id…>` answers only those sections, history comments stripped. Read the overview (id 0 and `Vue d'ensemble`) and any shared-rules section alongside the feature, and pick a large parent's children by their `bytes`. An answer that spilled names `spill.file` and `spill.ranges`: Read those in one batch, never re-run it. An unknown id refuses: re-run the outline, never fall back to a whole-file Read. `exists: false` means there is no such projection.
    <!-- shared:projection-read:end -->
 2. Note today's date in YYYY-MM-DD format.
-3. **Resolve the target.** A `B-NNN` (match leniently, as `/esq:work` does) or a sentence describing what went wrong makes this a targeted run — see `## A targeted run`; read only that row and its `## B-NNN` section in `docs/BACKLOG.md`. A screen name centres the slice on it. Nothing named centres it on the journey a user takes most often. Either way the slice is sized in `## The slice`, once Pass 1 has mapped the screens.
+3. **Resolve the target.** Read only the row and its `## B-NNN` section in `docs/BACKLOG.md` when a `B-NNN` is named (match leniently, as `/esq:work` does). Then:
+   - **A `B-NNN` whose `Source` reads `ui: <slug> — next slice`** is a slice this command filed: its section is the mandate, and the run covers that slice. It is not a targeted run.
+   - **Any other `B-NNN`, or a sentence describing what went wrong**, makes this a targeted run. See `## A targeted run`.
+   - **A path to a document** (a spec, a product brief, a release of several journeys), **or a pasted mandate naming several journeys**, is the mandate. Read the document whole, then center the slice on the slice of it that comes first in value (see `## The mandate survives the cut`).
+   - **A screen name** centers the slice on that screen. **Nothing named** centers it on the journey a user takes most often.
+
+   In every case, `## The slice` sizes the slice once Pass 1 has mapped the screens.
 4. Determine a slug from the target the user named: 3-5 lowercase words joined with hyphens, e.g. `refonte-visuelle-dashboard`. If they named no target, slug the slice's centre journey and say so.
 5. Determine the brief path: `docs/plans/<YYYY-MM-DD>-<slug>.brief.md`. If it exists, append `-2` (then `-3`, etc.) until unique. Ensure `docs/plans/` exists; create if missing. In `--greenfield`, when the resolved source is a grill brief, that brief *is* the brief path and is never uniquified — see `## Greenfield mode`.
 6. Fetch the tools you need: `ToolSearch "select:AskUserQuestion,WebSearch,WebFetch"`. `AskUserQuestion` carries the direction choice; the other two are the outside read. If any is unavailable, say so where it matters and continue on the evidence you have.
@@ -69,7 +75,22 @@ A person never meets one screen alone. They arrive at it from somewhere and leav
 2. **The blast radius.** For each component, layout or token a direction on the centre would plausibly change, list the other screens that render it. `git grep -l` the component's importers and follow a layout to the routes it wraps. A shared tab bar, form control or colour token reaches every screen that uses it, and those screens are where a change holds or breaks. Count them: the count goes in the brief whether or not they fit the slice.
 3. **The same pattern doing another job.** Tabs, a stat card or a status badge the centre uses, used elsewhere to mean something different. A misreading usually comes from here.
 
-**A slice holds at most 3 journeys and 6 screens.** A bigger surface is cut, never skimmed. This run takes the slice holding the centre. Every screen the rings reached beyond it goes in the brief's `## Out of scope`, grouped into next slices in the order you would run them. Each group carries the ring that reached it and the exact invocation that covers it (`/esq:ui "<journey or screen>"`). A finished slice with named next slices is a complete run, not a pass cut short. A blast-radius screen outside the slice is still named, so the plan's manual verification walks it.
+**A slice holds at most 3 journeys and 6 screens.** A bigger surface is cut, never skimmed. This run takes the slice holding the centre. Every screen the rings reached beyond it, and every journey the mandate names beyond it, is grouped into next slices filed as `## The mandate survives the cut` says. A finished slice with filed next slices is a complete run, not a pass cut short. A blast-radius screen outside the slice is still named, so the plan's manual verification walks it.
+
+**A screen the mandate asks for that the app does not have yet** is part of the slice like any other screen. This is still the bare mode, never `--greenfield`, because the app exists. Pass 2 captures the screen a person would reach it from, says `new — nothing to capture` for it, and walks the journey to the point where it stops today. Pass 4 renders the new screen inside today's shell and tokens. Its content comes from the mandate under greenfield's content rule: every string traces to the mandate, ordinary interface wording is listed under **Proposed copy**, and an unnamed fact stays a visible placeholder.
+
+## The mandate survives the cut
+
+The run covers one slice, but the mandate covers everything it was given. The prompt dies with the session, so **nothing the mandate says may survive only in the prompt.** A next slice reduced to a one-line invocation loses its details: the next run would be planning from a title.
+
+- **The slice in hand.** The brief's `## In scope`, `## User-facing flow` and `## Done looks like` carry every requirement the mandate states for this slice's journeys, point by point and never summarized. They also carry the shared rules the mandate sets for all journeys.
+- **Each next slice is one backlog row**, filed with the leftovers and committed with the brief. First check for an open row with the same `Source` and the same journeys, which a re-run would have filed already. Then run `esq backlog add --type "☑️ todo" --concern user --layer app --summary "UI slice: <its journeys, ≤ ~12 words>" --source "ui: <slug> — next slice" --pri "<lo?|med?|hi?>" --status Open`. Its `## B-NNN` section holds:
+  - the journeys and screens it covers, and the ring or mandate that reached them;
+  - the mandate's shared rules and **its requirements for those journeys**. Copy them verbatim when they came from the prompt. Point to the file and its headings when they live in a committed document, and do not copy that document;
+  - the open decisions the mandate leaves to that slice;
+  - the line `→ /esq:ui B-NNN`.
+- **Order is value first.** The slice that gives a person value soonest runs first, for example a path that does not exist at all today. A slice that needs another slice's screens runs after it. The rows are filed in that order, and the brief lists them by ID with their invocation.
+- **Account for every journey before the commit.** Each journey the mandate names is in exactly one of three places: this brief's `## In scope`, a next-slice row, or `## Out of scope` with its reason. A journey that is in none of them was lost by the cut. Place it before you commit.
 
 ## A targeted run
 
@@ -78,7 +99,7 @@ A person never meets one screen alone. They arrive at it from somewhere and leav
 - **The report is evidence, and Pass 2 reproduces it.** What the person saw or failed to find is an observation — cite it as reported in the brief. Capture the screen as they met it and name what on it produces the misreading. A report the capture does not reproduce is stated as unreproduced, never upgraded to a finding.
 - **The slice centres on the problem.** Pass 1 and Pass 2 cover the problem's screen and the rings of `## The slice` around it. A misreading often lives across screens: the same pattern means one thing here and another there (ring 3). A fix to a shared component lands on its whole blast radius (ring 2). So the fix is judged where it lands, not only where it was reported. Whatever you notice outside the slice goes to the leftovers.
 - **The directions answer the problem.** Pass 4 renders on that screen and on the screens of the slice its fix changes, and the tension is between answers to the problem, which may be structural — keep the pattern and make it legible, or replace the pattern — as easily as visual. Each direction says in one line how it removes the reported failure, and the brief's `## Done looks like` carries that as a condition someone can check on screen.
-- **The brief names its row.** With a `B-NNN` target, `## Task` cites it, so `/esq:plan` picks the row up.
+- **The brief names its row.** With a `B-NNN` target, `## Task` cites it, so `/esq:plan` picks the row up. A next-slice row is cited the same way.
 
 ## Greenfield mode
 
@@ -260,8 +281,8 @@ update this sentence after the pick.
 
 ## Out of scope
 - Screens deliberately left alone, and why.
-- The next slices, in run order: the screens each holds, the ring that reached them, and
-  the invocation that covers them. Blast-radius screens outside the slice, counted.
+- The next slices, in run order, by backlog ID: the journeys and screens each holds, the
+  ring that reached them, and `/esq:ui B-NNN`. Blast-radius screens outside the slice, counted.
 - The audit findings that are real but outside this work, filed as backlog rows (by ID).
 
 ## Resolved decisions
@@ -332,7 +353,7 @@ Tell the user, in this order:
 1. Whether the audit ran complete or a pass was cut short, and which.
 2. The direction they picked, and the brief path.
 3. The comparison page's URL or path.
-4. What still needs them: the leftover rows it filed, one line each, screens or journey steps you could not reach, and the next slices with their invocations.
+4. What still needs them: the leftover rows it filed, one line each, screens or journey steps you could not reach, and the next-slice rows with their `/esq:ui B-NNN`.
 5. Elapsed time, and what it spent: screens covered, journeys walked, captures taken, searches run, directions rendered.
 6. Next step: "Review the brief in your editor. When ready, `/clear` and run `/esq:plan` — it will pick up this brief automatically."
 
