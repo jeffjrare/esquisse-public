@@ -239,3 +239,10 @@ None. The user approved the three-part scope on 2026-11-21 ("Go"). Thresholds, p
 **Backlog candidates:** None.
 
 **For Phase 4:** Last phase: the plan is complete. /esq:review next; the plugin-runtime project skill and docs/ARCHITECTURE.md's SessionStart and ledger-writer descriptions are /esq:arch's to refresh.
+
+### Phase 3 — reverified 2026-11-22
+
+**Reverified by:** spec-intake-reference-stack-fixes item 3
+
+**Verified:** b3d5eec5b2338e8e35cf9ae6603a3165d7e04bd5
+- `./scripts/audit.sh`
