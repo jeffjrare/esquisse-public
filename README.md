@@ -460,18 +460,27 @@ honor it, the worker runs on your session's model.
   nothing from the project, writes nothing, sends nothing anywhere and repeats none of
   your manifest's or documents' content (not even a file name), and on any error it
   stays silent.
-- **Codex as a second opinion (opt-in).** With `ESQ_CODEX=on`, `/esq:plan` asks the
-  local `codex` CLI for a blind counter-plan and a pre-mortem of the written plan.
-  Claude judges both against the code; they never block the plan. **Opting in sends
-  the goal text and whatever Codex reads in your repository to OpenAI under your own
-  Codex login.** Set it per project in `.claude/settings.json`:
+- **Codex or Gemini as a second opinion (opt-in).** With `ESQ_CODEX=on`, `/esq:plan` asks
+  the local `codex` CLI for a blind counter-plan and a pre-mortem of the written plan;
+  with `ESQ_GEMINI=on`, the local `gemini` CLI does the same. Turn on either or both:
+  with both, the two run at the same time, so the plan waits no longer, and each
+  one's verdicts stay attributed to it. Claude judges every answer against the code;
+  none ever blocks the plan. **Opting in sends the goal text and whatever the model reads
+  in your repository to its vendor under your own login: OpenAI for Codex, Google for
+  Gemini.** Set it per project in `.claude/settings.json`:
 
   ```json
-  { "env": { "ESQ_CODEX": "on", "ESQ_CODEX_MODEL": "gpt-6-astra", "ESQ_CODEX_EFFORT": "high" } }
+  { "env": { "ESQ_CODEX": "on", "ESQ_CODEX_MODEL": "gpt-6-astra", "ESQ_CODEX_EFFORT": "high",
+             "ESQ_GEMINI": "on", "ESQ_GEMINI_MODEL": "gemini-3-pro" } }
   ```
 
-  The model and effort are optional; unset, `~/.codex/config.toml` applies. A missing
-  or failing `codex` costs one `Codex: not run — <reason>` line.
+  The models and effort are optional; unset, `~/.codex/config.toml` and Gemini's own
+  settings apply. Codex runs in its read-only sandbox. Gemini has none, so it runs in
+  plan mode under an allowlist policy that permits only reads, and is skipped when the
+  installed `gemini` cannot enforce it. After installing `gemini`, run
+  `scripts/probe-gemini-readonly.sh` once from this repository: four PASS lines prove it
+  could read but not write; a FAIL means keep `ESQ_GEMINI` off. A missing or failing CLI
+  costs one `Codex: not run — <reason>` or `Gemini: not run — <reason>` line.
 
 ### Reference stack
 
