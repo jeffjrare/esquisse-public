@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseSections, parseVerified, pathAlternatives, readText, splitTableRow, stripComments, tableAt, phaseExpertise, touchedPaths, touchesPath } from './markdown.mjs';
 import { canonicalPlanSlug, telemetryOptedOut } from '../scripts/hook-io.mjs';
 import { expertiseMatch } from './expertise.mjs';
-import { intakeInventory } from './intake.mjs';
+import { intakeInventory, scanDocs } from './intake.mjs';
 import { MIN_SAMPLE_RUNS, compareTelemetry, discoverTelemetryFiles, renderTelemetrySummary, repoKey, summarizeTelemetry, trendWindow } from './telemetry.mjs';
 
 // The expertise reader lives in its own module so a hook can import it without this file; the CLI
@@ -2517,11 +2517,11 @@ export async function stateAnswer(root, { rows = false } = {}) {
   const body = `${readableJson(answer)}\n`;
   await writeFile(temporary, body, 'utf8');
   await rename(temporary, target);
-  const { root: top, branch, dirty, activePlan, landing, idBlock, inFlight } = answer;
+  const { root: top, branch, dirty, activePlan, landing, idBlock, inFlight, intake } = answer;
   // Rows the caller named by ID stay inline: they are few, and they are why it called.
   const { counts, openPri, error, notOpen } = answer.backlog ?? {};
   const named = Array.isArray(rows) ? { rows: answer.backlog?.rows } : {};
-  return { file: target, ranges: readRanges(body), root: top, branch, dirty, activePlan, backlog: answer.backlog && { counts, openPri, error, ...named, notOpen }, landing, idBlock, inFlight };
+  return { file: target, ranges: readRanges(body), root: top, branch, dirty, activePlan, backlog: answer.backlog && { counts, openPri, error, ...named, notOpen }, landing, idBlock, inFlight, intake };
 }
 
 // `esq intake inventory`: the imported-spec map `/esq:harvest` routes on. It grows with the folder a
@@ -2636,7 +2636,11 @@ export async function state(root, { rows: allRows = false } = {}) {
   // A complete plan is listed by file and state alone: readers ask only whether a cited or member plan
   // is complete, and the rest of its entry repeated for every plan ever finished.
   const listed = plans.map((plan) => (plan.state === 'complete' && !plan.abandoned ? { file: plan.file, state: plan.state } : plan));
-  return { root: repository, branch: git(repository, ['branch', '--show-current']), dirty: git(repository, ['status', '--porcelain']) !== '', activePlan, plans: listed, backlog, roadmap, epics, landing, idBlock: await idBlock(repository), inFlight: await inFlightUnits(repository) };
+  // Whether docs/ holds imported specs esq has not adopted — the verdict `esq intake inventory`
+  // answers, from the same scanDocs, so the two cannot disagree. `null` when there is no docs/.
+  const scan = await scanDocs(repository);
+  const intake = scan && { pending: scan.pending, files: scan.foreign.length, kb: Math.round(scan.bytes / 1024), reason: scan.reason };
+  return { root: repository, branch: git(repository, ['branch', '--show-current']), dirty: git(repository, ['status', '--porcelain']) !== '', activePlan, plans: listed, backlog, roadmap, epics, landing, idBlock: await idBlock(repository), inFlight: await inFlightUnits(repository), intake };
 }
 
 // ── Shipping units that live on other branches ───────────────────────────────

@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { state } from '../../plugin/lib/cli.mjs';
 import { intakeInventory } from '../../plugin/lib/intake.mjs';
 
 // Real throwaway repositories built from `fixtures/intake/`, no stubs: the inventory answers a
@@ -177,6 +178,35 @@ test('the walk stops at 500 entries and counts the overflow', async () => {
     assert.equal(inventory.overflow, 20);
     assert.equal(inventory.files.length, 500);
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+// `esq state` carries the verdict /esq:status and /esq:advance route on, from the same scan.
+test('state().intake: pending, not pending, and null with no docs/', async () => {
+  const root = await repo('foreign');
+  try {
+    const small = (await state(root)).intake;
+    assert.deepEqual(Object.keys(small), ['pending', 'files', 'kb', 'reason']);
+    assert.equal(small.pending, false);
+    assert.equal(small.files, 5);
+    assert.match(small.reason, /below the floor/);
+    await pad(root);
+    const large = (await state(root)).intake;
+    const inventory = await intakeInventory(root);
+    assert.equal(large.pending, true);
+    assert.equal(large.pending, inventory.pending);
+    assert.equal(large.files, inventory.totals.files);
+    assert.equal(large.kb, inventory.totals.kb);
+    assert.ok(large.kb >= 20);
+    assert.equal(large.reason, inventory.reason);
+    await writeFile(path.join(root, 'docs/DECISIONS.md'), REGISTRY);
+    const registered = (await state(root)).intake;
+    assert.equal(registered.pending, false);
+    assert.match(registered.reason, /esq registry/);
+  } finally { await rm(root, { recursive: true, force: true }); }
+  const bare = await repo(null);
+  try {
+    assert.equal((await state(bare)).intake, null);
+  } finally { await rm(bare, { recursive: true, force: true }); }
 });
 
 // Harvest files module rows in a repository that has no backlog yet.
