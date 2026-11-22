@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 8cc42305bc7e421e7e778a6a208af800dfe1a97b
+
 ## Context
 
 On a real greenfield project (2026-11-20..21), the user imported ~25k words of chat-written specs into `docs/`: product briefs, a decision registry coded D1..D64, a module registry and a hand-written roadmap of prompts to paste. None of it was in esq's formats. It took 18 h from the import to the first code commit, across two sessions long enough to be compacted (6.3 MB and 3.7 MB of transcript). The 4-phase build and the converge that followed took about 1 h 10 (0.8 MB). The causes observed: esq reads none of those docs, so the user acted as the router. Contradictions and superseded content (a disposable prototype versus the real product, the code language, when the core record is born) surfaced one at a time. The user had to ask what was being built. The planner over-engineered isolation (row-level security) until the user pointed to their own proven stack in a sibling repo, and had to point to it twice. Today `/esq:harvest` mines git, plans, config and the first 30 lines of `docs/*.md`, writes `docs/DECISIONS.md` only, and stays silent on a folder of foreign specs. `/esq:status` rule 7 sends a project with no plan to `/esq:grill`, and `/esq:advance` stops on a missing roadmap with `/esq:roadmap plan`.
