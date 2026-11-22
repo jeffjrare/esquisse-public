@@ -18,7 +18,8 @@ too.
 From the inventory's `files` (path, bytes, words, headings) pick the docs that carry the product first: what is built and for
 whom, the journeys, decisions, modules, then everything else. Sum `bytes` until 320 KB. A doc too large for what is left is
 read by slices: take the line ranges under its relevant headings from the outline. Send every chosen `Read` together in one
-turn. Keep the list of docs and sections left unread for the report.
+turn, with `esq stack` beside them: the user's reference stack, the choices proven on their own projects. It does not count
+against the 320 KB. Keep the list of docs and sections left unread for the report.
 
 A foreign `docs/SPEC.md` or `docs/ARCHITECTURE.md` (the inventory's `ledgers` answers `foreign`) is an imported doc and is read
 like one. The projection verbs serve esq's own projections only.
@@ -36,6 +37,10 @@ Write nothing yet. From what you read and the inventory's aggregates, settle:
 - **Superseded passages.** The newest dated text wins only when it says it replaces the older one. Otherwise the pair is a
   question, never a silent pick.
 - **Modules:** each feature unit the docs name, and **gates**: an open decision that blocks a module.
+- **The reference stack.** A spec choice that contradicts `esq stack`'s text is an architecture question: asked in § 4 when it
+  bears on the first slice, else carried by a gate row like any other open one. A choice the stack covers and the specs leave
+  open is settled by the stack, never asked. With `present: false` and architecture choices still open, § 3 adds one line:
+  `No reference stack at <path> — record your proven choices there and /esq:plan starts from them.`
 - **Gaps:** `undefinedCited` (a code cited that no doc defines), links with `resolves: false` (a doc that was never written).
 
 ## 3 — Print the overview

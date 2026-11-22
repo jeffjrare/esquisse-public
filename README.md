@@ -181,8 +181,8 @@ backlog row per module; `/esq:roadmap plan` orders them next.
 
 | Command | Purpose | Main result |
 |---|---|---|
-| `/esq:grill <idea>` | Resolve scope and consequential choices before planning | A brief in `docs/plans/` |
-| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases, reading the expertise modules its files or its stack touch | A plan committed on its own branch, its checks tried against the repository first, citing any lesson from `docs/LESSONS.md` that changed its design, each phase naming the expertise it loads, and a backlog row for a domain no module or project skill covers; when it replaces a surface, the inventory of what that surface did, any drop asked first |
+| `/esq:grill <idea>` | Resolve scope and consequential choices before planning; a choice your reference stack covers is not asked | A brief in `docs/plans/` |
+| `/esq:plan <brief-or-task>` | Design the work and its verifiable phases, starting architecture choices from your reference stack and reading the expertise modules its files or its stack touch | A plan committed on its own branch, its checks tried against the repository first, citing any lesson from `docs/LESSONS.md` that changed its design, each phase naming the expertise it loads, and a backlog row for a domain no module or project skill covers; when it replaces a surface, the inventory of what that surface did, any drop asked first |
 | `/esq:build <plan>` | Implement and verify one phase, then stop, weighing the lessons earlier cycles left on its files and reading the expertise modules they touch or the plan names | Task commits and an execution-log entry; a repo fact in `docs/LESSONS.md` for a trap the phase hit and verified itself |
 | `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design, against the expertise modules the change touches or its plan names | Review findings, each marked `(repeats L-<id>)` when it repeats a defect a lesson recorded; the calls build decided for you by hat; a corrective brief when needed |
 | `/esq:fix <fixes-brief> [--accept B-NNN,...]` | Apply safe corrections or record explicitly accepted findings | Verified fix commits and updated findings; a lesson in `docs/LESSONS.md` for a fix whose contrast recurs beyond its line |
@@ -467,6 +467,28 @@ honor it, the worker runs on your session's model.
 
   The model and effort are optional; unset, `~/.codex/config.toml` applies. A missing
   or failing `codex` costs one `Codex: not run — <reason>` line.
+
+### Reference stack
+
+If you keep repeating the same proven choices across projects (runtime, data store, auth,
+hosting, the repository that shows how), write them once in `~/.config/esq/stack.md`
+(`$XDG_CONFIG_HOME/esq/stack.md` when that is set, or any path in `ESQ_STACK`). The file lives
+outside every repository and is free Markdown; `esq stack` returns its text and parses none of it.
+`/esq:plan` and `/esq:grill` then start architecture choices from it and say so in one line
+(`Reference stack: <choice> (<path>)`). They depart only for a requirement your project states, and
+ask you only when the departure is a major architecture commitment. A plan reads at most 5 files
+from a repository the stack names, and only when a choice needs a concrete pattern. Keep the file
+short: past 16 KB it is cut at a line. With no file, nothing changes.
+
+```markdown
+# Reference stack
+
+- Runtime: Node 22, TypeScript, plain ESM
+- Data: one PostgreSQL per app; isolation by tenant column, no row-level security
+- Auth: magic-link email sessions; no third-party identity provider
+- Hosting: one container on a single VM, Caddy in front
+- Example: ~/projects/orchard-ledger shows the layout, the migrations and the auth flow
+```
 
 ## Contributing
 
