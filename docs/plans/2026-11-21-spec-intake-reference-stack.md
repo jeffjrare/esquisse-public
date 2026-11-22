@@ -172,3 +172,32 @@ None. The user approved the three-part scope on 2026-11-21 ("Go"). Thresholds, p
 **For Phase 2:** 1. `plugin/skills/harvest/references/intake.md` exists; Phase 2 adds `esq stack` to its first batch before § 2 Reconcile. Harvest now carries `allowed-tools: Bash(esq *)`.
 2. `scanDocs(root)` in plugin/lib/intake.mjs is the cheap half (walk, sizes, ledger-format checks) returning {pending, reason, registry, registryCollision, foreign, bytes, ...}; Phase 3's `state().intake` should call it, not `intakeInventory`. Note it reads the content of the five format-owned names (SPEC, ARCHITECTURE, DECISIONS, BACKLOG, ROADMAP), whereas Phase 3's hook may read only the first 4 KB of DECISIONS.md: the hook needs its own narrower read or a `scanDocs` option.
 3. The usage string in cli.mjs' final throw lists `intake inventory`; add `stack` beside it in Phase 2.
+
+### Phase 2 — completed 2026-11-21
+
+**Plan committed at:** 1f3a636
+
+**Commits:** 362bb92, d8a7259
+
+**Verified:** d8a72592269b4c5b87ad96a3896fefab5efb3984
+- `node --test tests/cli/stack.test.mjs`
+- `./scripts/audit.sh`
+
+**What got built:** `esq stack` returns the user's reference stack ($ESQ_STACK, else ${XDG_CONFIG_HOME:-$HOME/.config}/esq/stack.md) as {path, present, text, truncated, findings}, read-only and cut at a line past 16 KB; `/esq:plan`, `/esq:grill` and the harvest intake call it in their first batch and treat a covered choice as a recorded preference, with a README subsection and template.
+
+**Verification:**
+- (auto) node --test tests/cli/stack.test.mjs — 8 pass, 0 fail (ESQ_STACK override, XDG fallback, HOME fallback with an empty XDG_CONFIG_HOME counted as unset, absent file present: false and nothing created, empty file a finding, a directory path a finding, a 20 KB file cut at the last whole line under 16 KB with truncated: true and no write, the no-argument usage); each of 7 source mutations turned it red, source restored
+- (blast radius, not a plan step) ./scripts/audit.sh — exit 0, 7 checks clean, 26 s: cli.mjs is imported by every CLI suite, and the skill and README edits fall under check-structure and check-plugin
+
+**Decided for you:**
+- product: in an intake, a spec choice that contradicts the reference stack is asked in the one round only when it bears on the first slice, else it is carried by a gate row — the round stays bounded to what blocks the first slice — undo: plugin/skills/harvest/references/intake.md § 2, the reference-stack bullet
+- architecture: an empty XDG_CONFIG_HOME counts as unset, matching the shell's ${XDG_CONFIG_HOME:-…} the plan names — undo: `||` to `??` in stackPath, plugin/lib/cli.mjs
+
+**Surprises / decisions made during execution:** - An unreadable path (a directory given as ESQ_STACK) is also a finding with present: true, tested, beside the empty file the plan named.
+- `esq stack` takes no argument and refuses one with its usage line (exit 2).
+- The README CLI row in *How it works* gained the `esq stack` clause in Task 2.1's commit, since the verb is user-visible behavior; Task 2.2 added the *Reference stack* subsection and changed the `/esq:plan` and `/esq:grill` rows.
+- The usage text avoids an apostrophe because the whole usage string is single-quoted.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** Phase 3 can proceed as planned, no surprises. `esq stack` is independent of `intake.mjs`; Phase 3's hook and `state().intake` should use `scanDocs` as Phase 1's hand-off says, with the hook's narrower 4 KB read of DECISIONS.md.
