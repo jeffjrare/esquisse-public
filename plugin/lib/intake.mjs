@@ -8,7 +8,7 @@
 //
 // It imports nothing from `cli.mjs`, so the SessionStart hook can load it without the CLI.
 
-import { readFile, readdir, stat } from 'node:fs/promises';
+import { open, readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 // The bounds, stated before anything is read. Depth counts path segments under docs/ (a file
@@ -78,9 +78,23 @@ async function walk(docs) {
   return { files, deep, examined, overflow };
 }
 
+// The first `limit` bytes of a file, never more.
+async function head(file, limit) {
+  const handle = await open(file, 'r');
+  try {
+    const buffer = Buffer.alloc(limit);
+    const { bytesRead } = await handle.read(buffer, 0, limit, 0);
+    return buffer.subarray(0, bytesRead).toString('utf8');
+  } finally { await handle.close(); }
+}
+
 // The cheap half: which files are foreign, how big, and what each ledger name holds. It reads the
 // content of the five format-owned names only.
-export async function scanDocs(root) {
+//
+// `peek` is the SessionStart hook's narrower read: the first `peek` bytes of docs/DECISIONS.md and
+// no other content at all. The four other format-owned names are then counted as esq's unread
+// (`ledgers` says `unread`), so the hook errs toward silence, never toward a false nudge.
+export async function scanDocs(root, { peek = null } = {}) {
   const docs = path.join(root, 'docs');
   try { if (!(await stat(docs)).isDirectory()) return null; }
   catch { return null; }
@@ -95,8 +109,9 @@ export async function scanDocs(root) {
     let bytes;
     try { bytes = (await stat(file.absolute)).size; } catch { continue; }
     if (top && FORMAT_OWNED[file.name]) {
+      if (peek !== null && file.name !== 'DECISIONS.md') { ledgers[file.name] = 'unread'; continue; }
       let text = '';
-      try { text = await readFile(file.absolute, 'utf8'); } catch { text = ''; }
+      try { text = peek !== null ? await head(file.absolute, peek) : await readFile(file.absolute, 'utf8'); } catch { text = ''; }
       const esq = FORMAT_OWNED[file.name](text);
       ledgers[file.name] = esq ? 'esq' : 'foreign';
       if (esq) continue;
