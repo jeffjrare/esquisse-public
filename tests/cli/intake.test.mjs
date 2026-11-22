@@ -6,7 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { state } from '../../plugin/lib/cli.mjs';
-import { intakeInventory } from '../../plugin/lib/intake.mjs';
+import { intakeInventory, scanDocs } from '../../plugin/lib/intake.mjs';
 
 // Real throwaway repositories built from `fixtures/intake/`, no stubs: the inventory answers a
 // question about the files on disk, and a stubbed reader would only agree with itself. The
@@ -127,6 +127,26 @@ test('pending: true with a foreign DECISIONS.md (a registry collision), false wi
     assert.equal(registered.pending, false);
     assert.equal(registered.registry, 'esq');
     assert.ok(!registered.files.some((file) => file.path === 'docs/DECISIONS.md'));
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+// A project that runs esq through its backlog and roadmap may never have recorded a decision.
+test('pending: false with an esq BACKLOG.md and ROADMAP.md and no DECISIONS.md', async () => {
+  const root = await repo(null);
+  try {
+    await import('node:fs/promises').then((fs) => fs.mkdir(path.join(root, 'docs')));
+    const padding = 'deploy the invented service '.repeat(300);
+    for (const name of ['api.md', 'deploy.md', 'guide.md']) await writeFile(path.join(root, 'docs', name), `# ${name}\n\n${padding}\n`);
+    await writeFile(path.join(root, 'docs/ROADMAP.md'), '# Roadmap\n\n## Now\n\n- B-1\n');
+    await writeFile(path.join(root, 'docs/BACKLOG.md'), '# Backlog\n\n| ID | Date | Type | Concern | Layer | Pri | Rank | Summary | Source | Epic | Version | Status |\n|---|---|---|---|---|---|---|---|---|---|---|---|\n\n---\n');
+    const intake = (await state(root)).intake;
+    assert.equal(intake.pending, false);
+    assert.match(intake.reason, /esq ledger/);
+    const peeked = await scanDocs(root, { peek: 4096 });
+    assert.equal(peeked.pending, false);
+    assert.equal(peeked.ledgers['DECISIONS.md'], 'absent');
+    assert.equal(peeked.ledgers['BACKLOG.md'], 'esq');
+    assert.ok(peeked.bytes >= 20 * 1024);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 

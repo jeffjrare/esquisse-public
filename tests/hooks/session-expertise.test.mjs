@@ -133,7 +133,7 @@ test('pending intake adds one line of at most 200 characters, naming no file, be
   assert.equal((await run(root, empty)).hookSpecificOutput.additionalContext, line);
 });
 
-test('no pending intake leaves the output byte-identical to today, and the peek reads 4 KB of DECISIONS.md alone', async () => {
+test('no pending intake leaves the output byte-identical to today, and the peek reads 4 KB of three ledgers alone', async () => {
   const dir = await catalog(await mkdtemp(path.join(os.tmpdir(), 'esq-cat-')), [['payments-stripe', 'Stripe.', ['stripe']]]);
   const plain = await repository({ dependencies: { stripe: '1' } });
   const today = JSON.stringify(await run(plain, dir));
@@ -153,12 +153,15 @@ test('no pending intake leaves the output byte-identical to today, and the peek 
   await imported(late, { registry: `# Decisions\n\n${'x'.repeat(INTAKE_PEEK)}\n\n${REGISTRY}` });
   assert.equal((await scanDocs(late)).registry, 'esq');
   assert.equal((await scanDocs(late, { peek: INTAKE_PEEK })).registry, 'foreign');
-  // The four other ledger names are never read by the peek: counted as esq's, unread.
+  // The peek reads the head of BACKLOG.md and ROADMAP.md too; the two other ledger names are never
+  // read by it: counted as esq's, unread.
   const named = await repository(undefined);
   await imported(named);
   await writeFile(path.join(named, 'docs', 'BACKLOG.md'), `# zz-secret backlog\n\n${'zz '.repeat(4000)}\n`);
+  await writeFile(path.join(named, 'docs', 'SPEC.md'), `# zz-secret spec\n\n${'zz '.repeat(4000)}\n`);
   const peeked = await scanDocs(named, { peek: INTAKE_PEEK });
-  assert.equal(peeked.ledgers['BACKLOG.md'], 'unread');
-  assert.ok(!peeked.foreign.some((file) => file.path === 'docs/BACKLOG.md'));
-  assert.equal((await scanDocs(named)).ledgers['BACKLOG.md'], 'foreign');
+  assert.equal(peeked.ledgers['BACKLOG.md'], 'foreign');
+  assert.equal(peeked.ledgers['SPEC.md'], 'unread');
+  assert.ok(!peeked.foreign.some((file) => file.path === 'docs/SPEC.md'));
+  assert.equal((await scanDocs(named)).ledgers['SPEC.md'], 'foreign');
 });

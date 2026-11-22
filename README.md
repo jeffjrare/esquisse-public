@@ -456,7 +456,7 @@ honor it, the worker runs on your session's model.
   after changing a record, validate it once. At session start, one reads only the
   dependency names in your `package.json` files to name the expertise your stack uses,
   and the names and sizes of the files under `docs/` plus the first 4 KB of
-  `docs/DECISIONS.md` to tell whether imported specs await `/esq:harvest`: it runs
+  `docs/DECISIONS.md`, `docs/BACKLOG.md` and `docs/ROADMAP.md` to tell whether imported specs await `/esq:harvest`: it runs
   nothing from the project, writes nothing, sends nothing anywhere and repeats none of
   your manifest's or documents' content (not even a file name), and on any error it
   stays silent.

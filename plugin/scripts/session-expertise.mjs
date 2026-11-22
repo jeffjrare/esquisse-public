@@ -14,7 +14,7 @@
 //
 // The intake line (at most INTAKE_LINE_MAX characters, first, only when intake is pending) comes
 // from `scanDocs` with its narrow `peek`: directory entries, file sizes and the first 4 KB of
-// docs/DECISIONS.md. It never reads an imported doc's content and never echoes a file name — only
+// docs/DECISIONS.md, docs/BACKLOG.md and docs/ROADMAP.md. It never reads an imported doc's content and never echoes a file name — only
 // a count and a size. When the line is absent the expertise output is byte-identical to before.
 //
 // Output shape checked against https://code.claude.com/docs/en/hooks on 2026-10-26, Claude Code

@@ -33,6 +33,9 @@ const FORMAT_OWNED = {
   'ROADMAP.md': (text) => /^## Now\b/m.test(text),
 };
 
+// The format-owned names the hook's peek reads the head of.
+const PEEKED = new Set(['DECISIONS.md', 'BACKLOG.md', 'ROADMAP.md']);
+
 const MARKDOWN = /\.(md|markdown)$/i;
 // A code: `D58`, `MOD-12`, `B-139-2`, `3.A`. Syntactic only — `UTF-8` matches too, and the
 // defined-versus-cited split plus harvest's reading are what filter it. Never claimed a decision.
@@ -91,9 +94,13 @@ async function head(file, limit) {
 // The cheap half: which files are foreign, how big, and what each ledger name holds. It reads the
 // content of the five format-owned names only.
 //
-// `peek` is the SessionStart hook's narrower read: the first `peek` bytes of docs/DECISIONS.md and
-// no other content at all. The four other format-owned names are then counted as esq's unread
-// (`ledgers` says `unread`), so the hook errs toward silence, never toward a false nudge.
+// `peek` is the SessionStart hook's narrower read: the first `peek` bytes of docs/DECISIONS.md,
+// docs/BACKLOG.md and docs/ROADMAP.md, and no other content at all. The two other format-owned
+// names are then counted as esq's unread (`ledgers` says `unread`), so the hook errs toward
+// silence, never toward a false nudge.
+//
+// Intake is not pending once any ledger is in esq's format: a project that runs esq through its
+// backlog or roadmap may never have recorded a decision.
 export async function scanDocs(root, { peek = null } = {}) {
   const docs = path.join(root, 'docs');
   try { if (!(await stat(docs)).isDirectory()) return null; }
@@ -109,7 +116,7 @@ export async function scanDocs(root, { peek = null } = {}) {
     let bytes;
     try { bytes = (await stat(file.absolute)).size; } catch { continue; }
     if (top && FORMAT_OWNED[file.name]) {
-      if (peek !== null && file.name !== 'DECISIONS.md') { ledgers[file.name] = 'unread'; continue; }
+      if (peek !== null && !PEEKED.has(file.name)) { ledgers[file.name] = 'unread'; continue; }
       let text = '';
       try { text = peek !== null ? await head(file.absolute, peek) : await readFile(file.absolute, 'utf8'); } catch { text = ''; }
       const esq = FORMAT_OWNED[file.name](text);
@@ -123,7 +130,9 @@ export async function scanDocs(root, { peek = null } = {}) {
   const registry = ledgers['DECISIONS.md'];
   let pending = false;
   let reason;
+  const ledger = Object.keys(ledgers).find((name) => ledgers[name] === 'esq');
   if (registry === 'esq') reason = 'docs/DECISIONS.md is an esq registry — this project already runs esq';
+  else if (ledger) reason = `docs/${ledger} is an esq ledger — this project already runs esq`;
   else if (foreign.length < INTAKE_MIN_FILES || bytes < INTAKE_MIN_BYTES) {
     reason = `below the floor: ${foreign.length} foreign Markdown file(s), ${Math.round(bytes / 1024)} KB — intake needs at least ${INTAKE_MIN_FILES} files and ${INTAKE_MIN_BYTES / 1024} KB`;
   } else {
