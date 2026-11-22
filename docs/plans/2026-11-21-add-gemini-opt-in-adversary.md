@@ -78,3 +78,36 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-11-21
+
+**Plan committed at:** 0096855
+
+**Commits:** 1c8238d, 215c0bf, 6e72049, 8c86910
+
+**Verified:** 8c86910b11a811f6c9c62f25f0886374f3b1428f
+- `git grep -nE 'codex-(counter-plan|premortem)\.schema' -- plugin scripts tests .claude README.md CLAUDE.md`
+- `ls plugin/skills/plan/references/adversary.md plugin/skills/plan/references/gemini-adversary.md plugin/skills/plan/references/gemini-readonly.toml plugin/skills/plan/references/counter-plan.schema.json plugin/skills/plan/references/premortem.schema.json`
+- `bash -n scripts/probe-gemini-readonly.sh`
+- `./scripts/audit.sh`
+
+**What got built:** /esq:plan's adversary protocol is now one shared references/adversary.md plus a thin invocation reference per provider; ESQ_GEMINI=on runs Gemini's blind counter-plan and pre-mortem read-only (plan mode, admin allowlist policy gemini-readonly.toml, fail-closed capability precondition), alone or concurrently with Codex, with a by-hand read-only probe and README/author docs.
+
+**Verification:**
+- (auto) git grep -nE 'codex-(counter-plan|premortem)\.schema' -- plugin scripts tests .claude README.md CLAUDE.md — no match (exit 1)
+- (auto) ls of the five new/renamed reference files — exit 0, all present
+- (auto) bash -n scripts/probe-gemini-readonly.sh — parses (exit 0)
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), exit 0 in 27 s; hooks suite 44 pass incl. the new Gemini protect-installed case (mutation-checked: coarsening the hook reds it, source restored)
+
+**Decided for you:**
+- architecture: Gemini's `response` is parsed after stripping one surrounding Markdown code fence — a fenced JSON answer is common and would otherwise cost a wasted `not run` — undo: delete the fence clause in plugin/skills/plan/references/gemini-adversary.md § Reading the answer
+- architecture: the precondition checks /etc/gemini-cli/policies and /Library/Application Support/GeminiCli/policies for *.toml — the platform system-policy dirs per the policy-engine doc as the plan cited it — undo: edit the ls paths in gemini-adversary.md and scripts/probe-gemini-readonly.sh
+
+**Surprises / decisions made during execution:** - The probe exits 1 when check 3 or 4 FAILs (Gemini wrote), distinct from exit 2 inconclusive; the plan only fixed exit 0 and 2.
+- The probe runs Gemini with a plain task prompt rather than the adversary schema, since it judges permissions, not answer shape; flags are the reference's exactly.
+- The Gemini allowlist policy ends with a toolName-less catch-all deny at priority 100 under the allows (200) and named denies (300); whether the engine accepts a rule without toolName is unprobed until the Rollout probe runs.
+- The Gemini command is written once in gemini-adversary.md, parameterised by <call>/<schema>/<bound>, instead of two copied blocks like Codex's.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. The Rollout probe scripts/probe-gemini-readonly.sh (gemini not installed here, exits 2 inconclusive) is the only proof of the read-only boundary; its output belongs in the B-200 closing note. docs/ARCHITECTURE.md and docs/SPEC.md still describe Codex alone: /esq:arch and /esq:spec refresh them.
