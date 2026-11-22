@@ -26,7 +26,7 @@ written to a `.part` file and renamed on exit 0, so a counter-plan still running
 `<bound>` its timeout (`900` for the background counter-plan, `570` for the foreground pre-mortem):
 
 ```bash
-d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/gemini-<slug>-<call>".* && \
+cd "$(git rev-parse --show-toplevel)" && d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/gemini-<slug>-<call>".* && \
 e="$d/gemini-<slug>-<call>.err" && \
 { command -v gemini >/dev/null || { echo 'gemini is not on PATH' >"$e"; false; }; } && \
 h="$(gemini --help 2>&1)" && \

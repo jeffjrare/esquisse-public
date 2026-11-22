@@ -59,7 +59,7 @@ test('bash mutations of the installed cache are denied, reads and dev-tree edits
   assert.equal(bash(codex), null);
   // Its Gemini counter-plan cats the same schema, names the plugin's admin policy and renames its output under .git.
   const refs = '/config/plugins/cache/esquisse/esq/1.0/skills/plan/references';
-  const gemini = 'd="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/gemini-x-counter".* && \\\n'
+  const gemini = 'cd "$(git rev-parse --show-toplevel)" && d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/gemini-x-counter".* && \\\n'
     + 'e="$d/gemini-x-counter.err" && \\\n'
     + '{ command -v gemini >/dev/null || { echo \'gemini is not on PATH\' >"$e"; false; }; } && \\\n'
     + 'h="$(gemini --help 2>&1)" && \\\n'
