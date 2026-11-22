@@ -173,6 +173,13 @@ None. The user approved the three-part scope on 2026-11-21 ("Go"). Thresholds, p
 2. `scanDocs(root)` in plugin/lib/intake.mjs is the cheap half (walk, sizes, ledger-format checks) returning {pending, reason, registry, registryCollision, foreign, bytes, ...}; Phase 3's `state().intake` should call it, not `intakeInventory`. Note it reads the content of the five format-owned names (SPEC, ARCHITECTURE, DECISIONS, BACKLOG, ROADMAP), whereas Phase 3's hook may read only the first 4 KB of DECISIONS.md: the hook needs its own narrower read or a `scanDocs` option.
 3. The usage string in cli.mjs' final throw lists `intake inventory`; add `stack` beside it in Phase 2.
 
+### Phase 1 — reverified 2026-11-22
+
+**Reverified by:** spec-intake-reference-stack-fixes item 2
+
+**Verified:** fc3ac08974288c7fb70393a937408cc022ce9932
+- `bash scripts/check-structure.sh`
+
 ### Phase 2 — completed 2026-11-21
 
 **Plan committed at:** 1f3a636
