@@ -1,0 +1,66 @@
+# Admin policy for /esq:plan's Gemini adversary, passed with --admin-policy.
+#
+# Read-only allowlist: the repository read tools are allowed, everything else is
+# denied at admin priority, which outranks user rules and the plan-mode defaults.
+# The named denies only make the policy explicit; the catch-all deny covers any
+# tool not listed, whatever its name (MCP tools included).
+
+[[rule]]
+toolName = "read_file"
+decision = "allow"
+priority = 200
+
+[[rule]]
+toolName = "read_many_files"
+decision = "allow"
+priority = 200
+
+[[rule]]
+toolName = "list_directory"
+decision = "allow"
+priority = 200
+
+[[rule]]
+toolName = "glob"
+decision = "allow"
+priority = 200
+
+[[rule]]
+toolName = "grep_search"
+decision = "allow"
+priority = 200
+
+[[rule]]
+toolName = "run_shell_command"
+decision = "deny"
+priority = 300
+
+[[rule]]
+toolName = "write_file"
+decision = "deny"
+priority = 300
+
+[[rule]]
+toolName = "replace"
+decision = "deny"
+priority = 300
+
+[[rule]]
+toolName = "exit_plan_mode"
+decision = "deny"
+priority = 300
+
+[[rule]]
+toolName = "web_fetch"
+decision = "deny"
+priority = 300
+
+[[rule]]
+toolName = "google_web_search"
+decision = "deny"
+priority = 300
+
+# Everything not allowed above.
+[[rule]]
+decision = "deny"
+priority = 100

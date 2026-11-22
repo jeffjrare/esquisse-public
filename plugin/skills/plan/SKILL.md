@@ -42,7 +42,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
 ## Preflight
 
-**Read the Codex gate in the first preflight shell call:** chain `printf 'ESQ_CODEX=%s\n' "${ESQ_CODEX:-}"` with `&&` into `esq brief pending` when step 2 runs it, else send it alone in step 1's batch. That printed value — never a guess at the environment — is what every `ESQ_CODEX=on` below means. Anything but `on`: nothing Codex-related is loaded, launched or said.
+**Read the adversary gates in the first preflight shell call:** chain `printf 'ESQ_CODEX=%s ESQ_GEMINI=%s\n' "${ESQ_CODEX:-}" "${ESQ_GEMINI:-}"` with `&&` into `esq brief pending` when step 2 runs it, else send it alone in step 1's batch. Those printed values — never a guess at the environment — are what every `ESQ_CODEX=on` and `ESQ_GEMINI=on` below means, and "a gate on" is either. A provider whose gate printed anything but `on`: nothing of it is loaded, launched or said.
 
 1. **Load the projection docs by section, if present.** They answer different questions:
    - `CLAUDE.md` — *how* this codebase is built: conventions, architecture, gotchas. Claude Code already loads it into every session, so its conventions are in context; never open it again.
@@ -74,7 +74,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
     This is the free moment to be redirected — the target is on screen before anything has been spent on it.
 
-    **`ESQ_CODEX=on` only:** the target line ends `…; with ESQ_CODEX=on, 2 read-only Codex calls (≤15 min background, ≤10 min foreground).` instead of its period. In this same response, load `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`, then launch the blind counter-plan in the background, per its § 1.
+    **A gate on only:** the target line ends, instead of its period, `…; with ESQ_CODEX=on, 2 read-only Codex calls (≤15 min background, ≤10 min foreground).`, or `…; with ESQ_GEMINI=on, 2 read-only Gemini calls (≤15 min background, ≤10 min foreground).`, or with both `…; with ESQ_CODEX=on and ESQ_GEMINI=on, 4 read-only calls (Codex, Gemini) (≤15 min background, ≤10 min foreground).`. In this same response, load `${CLAUDE_SKILL_DIR}/references/adversary.md` plus the invocation reference of each provider whose gate printed `on` (`${CLAUDE_SKILL_DIR}/references/codex-adversary.md`, `${CLAUDE_SKILL_DIR}/references/gemini-adversary.md`), then launch each blind counter-plan in the background, per § 1 of the first.
 
 <!-- shared:batch-independent:start -->
 **Batch independent, read-only calls in one turn.** A call that consumes another's result waits for it. Serialize Git mutations, writes to the same file, and reads of a file another call writes; never run them concurrently. Group ordered shell operations with `&&` in one call so failure stops the chain.
@@ -278,7 +278,7 @@ Things you couldn't decide without more input. Be specific about what would reso
 
 The `<!-- comment -->` after `## Execution log` is required — it signals to `/esq:build` that this section is reserved.
 
-**`ESQ_CODEX=on` only — `## Approaches considered`:** read the counter-plan if it has returned and judge it there, per § 1 and § 3 of `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`; a structurally different Codex approach replaces the self-invented alternative. Not returned yet: write the section without it.
+**A gate on only — `## Approaches considered`:** read each counter-plan that has returned and judge it there, per § 1 and § 3 of `${CLAUDE_SKILL_DIR}/references/adversary.md`; a structurally different approach from a provider replaces the self-invented alternative. One not returned yet: write the section without it.
 
 ## Style for the plan content
 
@@ -385,7 +385,7 @@ registry migration.
 
 After writing the plan file and updating DECISIONS.md (if applicable):
 
-0. **`ESQ_CODEX=on` only:** run the pre-mortem, judge it and make the accepted plan edits before anything is staged, per § 2–3 of `${CLAUDE_SKILL_DIR}/references/codex-adversary.md`. Its § 4 `Adversary` block becomes step 3's commit body, and its count line joins step 4's report.
+0. **A gate on only:** run the pre-mortem of each provider whose gate printed `on` (both in one foreground call when both are on), judge it and make the accepted plan edits before anything is staged, per § 2–3 of `${CLAUDE_SKILL_DIR}/references/adversary.md`, with the commands from each provider's invocation reference. Its § 4 `Adversary` blocks become step 3's commit body, and their count lines join step 4's report.
 1. **Cut the shipping unit, and fill both fields from it**, here and not earlier.
    `git branch --show-current`, run once: that is `**Origin:**`. Then `git switch -c esq/<slug>`
    from it, and that name is `**Branch:**`. Write both into the plan file's header before staging. A Git state is named only from the output of a command that ran: empty output means
@@ -395,7 +395,7 @@ After writing the plan file and updating DECISIONS.md (if applicable):
    what `esq branch resolve <slug>` answered — `reuse` copies the two fields and creates nothing, `new`
    cuts from the stem's `**Origin:**`; an `esq/<slug>` that already exists stops the command here.
 2. **Stage this command's whole tail in one call**, naming only the files this run actually wrote: `git add docs/plans/<filename>` always, plus `docs/DECISIONS.md` if you updated it and `docs/BACKLOG.md` if preflight step 9 flipped any row to `Planned`. Never stage a file this run did not write — with one exception. **A corrective brief you planned is retired in this same commit.** From the `*-fixes*.brief.md` you planned, strike the `## 🟡 Needs a plan` section and every 🔴 item this run resolved through `AskUserQuestion`; when no 🟢, 🟡 or 🔴 item remains, `git rm` the brief, otherwise `git add` it with the rest intact — an unapplied 🟢 is still `/esq:fix`'s and an open 🔴 is still the user's. Never a grill brief, and never a brief this run did not plan. The why is `D-plan-retires-the-brief-it-plans`: `unit.findings` counts every corrective brief still on disk.
-3. `git commit -m "plan: <slug>"` (plus `-m "<the Adversary block>"` when step 0 ran) — **one** commit, not two: `/esq:plan` owns every one of these files in this one pass, and reverting the plan must revert the status flip it caused.
+3. `git commit -m "plan: <slug>"` (plus `-m "<the Adversary blocks>"` when step 0 ran) — **one** commit, not two: `/esq:plan` owns every one of these files in this one pass, and reverting the plan must revert the status flip it caused.
 4. Tell the user:
    - The file path
    - **The shipping unit it created** — two lines, `Branch: esq/<slug>` and `Origin: <name>` — or,
@@ -403,7 +403,7 @@ After writing the plan file and updating DECISIONS.md (if applicable):
      repository, or branch not observed) and that `/esq:build` will therefore treat the plan as legacy: it refuses
      nothing, and it never lands.
    - One-sentence summary of the recommendation
-   - With `ESQ_CODEX=on`: the `Codex:` count line from step 0
+   - With a gate on: the `Codex:` and `Gemini:` count lines from step 0, one per provider whose gate printed `on`
    - Suggested next step. **A plan with 2+ phases has two ways to execute, and the user picks — name both:**
      - Always: "Review the plan in your editor. When ready, `/clear` and run `/esq:build <plan-path>` to execute Phase 1."
      - When the plan has 2 or more phases, add: "Or `/esq:autopilot <plan-path>` to run all <N> phases unattended — it stops at the first gate that needs you. Cap the first run (`/esq:autopilot <plan-path> 2`) if you'd rather watch a couple land first."

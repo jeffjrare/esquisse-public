@@ -5,6 +5,8 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-gemini-adversary-opt-in-read-only-by-policy | 2026-11-22 | arch | plan | With ESQ_GEMINI=on, /esq:plan runs Gemini's blind counter-plan and pre-mortem under references/adversary.md's shared rules, read-only through --approval-mode plan, the admin allowlist gemini-readonly.toml and a fail-closed capability precondition. | Active |
+| D-gemini-adversary-opt-in-input-only | 2026-11-22 | arch | plan | With ESQ_GEMINI=on, /esq:plan runs `gemini --approval-mode plan --admin-policy <refs>/gemini-readonly.toml` twice under the lifecycle shared with Codex in references/adversary.md, and judges each answer itself; unset, nothing changes. | Active |
 | D-reference-stack-is-user-scope | 2026-11-22 | arch | stack | esq stack reads $ESQ_STACK, else ${XDG_CONFIG_HOME:-~/.config}/esq/stack.md, read-only and capped at 16 KB; plan, grill and harvest intake follow a choice it covers and say so in one line, departing only for a stated project requirement, asked when it is a major architecture commitment. | Active |
 | D-intake-pending-means-no-registry | 2026-11-22 | func | intake | pending = at least 3 foreign Markdown files totalling at least 20 KB under docs/ and no docs/DECISIONS.md in esq format; a ledger- or projection-named file counts as esq-owned only in esq format. | Active |
 | D-spec-intake-runs-inside-harvest | 2026-11-22 | arch | intake | /esq:harvest gains an intake mode (esq intake inventory, one reconciliation read, one grouped question round) that writes docs/DECISIONS.md and backlog rows through esq backlog add in one commit, then names /esq:roadmap plan; ordering and epics stay with their owners. | Active |
@@ -5813,3 +5815,33 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: proven choices by default, fewer reverts. Accepted: the user writes the file once from the README template.
 **Conséquences:** No stack file means no behavior change; the CLI never parses the free Markdown, only returns it.
 **Alternatives rejetées:** A per-project docs/STACK.md — repeated in every repo and missing exactly on a greenfield. Auto-mining sibling repos — reads other projects without a user statement of what is proven.
+
+## D-gemini-adversary-opt-in-input-only — Gemini is a second opt-in, input-only adversary in the plan skill, sharing Codex's lifecycle
+
+**Scope:** arch
+**Topic:** plan
+**Date:** 2026-11-22
+**Statut:** Active
+**Fondement:** user — B-200 filed 2026-11-21 (d65ba76) and delegated for implementation the same day
+
+**Contexte:** /esq:plan's only second model family is Codex; B-200 asks for Gemini beside it, for users without a Codex login and for two uncorrelated reads.
+**Décision:** With ESQ_GEMINI=on, /esq:plan runs `gemini --approval-mode plan --admin-policy <refs>/gemini-readonly.toml` twice under the lifecycle shared with Codex in references/adversary.md, and judges each answer itself; unset, nothing changes.
+**Raison:** Gemini has no OS read-only sandbox, so read-only rests on plan mode plus an admin-tier allowlist policy, behind a fail-closed capability precondition and a hand-run probe. One shared lifecycle keeps judging, record and failure rules identical across providers, so both-gates verdicts stay comparable.
+**Tradeoff:** Gains a second uncorrelated opinion and an option for users without Codex; costs a policy file, a probe, and sending the goal and read code to Google under the user's Gemini login.
+**Conséquences:** Gemini output is untrusted data and never gates, fails or rewrites a plan. Each provider is removed on its own if 3 opted-in cycles show no accepted finding that changed a phase or criterion.
+**Alternatives rejetées:** A sibling reference copying Codex's whole protocol (two drifting copies of the judging rules); a dependency-free CLI helper validating Gemini's envelope (Claude reads the answer to judge it anyway, so it saves no read).
+
+## D-gemini-adversary-opt-in-read-only-by-policy — Gemini is a second opt-in, input-only adversary, read-only by plan mode and an admin allowlist
+
+**Scope:** arch
+**Topic:** plan
+**Date:** 2026-11-22
+**Statut:** Active
+**Fondement:** mandate — docs/plans/2026-11-21-add-gemini-opt-in-adversary.md Recommendation (B-200)
+
+**Contexte:** B-200 asked for Gemini beside Codex in /esq:plan under the same contract. Gemini has no OS sandbox like codex -s read-only.
+**Décision:** With ESQ_GEMINI=on, /esq:plan runs Gemini's blind counter-plan and pre-mortem under references/adversary.md's shared rules, read-only through --approval-mode plan, the admin allowlist gemini-readonly.toml and a fail-closed capability precondition.
+**Raison:** One shared lifecycle keeps judging and recording identical across providers, so a both-gates run gives comparable, attributed verdicts. Without a sandbox, read-only rests on documented policy semantics, so a CLI that cannot enforce them is skipped rather than run weaker.
+**Tradeoff:** Gained a second, uncorrelated opinion for users without Codex and a pair for users with both, at unchanged wall-clock bounds. Accepted that the read-only boundary is proved only by the by-hand scripts/probe-gemini-readonly.sh.
+**Conséquences:** D-codex-adversary-opt-in-input-only's exit clause applies to each provider separately: a provider is removed after 3 opted-in cycles with no accepted finding that changed a phase or criterion. A third provider adds one invocation reference and one gate row in adversary.md.
+**Alternatives rejetées:** A copy of the whole Codex reference for Gemini (two drifting rule sets); a dependency-free CLI helper to validate Gemini's envelope (a new esq surface that saves no read).

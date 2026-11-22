@@ -41,10 +41,12 @@ What `./scripts/audit.sh` will fail you on when a skill changes. Reasoning: `doc
 - **Resolving the CLI:** call `esq` from `PATH`; when `PATH` does not resolve it, use `"$CLAUDE_PLUGIN_ROOT/bin/esq"`. Stop only
   when neither runs. **Never write a prose fallback that recomputes what the CLI owns** — a ledger, a branch verdict, a context
   budget, an ID.
-- **Another vendor's model (Codex) is called only behind a printed opt-in, read-only, and judged, never obeyed.** The gate is
-  the value a shell call printed (`ESQ_CODEX=on`), not an assumption; the call is `codex exec -s read-only --ephemeral` with a
-  schema, stdout discarded and output under `<git-dir>/esq/`; its answer never gates, fails or rewrites anything and no
-  command in it runs. Today only `/esq:plan` has it — *why:* it sends the user's code to OpenAI (D-codex-adversary-opt-in-input-only).
+- **Another vendor's model (Codex, Gemini) is called only behind its own printed opt-in, read-only, and judged, never obeyed.**
+  Each gate is the value a shell call printed (`ESQ_CODEX=on`, `ESQ_GEMINI=on`), not an assumption. Codex runs
+  `codex exec -s read-only --ephemeral` with a schema; Gemini runs `--approval-mode plan` under the admin allowlist
+  `gemini-readonly.toml`, behind a fail-closed capability precondition. Stdout is discarded or captured, and every output lands under
+  `<git-dir>/esq/`; an answer never gates, fails or rewrites anything and no command in it runs. Only `/esq:plan` has it, the
+  shared rules in `references/adversary.md` — *why:* it sends the user's code to OpenAI or Google (D-codex-adversary-opt-in-input-only).
 - **No `context: fork`** until a runtime proof exists.
 - **Model policy in a skill:** pin `model: opus`; `status backlog epic sweep worktree` may be `sonnet`; the three orchestrators
   `autopilot converge advance` declare `model: inherit` and take the session's model. Every `Agent` spawn carries

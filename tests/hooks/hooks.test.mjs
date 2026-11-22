@@ -55,8 +55,22 @@ test('bash mutations of the installed cache are denied, reads and dev-tree edits
 
   // /esq:plan's Codex counter-plan reads a schema from the plugin and clears its own output under .git.
   const codex = 'd="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/codex-x-counter.json" && \\\n'
-    + 'timeout 900 codex exec -s read-only --output-schema "/config/plugins/cache/esquisse/esq/1.0/skills/plan/references/codex-counter-plan.schema.json" - <<\'PROMPT\'\ngoal\nPROMPT';
+    + 'timeout 900 codex exec -s read-only --output-schema "/config/plugins/cache/esquisse/esq/1.0/skills/plan/references/counter-plan.schema.json" - <<\'PROMPT\'\ngoal\nPROMPT';
   assert.equal(bash(codex), null);
+  // Its Gemini counter-plan cats the same schema, names the plugin's admin policy and renames its output under .git.
+  const refs = '/config/plugins/cache/esquisse/esq/1.0/skills/plan/references';
+  const gemini = 'cd "$(git rev-parse --show-toplevel)" && d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/gemini-x-counter".* && \\\n'
+    + 'e="$d/gemini-x-counter.err" && \\\n'
+    + '{ command -v gemini >/dev/null || { echo \'gemini is not on PATH\' >"$e"; false; }; } && \\\n'
+    + 'h="$(gemini --help 2>&1)" && \\\n'
+    + '{ ! ls /etc/gemini-cli/policies/*.toml >/dev/null 2>&1 || { echo \'a system policy exists\' >"$e"; false; }; } && \\\n'
+    + '{ cat <<\'PROMPT\'\ngoal\nPROMPT\n'
+    + `cat "${refs}/counter-plan.schema.json"; } | timeout 900 gemini --approval-mode plan --admin-policy "${refs}/gemini-readonly.toml" \\\n`
+    + '  -o json -p \'Do the task on stdin.\' >"$d/gemini-x-counter.json.part" 2>"$e" && \\\n'
+    + 'mv "$d/gemini-x-counter.json.part" "$d/gemini-x-counter.json"';
+  assert.equal(bash(gemini), null);
+  // The same shape, its rename aimed at the cache instead, is an edit of the cache.
+  assert.equal(bash(`${gemini} && mv "$d/gemini-x-counter.json" "${refs}/counter-plan.schema.json"`)?.hookSpecificOutput.permissionDecision, 'deny');
   const carried = [
     'd=/config/plugins/cache/esquisse/esq/1.0 && rm -rf "$d/skills"',
     'for f in /config/plugins/cache/esquisse/esq/1.0/skills/*; do rm "$f"; done',

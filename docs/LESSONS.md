@@ -23,3 +23,10 @@ stripComments and structuralLines located comments with rest.indexOf('<!--') and
 - **Confidence:** high <!-- L-29df275eef -->
 - **Date:** 2026-11-22 <!-- L-29df275eef -->
 Intake's FORMAT_OWNED recognized docs/DECISIONS.md by any `| # |` header and docs/BACKLOG.md by any `| ID |`, so a model-written `| # | Decision | Status |` registry counted as esq's: intake reported not pending and a later `esq decisions add` wrote esq rows into the foreign file. The fix matches esq's leading columns as the templates write them (`| # | Date |`, `| ID | Date | Type |`, plus the older `#` backlog id header the parser still reads). It recurs whenever a new ledger name joins FORMAT_OWNED or another reader decides ownership of a file a user may have authored: a single generic cell is a shape imports share. <!-- L-29df275eef -->
+
+## L-01e9c39011 · lesson — Adding a vendor CLI adversary beside Codex: a CLI whose workspace is its cwd misses the repo when the session starts in a subdirectory
+- **Paths:** `plugin/skills/plan/references/gemini-adversary.md`, `tests/hooks/hooks.test.mjs` <!-- L-01e9c39011 -->
+- **Evidence:** `docs/plans/2026-11-21-add-gemini-opt-in-adversary-fixes.brief.md@82c67cd9899c1b2c4463f739447b42c59245a78d:9` · fix `2af71ee1cde506c5bc5c25116b4cc73ccfceed43` <!-- L-01e9c39011 -->
+- **Confidence:** medium <!-- L-01e9c39011 -->
+- **Date:** 2026-11-22 <!-- L-01e9c39011 -->
+The Gemini command was written without a workspace pin, while every Codex call pins its workspace with -C to the repository top level. Gemini takes its cwd as its workspace, so a session launched in a monorepo subdirectory gave it a tree without docs/plans. The fix prefixed the command with a cd to git rev-parse --show-toplevel. It recurs whenever another external CLI call is added to a skill: check how that CLI picks its workspace and pin it to the repository root. <!-- L-01e9c39011 -->
