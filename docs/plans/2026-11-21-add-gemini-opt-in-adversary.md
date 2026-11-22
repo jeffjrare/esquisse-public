@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 5f1a316a3350e8ac8ed8ab5d88d50a7229b04a96
+
 ## Context
 `/esq:plan` can already ask one other model family for a second opinion. With `ESQ_CODEX=on`, it runs a blind counter-plan in the background and a pre-mortem of the written plan, judges both itself and records the tally in the commit body (`plugin/skills/plan/references/codex-adversary.md`, D-codex-adversary-opt-in-input-only). B-200 asks for Gemini as a second, independent adversary under the same contract. A user without a Codex login then gets the second opinion, and a user with both gets two uncorrelated reads of the same plan. SPEC *Planning — `/esq:plan`* ("Opt-in second opinion from another model family") documents Codex only. This plan widens that behavior, and `/esq:spec` refreshes the text afterwards.
 
