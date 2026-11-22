@@ -216,7 +216,7 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-197 | 2026-10-24 | ✨ improvement | user | app | med | 2100 | Expertise batch 5, features that use AI: llm-features (cost caps, structured output, prompt caching, refusals, validation on real data; source: events-tracker ai-import, assets-prospection smart-ai). | user, 2026-10-23: expertise catalog after ship-mobile-expertise-skills | esq-decides-implementation-detail |  | Open |
 | B-198 | 2026-10-29 | 🐛 bug | user | app | med? |  | Plan slugs ending in a number collide: canonicalPlanSlug (plugin/scripts/hook-io.mjs:64) strips any trailing -N as if it were the fixes uniquifier, so ship-expertise-batch-2/-3/-4 all become ship-expertise-batch. /esq:review on batch-4 took batch-2's fixes brief (f5da5fb) as its delta base and re-read 26 commits batch-3 had already reviewed clean at bda604c (a 2,800-line diff instead of about 600), and telemetry files these plans under one identity | review: ship-expertise-batch-4 · Planned by plan-slug-numeric-suffix · Done by plan-slug-numeric-suffix |  |  | Done |
 | B-199 | 2026-11-08 | ✨ improvement | user | app | med? |  | Classify every backlog row by domain and nature reliably; show their distribution as a radar/table | work · Planned by backlog-domain-nature-distribution · Done by backlog-domain-nature-distribution |  |  | Done |
-| B-200 | 2026-11-22 | ✨ improvement | user | app | med? | 2200 | Add Gemini as a second opt-in adversary beside Codex in /esq:plan | work |  |  | Open |
+| B-200 | 2026-11-22 | ✨ improvement | user | app | med? | 2200 | Add Gemini as a second opt-in adversary beside Codex in /esq:plan | work · Planned by add-gemini-opt-in-adversary |  |  | Planned |
 
 ---
 
