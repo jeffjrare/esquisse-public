@@ -5,7 +5,7 @@ description: Accessibility of a web UI against WCAG 2.2 AA. Use before building 
 
 # Accessibility: WCAG 2.2 AA in practice
 
-**As of:** 2026-10-25
+**As of:** 2026-11-22
 
 **Paths:** `components/ui/`, `*Dialog.*`, `*Modal.*`, `*Menu.*`, `index.html`, `layouts/`
 
@@ -28,7 +28,8 @@ Accessibility is the product working for someone on a keyboard, a screen reader,
 ## Colour and size
 
 - **Text contrast is at least 4.5:1 (3:1 for large text), and a control's boundary, icon or state at least 3:1 against what touches it, in every theme.** *Why:* 1.4.3 and 1.4.11 (AA). A colour picked by eye in one theme fails in the other. *Fix:* check contrast as **token pairs** (each ink on each ground it is used on), in both themes, by a script over the token file that fails the build below the floor, rather than component by component. Placeholder text and disabled-looking but enabled controls count. *Check:* the script's pair list covers every new pairing this change introduced.
-- **Pointer targets are at least 24×24 CSS px, or spaced so a 24 px circle on each does not overlap another.** *Why:* 2.5.8 Target Size (Minimum, AA, new in 2.2). Exceptions: inline links in a sentence, a control whose size the browser sets, an equivalent larger control elsewhere on the page, and a size that is essential or legally required. Icon-only buttons in toolbars and table rows are the usual failure. Platform guides ask for more on touch (44 pt on iOS, 48 dp on Android). *Check:* measure icon buttons and close crosses in devtools.
+- **Pointer targets are at least 24×24 CSS px, or spaced so a 24 px circle on each does not overlap another.** *Why:* 2.5.8 Target Size (Minimum, AA, new in 2.2). Exceptions: inline links in a sentence, a control whose size the browser sets, an equivalent larger control elsewhere on the page, and a size that is essential or legally required. Icon-only buttons in toolbars and table rows are the usual failure. *Check:* measure icon buttons and close crosses in devtools.
+- **On touch, aim higher than the floor: 48×48 CSS px when the product ships on Android (a `@capacitor/android` dependency or an `android/` tree), 44×44 CSS px otherwise.** *Why:* Android asks for a touch target of at least 48dp×48dp ([Android Developers](https://developer.android.com/guide/topics/ui/accessibility/apps), checked 2026-11-22); Apple's HIG gives 44×44 pt as the default control size on iOS and iPadOS, 28×28 pt the minimum ([HIG](https://developer.apple.com/design/human-interface-guidelines/accessibility), checked 2026-11-22). A WebView lays out in CSS px, which it maps 1:1 to dp on Android and to pt on iOS at the platform's reference density; physical pixels are not interchangeable with either. A PWA used on Android without a native shell gets 44, by choice: nothing in its stack says Android. The 24 px rule above stays the WCAG floor. *Check:* read `getBoundingClientRect` on each control at phone width.
 
 ## Names, errors and announcements
 
