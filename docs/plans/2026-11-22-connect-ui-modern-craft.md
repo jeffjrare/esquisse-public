@@ -148,3 +148,34 @@ None.
 **Backlog candidates:** None.
 
 **For Phase 2:** 1. `plugin/expertise/visual-craft.md` defers motion and component states to `esq:motion-and-states` only implicitly; Phase 2's module should cross-reference visual-craft (look) and accessibility (reduced motion, contrast). 2. `/esq:ui` Pass 1 already reads `esq:motion-and-states` by id, so Phase 2 needs no wiring there, only the gate item 7 and the 'six' wording. 3. visual-craft's Paths include `components/` and `*.css`; Phase 2's module overlaps those by design, and `frontend/src/App.tsx` must still match nothing (tests/cli/expertise.test.mjs).
+
+### Phase 2 — completed 2026-11-22
+
+**Plan committed at:** 41722b1
+
+**Commits:** 6dd50b0, f0bbef2, a8643d2
+
+**Verified:** a8643d26c634cbc78c508713edba9767d8cc0697
+- `printf 'src/components/ui/Button.tsx\n' | esq expertise match --paths -`
+- `./scripts/audit.sh`
+
+**What got built:** A dated `motion-and-states` expertise module (duration and easing tokens, native CSS primitives with browser support read from web-features 3.47.0 and MDN BCD 8.1.10, when a motion library earns its place, the component state matrix, mobile patterns); `accessibility.md` names 44 px / 48 px-on-Android touch targets with Android and Apple sources; `/esq:ui`'s gate gains item 7 (state matrix, non-text contrast, accessible names) and item 3 takes the platform threshold; README says so.
+
+**Verification:**
+- (auto) printf 'src/components/ui/Button.tsx\n' | esq expertise match --paths - — lists esq:motion-and-states with src/components/ui/Button.tsx in matched (beside accessibility, design-system, visual-craft) — PASS
+- (auto) ./scripts/audit.sh — exit 0, 'Clean — 7 checks (product)', product suites passed, 29 s — PASS
+- extra, per task: bash scripts/check-plugin.sh — '23 skills and 22 expertise modules validate'; node --test tests/cli/expertise.test.mjs — 8 pass (frontend/src/App.tsx still matches no module); scripts/check-structure.sh exit 0
+
+**Decided for you:**
+- design: the state matrix exempts only a link inline in running text (hover/focus underline) and purely decorative elements — every other control owes every state it has — undo: edit the 'Exempt' line under § The component state matrix in plugin/expertise/motion-and-states.md
+- design: motion tokens follow Material 3's ladder (100–200 ms feedback, 250–400 ms surfaces, enter emphasized-decelerate, exit emphasized-accelerate at about two thirds of the enter time) — the one public token set checkable today with exact values — undo: edit § Duration and easing in plugin/expertise/motion-and-states.md
+- product: gate item 3 also takes 48 px when the spec names Android, beside the `@capacitor/android` / `android/` stack signals — the plan's Android signal is 'the stack or the spec' — undo: drop 'or the spec names Android' from item 3 in plugin/skills/ui/SKILL.md
+
+**Surprises / decisions made during execution:** - Browser support was read from the web-features and MDN browser-compat-data packages (2 downloads) rather than web searches: one deterministic source for every primitive. Two facts are newer than prior knowledge: scroll-driven animations became Baseline on 2026-10-27 (Firefox 159), and anchor positioning is in Chromium 157 and Safari 27 but not Firefox.
+- Apple's HIG page is script-rendered; its 44×44 pt default (28×28 pt minimum) was read from the HIG's JSON data endpoint. Material's duration/easing values came from the @material/web 2.5.0 token source, since m3.material.io is script-rendered too.
+- The README's 'An interface that works but looks dull?' paragraph also listed the gate ('44 px targets'); updated it in the same commit so it does not contradict the new gate.
+- docs/SPEC.md (§ /esq:ui, 'Des points nommés…') names no count and was left to /esq:spec.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** Last phase: the plan is complete. Next is /esq:review on this plan; the real proof of 'Done looks like' (a non-drab direction judged on the phone) is the next /esq:ui run, outside this unit.
