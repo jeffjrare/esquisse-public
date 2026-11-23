@@ -113,7 +113,8 @@ with a suggested priority, and the rest stays in a slate you can capture from la
 one page alone. It covers a slice: the journeys through the screen, and the screens a
 change there would reach through a shared component, layout or token. It walks those
 journeys end to end in the running app (steps, dead ends, labels that disagree, input lost
-on back) and checks current practice. Then it renders the directions across every screen
+on back) and checks current practice, starting from the dated UI craft and accessibility
+modules (see *Expertise*) and searching only what they leave open. Then it renders the directions across every screen
 they change, linked so you walk the journey, on a comparison page at the width people use
 it. Hand it a spec document (`/esq:ui docs/<spec>.md`) or a long mandate and it reads the
 whole thing. A surface too big for one run (more than 3 journeys or 6 screens) is cut into
@@ -126,8 +127,8 @@ you anything. A direction answers what the screen should feel like, not just
 the defects it counted: each carries its own signature and motion, built live on the page
 so you play the hover, the press and the transitions before choosing. It may break the
 app's own visual rules where only habit set them, and it ships only after it passes
-contrast, focus, 44 px targets, phone width, reduced motion and its empty, loading and
-error states. Each direction's own HTML (no embedded screenshots, one section per screen)
+contrast, focus, 44 px targets (48 px when shipping Android), phone width, reduced motion,
+its empty, loading and error states, and each control's states, contrast and name. Each direction's own HTML (no embedded screenshots, one section per screen)
 is committed beside the brief, and that is what `/esq:build` reads when it builds the screen,
 so a mockup is never too big to read.
 
@@ -207,7 +208,7 @@ backlog row per module; `/esq:roadmap plan` orders them next.
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
 | `/esq:ideas [focus] [features\|adjust\|content\|container]`, `/esq:ideas capture <n,…>` | Propose grounded ideas, user value first: new features, adjustments, content and container (architecture, structure, surfaces) | A ranked slate you pick from in one question; picked ideas become backlog rows with a suggested priority, the rest kept for a later `capture` |
 | `/esq:promise [page-or-feature] [--sense \| --copy] [--all]` | Check that what the product promises works in the running app; sweep it for UX nonsense; write or improve page copy | `docs/PROMISES.md` verdicts with evidence and a backlog row per promise that does not hold, per defect seen on the way and for the part of the ask it cannot judge; `--sense` backlog rows; `--copy` a before/after page, then approved copy committed page by page |
-| `/esq:ui [screen-problem-spec-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large, or a spec document of several journeys) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), live, animated and walkable, gated on contrast, focus, target size, phone width, reduced motion and states, a comparison page, each direction's HTML source committed beside a planning brief; each next slice filed as a backlog row holding its share of the mandate (the source, not the page, is what `/esq:build` builds from); backlog rows for the defects outside the work |
+| `/esq:ui [screen-problem-spec-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large, or a spec document of several journeys) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), live, animated and walkable, built against the UI craft and accessibility expertise modules, gated on contrast, focus, target size, phone width, reduced motion and states, component states, control contrast and accessible names, a comparison page, each direction's HTML source committed beside a planning brief; each next slice filed as a backlog row holding its share of the mandate (the source, not the page, is what `/esq:build` builds from); backlog rows for the defects outside the work |
 
 In every example, use the actual paths the previous command reported. `review` and
 `check` need an explicit target and ask for one when it is missing.
@@ -224,9 +225,10 @@ Each module declares the paths it covers (`**Paths:**`) and the npm packages tha
 project uses its domain (`**Stack:**`). `esq expertise match <path…>` answers which modules
 a set of paths touches, each with its file; `esq expertise match --all` answers every
 module, with the packages your root and tracked `package.json` files declare that match it (only
-dependency names are read, never through `node_modules`). `/esq:plan`, `/esq:build` and
-`/esq:review` read the matched modules automatically for the files a phase or a change
-touches. A plan names them in each phase's `**Expertise:**` item, together with any module
+dependency names are read, never through `node_modules`). `/esq:plan`, `/esq:build`, `/esq:review`
+and `/esq:ui` read the matched modules automatically for the files a phase or a change
+touches, and `/esq:ui` always reads the UI modules (`esq:visual-craft`, `esq:motion-and-states`,
+`esq:accessibility`) whatever matched, since they are its whole domain. A plan names them in each phase's `**Expertise:**` item, together with any module
 the work needs that no path shows, such as `esq:store-review` for a phase that submits a
 build; ids written as `esq:<name>` in older plans still resolve.
 
@@ -245,10 +247,12 @@ how many and how large, and that `/esq:harvest` adopts them.
 - **Facts are dated.** Each module opens with an `**As of:**` date and the paths it
   covers. When a run finds the date more than 180 days old, it says so in one line
   before relying on a deadline, and keeps going. An old or unreadable module never stops a run.
+  `/esq:ui` inherits a fresh module's dated facts instead of searching the web for them again,
+  and spends its searches only on what the modules leave open.
 
 | Module | Covers |
 |---|---|
-| `esq:accessibility` | WCAG 2.2 AA in practice: one global focus outline, focus not obscured, dialogs that trap and restore focus, contrast as token pairs, 24×24 px targets, errors and live regions, reduced motion, `lang` |
+| `esq:accessibility` | WCAG 2.2 AA in practice: one global focus outline, focus not obscured, dialogs that trap and restore focus, contrast as token pairs, 24×24 px targets (44 px, or 48 px when shipping Android), errors and live regions, reduced motion, `lang` |
 | `esq:auth-sessions` | Sign-in and sessions: cookie flags and `__Host-`, CSRF by method and origin (login included), rotation on login and privilege change, server-side revocation and cached-session delay, better-auth defaults, native OAuth with PKCE and verified ID tokens, account deletion that ends sessions and grants |
 | `esq:background-jobs` | Jobs that run twice, fail and restart without harm: idempotent handlers, job ids that dedupe enqueueing, bounded retries with exponential backoff and jitter, failed jobs someone sees, graceful shutdown, Redis `noeviction`, one schedule across instances |
 | `esq:capacitor-android` | A Capacitor app's Android shell: build origins, `versionCode`, API levels, `cap sync` output, the WebView origin and its cookies, App Links, signing, backup rules, insets |
@@ -259,6 +263,7 @@ how many and how large, and that `/esq:harvest` adopts them.
 | `esq:forms-and-failures` | Forms and failure states: every request ends in something visible, double submits, input kept after a failure, unsaved changes, server field errors on their fields, loading/error/empty/offline states, option sorting |
 | `esq:i18n-fr-en` | French/English for a Québec product: keys never literals, both locales in one commit with a parity check, the recipient's language in jobs and emails, Québec French and OQLF typography, `fr-CA` formats through `Intl`, plurals, Charter s. 52.1 |
 | `esq:landing-seo` | A public site found, shared and fast: Core Web Vitals from field data with INP, images that reserve their space and a non-lazy hero, per-page title, description and absolute canonical, Open Graph's four tags and a 1200×630 card, staging kept out by `X-Robots-Tag` rather than `robots.txt`, a sitemap of canonical URLs, reciprocal `hreflang` with `x-default`, JSON-LD that matches the page, Astro's `<Image />` and `@astrojs/sitemap` |
+| `esq:motion-and-states` | Motion and controls that answer: two duration bands as tokens, enter decelerating and exit accelerating, springs through `linear()`, the native primitives with dated support (`@starting-style`, view transitions, scroll-driven animations, Popover, anchor positioning, container queries, `:has()`), when a motion library earns its place, the component state matrix, safe areas, `dvh`/`svh`, the virtual keyboard, coarse pointers, bottom nav and sheets, haptics on the main action |
 | `esq:observability` | Errors you can read and an app you know is up: the SDK initialised first, Bugsink as a self-hosted Sentry-compatible target, sourcemaps uploaded per release and never served, a deliberate production error as the check, `release` and `environment` set, `sendDefaultPii`/`dataCollection` and `beforeSend`, unhandled rejections reported before exit, a Capacitor app's web and native layers, a health endpoint with an outside uptime check, alerts someone reads |
 | `esq:payments-stripe` | Stripe where a mistake costs money: signatures on the raw body, events handled once by id and in any order, test vs live secrets, granting on the webhook (async payments included), refunds and disputes, GST/HST and QST registration and what Stripe Tax does not watch |
 | `esq:pwa-and-push` | A PWA that updates and push that keeps arriving: the waiting worker and an update prompt, `skipWaiting()` only from the user's reload, the worker script uncached and scoped where it lives, network-first HTML and no cached authenticated API, the install criteria, permission from a tap (iOS web push only from the Home Screen), one VAPID pair per environment and `userVisibleOnly`, tokens pruned on 404/410 or `UNREGISTERED`, FCM through HTTP v1 |
@@ -267,6 +272,7 @@ how many and how large, and that `/esq:harvest` adopts them.
 | `esq:store-review` | What Google Play and App Store reviewers check, and the Console and App Store Connect forms that block a build or a review |
 | `esq:testing-pitfalls` | Tests that can fail: break the code once to see red, assert what the caller observes, mocks only at boundaries you do not own and restored after each test, no shared state or order, a real PostgreSQL for queries and migrations, end-to-end waits on a state never a duration, flaky tests as findings, small reviewed snapshots |
 | `esq:transactional-email` | Mail that reaches the inbox and links a scanner cannot spend: SPF, DKIM and DMARC aligned (RFC 9989), SPF under ten lookups, a sending subdomain with transactional apart from marketing, Gmail and Yahoo bulk-sender rules (one-click unsubscribe, spam rate under 0.3 %), bounce and complaint suppression, single-use hashed short-lived tokens confirmed by `POST`, a text part and dark-mode-safe HTML, CASL s. 6(6) |
+| `esq:visual-craft` | The look of a screen: a font pairing with a job each, one scale, hierarchy by weight and colour, variable fonts, `oklch` ramps and tinted neutrals, one accent's budget, a designed dark theme, one way to separate surfaces, density and rhythm, one icon family, the generic "AI look" defaults and the move replacing each, dated reference products per app class |
 | `esq:web-security` | The server trusts nothing from the client: the OWASP Top 10:2025, schema validation at the boundary, parameterised queries, authorization per object (IDOR), SSRF checked after resolution, CORS with credentials on exact origins, CSP, rate limits per account and IP, secrets out of the bundle and the logs, audited and locked dependencies |
 
 ## How it works
