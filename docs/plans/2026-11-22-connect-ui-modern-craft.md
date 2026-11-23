@@ -116,3 +116,35 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-11-22
+
+**Plan committed at:** d0b86d7
+
+**Commits:** 5e7a01b, 6c9270c
+
+**Verified:** 6c9270ca5d6d0ee61291542ef34745b25674ef7c
+- `printf 'src/styles/globals.css\n' | esq expertise match --paths -`
+- `printf 'src/components/SearchInput.tsx\n' | esq expertise match --paths -`
+- `bash scripts/check-plugin.sh`
+
+**What got built:** A dated, sourced `visual-craft` expertise module (typography, colour, surfaces, layout, iconography, the generic-AI-look defaults with their replacing moves, reference products per app class), and `/esq:ui` now chains `esq expertise match --all --paths -` into Pass 1, always reads visual-craft, motion-and-states and accessibility, inherits non-stale module facts in Pass 3, checks each signature against the generic defaults in Pass 4, and names the modules read in its report; README says so.
+
+**Verification:**
+- (auto) printf 'src/styles/globals.css\n' | esq expertise match --paths - — lists esq:design-system and esq:visual-craft, each with src/styles/globals.css in matched — PASS
+- (auto) printf 'src/components/SearchInput.tsx\n' | esq expertise match --paths - — lists esq:visual-craft with src/components/SearchInput.tsx in matched — PASS
+- (auto) bash scripts/check-plugin.sh — exit 0, '23 skills and 21 expertise modules validate' (re-run after the last commit) — PASS
+- extra: node --test tests/cli/expertise.test.mjs — 8 pass (frontend/src/App.tsx still matches no module); scripts/check-structure.sh clean. Whole audit skipped: the phase touched one module file, one skill and the README, no CLI or shared code; Phase 2 (last) runs ./scripts/audit.sh
+
+**Decided for you:**
+- design: reference products are Linear (tool), CapWords and Mela (consumer mobile), iA Writer (content) and Readymag's 2025 list (marketing) — each was checkable today with a dated source; the Awwwards SOTY winner could not be confirmed — undo: edit § Reference products in plugin/expertise/visual-craft.md
+- product: `/esq:ui` reads a module matched by stack as well as by path (`matched` or `stack` non-empty) — greenfield has no files, so stack is its only signal — undo: drop 'or `stack`' in Pass 1 of plugin/skills/ui/SKILL.md
+
+**Surprises / decisions made during execution:** - Tasks 1.2 and 1.3 share one commit (6c9270c), as the plan requires ('README, in the same commit as 1.2').
+- Research spent 7 web searches in total. `text-wrap: pretty` support differs by source, so the module calls it progressive enhancement rather than citing a version.
+- Also updated the README's 'An interface that works but looks dull?' paragraph so it does not contradict the new behaviour.
+- Pass 1 names `esq:motion-and-states` already; until Phase 2 ships it, the run prints its one 'not in the expertise catalog' line, as planned.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. `plugin/expertise/visual-craft.md` defers motion and component states to `esq:motion-and-states` only implicitly; Phase 2's module should cross-reference visual-craft (look) and accessibility (reduced motion, contrast). 2. `/esq:ui` Pass 1 already reads `esq:motion-and-states` by id, so Phase 2 needs no wiring there, only the gate item 7 and the 'six' wording. 3. visual-craft's Paths include `components/` and `*.css`; Phase 2's module overlaps those by design, and `frontend/src/App.tsx` must still match nothing (tests/cli/expertise.test.mjs).
