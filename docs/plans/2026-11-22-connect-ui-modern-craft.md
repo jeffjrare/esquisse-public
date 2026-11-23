@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 7612c34f7c08a1ce98135e3ccbffe2a07940d9d8
+
 ## Context
 `/esq:ui` holds the right intentions: a gate of six measured checks, motion that has to be rendered, a "departure departs" rule, and judging at phone width. It holds no craft knowledge, though. It is the only judging command that never calls `esq expertise match`: `plan`, `build` and `review` call it (`plugin/skills/review/SKILL.md:51`). So during an audit it never reads `accessibility.md`, `design-system.md`, `forms-and-failures.md`, `pwa-and-push.md` or `capacitor-*.md`. No module covers look-and-feel (typography, colour, surfaces, layout, iconography) or motion and component states. "Modern" therefore rests on Pass 3's up-to-8 web searches, repaid on every run, and the model falls back on its own habits: the "drab" outcome the user judged in 2026-09 (memory `ui-redesign-aims-at-character`).
 
