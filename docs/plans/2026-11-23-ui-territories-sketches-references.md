@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 444766962c17b5b3cc2992e17312dbf71b476210
+
 ## Context
 `/esq:ui` now reads `visual-craft`, `motion-and-states` and `accessibility` on every run (plan `2026-11-22-connect-ui-modern-craft`). Those modules are a floor, not a source of ideas. `visual-craft` (`plugin/expertise/visual-craft.md`) is mostly hygiene rules plus the list of "generic AI defaults" to avoid. Its reference products (Linear, iA Writer, Apple Design Award winners, Readymag) are the pool everyone looks at, so they pull directions back toward the average. Pass 4 (`plugin/skills/ui/SKILL.md:218-256`) builds one or two directions straight away, so the model's first idea always wins. A direction's "signature" is picked from the module's list of moves, not from the product's own world. The first real run after that plan kept the existing identity in both directions and borrowed a motif from an unrelated trade. The user, who judged an earlier redesign "drab" (memory `ui-redesign-aims-at-character`), saw no change in look and feel. The user supplies no moodboard and never will: esq has to find its own material.
 
