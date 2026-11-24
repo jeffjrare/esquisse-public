@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-ui-sources-its-own-references | 2026-11-24 | ux | ui | /esq:ui names 2–3 territories from the product's domain on every run, and when the direction is the user's it finds, captures (≤3) and cites references outside software itself and explores a 4–6 take sketch sheet before developing two, under an announced ceiling of 16 captures. | Active |
 | D-gemini-adversary-opt-in-read-only-by-policy | 2026-11-22 | arch | plan | With ESQ_GEMINI=on, /esq:plan runs Gemini's blind counter-plan and pre-mortem under references/adversary.md's shared rules, read-only through --approval-mode plan, the admin allowlist gemini-readonly.toml and a fail-closed capability precondition. | Active |
 | D-gemini-adversary-opt-in-input-only | 2026-11-22 | arch | plan | With ESQ_GEMINI=on, /esq:plan runs `gemini --approval-mode plan --admin-policy <refs>/gemini-readonly.toml` twice under the lifecycle shared with Codex in references/adversary.md, and judges each answer itself; unset, nothing changes. | Active |
 | D-reference-stack-is-user-scope | 2026-11-22 | arch | stack | esq stack reads $ESQ_STACK, else ${XDG_CONFIG_HOME:-~/.config}/esq/stack.md, read-only and capped at 16 KB; plan, grill and harvest intake follow a choice it covers and say so in one line, departing only for a stated project requirement, asked when it is a major architecture commitment. | Active |
@@ -5845,3 +5846,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained a second, uncorrelated opinion for users without Codex and a pair for users with both, at unchanged wall-clock bounds. Accepted that the read-only boundary is proved only by the by-hand scripts/probe-gemini-readonly.sh.
 **Conséquences:** D-codex-adversary-opt-in-input-only's exit clause applies to each provider separately: a provider is removed after 3 opted-in cycles with no accepted finding that changed a phase or criterion. A third provider adds one invocation reference and one gate row in adversary.md.
 **Alternatives rejetées:** A copy of the whole Codex reference for Gemini (two drifting rule sets); a dependency-free CLI helper to validate Gemini's envelope (a new esq surface that saves no read).
+
+## D-ui-sources-its-own-references — /esq:ui sources its own creative references, never asks for them
+
+**Scope:** ux
+**Topic:** ui
+**Date:** 2026-11-24
+**Statut:** Active
+**Fondement:** user — 2026-11-23 conversation, asked whether to supply inspiration: "je veux que esq s'occupe de ça"
+
+**Contexte:** Directions drawn from the expertise module's move list and convergent reference products read as generic; the user has no moodboard to supply.
+**Décision:** /esq:ui names 2–3 territories from the product's domain on every run, and when the direction is the user's it finds, captures (≤3) and cites references outside software itself and explores a 4–6 take sketch sheet before developing two, under an announced ceiling of 16 captures.
+**Raison:** Creativity needs a source of material that is specific to the product; the user decides between directions but never supplies assets. Self-sourced, dated references keep the source honest without a paid dependency.
+**Tradeoff:** Gained directions grounded in the product's world and a wider explored field; accepted up to 4 more captures and a sketch sheet's output on two-direction runs.
+**Conséquences:** No /esq:ui feature may require user-supplied inspiration; an image-library MCP may only ever be an optional extra source.
+**Alternatives rejetées:** A curated reference corpus in the repo (convergent and ageing); Mobbin MCP (paid account, shows what apps already do); asking the user for a moodboard (refused by the user).
