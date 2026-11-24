@@ -1,11 +1,11 @@
 ---
 name: visual-craft
-description: The look of a screen: typography, colour, surfaces, layout and iconography, and the generic defaults that make an interface read as machine-made. Use before rendering a UI direction, choosing a font pairing, a palette or an accent, styling cards, panels or a page layout, picking an icon set, or judging whether a redesign has any character.
+description: The look of a screen: typography, colour, surfaces, layout and iconography, territories drawn from the product's domain, references found outside software, and the generic defaults that make an interface read as machine-made. Use before rendering a UI direction, choosing a font pairing, a palette or an accent, styling cards, panels or a page layout, picking an icon set, or judging whether a redesign has any character.
 ---
 
 # Visual craft: a look someone chose
 
-**As of:** 2026-11-22
+**As of:** 2026-11-23
 
 **Paths:** `styles/`, `*.css`, `globals.css`, `tailwind.config.*`, `theme.*`, `components/`, `layouts/`, `pages/`, `screens/`, `views/`
 
@@ -49,6 +49,21 @@ A look is a set of decisions a person would recognise from one screen to the nex
 - **One icon family, one stroke, one size grid.** Lucide, Phosphor, Heroicons, Material Symbols: pick one and its stroke width, size icons on the type scale, never mix outline and filled except to mark selected. *Check:* every icon on the screen comes from the same set.
 - **Illustration pays where the screen is otherwise empty or emotional.** Empty states, onboarding, a success moment. In a dense working view it competes with the data. A product photograph or real content beats a stock illustration.
 
+## Territories
+
+A direction drawn from the module's lists alone is a better default, not a character. Character comes from the product's own world: a **territory** is a material world the product's people already live in, and a direction borrows its moves from one.
+
+- **Extract the territory from the domain, never from software.** Read the spec, the mandate and the app's own content for the trade's documents (invoices, tickets, forms, logbooks), its tools and instruments, its materials, its places and their signage, its printed matter (catalogues, labels, manuals) and its vocabulary. Name 2–3 territories, each in one line with the material it rests on. *Why:* every product in a class shares the same reference apps; nobody else shares its trade's workbench. *Check:* each territory names a physical or printed thing a person in the trade handles, not a mood ("warm", "modern").
+- **Translate it into moves, one per dimension.** Type from its printed matter (a stencil, a ledger's tabular figures, a label's condensed caps); a palette sampled from its materials, then built as an `oklch` ramp under the rules above; a texture from its surfaces; a shape language from its objects (a ticket's notch, a tag's punched hole, a form's ruled boxes); an iconography drawn from its tools; a motion metaphor from how its things move (a stamp, a slip, a fold). Name any dimension left unused on purpose. *Check:* every move in the direction's brief traces to the territory or to a rule above.
+- **The pastiche guard: the territory informs, it never illustrates every surface.** One signature region carries it strongly (the hero, the header, an empty state, the reward moment); the rest takes the territory only through type, palette and rhythm. Skeuomorphic clip-art, wood grain on every panel and a costume of the trade on each control are the theme park, not the territory. The usability floor always wins: contrast, targets, focus and legible data are never traded for flavour. *Check:* remove the signature region; the screen still reads as one product, and still works.
+- **The test is two readers.** Would someone from that trade recognise their world in it, and would someone outside it still read the screen at a glance? A yes to the first alone is pastiche; to the second alone, the default.
+
+Three worked examples, from unrelated trades:
+
+- **A bakery's ordering app.** Territories: the kraft bag and its stamped label; the chalkboard of the day's bakes; the flour-dusted proving tray. Moves: a slab serif from the stamp for headings, a palette sampled from kraft, crust and flour, a paper grain in the hero only, a stamp-press as the order's confirmation moment.
+- **A freight dispatcher's tool.** Territories: the bill of lading; the yard's painted signage; the departure board. Moves: tabular mono figures and ruled rows from the bill, a high-visibility safety accent spent on the one late load, split-flap motion for a status change, dense rows because the screen is used all day.
+- **A clinic's booking screen.** Territories: the appointment card; the wayfinding system of the corridors; the printed prescription pad. Moves: a calm humanist sans from wayfinding, colour-coded zones as the shape and colour language of the time slots, the card's perforated edge as the confirmation, generous targets and quiet motion because people arrive anxious.
+
 ## The generic defaults
 
 A direction may use one of these with intent; one resting on several at once reads as nobody chose it. The list is the shared vocabulary of 2025–2026 design writing, not a measured standard ([925 Studios](https://www.925studios.co/blog/ai-slop-design-tells), [uxdesign.cc](https://uxdesign.cc/ai-design-isnt-ugly-it-s-fluent-and-thats-the-problem-131b2f4eb78c), checked 2026-11-22).
@@ -62,9 +77,13 @@ A direction may use one of these with intent; one resting on several at once rea
 
 *Check:* before a direction is shown, name which of these it uses and why; the brief lists the moves it took from this module.
 
-## Reference products, by class
+## Where references come from
 
-Look at what these do, never copy them. Each was checked on the date given; re-check before quoting a detail.
+Look at a reference for one move, never copy it, and cite it with its URL and the date it was checked. Each was checked on the date given; re-check before quoting a detail.
+
+**Outside software, per territory, first.** These are where a direction finds what no app class shares: the trade's own publications and suppliers' catalogues; signage and wayfinding systems of its places; its packaging and labels; museum and archive collections of its objects and printed matter (digitised collections are searchable by object type); studios and type foundries that have worked for that trade. A search names the trade and the object, never the project, the client or the user. *Check:* each direction names the reference move it took and where it came from.
+
+**The convergent baseline: products every designer already looks at.** Useful to see the state of a class; a direction built from them alone pulls back toward the average.
 
 - **Tool / dashboard:** Linear, its 2024 UI redesign and the later refresh of quieter borders and header consistency ([Linear](https://linear.app/now/behind-the-latest-design-refresh), checked 2026-11-22) — density, restraint, a near-monochrome palette with one accent.
 - **Consumer mobile:** CapWords, the 2025 Apple Design Award winner for Delight and Fun, and Mela, a 2025 Interaction finalist ([Apple](https://www.apple.com/newsroom/2025/06/apple-unveils-winners-and-finalists-of-the-2025-apple-design-awards/), checked 2026-11-22) — illustration and playful feedback around one main action; calm, content-first lists.
