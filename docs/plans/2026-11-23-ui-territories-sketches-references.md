@@ -109,3 +109,32 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-11-23
+
+**Plan committed at:** 7fc2ee9
+
+**Commits:** 07d8ae1, 7ab46a1, 923c720
+
+**Verified:** 923c7204af56a4f874ff44fe616b0757d0c795a8
+- `bash scripts/check-plugin.sh`
+- `printf 'src/styles/globals.css\n' | esq expertise match --paths -`
+- `./scripts/audit.sh`
+
+**What got built:** visual-craft now teaches territories (extract, translate, pastiche guard, two-reader test, three generic examples) and where references come from outside software, with the old product list kept as the convergent baseline. /esq:ui names 2–3 territories on every run, derives each direction from one, and when the direction is the user's it finds, captures and cites up to 3 references itself and explores a 4–6 take sketch sheet before developing two, within an announced 12/16-capture bound. The README row, the 'looks dull' paragraph and the § Expertise row say so.
+
+**Verification:**
+- (auto) bash scripts/check-plugin.sh — exit 0: plugin, embedded CLI, native hooks, 23 skills and 22 expertise modules validate (visual-craft description 422 chars)
+- (auto) printf 'src/styles/globals.css\n' | esq expertise match --paths - — esq:visual-craft listed with src/styles/globals.css in matched, asOf 2026-11-23
+- (auto) ./scripts/audit.sh — exit 0, Clean — 7 checks (product), 27 s
+
+**Decided for you:**
+- design: the two developed directions must come from two different territories, a rule the plan implied but did not state — otherwise both could be variants of one domain idea, the convergence this plan fixes — undo: delete the sentence 'Two directions come from two different territories.' in plugin/skills/ui/SKILL.md § Pass 4
+
+**Surprises / decisions made during execution:** - The old heading `## Reference products, by class` was replaced by `## Where references come from`; no script or skill referenced the old heading (grep), only a historical plan log.
+- Renumbering the comparison page (new section 3 'Explored') moved 'What is broken regardless' to section 5; the Pass 4 cross-reference 'section 4 of the page' was updated with it, and the greenfield publish sentence now names the Explored section.
+- Two-direction bare run budget: Pass 2 ≤6 + references ≤3 + Pass 4 ≤6 + sketch sheet 1 = 16, exactly the announced ceiling; greenfield 3 + 1 + 4 = 8.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. The only proof the directions gain character is the user's next real /esq:ui identity run; keep/revert rule is in the plan's Risks.
