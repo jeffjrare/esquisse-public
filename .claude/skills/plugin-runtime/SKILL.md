@@ -47,7 +47,7 @@ description: Rules for the esq CLI and hooks — read before editing plugin/bin,
   them and never widen either for convenience — a path added to a harmless list is verification `/esq:land` silently skips.
   `tests/cli/landing.test.mjs` and `gate.test.mjs` pin the invalidations; extend them with the list.
 - **Node built-ins only; `git` is the one external process** — the CLI is dependency-free by contract; the
-  `NODE_ENV=test` + `ESQ_TEST_GIT_ROOT` seam replaces git in tests. The opt-in `codex` and `gemini` calls live in `/esq:plan`'s
+  `NODE_ENV=test` + `ESQ_TEST_GIT_ROOT` seam replaces git in tests. The opt-in `codex` and `agy` (Gemini) calls live in `/esq:plan`'s
   references, each behind its own printed gate, never here.
 - **An answer over `INLINE_OUTPUT_BUDGET` (24 KB) spills to `<git-dir>/esq/`, never the working tree**, keeping scalars,
   counts and verdicts inline and naming `ranges` that each fit one `Read` — *why:* Claude Code persists a large result and

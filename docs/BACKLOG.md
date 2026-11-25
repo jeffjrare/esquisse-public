@@ -217,8 +217,8 @@ The execution proposal is [ROADMAP.md](ROADMAP.md). Rank projects its sequence; 
 | B-198 | 2026-10-29 | 🐛 bug | user | app | med? |  | Plan slugs ending in a number collide: canonicalPlanSlug (plugin/scripts/hook-io.mjs:64) strips any trailing -N as if it were the fixes uniquifier, so ship-expertise-batch-2/-3/-4 all become ship-expertise-batch. /esq:review on batch-4 took batch-2's fixes brief (f5da5fb) as its delta base and re-read 26 commits batch-3 had already reviewed clean at bda604c (a 2,800-line diff instead of about 600), and telemetry files these plans under one identity | review: ship-expertise-batch-4 · Planned by plan-slug-numeric-suffix · Done by plan-slug-numeric-suffix |  |  | Done |
 | B-199 | 2026-11-08 | ✨ improvement | user | app | med? |  | Classify every backlog row by domain and nature reliably; show their distribution as a radar/table | work · Planned by backlog-domain-nature-distribution · Done by backlog-domain-nature-distribution |  |  | Done |
 | B-200 | 2026-11-22 | ✨ improvement | user | app | med? |  | Add Gemini as a second opt-in adversary beside Codex in /esq:plan | work · Planned by add-gemini-opt-in-adversary · Done by add-gemini-opt-in-adversary |  |  | Done |
-| B-201 | 2026-11-22 | ✨ improvement | user | app | lo? |  | Prove the Gemini adversary read-only: after gemini login, run scripts/probe-gemini-readonly.sh and record its four PASS lines (remainder of B-200) | remainder: add-gemini-opt-in-adversary · of B-200 · Dropped: user 2026-11-21: no Gemini account to probe with (personal sign-in refused since 2026-06-18); ESQ_GEMINI stays off here |  |  | Dropped |
-| B-202 | 2026-11-22 | ✨ improvement | user | app | med | 2200 | Run the Gemini adversary through Antigravity CLI (agy) so a Google AI subscription covers it: since 2026-06-18 gemini CLI refuses personal/AI Plus/Pro/Ultra sign-in (API key or Vertex only); keep read-only via agy permissions deny of writes and shell, port the probe; absorbs B-201 | manual · user 2026-11-21, after B-200 landed (acb9c71) · Dropped: user 2026-11-21: Google AI Plus gives only Flash through Antigravity; not worth porting |  |  | Open |
+| B-201 | 2026-11-22 | ✨ improvement | user | app | lo? |  | Prove the Gemini adversary read-only: after gemini login, run scripts/probe-gemini-readonly.sh and record its four PASS lines (remainder of B-200) | remainder: add-gemini-opt-in-adversary · of B-200 · Dropped: user 2026-11-21: no Gemini account to probe with (personal sign-in refused since 2026-06-18); ESQ_GEMINI stays off here · Planned by 2026-11-25-gemini-adversary-via-agy · Done by 2026-11-25-gemini-adversary-via-agy |  |  | Done |
+| B-202 | 2026-11-22 | ✨ improvement | user | app | med |  | Run the Gemini adversary through Antigravity CLI (agy) so a Google AI subscription covers it: since 2026-06-18 gemini CLI refuses personal/AI Plus/Pro/Ultra sign-in (API key or Vertex only); keep read-only via agy permissions deny of writes and shell, port the probe; absorbs B-201 | manual · user 2026-11-21, after B-200 landed (acb9c71) · Dropped: user 2026-11-21: Google AI Plus gives only Flash through Antigravity; not worth porting · Planned by 2026-11-25-gemini-adversary-via-agy · Done by 2026-11-25-gemini-adversary-via-agy |  |  | Done |
 
 ---
 
@@ -1072,3 +1072,11 @@ spending anything on hooks.
 ## B-200 — Add Gemini as a second opt-in adversary beside Codex in /esq:plan
 
 **Resolution:** ESQ_GEMINI=on opt-in Gemini counter-plan + pre-mortem beside Codex, shared adversary.md, read-only policy, probe and README delivered in 1c8238d, 215c0bf, 6e72049, 8c86910 (audit PASS at 8c86910), review fixes a7bf975, 2af71ee; remainder → B-201
+
+## B-202 — Run the Gemini adversary through Antigravity CLI (agy) so a Google AI subscription covers it: since 2026-06-18 gemini CLI refuses personal/AI Plus/Pro/Ultra sign-in (API key or Vertex only); keep read-only via agy permissions deny of writes and shell, port the probe; absorbs B-201
+
+**Resolution:** ESQ_GEMINI=on runs through agy under --mode plan + agy-readonly.json deny rules (c2e2335); README opt-in paragraph rewritten; audit Clean at 7f241b5
+
+## B-201 — Prove the Gemini adversary read-only: after gemini login, run scripts/probe-gemini-readonly.sh and record its four PASS lines (remainder of B-200)
+
+**Resolution:** probe ported to agy (7f241b5) and run at 7f241b5: PASS 1-5, recorded in the plan's Phase 1 log (a52e502)

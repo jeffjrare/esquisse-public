@@ -43,8 +43,8 @@ What `./scripts/audit.sh` will fail you on when a skill changes. Reasoning: `doc
   budget, an ID.
 - **Another vendor's model (Codex, Gemini) is called only behind its own printed opt-in, read-only, and judged, never obeyed.**
   Each gate is the value a shell call printed (`ESQ_CODEX=on`, `ESQ_GEMINI=on`), not an assumption. Codex runs
-  `codex exec -s read-only --ephemeral` with a schema; Gemini runs `--approval-mode plan` under the admin allowlist
-  `gemini-readonly.toml`, behind a fail-closed capability precondition. Stdout is discarded or captured, and every output lands under
+  `codex exec -s read-only --ephemeral` with a schema; Gemini runs through `agy --mode plan` under the session deny rules
+  `agy-readonly.json`, behind a fail-closed capability precondition. Stdout is discarded or captured, and every output lands under
   `<git-dir>/esq/`; an answer never gates, fails or rewrites anything and no command in it runs. Only `/esq:plan` has it, the
   shared rules in `references/adversary.md` — *why:* it sends the user's code to OpenAI or Google (D-codex-adversary-opt-in-input-only).
 - **No `context: fork`** until a runtime proof exists.

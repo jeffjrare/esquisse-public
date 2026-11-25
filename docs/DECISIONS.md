@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-gemini-adversary-runs-through-agy | 2026-11-25 | arch | plan | With ESQ_GEMINI=on, /esq:plan calls agy -p --mode plan --settings <refs>/agy-readonly.json (deny write_file, command, mcp, read_url, execute_url) --json-schema --output-format json with a gemini-* model (ESQ_GEMINI_MODEL, else the first agy models lists), behind a fail-closed --help precondition; the gemini CLI transport is removed. | Active |
 | D-ui-sources-its-own-references | 2026-11-24 | ux | ui | /esq:ui names 2–3 territories from the product's domain on every run, and when the direction is the user's it finds, captures (≤3) and cites references outside software itself and explores a 4–6 take sketch sheet before developing two, under an announced ceiling of 16 captures. | Active |
 | D-gemini-adversary-opt-in-read-only-by-policy | 2026-11-22 | arch | plan | With ESQ_GEMINI=on, /esq:plan runs Gemini's blind counter-plan and pre-mortem under references/adversary.md's shared rules, read-only through --approval-mode plan, the admin allowlist gemini-readonly.toml and a fail-closed capability precondition. | Active |
 | D-gemini-adversary-opt-in-input-only | 2026-11-22 | arch | plan | With ESQ_GEMINI=on, /esq:plan runs `gemini --approval-mode plan --admin-policy <refs>/gemini-readonly.toml` twice under the lifecycle shared with Codex in references/adversary.md, and judges each answer itself; unset, nothing changes. | Active |
@@ -5861,3 +5862,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained directions grounded in the product's world and a wider explored field; accepted up to 4 more captures and a sketch sheet's output on two-direction runs.
 **Conséquences:** No /esq:ui feature may require user-supplied inspiration; an image-library MCP may only ever be an optional extra source.
 **Alternatives rejetées:** A curated reference corpus in the repo (convergent and ageing); Mobbin MCP (paid account, shows what apps already do); asking the user for a moodboard (refused by the user).
+
+## D-gemini-adversary-runs-through-agy — The Gemini adversary runs through Antigravity CLI (agy), read-only by plan mode and session deny rules
+
+**Scope:** arch
+**Topic:** plan
+**Date:** 2026-11-25
+**Statut:** Active
+**Fondement:** user — B-202 reopened 2026-11-25 (53e27ee) and the /esq:plan request of 2026-11-25 to run the Gemini adversary through agy and port the probe
+
+**Contexte:** Since 2026-06-18 the gemini CLI refuses personal Google sign-in, so the B-200 adversary (D-gemini-adversary-opt-in-read-only-by-policy, D-gemini-adversary-opt-in-input-only) could not run for Google AI subscribers. This supersedes the transport and read-only layers of those two entries; their lifecycle and gate stand.
+**Décision:** With ESQ_GEMINI=on, /esq:plan calls agy -p --mode plan --settings <refs>/agy-readonly.json (deny write_file, command, mcp, read_url, execute_url) --json-schema --output-format json with a gemini-* model (ESQ_GEMINI_MODEL, else the first agy models lists), behind a fail-closed --help precondition; the gemini CLI transport is removed.
+**Raison:** agy documents deny over ask over allow and explicit rules over the execution mode, and soft-denies unapprovable actions in headless mode, so a session deny list holds whatever the user's own settings allow. One transport keeps one policy, one precondition and one probe.
+**Tradeoff:** Gained the adversary for Google AI subscribers, native structured output, and a probe that requires the permission engine's denial evidence. Accepted losing the API-key/Vertex gemini path and that reads follow agy's own read permissions rather than a repository-only allowlist.
+**Conséquences:** scripts/probe-gemini-readonly.sh probes agy and must print five PASS lines after any edit to gemini-adversary.md or agy-readonly.json. A user asking for the API-key path again adds a second invocation reference, not a fallback inside this one.
+**Alternatives rejetées:** agy first with gemini fallback (two drifting policies and probes for an unasked user); a separate ESQ_AGY provider (the same model family under two gates).
