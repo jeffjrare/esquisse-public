@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 30a9738933112123cec99aba2662861524a4b000
+
 ## Context
 B-200 shipped an opt-in Gemini adversary in `/esq:plan` (`ESQ_GEMINI=on`). It calls the `gemini` CLI under `--approval-mode plan` and the admin allowlist `gemini-readonly.toml` (`plugin/skills/plan/references/gemini-adversary.md`). Since 2026-06-18 that CLI turns away personal Google sign-ins, Google AI Plus/Pro/Ultra included. That leaves the maintainer and any subscriber with nothing but a `Gemini: not run` line, and it is why the read-only proof (B-201) was never run. The Antigravity CLI `agy` (1.5.16 installed, signed in; `agy models` lists Gemini 4 Hydrogen and 3.8 Flash) is the route a Google AI subscription covers. B-202 was reopened on 2026-11-25 (53e27ee) and absorbs B-201. No SPEC or ARCHITECTURE section names Gemini, so no documented behavior changes beyond the README's opt-in paragraph.
 
