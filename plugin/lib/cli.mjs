@@ -3203,7 +3203,8 @@ async function branchVerdict(root, planPath) {
   // `## Capability inventory` names. Read only on the recorded branch — anywhere else HEAD is not the
   // unit's — and `null` for a legacy plan, a detached HEAD or a git that cannot answer.
   const removalBase = recorded && recorded === branch ? unitRemovalBase(repository, origin, head) : null;
-  const removed = removalBase ? removedModules(repository, removalBase, head, members.map((member) => capabilityInventory(member.text))) : null;
+  const inventoried = [...members, ...inventoryHeaders(headers, recorded).filter((header) => !members.some((member) => member.relative === header.relative))];
+  const removed = removalBase ? removedModules(repository, removalBase, head, inventoried.map((member) => capabilityInventory(member.text))) : null;
   // The seventh: whether the destination is itself a unit's `**Branch:**` — a plan landing into its
   // parent's branch rather than a trunk. Then landing this unit ships nothing, and the work still owed
   // is the parent's; `null` when no plan records the origin.
@@ -3385,6 +3386,29 @@ function unitHeaders(headers, branch) {
   if (!branch) return [];
   return headers.filter((header) => parseBranch(header.text) === branch)
     .sort((left, right) => unitOrder(left.relative, right.relative));
+}
+
+// The plans whose capability inventories cover a unit's removals: the unit's own, and every plan of a
+// unit that landed into it — one whose `**Origin:**` is this branch, followed down transitively. A
+// sub-unit merged into its parent brings its deletions into the parent's `base..head`, and its own
+// inventory already disposed of each one; asking the parent to re-list them refuses a landing on a
+// reference that does resolve. Only plans present in this tree count, and a sub-unit's plan file is
+// here only once its branch was merged in.
+function inventoryHeaders(headers, branch) {
+  const found = [];
+  const seen = new Set();
+  const queue = branch ? [branch] : [];
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (seen.has(current)) continue;
+    seen.add(current);
+    found.push(...unitHeaders(headers, current));
+    for (const header of headers) {
+      const child = parseBranch(header.text);
+      if (child && !seen.has(child) && parseOrigin(header.text) === current) queue.push(child);
+    }
+  }
+  return found;
 }
 
 // How far along history a commit sits: the number of commits reachable from it. A descendant always
@@ -4337,11 +4361,14 @@ function reviewPaths(record) {
 // The plans a review of this plan reads as one unit: its `**Branch:**` unit's, abandoned plans
 // included, as `esq branch check` collects them — or, for a legacy plan recording no branch, itself.
 // The unit is found from the plan's path, like `unitForPlan`, so the answer needs no git. The hat
-// decisions and the capability inventories both come from these headers, read once.
+// decisions come from these headers; the capability inventories from them plus every sub-unit that
+// landed into the branch (`inventoryHeaders`), both out of one read of the plan files.
 async function reviewUnitHeaders(file, text) {
   const repository = path.resolve(path.dirname(file), '../..');
   const branch = parseBranch(text);
-  return branch ? unitHeaders(await planHeaders(repository), branch) : [{ relative: path.relative(repository, file), text }];
+  if (!branch) { const self = [{ relative: path.relative(repository, file), text }]; return { unit: self, inventoried: self }; }
+  const all = await planHeaders(repository);
+  return { unit: unitHeaders(all, branch), inventoried: inventoryHeaders(all, branch) };
 }
 
 function reviewDecisions(headers) {
@@ -4507,7 +4534,7 @@ export async function reviewScope(root, planPath, options = {}) {
 async function planReviewScope(root, planPath, { full = false } = {}) {
   const text = await readText(path.resolve(root, planPath));
   // Computed once, before any early return, so every plan-mode answer carries the field.
-  const headers = await reviewUnitHeaders(path.resolve(root, planPath), text);
+  const { unit: headers, inventoried } = await reviewUnitHeaders(path.resolve(root, planPath), text);
   const decisions = reviewDecisions(headers);
   let repository = null;
   try { repository = git(root, ['rev-parse', '--show-toplevel']); } catch { repository = null; }
@@ -4518,7 +4545,7 @@ async function planReviewScope(root, planPath, { full = false } = {}) {
   // narrows to — a delta re-review still owes every module no inventory names — and read before any
   // early return, so an unresolved scope carries them too. A plan with no origin falls back below to
   // the range this review resolves.
-  const inventories = headers.map((header) => capabilityInventory(header.text));
+  const inventories = inventoried.map((header) => capabilityInventory(header.text));
   const unitBase = repository && head ? unitRemovalBase(repository, parseOrigin(text), head) : null;
   const removed = unitBase ? removedModules(repository, unitBase, head, inventories) : null;
   const answer = { root: repository, file, slug, head, mode: 'unresolved', base: null, provenance: null, reason: null, candidates: [], commits: null, excluded: null, bookkeepingOnly: null, paths: null, diff: null, decisions, removed };

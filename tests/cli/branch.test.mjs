@@ -649,3 +649,32 @@ test('branch check reports what the unit removed and which of it no capability i
   const legacy = await repo({ branches: ['esq/old'], checkout: 'esq/old' });
   assert.equal((await branchCheck(legacy, await plan(legacy, 'p.md', { branch: 'esq/old' }))).removed, null);
 });
+
+// A sub-unit planned off the parent's branch and merged back into it brings its deletions into the
+// parent's range; its own inventory already disposed of them, so they are covered. A deletion no plan
+// of either names stays uncovered, and the parent's unit still lists only the parent's plans.
+test('a sub-unit landed into the branch covers the removals its own inventory names', async () => {
+  const root = await repo();
+  for (const name of ['banner', 'chips', 'stray']) await writeFile(path.join(root, `${name}.ts`), `export const ${name} = 1;\n`);
+  git(root, 'add', '.');
+  git(root, 'commit', '-q', '-m', 'app');
+  git(root, 'switch', '-q', '-c', 'esq/parent');
+  const parent = await plan(root, '2026-11-23-parent.md', { branch: 'esq/parent', origin: 'main' });
+  git(root, 'add', '.');
+  git(root, 'commit', '-q', '-m', 'plan parent');
+  git(root, 'switch', '-q', '-c', 'esq/child');
+  await plan(root, '2026-11-24-child.md', {
+    branch: 'esq/child', origin: 'esq/parent',
+    body: '\n## Capability inventory\n\n| Source | Capability | Disposition |\n|---|---|---|\n| `banner.ts` | export scope | moved — Analyse |\n',
+  });
+  git(root, 'rm', '-q', 'banner.ts', 'stray.ts');
+  git(root, 'add', '.');
+  git(root, 'commit', '-q', '-m', 'child work');
+  git(root, 'switch', '-q', 'esq/parent');
+  git(root, 'merge', '-q', '--no-ff', '-m', 'merge child', 'esq/child');
+
+  const verdict = await branchCheck(root, parent);
+  assert.deepEqual(verdict.removed.deleted, ['banner.ts', 'stray.ts']);
+  assert.deepEqual(verdict.removed.uncovered, ['stray.ts']);
+  assert.deepEqual(verdict.unit.plans, [parent]);
+});
