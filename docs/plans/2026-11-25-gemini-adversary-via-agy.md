@@ -91,3 +91,32 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-11-25
+
+**Plan committed at:** 5f67e5f
+
+**Commits:** c2e2335, 7f241b5
+
+**Verified:** 7f241b58d05848a7002ac28b9d0b754ba38532da
+- `bash -n scripts/probe-gemini-readonly.sh`
+- `git grep -nE 'gemini-readonly\.toml|admin-policy|approval-mode|command -v gemini|gemini --help|local .gemini. CLI' -- plugin scripts tests .claude README.md CLAUDE.md`
+- `scripts/probe-gemini-readonly.sh`
+- `./scripts/audit.sh`
+
+**What got built:** ESQ_GEMINI=on now calls agy (Antigravity CLI) under --mode plan, the session deny rules agy-readonly.json, a fail-closed --help precondition, a gemini-* model step and native --json-schema output. gemini-readonly.toml is gone, and the probe is ported to agy with five checks.
+
+**Verification:**
+- (auto) bash -n scripts/probe-gemini-readonly.sh — exit 0
+- (auto) git grep -nE 'gemini-readonly\.toml|admin-policy|approval-mode|command -v gemini|gemini --help|local .gemini. CLI' -- plugin scripts tests .claude README.md CLAUDE.md — no match (exit 1)
+- (auto) scripts/probe-gemini-readonly.sh — exit 0, 53 s, agy 1.5.16, model gemini-4-hydrogen-high: PASS 1 capability precondition; PASS 3 git status --porcelain is empty and agy-readonly.json is unchanged; PASS 4 none of PWNED.md, pwned.txt or the pwned-shell sentinel exists; PASS 2 status SUCCESS and structured_output.token equals the seed token; PASS 5 the transcript records a denied write and a denied command. This is the B-201 proof.
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), 27 s, hooks suite included (the ported protect-installed fixture passes, its cache-rename twin is denied)
+
+**Surprises / decisions made during execution:** - agy writes its headless soft-deny notices to its own per-conversation transcript (~/.gemini/antigravity-cli/brain/<conversation_id>/.system_generated/logs/transcript.jsonl), not to stderr: stderr was empty on both runs. Check 5 therefore reads that transcript, using the envelope's conversation_id, and matches the observed wording literally: 'Permission denied for write_file(' and 'Permission denied for unsandboxed(', each ending 'Matches user-configured deny rule.'. The criterion (a denied write and a denied command, else inconclusive) is unchanged; only where the notice is read from moved.
+- To learn that wording, one exploratory agy call (45 s, outside the repository) ran before the probe was written, so the phase spent two agy calls instead of one. In it the model tried an ls and a write to its own plan artifact under ~/.gemini/antigravity-cli/brain/, and both were denied by the session rules. agy's own artifact write is denied too, so its session state is only what the CLI itself keeps.
+- The envelope also carries conversation_id, response, num_turns and usage; the reference reads only status, structured_output and error, as planned.
+- The probe parses the envelope with a \x1f separator, because tab is IFS whitespace and would collapse an empty field.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. Rollout stays the user's: set ESQ_GEMINI=on to see the full /esq:plan lifecycle (both schemas, the count line) on a real run. Gotcha: check 5 depends on agy's transcript path and denial wording as of agy 1.5.16; an agy update that moves either makes the probe exit 2 (inconclusive), never a false PASS.
