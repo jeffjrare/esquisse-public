@@ -140,9 +140,10 @@ fi
 #
 # A split skill loads its procedures by path. A path that resolves to nothing is
 # a branch that reaches no instructions — which is the failure the whole
-# references/ arrangement can produce and nothing else catches.
+# references/ arrangement can produce and nothing else catches. A sibling
+# load (`../plan/references/adversary.md`) resolves against that sibling skill.
 for n in $(skill_names); do
-  skill_grep "$n" -ohE 'references/[A-Za-z0-9._-]+\.md' 2>/dev/null | sort -u | while read -r ref; do
+  skill_grep "$n" -ohE '(\.\./[a-z0-9-]+/)?references/[A-Za-z0-9._-]+\.md' 2>/dev/null | sort -u | while read -r ref; do
     [ -n "$ref" ] || continue
     [ -f "$CMD_DIR/$n/$ref" ] && continue
     echo "$n: names \`$ref\`, which does not exist"

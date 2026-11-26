@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["findings"],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["where", "failure", "evidence", "fix"],
+        "properties": {
+          "where": { "type": "string" },
+          "failure": { "type": "string" },
+          "evidence": { "type": "string" },
+          "fix": { "type": "string" }
+        }
+      }
+    }
+  }
+}
