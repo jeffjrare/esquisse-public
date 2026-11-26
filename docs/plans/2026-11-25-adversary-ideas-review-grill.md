@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 36763c4d994379c7fa198f48c4037128f5a3d365
+
 ## Context
 The opt-in second model family (Codex through `codex exec -s read-only`, Gemini through `agy --mode plan` under
 `agy-readonly.json`) runs today from `/esq:plan` alone: a blind background counter-plan and a foreground pre-mortem, judged
