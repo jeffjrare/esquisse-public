@@ -1,8 +1,8 @@
 <!-- loaded-at: with references/adversary.md, only when `ESQ_GEMINI=on` -->
 ## Gemini invocation
 
-The lifecycle, prompts, judging, record and failure line are `references/adversary.md`'s. This file holds only how
-Gemini is called, through the Antigravity CLI `agy` that a Google AI subscription signs in to. `<refs>`, `<d>`, `<slug>`
+The lifecycle, prompts, judging, record and failure line are `references/adversary.md`'s, or the calling command's own
+lifecycle reference. This file holds only how Gemini is called, through the Antigravity CLI `agy` that a Google AI subscription signs in to. `<refs>`, `<d>`, `<slug>`
 and `<the prompt>` mean what they mean there. The record names the provider `gemini` and its model the `gemini-*` id the
 call resolved (`$m` below). The report line is `Gemini:`.
 
@@ -29,8 +29,10 @@ read half-written.
 
 ### The command
 
-`<call>` is `counter` or `premortem`, `<schema>` its schema (`counter-plan.schema.json`, `premortem.schema.json`) and
-`<bound>` its timeout (`900` for the background counter-plan, `570` for the foreground pre-mortem):
+The calling lifecycle names `<call>`, its `<schema>` (a file beside this one) and its `<bound>` in seconds. For
+`/esq:plan`, `<call>` is `counter` or `premortem`, `<schema>` its schema (`counter-plan.schema.json`,
+`premortem.schema.json`) and `<bound>` its timeout (`900` for the background counter-plan, `570` for the foreground
+pre-mortem):
 
 ```bash
 cd "$(git rev-parse --show-toplevel)" && d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/gemini-<slug>-<call>".* && \
@@ -53,6 +55,19 @@ timeout <bound> agy -p "$p" --mode plan --settings "<refs>/agy-readonly.json" \
   >"$d/gemini-<slug>-<call>.json.part" 2>"$e" && \
 mv "$d/gemini-<slug>-<call>.json.part" "$d/gemini-<slug>-<call>.json"
 ```
+
+**A prompt with an attached file.** When the lifecycle attaches a file, `p` is the heredoc followed by that file, the rest of the command unchanged:
+
+```bash
+p="$(cat <<'PROMPT'
+<the prompt>
+PROMPT
+cat "<file>")" && \
+```
+
+The provider is never pointed at the path instead: `<git-dir>/esq/` can lie outside agy's workspace (its cwd), and the
+`command(*)` deny stops it running `git` itself. A `-p` argument is one `argv` string, so the lifecycle caps the file
+below Linux's 131,072-byte `MAX_ARG_STRLEN`.
 
 Its output is `<d>/gemini-<slug>-<call>.json`. When it is absent (the precondition failed, the model was refused, or the
 call exited non-zero or timed out), the reason is the `.err` file's last line.
