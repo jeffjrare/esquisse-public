@@ -75,6 +75,21 @@ test('bash mutations of the installed cache are denied, reads and dev-tree edits
   assert.equal(bash(gemini), null);
   // The same shape, its rename aimed at the cache instead, is an edit of the cache.
   assert.equal(bash(`${gemini} && mv "$d/gemini-x-counter.json" "${refs}/counter-plan.schema.json"`)?.hookSpecificOutput.permissionDecision, 'deny');
+  // /esq:ideas reaches the same kit through a sibling path; reading its schema and settings there is no edit.
+  const sibling = '/config/plugins/cache/esquisse/esq/1.0/skills/ideas/../plan/references';
+  const ideasCodex = 'd="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/codex-ideas-whole-slate.json" && \\\n'
+    + `timeout 600 codex exec -s read-only -C "$(git rev-parse --show-toplevel)" --ephemeral \\\n`
+    + `  --output-schema "${sibling}/idea-slate.schema.json" -o "$d/codex-ideas-whole-slate.json" - \\\n`
+    + '  >/dev/null 2>"$d/codex-ideas-whole-slate.err" <<\'PROMPT\'\nfocus\nPROMPT';
+  assert.equal(bash(ideasCodex), null);
+  const ideasGemini = gemini
+    .replaceAll('gemini-x-counter', 'gemini-ideas-whole-slate')
+    .replace('timeout 900', 'timeout 600')
+    .replaceAll(refs, sibling)
+    .replace('counter-plan.schema.json', 'idea-slate.schema.json');
+  assert.ok(ideasGemini.includes(`${sibling}/idea-slate.schema.json`) && ideasGemini.includes(`${sibling}/agy-readonly.json`));
+  assert.equal(bash(ideasGemini), null);
+  assert.equal(bash(`${ideasGemini} && mv "$d/gemini-ideas-whole-slate.json" "${sibling}/idea-slate.schema.json"`)?.hookSpecificOutput.permissionDecision, 'deny');
   const carried = [
     'd=/config/plugins/cache/esquisse/esq/1.0 && rm -rf "$d/skills"',
     'for f in /config/plugins/cache/esquisse/esq/1.0/skills/*; do rm "$f"; done',

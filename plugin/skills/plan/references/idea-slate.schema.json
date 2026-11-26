@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ideas"],
+  "properties": {
+    "ideas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "axis", "for", "value", "signal", "idea", "size"],
+        "properties": {
+          "title": { "type": "string" },
+          "axis": { "type": "string", "enum": ["feature", "adjustment", "content", "container"] },
+          "for": { "type": "string" },
+          "value": { "type": "string" },
+          "signal": { "type": "string" },
+          "idea": { "type": "string" },
+          "size": { "type": "string", "enum": ["S", "M", "L"] }
+        }
+      }
+    }
+  }
+}

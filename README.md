@@ -214,7 +214,7 @@ backlog row per module; `/esq:roadmap plan` orders them next.
 | `/esq:harvest` | Recover decisions from the code, history and discussion; adopt a folder of imported specs in one pass | `docs/DECISIONS.md`; for imported specs, also an overview, the contradictions settled in one question round, and a backlog row per module and per blocking gate |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md`, free of dated history comments; what a refresh changed goes in its commit message |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
-| `/esq:ideas [focus] [features\|adjust\|content\|container]`, `/esq:ideas capture <n,…>` | Propose grounded ideas, user value first: new features, adjustments, content and container (architecture, structure, surfaces) | A ranked slate you pick from in one question; picked ideas become backlog rows with a suggested priority, the rest kept for a later `capture` |
+| `/esq:ideas [focus] [features\|adjust\|content\|container]`, `/esq:ideas capture <n,…>` | Propose grounded ideas, user value first: new features, adjustments, content and container (architecture, structure, surfaces) | A ranked slate you pick from in one question; picked ideas become backlog rows with a suggested priority, the rest kept for a later `capture`; with `ESQ_CODEX=on`/`ESQ_GEMINI=on`, a blind slate per provider (the focus sent out, ≤10 min background) joins the pool before the cut |
 | `/esq:promise [page-or-feature] [--sense \| --copy] [--all]` | Check that what the product promises works in the running app; sweep it for UX nonsense; write or improve page copy | `docs/PROMISES.md` verdicts with evidence and a backlog row per promise that does not hold, per defect seen on the way and for the part of the ask it cannot judge; `--sense` backlog rows; `--copy` a before/after page, then approved copy committed page by page |
 | `/esq:ui [screen-problem-spec-or-B-NNN] [--greenfield <brief-or-copy>]` | Inspect an existing interface (the journeys through a screen and every screen a change reaches, sliced when large, or a spec document of several journeys) or one screen a user misread, or explore one before implementation | A rendered recommended direction across the screens it changes (two in `--greenfield`, or when the choice is yours), each drawn from a territory of the product's own domain (its documents, tools, materials, places) and, when the choice is yours, from references outside software it finds and cites itself (up to 3 captures, within 16 in all), developed from a sketch sheet of 4–6 takes it shows you, never asking you for inspiration, live, animated and walkable, built against the UI craft and accessibility expertise modules, gated on contrast, focus, target size, phone width, reduced motion and states, component states, control contrast and accessible names, a comparison page, each direction's HTML source committed beside a planning brief; each next slice filed as a backlog row holding its share of the mandate (the source, not the page, is what `/esq:build` builds from); backlog rows for the defects outside the work |
 
@@ -482,10 +482,14 @@ honor it, the worker runs on your session's model.
   the local `codex` CLI for a blind counter-plan and a pre-mortem of the written plan;
   with `ESQ_GEMINI=on`, the Antigravity CLI `agy` asks a Gemini model the same. Turn on
   either or both: with both, the two run at the same time, so the plan waits no longer,
-  and each one's verdicts stay attributed to it. Claude judges every answer against the
-  code; none ever blocks the plan. **Opting in sends the goal text and whatever the model
-  reads in your repository to its vendor under your own account: OpenAI for Codex, Google
-  for Gemini.** For Gemini, install `agy` and sign in with your Google account; a Google AI
+  and each one's verdicts stay attributed to it. With the same switch, `/esq:ideas`
+  (when generating, never on `capture`) asks each provider, in the background and bounded
+  at 10 minutes, for a blind slate of at most 10 grounded ideas; those that survive the
+  same cuts as Claude's join the slate, credited to their provider in its `## Adversary`
+  section. Claude judges every answer against the
+  code; none ever blocks the plan. **Opting in sends the goal text (for `/esq:ideas`, the focus)
+  and whatever the model reads in your repository to its vendor under your own account:
+  OpenAI for Codex, Google for Gemini.** For Gemini, install `agy` and sign in with your Google account; a Google AI
   subscription covers it, and the models offered depend on your plan (`agy models` lists
   them). Set it per project in `.claude/settings.json`:
 
@@ -496,7 +500,8 @@ honor it, the worker runs on your session's model.
 
   The models and effort are optional. Unset, `~/.codex/config.toml` applies for Codex, and
   Gemini uses the first Gemini model `agy models` lists; `ESQ_GEMINI_MODEL` must name a
-  `gemini-*` model, and any other id is refused. Codex runs in its read-only sandbox.
+  `gemini-*` model, and any other id is refused. Gemini has no effort setting: its effort
+  is the model variant `ESQ_GEMINI_MODEL` names. Codex runs in its read-only sandbox.
   `agy` has none, so Gemini runs in plan mode under session-only deny rules for writes,
   shell commands, MCP tools and URLs, and is skipped when the installed `agy` cannot take
   them. That denies the agent's writes and commands; it is not an OS sandbox, and `agy`

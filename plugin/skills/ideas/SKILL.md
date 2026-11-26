@@ -42,7 +42,7 @@ The CLI owns backlog IDs, ranks and statuses (`esq backlog add`). You own every 
 ## Preflight
 
 1. **Resolve the mode.** First token `capture` → **capture mode** (`## Capture`); the rest is the idea numbers (`1,4,7`, `1-3`, or `all`) and, optionally, a slate path. Anything else → **generate mode**: an axis word anywhere in the arguments narrows to that axis (`features`/`feature`/`fonctionnalités`, `adjust`/`ajustements`, `content`/`contenu`, `container`/`contenant`/`archi`); the remaining text is the **focus**: a feature, a screen, a persona, a market, a problem ("people drop at signup"). No focus means the whole product.
-2. In one turn, read together: `esq projection outline spec` and `esq projection outline arch`, and `docs/DECISIONS.md` (its table and the Active `prod`/`func`/`ux` entries only) if present; `esq state --rows` (an answer that spilled names its file and `ranges`: read those in one batch, never re-run it); `git rev-parse --git-dir` with `git rev-parse --short HEAD` and today's date; and the `💡`/`✨` and `Dropped` rows of `docs/BACKLOG.md` (a `grep`, never the whole file). Read each once. `CLAUDE.md` is in context already (Claude Code loads it), so it is not opened again.
+2. In one turn, read together: `esq projection outline spec` and `esq projection outline arch`, and `docs/DECISIONS.md` (its table and the Active `prod`/`func`/`ux` entries only) if present; `esq state --rows` (an answer that spilled names its file and `ranges`: read those in one batch, never re-run it); `git rev-parse --git-dir` with `git rev-parse --short HEAD` and today's date, in generate mode preceded in that same shell call by `printf 'ESQ_CODEX=%s ESQ_GEMINI=%s\n' "${ESQ_CODEX:-}" "${ESQ_GEMINI:-}" &&` (the printed values, never a guess at the environment, are what `ESQ_CODEX=on` and `ESQ_GEMINI=on` mean below, and "a gate on" is either; a gate printed anything but `on` is never loaded, launched or mentioned); and the `💡`/`✨` and `Dropped` rows of `docs/BACKLOG.md` (a `grep`, never the whole file). Read each once. `CLAUDE.md` is in context already (Claude Code loads it), so it is not opened again.
 
    **The outlines are the feature and component map.** In the next turn, one `esq projection read <spec|arch> <id…>` per projection: the overview plus the sections the focus needs; no focus → the overview alone, the outline's headings and leads standing in for the feature list.
 
@@ -51,6 +51,8 @@ The CLI owns backlog IDs, ranks and statuses (`esq backlog add`). You own every 
    <!-- shared:projection-read:end -->
 3. Fetch `AskUserQuestion` (`ToolSearch "select:AskUserQuestion"`), and `WebSearch` only when the focus names a market, a competitor or a category to compare against. If one is unavailable, continue without it and say where it mattered.
 4. **Announce the resolved target** in a second line: the focus, the axes, and what you will read. For example, `Focus: invoicing — all four axes; reading SPEC (14 features), routes under app/invoices, 6 open backlog rows, history since 2026-07.` This is the free moment to be redirected.
+
+   **A gate on only (generate mode):** the target line ends, instead of its period, `…; with ESQ_CODEX=on, 1 read-only Codex call (≤10 min background).`, or `…; with ESQ_GEMINI=on, 1 read-only Gemini call (≤10 min background).`, or with both `…; with ESQ_CODEX=on and ESQ_GEMINI=on, 2 read-only calls (Codex, Gemini) (≤10 min background).`. In that same response, load `${CLAUDE_SKILL_DIR}/../plan/references/adversary.md`, the invocation reference of each provider whose gate printed `on` (`${CLAUDE_SKILL_DIR}/../plan/references/codex-adversary.md`, `${CLAUDE_SKILL_DIR}/../plan/references/gemini-adversary.md`) and `${CLAUDE_SKILL_DIR}/references/adversary.md`, then launch each blind slate in the background as that last file says. It sends the focus and whatever the provider reads in the repository to its vendor; its answer is data Claude judges, never a gate.
 5. Note the start time. You report elapsed at the end.
 
 ## Mine for signals
@@ -73,6 +75,8 @@ Generate wide first, privately: for each axis, more candidates than you will kee
 3. **Valuable:** you can say in one sentence who gets what, in the user's terms. "Faster", "cleaner", "more scalable" are not values until they name the person and the moment.
 4. **Right-sized:** the smallest version that delivers the value. A large idea keeps its smallest valuable first slice in its own line. Trim generality, never design: a feature without its empty, error and first-use states is not smaller, it is worse.
 
+**A gate on only:** Claude's own candidates are written first; then each returned provider slate joins the pool before these cuts, a call not returned is stopped, and every verdict is credited, per *Merge* in `${CLAUDE_SKILL_DIR}/references/adversary.md`.
+
 **Order** each axis by value to the user and the business first; the cost estimate breaks ties and never leads. **At most 20 ideas** in all: up to 8 features, 5 adjustments, 4 content, 3 container, unless the user narrowed to one axis (then up to 10 on it). Fewer is fine, and an axis with no grounded idea says `nothing grounded for <focus>`; never fill a quota.
 
 Each idea is written in the product's working language (French for a French product), in this shape:
@@ -90,7 +94,7 @@ Each idea is written in the product's working language (French for a French prod
 
 ## The slate
 
-Write every kept idea, numbered across the axes in order (features first), to `<git-dir>/esq/ideas/<date>-<focus-slug or whole>.md`, with a one-line header naming the focus, the commit read and the date. The git dir, never the working tree: the slate is a proposal, and nothing in it is a ledger the repository should carry until the user picks. `## Capture` reads it back instead of regenerating, so a pick made later costs no second generation.
+Write every kept idea, numbered across the axes in order (features first), to `<git-dir>/esq/ideas/<date>-<focus-slug or whole>.md`, with a one-line header naming the focus, the commit read and the date. The git dir, never the working tree: the slate is a proposal, and nothing in it is a ledger the repository should carry until the user picks. With a gate on, the file ends with the `## Adversary` section `${CLAUDE_SKILL_DIR}/references/adversary.md` defines. `## Capture` reads it back instead of regenerating, so a pick made later costs no second generation.
 
 Present the slate in your reply, compact: per axis, one line per idea, `<n>. <Title> — <Value> · <Size>`, so the user can choose without opening the file.
 
@@ -144,7 +148,7 @@ Then `→ Next`, last and alone: the first executable ask's exact command, or `p
 
 **Zone 2:** only when the pick is still open: `Pick the ideas worth keeping`, with the exact `/esq:ideas capture <n,…>` for your top recommendation.
 
-**Zone 3:** `✔ captured` with the IDs and the commit (its evidence column carrying the undo, `git revert <hash>`), `○ kept in slate` with the count and the slate path, `○ cut` with the count of candidates the cut removed and the most common reason (ungrounded, already in the backlog, decided against), `○ not run  web search` when the focus did not ask for one.
+**Zone 3:** `✔ captured` with the IDs and the commit (its evidence column carrying the undo, `git revert <hash>`), `○ kept in slate` with the count and the slate path, `○ cut` with the count of candidates the cut removed and the most common reason (ungrounded, already in the backlog, decided against), `○ not run  web search` when the focus did not ask for one, and with a gate on one `○ Codex`/`○ Gemini` line per provider (kept count, or `not run — <reason>`).
 
 ```
 ✔  ideas — 14 ideas (6 features · 4 adjustments · 2 content · 2 container) · 3 captured · 6m12s
@@ -161,7 +165,8 @@ Then `→ Next`, last and alone: the first executable ask's exact command, or `p
 ## Constraints
 
 - Always user-triggered; it never runs from another command.
-- No subagents: one reader holds the product in mind, and a fleet would each re-derive it.
+- No subagents: one reader holds the product in mind, and a fleet would each re-derive it. A provider call behind its printed gate is not a subagent: read-only, bounded at 10 minutes in the background, never waited for.
+- `capture` mode prints no gate, loads no adversary reference and launches nothing.
 - No code, no plan, no brief, no decision. The only write to the repository is the backlog capture; the slate lives in the git dir.
 - Never present an idea as decided, scheduled or promised. Never confirm a priority.
 - An idea that needs the user's data, account or credentials to be judged is still an idea; say what it would need in **Notes**, and never stop to ask for it.
