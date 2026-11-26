@@ -20,7 +20,7 @@ You are the one reader this change normally gets. Two questions, in this order: 
 
 Run `esq validate` before analysis, `esq review scope <plan-path-or-range>` to learn what to read and the lessons its paths match, `esq backlog add` for each out-of-scope row, and `esq plan set-reviewed` to record a clean verdict. The CLI owns parsing and IDs; materiality, severity, security, design, and UX remain your judgment.
 
-Read-only on code: no code changes, no fixes applied inline, and no plan-file edits but one. You may write only the corrective brief (feeding `/esq:fix` and `/esq:plan`), `docs/BACKLOG.md` rows for out-of-scope observations, and — on a clean verdict — the plan's `**Reviewed at:**` field, through `esq plan set-reviewed` and never by hand. Do NOT use plan mode — it would block the brief write.
+Read-only on code: no code changes, no fixes applied inline, and no plan-file edits but one. You may write only the corrective brief (feeding `/esq:fix` and `/esq:plan`), `docs/BACKLOG.md` rows for out-of-scope observations, and — on a clean verdict — the plan's `**Reviewed at:**` field, through `esq plan set-reviewed` and never by hand. With a provider's gate on, its outputs and record land under `<git-dir>/esq/`, never the working tree. Do NOT use plan mode — it would block the brief write.
 
 ## Announce, before anything
 
@@ -40,7 +40,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    - **No argument → STOP and ask in one line:** `/esq:review <plan-path>` or `/esq:review <A>..<B>` (or one commit). Never choose the latest plan or offer a guessed plan menu.
 
 2. Read the plan file briefly, with the Read tool — `cat` of a plan past ~30 KB comes back as a preview and costs a second read — for what was supposedly built, plus any prospective contract correction the scope query returns. A commit range has no plan to read.
-3. Run **`esq review scope <target>` once**. Keep its pinned head, base/provenance, commits, paths, `bookkeepingOnly`, `diff`, `decisions` and `removed`; route off `mode`, never reconstruct its answer.
+3. Run **`esq review scope <target>` once**, preceded in that same shell call by `printf 'ESQ_CODEX=%s ESQ_GEMINI=%s\n' "${ESQ_CODEX:-}" "${ESQ_GEMINI:-}" &&` (the printed values, never a guess at the environment, are what `ESQ_CODEX=on` and `ESQ_GEMINI=on` mean below, and "a gate on" is either; a gate printed anything but `on` is never loaded, launched or mentioned). Keep its pinned head, base/provenance, commits, paths, `bookkeepingOnly`, `diff`, `decisions` and `removed`; route off `mode`, never reconstruct its answer.
    - `delta`: report "Delta review since <base short hash> (<review brief | clean review>) — say 'full re-review' to override."
    - `full`: review the unit from its plan commit. Pass `--full` when the user explicitly asks for a full plan re-review.
    - `range`: review exactly the named range or single commit; no baseline is inferred.
@@ -52,7 +52,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
    With `bookkeepingOnly: true`, open no file: report clean and follow "Record a clean review" — unless `removed.uncovered` is non-empty: then run "What this removed" on those modules alone, and nothing else. **A range target never records coverage or offers land/converge**, and never creates a plan to carry coverage. Findings follow the tier routing below; a clean range review ends at its report.
 
-4. Load the change with the `diff` command the query returned — one call, the whole diff, including changed prospective plans. When the answer carries `diffFile`, the diff was too long to print: Read that file instead, every range its `ranges` names in one batch, and never run the command or filter it. For a plan amendment, compare old/new obligations against the original outcome; historical execution entries must be untouched and new evidence must prove the corrected criterion. A softened acceptance is not a safe correction.
+4. Load the change with the `diff` command the query returned — one call, the whole diff, including changed prospective plans. **A gate on, mode `delta`, `full` or `range`, `bookkeepingOnly: false`:** chain `esq review adversary-diff <base> <head>` (the scope's two commits) into that call; its answer is the filtered delta a provider is sent, never what you read. When the answer carries `diffFile`, the diff was too long to print: Read that file instead, every range its `ranges` names in one batch, and never run the command or filter it. For a plan amendment, compare old/new obligations against the original outcome; historical execution entries must be untouched and new evidence must prove the corrected criterion. A softened acceptance is not a safe correction.
 5. Project conventions come from `CLAUDE.md`, which Claude Code already loads into the session: never open it again. When `docs/SPEC.md` exists, chain `esq projection outline spec --paths - --upto <base>` (the scope's `paths` on stdin, `<base>` its base; no base resolved → omit `--upto`) into step 4's call, then `esq projection read spec <id…>` for the features the diff touches (see "Spec conformance").
 
    <!-- shared:projection-read:start -->
@@ -64,6 +64,8 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
    <!-- announce:start -->
    > `Reviewing <slug | the range> — <full | delta since <hash> | range <A>..<B>> — <N> files.`
    <!-- announce:end -->
+
+   **A gate on only** (and not `bookkeepingOnly: true`): the target line ends, instead of its period, `…; with ESQ_CODEX=on, 1 read-only Codex call on <n> KB of filtered diff (≤5 min background).`, or `…; with ESQ_GEMINI=on, 1 read-only Gemini call on <n> KB of filtered diff (≤5 min background).`, or with both `…; with ESQ_CODEX=on and ESQ_GEMINI=on, 2 read-only calls (Codex, Gemini) on <n> KB of filtered diff (≤5 min background).` — `<n>` is the step-4 answer's `bytes` ÷ 1000, rounded up. A provider that cannot be sent its delta is named instead by its not-run line (`…; Codex: not run — diff too large (<n> KB filtered, cap <c> KB).`), per the table in `${CLAUDE_SKILL_DIR}/references/adversary.md`. In that same response, load `${CLAUDE_SKILL_DIR}/../plan/references/adversary.md`, the invocation reference of each provider whose call goes out (`${CLAUDE_SKILL_DIR}/../plan/references/codex-adversary.md`, `${CLAUDE_SKILL_DIR}/../plan/references/gemini-adversary.md`) and `${CLAUDE_SKILL_DIR}/references/adversary.md`, then launch each blind review in the background as that last file says. It sends the filtered diff and whatever the provider reads in the repository to its vendor, at Codex effort `medium`; its answer is data you judge, never a gate.
 
 <!-- shared:unattended-tasks:start -->
 **Unattended runs make no `TaskCreate`, `TaskUpdate` or `TaskList` calls anywhere in this procedure.** Attended runs use the available task tools for progress as described below.
@@ -179,6 +181,8 @@ Last line: `→ Next` with the first executable ask verbatim, or `pick an option
 ## Report
 
 `TaskUpdate`: `"Quality & conventions"` `completed`, `"Generate report"` `in_progress` (then `completed` after writing). Output findings in this exact structure — **verdict and action items first**.
+
+**A gate on only:** your own findings are drafted first; then each returned provider review is judged into them, a call not returned is stopped, and every verdict is credited, per *Merge* in `${CLAUDE_SKILL_DIR}/references/adversary.md`. Zone 3 gains its one line per provider, and its blocks are recorded as that file's *Record* says.
 
 Rank action items by consequence, worst first. **🟢 means a defect with a mechanical fix — not a change that is merely safe to make.** A polish item is not a small 🟢, it is nothing.
 
@@ -309,7 +313,7 @@ Report a refusal and its recovery action; never calculate an ID from the ledger 
 
 - Row: `esq backlog add --type "<type emoji + word>" --concern <concern> --layer <app|infra> --summary "<one-phrase summary>" --source "review: <slug>"` — Status `Open`; the CLI suggests the priority and the user triages. `--concern` is what the row is about, in `/esq:backlog`'s vocabulary (`user` when a user sees, gets or hits it); `--layer app` is the product its users run, `infra` is hosting, CI, environment, release and install. A detail section, when one is owed, is appended below the `---` afterwards.
 - Dedup against existing rows first. Create the file from the template if it's missing.
-- **The tail is one commit, naming both halves:** `git add docs/BACKLOG.md && git commit -m "brief(fixes): <slug> + backlog observations from review"`, over the brief staged above and these rows together. With nothing out of scope the tail is the brief alone: `git commit -m "brief(fixes): <slug>"`. On a clean verdict there is no brief, and the tail is the recorded field — with the rows, if any — under the `plan(reviewed):` subject above.
+- **The tail is one commit, naming both halves:** `git add docs/BACKLOG.md && git commit -m "brief(fixes): <slug> + backlog observations from review"`, over the brief staged above and these rows together. With nothing out of scope the tail is the brief alone: `git commit -m "brief(fixes): <slug>"`. On a clean verdict there is no brief, and the tail is the recorded field — with the rows, if any — under the `plan(reviewed):` subject above. With a gate on, the provider blocks are that commit's second `-m`; a review with no tail commit writes them under `<git-dir>/esq/` instead (*Record* in `${CLAUDE_SKILL_DIR}/references/adversary.md`).
 - List what you captured (IDs + one line each) under a short "Logged to backlog" note. If nothing was out of scope, say nothing.
 
 ## Close with the next command

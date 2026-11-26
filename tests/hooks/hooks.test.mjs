@@ -90,6 +90,24 @@ test('bash mutations of the installed cache are denied, reads and dev-tree edits
   assert.ok(ideasGemini.includes(`${sibling}/idea-slate.schema.json`) && ideasGemini.includes(`${sibling}/agy-readonly.json`));
   assert.equal(bash(ideasGemini), null);
   assert.equal(bash(`${ideasGemini} && mv "$d/gemini-ideas-whole-slate.json" "${sibling}/idea-slate.schema.json"`)?.hookSpecificOutput.permissionDecision, 'deny');
+  // /esq:review attaches its filtered diff from the git dir: the Codex group pipes it into stdin, the
+  // Gemini call appends it to the prompt. Reading the kit over review's sibling path is still no edit.
+  const reviewRefs = '/config/plugins/cache/esquisse/esq/1.0/skills/review/../plan/references';
+  const reviewCodex = 'd="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/codex-review-x-review.json" && \\\n'
+    + '{ cat <<\'PROMPT\'\ndefects only\nPROMPT\ncat "/work/app/.git/esq/adversary-1234567-89abcde.diff"; } | \\\n'
+    + `timeout 300 codex exec -s read-only -C "$(git rev-parse --show-toplevel)" --ephemeral -c model_reasoning_effort="medium" \\\n`
+    + `  --output-schema "${reviewRefs}/review-findings.schema.json" -o "$d/codex-review-x-review.json" - \\\n`
+    + '  >/dev/null 2>"$d/codex-review-x-review.err"';
+  assert.equal(bash(reviewCodex), null);
+  const reviewGemini = gemini
+    .replaceAll('gemini-x-counter', 'gemini-review-x-review')
+    .replace('timeout 900', 'timeout 300')
+    .replace('PROMPT\n)" && \\\n', 'PROMPT\ncat "/work/app/.git/esq/adversary-1234567-89abcde.diff")" && \\\n')
+    .replaceAll(refs, reviewRefs)
+    .replace('counter-plan.schema.json', 'review-findings.schema.json');
+  assert.ok(reviewGemini.includes('cat "/work/app/.git/esq/adversary-1234567-89abcde.diff")"') && reviewGemini.includes(`${reviewRefs}/review-findings.schema.json`));
+  assert.equal(bash(reviewGemini), null);
+  assert.equal(bash(`${reviewCodex} && mv "$d/codex-review-x-review.json" "${reviewRefs}/review-findings.schema.json"`)?.hookSpecificOutput.permissionDecision, 'deny');
   const carried = [
     'd=/config/plugins/cache/esquisse/esq/1.0 && rm -rf "$d/skills"',
     'for f in /config/plugins/cache/esquisse/esq/1.0/skills/*; do rm "$f"; done',
