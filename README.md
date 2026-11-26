@@ -194,7 +194,7 @@ backlog row per module; `/esq:roadmap plan` orders them next.
 
 | Command | Purpose | Main result |
 |---|---|---|
-| `/esq:grill <idea>` | Resolve scope and consequential choices before planning; a choice your reference stack covers is not asked | A brief in `docs/plans/` |
+| `/esq:grill <idea>` | Resolve scope and consequential choices before planning; a choice your reference stack covers is not asked | A brief in `docs/plans/`; with `ESQ_CODEX=on`/`ESQ_GEMINI=on`, a blind pass per provider (the task text sent out, Codex effort `medium`, ≤5 min background) for at most 8 hidden assumptions, edge cases or contradictions with the code, folded into the rounds or the brief |
 | `/esq:plan <brief-or-task>` | Design the work and its verifiable phases, starting architecture choices from your reference stack and reading the expertise modules its files or its stack touch | A plan committed on its own branch, its checks tried against the repository first, citing any lesson from `docs/LESSONS.md` that changed its design, each phase naming the expertise it loads, and a backlog row for a domain no module or project skill covers; when it replaces a surface, the inventory of what that surface did, any drop asked first |
 | `/esq:build <plan>` | Implement and verify one phase, then stop, weighing the lessons earlier cycles left on its files and reading the expertise modules they touch or the plan names | Task commits and an execution-log entry; a repo fact in `docs/LESSONS.md` for a trap the phase hit and verified itself |
 | `/esq:review <plan-or-commit-or-range>` | Assess the delivered goal, what it removed, correctness, security, UX and design, against the expertise modules the change touches or its plan names | Review findings, each marked `(repeats L-<id>)` when it repeats a defect a lesson recorded; the calls build decided for you by hat; a corrective brief when needed; with `ESQ_CODEX=on`/`ESQ_GEMINI=on`, a blind review per provider (the filtered diff sent out, capped at 200 KB Codex / 120 KB Gemini, Codex effort `medium`, ≤5 min background) judged into the findings |
@@ -491,9 +491,14 @@ honor it, the worker runs on your session's model.
   sent that range's diff without fixtures, snapshots, lockfiles, generated output or
   historical docs, and nothing above 200 KB for Codex or 120 KB for Gemini; a larger
   diff is not sent, and the review says so in one line. Findings it accepts pass the
-  same bar as Claude's own, and the verdicts are recorded in the review's commit. Claude judges every answer against the
-  code; none ever blocks the plan or the review. **Opting in sends the goal text (for `/esq:ideas`, the focus;
-  for `/esq:review`, the filtered diff) and whatever the model reads in your repository to its vendor under your own account:
+  same bar as Claude's own, and the verdicts are recorded in the review's commit. `/esq:grill`
+  asks each provider, in the background and bounded at 5 minutes (Codex at effort `medium`),
+  for at most 8 hidden assumptions, edge cases or contradictions with the code. What the
+  repository settles becomes a resolved decision in the brief, and only a choice that is
+  genuinely yours becomes a question, within the usual 4 per round; the verdicts are
+  recorded in the brief's commit. Claude judges every answer against the
+  code; none ever blocks the plan, the review or the grill. **Opting in sends the goal text (for `/esq:ideas`, the focus;
+  for `/esq:review`, the filtered diff; for `/esq:grill`, your task text) and whatever the model reads in your repository to its vendor under your own account:
   OpenAI for Codex, Google for Gemini.** For Gemini, install `agy` and sign in with your Google account; a Google AI
   subscription covers it, and the models offered depend on your plan (`agy models` lists
   them). Set it per project in `.claude/settings.json`:
@@ -507,7 +512,7 @@ honor it, the worker runs on your session's model.
   Gemini uses the first Gemini model `agy models` lists; `ESQ_GEMINI_MODEL` must name a
   `gemini-*` model, and any other id is refused. Gemini has no effort setting: its effort
   is the model variant `ESQ_GEMINI_MODEL` names, so a `-high` variant can overrun
-  `/esq:review`'s 5 minutes and is then recorded as not returned. Codex runs in its read-only sandbox.
+  `/esq:review`'s or `/esq:grill`'s 5 minutes and is then recorded as not returned. Codex runs in its read-only sandbox.
   `agy` has none, so Gemini runs in plan mode under session-only deny rules for writes,
   shell commands, MCP tools and URLs, and is skipped when the installed `agy` cannot take
   them. That denies the agent's writes and commands; it is not an OS sandbox, and `agy`

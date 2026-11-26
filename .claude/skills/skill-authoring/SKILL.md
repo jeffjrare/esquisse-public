@@ -45,8 +45,8 @@ What `./scripts/audit.sh` will fail you on when a skill changes. Reasoning: `doc
   Each gate is the value a shell call printed (`ESQ_CODEX=on`, `ESQ_GEMINI=on`), not an assumption. Codex runs
   `codex exec -s read-only --ephemeral` with a schema; Gemini runs through `agy --mode plan` under the session deny rules
   `agy-readonly.json`, behind a fail-closed capability precondition. Stdout is discarded or captured, and every output lands under
-  `<git-dir>/esq/`; an answer never gates, fails or rewrites anything and no command in it runs. Only `/esq:plan`, `/esq:ideas` and
-  `/esq:review` have it; review sends only the delta `esq review adversary-diff` filtered and capped, never a diff the model
+  `<git-dir>/esq/`; an answer never gates, fails or rewrites anything and no command in it runs. Only `/esq:plan`, `/esq:ideas`,
+  `/esq:review` and `/esq:grill` have it; review sends only the delta `esq review adversary-diff` filtered and capped, never a diff the model
   assembles. The provider kit (the shared rules in `plan/references/adversary.md`, the invocation references, the schemas,
   `agy-readonly.json`) stays in plan's `references/`; a sibling loads it as `${CLAUDE_SKILL_DIR}/../plan/references/<file>`,
   which `check-structure.sh` resolves against that skill, and keeps its own lifecycle in its own `references/adversary.md`.

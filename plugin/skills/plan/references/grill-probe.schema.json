@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["findings"],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "claim", "evidence", "question"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["assumption", "edge-case", "contradiction"]
+          },
+          "claim": { "type": "string" },
+          "evidence": { "type": "string" },
+          "question": { "type": "string" }
+        }
+      }
+    }
+  }
+}

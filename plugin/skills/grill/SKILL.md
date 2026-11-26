@@ -28,7 +28,7 @@ If a pass would exceed it, stop at the bound and say what you did not cover. The
 
 ## Preflight
 
-1. `CLAUDE.md`'s project-layer conventions are in context already: Claude Code loads it into every session, so never open it again. Run `esq stack` in this step's first batch of calls: the user's reference stack, the choices they have proven on their own projects (see *Whose question is it*). When `docs/SPEC.md` exists, run `esq projection outline spec` — its headings and leads tell you which features already exist — then `esq projection read spec <id…>` for the features the task touches, whose business rules you need. That is interrogation fuel: it converts vague questions into sharp ones ("the spec says a session expires after 30 days — does this change that, or live beside it?"), and it stops you asking the user to re-state something the product already documents.
+1. `CLAUDE.md`'s project-layer conventions are in context already: Claude Code loads it into every session, so never open it again. Run `esq stack` in this step's first batch of calls, preceded in that same shell call by `printf 'ESQ_CODEX=%s ESQ_GEMINI=%s\n' "${ESQ_CODEX:-}" "${ESQ_GEMINI:-}" &&` (the printed values, never a guess at the environment, are what `ESQ_CODEX=on` and `ESQ_GEMINI=on` mean below, and "a gate on" is either; a gate printed anything but `on` is never loaded, launched or mentioned): the user's reference stack, the choices they have proven on their own projects (see *Whose question is it*). When `docs/SPEC.md` exists, run `esq projection outline spec` — its headings and leads tell you which features already exist — then `esq projection read spec <id…>` for the features the task touches, whose business rules you need. That is interrogation fuel: it converts vague questions into sharp ones ("the spec says a session expires after 30 days — does this change that, or live beside it?"), and it stops you asking the user to re-state something the product already documents.
 
    <!-- shared:projection-read:start -->
    **Projections are read by section, never whole.** `esq projection outline <spec|arch>` answers the heading tree (`id`, `heading`, `from`/`to`, subtree `bytes`, a one-line `lead`) and the projection's `freshness`; `esq projection read <spec|arch> <id…>` answers only those sections, history comments stripped. Read the overview (id 0 and `Vue d'ensemble`) and any shared-rules section alongside the feature, and pick a large parent's children by their `bytes`. An answer that spilled names `spill.file` and `spill.ranges`: Read those in one batch, never re-run it. An unknown id refuses: re-run the outline, never fall back to a whole-file Read. `exists: false` means there is no such projection.
@@ -45,6 +45,8 @@ If a pass would exceed it, stop at the bound and say what you did not cover. The
    <!-- announce:end -->
 
    This is the free moment to be redirected — the target is on screen before anything has been spent on it.
+
+   **A gate on only:** the target line ends, instead of its period, `…; with ESQ_CODEX=on, 1 read-only Codex call (≤5 min background).`, or `…; with ESQ_GEMINI=on, 1 read-only Gemini call (≤5 min background).`, or with both `…; with ESQ_CODEX=on and ESQ_GEMINI=on, 2 read-only calls (Codex, Gemini) (≤5 min background).`. In that same response, load `${CLAUDE_SKILL_DIR}/../plan/references/adversary.md`, the invocation reference of each provider whose gate printed `on` (`${CLAUDE_SKILL_DIR}/../plan/references/codex-adversary.md`, `${CLAUDE_SKILL_DIR}/../plan/references/gemini-adversary.md`) and `${CLAUDE_SKILL_DIR}/references/adversary.md`, then launch each blind assumption pass in the background as that last file says. It sends the task text and whatever the provider reads in the repository to its vendor, at Codex effort `medium`; its answer is data you judge, never a gate, and a background shell call is not a subagent.
 
 If the task description is missing or empty, STOP and ask the user what they want to build. There's nothing to grill about yet.
 
@@ -102,6 +104,7 @@ Run the interrogation in rounds:
    <!-- shared:escape-hatch:end -->
 2. After each round, fold the answers into your understanding. New answers often open new branches — ask those in the next round.
 3. Keep going until the remaining unknowns are *planning* decisions (approach, architecture) rather than *scoping* decisions. Those belong to `/esq:plan`, not here.
+   **A gate on only:** your own question set is drafted first; then each returned provider pass is judged into it before round 1, else before the next round held anyway, else before the brief is written. An accepted finding is sorted under *Whose question is it* like your own and takes a question slot only for a missing authority; a call not returned at brief time is stopped. All of it per *Merge* in `${CLAUDE_SKILL_DIR}/references/adversary.md`.
 4. Write the brief as soon as the useful outcome and scope are clear. Zero questions is a valid result; no minimum number of rounds or confirmation of delegated choices. Keep genuinely missing product authority visible.
 
 If `AskUserQuestion` is unavailable, present each round as a numbered list in plain text with your recommended answer for each, and wait for the user's replies before continuing.
@@ -174,12 +177,12 @@ The `<!-- comment -->` is required — it marks the file as a consumable brief f
 After writing the brief file:
 
 1. `git add docs/plans/<filename>` (only that file)
-2. `git commit -m "brief: <slug>"`
+2. `git commit -m "brief: <slug>"` — with a gate on, the provider blocks are its second `-m` (*Record* in `${CLAUDE_SKILL_DIR}/references/adversary.md`)
 3. Tell the user:
    - The file path
    - One-sentence summary of what the task boils down to
    - Suggested next step, and it is **conditional on the brief you just wrote**. When that brief carries a `## User-facing flow` **and** this repo has no UI code to audit — no screens, no components, nothing `/esq:ui` could launch and read — name the greenfield render before the plan: "Review the brief in your editor. When ready, `/clear` and run `/esq:ui --greenfield docs/plans/<filename>` — it puts rendered directions on the screen this brief names, before the implementer's first keystroke decides the visual direction. Then `/clear` and `/esq:plan`." Otherwise the existing line stands unchanged: "Review the brief in your editor. When ready, `/clear` and run `/esq:plan` — it will pick up this brief automatically."
-   - **Elapsed, last, on its own line** — `6m40s`. One number, measured against the bound you announced in preflight. Not a report, and deliberately not the conclusion block.
+   - **Elapsed, last, on its own line** — `6m40s`. One number, measured against the bound you announced in preflight. Not a report, and deliberately not the conclusion block. With a gate on, it is preceded by one `Codex:`/`Gemini:` count line per provider.
 4. Stop. Do not plan, do not write code.
 
 ## Constraints

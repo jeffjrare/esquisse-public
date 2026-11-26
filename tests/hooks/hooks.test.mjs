@@ -108,6 +108,21 @@ test('bash mutations of the installed cache are denied, reads and dev-tree edits
   assert.ok(reviewGemini.includes('cat "/work/app/.git/esq/adversary-1234567-89abcde.diff")"') && reviewGemini.includes(`${reviewRefs}/review-findings.schema.json`));
   assert.equal(bash(reviewGemini), null);
   assert.equal(bash(`${reviewCodex} && mv "$d/codex-review-x-review.json" "${reviewRefs}/review-findings.schema.json"`)?.hookSpecificOutput.permissionDecision, 'deny');
+  // /esq:grill sends the task text alone, at Codex effort medium, over its own sibling path.
+  const grillRefs = '/config/plugins/cache/esquisse/esq/1.0/skills/grill/../plan/references';
+  const grillCodex = 'd="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/codex-grill-x-probe.json" && \\\n'
+    + `timeout 300 codex exec -s read-only -C "$(git rev-parse --show-toplevel)" --ephemeral -c model_reasoning_effort="medium" \\\n`
+    + `  --output-schema "${grillRefs}/grill-probe.schema.json" -o "$d/codex-grill-x-probe.json" - \\\n`
+    + '  >/dev/null 2>"$d/codex-grill-x-probe.err" <<\'PROMPT\'\ntask\nPROMPT';
+  assert.equal(bash(grillCodex), null);
+  const grillGemini = gemini
+    .replaceAll('gemini-x-counter', 'gemini-grill-x-probe')
+    .replace('timeout 900', 'timeout 300')
+    .replaceAll(refs, grillRefs)
+    .replace('counter-plan.schema.json', 'grill-probe.schema.json');
+  assert.ok(grillGemini.includes(`${grillRefs}/grill-probe.schema.json`) && grillGemini.includes(`${grillRefs}/agy-readonly.json`));
+  assert.equal(bash(grillGemini), null);
+  assert.equal(bash(`${grillGemini} && mv "$d/gemini-grill-x-probe.json" "${grillRefs}/grill-probe.schema.json"`)?.hookSpecificOutput.permissionDecision, 'deny');
   const carried = [
     'd=/config/plugins/cache/esquisse/esq/1.0 && rm -rf "$d/skills"',
     'for f in /config/plugins/cache/esquisse/esq/1.0/skills/*; do rm "$f"; done',
