@@ -354,3 +354,32 @@ engineering calls.
 **For Phase 3:** 1. Grill's lifecycle copies plugin/skills/review/references/adversary.md's shape (call table, Merge, Record, zone-3 line) and loads the kit over ${CLAUDE_SKILL_DIR}/../plan/references. Grill attaches no file and passes <effort> medium, <bound> 300.
 2. The hooks test now has review shapes beside the ideas ones (reviewRefs const). Add the grill shapes the same way, over skills/grill/../plan/references.
 3. CLAUDE.md, skill-authoring and the README now name /esq:plan, /esq:ideas and /esq:review. Phase 3 adds grill to each, and the README /esq:review row and opt-in paragraph already state review's caps and medium effort.
+
+### Phase 3 — completed 2026-11-25
+
+**Plan committed at:** c50b926
+
+**Commits:** ea8801d, 0a1b714
+
+**Verified:** 0a1b714045634911725e2c3c4f8ceabe25fbb8cf
+- `node -e 'for (const f of process.argv.slice(1)) JSON.parse(require("fs").readFileSync(f, "utf8"))' plugin/skills/plan/references/grill-probe.schema.json plugin/skills/plan/references/review-findings.schema.json`
+- `./plugin/bin/esq validate`
+- `./scripts/audit.sh`
+
+**What got built:** /esq:grill now runs an opt-in blind Codex/Gemini assumption pass (grill-probe.schema.json, grill/references/adversary.md): gates printed with esq stack, the call announced on the target line and launched in the background (≤5 min, Codex effort medium, at most 8 findings), merged before round 1, else the next round held anyway, else the brief, each accepted finding sorted into Resolved decisions, Deferred to planning or a question slot only for a missing authority, verdicts in the brief commit's second -m. CLAUDE.md, skill-authoring and the README name all four commands; B-204 files the per-command measurement.
+
+**Verification:**
+- (auto) node -e JSON.parse grill-probe.schema.json review-findings.schema.json — exit 0
+- (auto) ./plugin/bin/esq validate — valid, no findings, with B-204
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product): structure, package, no-push, conformance, version, bounded runner, CLI/hooks/audit product suites; 26 s
+- (task) node --test tests/hooks/hooks.test.mjs — 44 pass with the grill Codex/Gemini shapes undenied; the new cache-rename deny assertion was red once against a mutated target, restored
+
+**Decided for you:**
+- design: grill's provider calls are named `probe` and their verdicts tag each accepted finding resolved|deferred|asked, so the measurement can tell a finding that cost the user a question from one Claude settled — undo: edit the Record block in plugin/skills/grill/references/adversary.md
+
+**Surprises / decisions made during execution:** - esq backlog add has no detail flag, so B-204's Method section was appended to docs/BACKLOG.md by hand after the CLI wrote the row, as earlier detail sections are.
+- The hooks test's new grill assertions were added inside the existing sibling-path test (so the test count stays 44).
+
+**Backlog candidates:** None.
+
+**For Phase 4:** Last phase. /esq:spec and /esq:arch still describe the adversary as plan-only (projections this plan does not edit); the rollout probe scripts/probe-gemini-readonly.sh remains to run.
