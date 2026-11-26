@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-adversary-reaches-ideas-review-grill | 2026-11-26 | arch | adversary | With ESQ_CODEX=on or ESQ_GEMINI=on, /esq:ideas, /esq:review and /esq:grill each run one blind, read-only background call per provider, loading plan/references' invocation, rules and schemas via ${CLAUDE_SKILL_DIR}/../plan/references and keeping their own lifecycle in their own references/adversary.md; review reads only esq review adversary-diff's filtered delta (200 KB Codex, 120 KB Gemini). | Active |
 | D-gemini-adversary-runs-through-agy | 2026-11-25 | arch | plan | With ESQ_GEMINI=on, /esq:plan calls agy -p --mode plan --settings <refs>/agy-readonly.json (deny write_file, command, mcp, read_url, execute_url) --json-schema --output-format json with a gemini-* model (ESQ_GEMINI_MODEL, else the first agy models lists), behind a fail-closed --help precondition; the gemini CLI transport is removed. | Active |
 | D-ui-sources-its-own-references | 2026-11-24 | ux | ui | /esq:ui names 2–3 territories from the product's domain on every run, and when the direction is the user's it finds, captures (≤3) and cites references outside software itself and explores a 4–6 take sketch sheet before developing two, under an announced ceiling of 16 captures. | Active |
 | D-gemini-adversary-opt-in-read-only-by-policy | 2026-11-22 | arch | plan | With ESQ_GEMINI=on, /esq:plan runs Gemini's blind counter-plan and pre-mortem under references/adversary.md's shared rules, read-only through --approval-mode plan, the admin allowlist gemini-readonly.toml and a fail-closed capability precondition. | Active |
@@ -5877,3 +5878,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained the adversary for Google AI subscribers, native structured output, and a probe that requires the permission engine's denial evidence. Accepted losing the API-key/Vertex gemini path and that reads follow agy's own read permissions rather than a repository-only allowlist.
 **Conséquences:** scripts/probe-gemini-readonly.sh probes agy and must print five PASS lines after any edit to gemini-adversary.md or agy-readonly.json. A user asking for the API-key path again adds a second invocation reference, not a fallback inside this one.
 **Alternatives rejetées:** agy first with gemini fallback (two drifting policies and probes for an unasked user); a separate ESQ_AGY provider (the same model family under two gates).
+
+## D-adversary-reaches-ideas-review-grill — The opt-in Codex/Gemini adversary reaches /esq:ideas, /esq:review and /esq:grill through plan's shared provider kit
+
+**Scope:** arch
+**Topic:** adversary
+**Date:** 2026-11-26
+**Statut:** Active
+**Fondement:** user — B-203, chosen 2026-11-25 after reading the plan pre-mortem's 25/31 acceptance rate and the review cost bounds
+
+**Contexte:** The second model family ran from /esq:plan alone (D-codex-adversary-opt-in-input-only, D-gemini-adversary-runs-through-agy); B-203 extends it to ideas, review and grill under the same gates.
+**Décision:** With ESQ_CODEX=on or ESQ_GEMINI=on, /esq:ideas, /esq:review and /esq:grill each run one blind, read-only background call per provider, loading plan/references' invocation, rules and schemas via ${CLAUDE_SKILL_DIR}/../plan/references and keeping their own lifecycle in their own references/adversary.md; review reads only esq review adversary-diff's filtered delta (200 KB Codex, 120 KB Gemini).
+**Raison:** One provider kit keeps one read-only boundary, one precondition and one probe for every call; a lifecycle per command keeps each merge point and record where that command already writes. The filtered, capped diff is CLI structure, so it is tested once instead of retyped per run.
+**Tradeoff:** Gains an uncorrelated read where ideas, defects and hidden assumptions are found; accepts more code and task text sent to OpenAI or Google under the user's login, and the plan skill's directory hosting a shared kit.
+**Conséquences:** A new command adopting the adversary adds a lifecycle reference and a schema beside plan's, never a copy of the invocation. Each command's adversary is retired per provider when its first opted-in runs show no accepted finding the command lacked (measured, never a gate).
+**Alternatives rejetées:** A plugin-level plugin/adversary/ directory (no substitution for the path, and the probes, hook tests and recorded paths would all move for no user gain); copying the invocation into each skill (drifting copies, rejected already by D-gemini-adversary-opt-in-input-only); a git pathspec in skill prose for the review filter (paid again on every run, untested).
