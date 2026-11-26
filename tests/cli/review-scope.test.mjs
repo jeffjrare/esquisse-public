@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { lessonsAdd, reviewScope, reviewScopeRange, setReviewed } from '../../plugin/lib/cli.mjs';
+import { lessonsAdd, reviewAdversaryDiff, reviewScope, reviewScopeRange, setReviewed } from '../../plugin/lib/cli.mjs';
 
 // Real git, in throwaway repositories: what this verb answers is a question about git's own history —
 // which commits a review read, whether a stamp survived a rebase, what a range actually changed — and
@@ -709,6 +709,115 @@ test('review scope carries the lessons matching its changed paths, in plan and r
   const malformed = await reviewScope(root, relative);
   assert.equal(malformed.mode, 'full');
   assert.deepEqual(malformed.lessons.cues, []);
+  await rm(root, { recursive: true, force: true });
+});
+
+// ── The delta a provider reviews ─────────────────────────────────────────────
+
+test('adversary-diff drops fixtures, lockfiles, generated output and historical docs, and keeps source hunks', async () => {
+  const root = await repo();
+  const base = git(root, 'rev-parse', 'HEAD');
+  const files = {
+    'src/app.js': 'export const one = 2;\n',
+    'tests/fixtures/sample.json': '{"recorded": true}\n',
+    'web/package-lock.json': '{"lockfileVersion": 3}\n',
+    'dist/bundle.js': 'var bundled = 1;\n',
+    'docs/preparation/notes.md': '# Notes\n',
+    'plugin/skills/build/SKILL.md': '# A source dir named build\n',
+  };
+  for (const [file, text] of Object.entries(files)) {
+    await mkdir(path.dirname(path.join(root, file)), { recursive: true });
+    await writeFile(path.join(root, file), text);
+  }
+  const head = commit(root, 'feat(app): change with noise');
+
+  const answer = await reviewAdversaryDiff(root, base, head);
+  const text = await readFile(answer.file, 'utf8');
+  assert.ok(text.includes('+export const one = 2;'));
+  assert.ok(text.includes('+# A source dir named build'), 'a nested build/ directory is source, not output');
+  for (const gone of ['recorded', 'lockfileVersion', 'bundled', '# Notes']) assert.ok(!text.includes(gone), `${gone} should be filtered out`);
+  assert.deepEqual([...answer.excluded].sort(), ['dist/bundle.js', 'docs/preparation/notes.md', 'tests/fixtures/sample.json', 'web/package-lock.json']);
+  assert.equal(answer.bytes, Buffer.byteLength(text));
+  assert.equal(answer.atHead, true);
+  assert.equal(answer.file, path.join(git(root, 'rev-parse', '--absolute-git-dir'), 'esq', `adversary-${base.slice(0, 7)}-${head.slice(0, 7)}.diff`));
+  await rm(root, { recursive: true, force: true });
+});
+
+test('adversary-diff counts bytes, not characters, and each cap holds at its exact boundary', async () => {
+  const root = await repo();
+  const base = git(root, 'rev-parse', 'HEAD');
+  // One added file of one line: the diff is a fixed header plus that line, so the line sets the total.
+  // The line is mostly `é` (two bytes, one character), so a character count would read about half.
+  const line = (size) => {
+    const pairs = Math.floor(size / 2);
+    return 'é'.repeat(pairs) + 'x'.repeat(size - pairs * 2);
+  };
+  const at = async (size) => {
+    await writeFile(path.join(root, 'src/wide.js'), `${line(size)}\n`);
+    const head = commit(root, `feat(app): ${size}`);
+    return reviewAdversaryDiff(root, base, head);
+  };
+  const probe = await at(1000);
+  const overhead = probe.bytes - 1000;
+  assert.ok(overhead > 0 && overhead < 400);
+
+  const exact = async (target) => at(target - overhead);
+  const gemini = await exact(120_000);
+  assert.equal(gemini.bytes, 120_000);
+  assert.deepEqual(gemini.fits, { codex: true, gemini: true });
+  assert.ok(gemini.file && Buffer.byteLength(await readFile(gemini.file, 'utf8')) === 120_000);
+  const overGemini = await exact(120_001);
+  assert.equal(overGemini.bytes, 120_001);
+  assert.deepEqual(overGemini.fits, { codex: true, gemini: false });
+  assert.ok(overGemini.file, 'a diff that still fits Codex is written');
+  const codex = await exact(200_000);
+  assert.equal(codex.bytes, 200_000);
+  assert.deepEqual(codex.fits, { codex: true, gemini: false });
+  const overBoth = await exact(200_001);
+  assert.equal(overBoth.bytes, 200_001);
+  assert.deepEqual(overBoth.fits, { codex: false, gemini: false });
+  assert.equal(overBoth.file, null);
+  assert.deepEqual(overBoth.limits, { codex: 200_000, gemini: 120_000 });
+  await rm(root, { recursive: true, force: true });
+});
+
+test('adversary-diff writes nothing for an empty delta, refuses a bad ref, flags a stale head and leaves the tree clean', async () => {
+  const root = await repo();
+  const { relative } = await plan(root, 'widget');
+  const base = git(root, 'rev-parse', 'HEAD');
+  const head = commit(root, 'plan(widget): log phase 1 execution');
+
+  // Only docs/plans changed, which the review already excludes: nothing is reviewable. The verb
+  // narrows only what a provider is sent, so the review's own scope answer is the same either side.
+  const before = await reviewScope(root, relative);
+  const empty = await reviewAdversaryDiff(root, base, head);
+  assert.deepEqual(await reviewScope(root, relative), before);
+  assert.equal(empty.bytes, 0);
+  assert.equal(empty.file, null);
+  assert.deepEqual(empty.excluded, []);
+
+  await writeFile(path.join(root, 'src/app.js'), 'export const one = 3;\n');
+  const moved = commit(root, 'feat(app): move on');
+  const stale = await reviewAdversaryDiff(root, base, head);
+  assert.equal(stale.atHead, false);
+  assert.equal((await reviewAdversaryDiff(root, head, moved)).atHead, true);
+
+  const esq = (...args) => execFileSync(process.execPath, [path.join(process.cwd(), 'plugin/bin/esq'), ...args], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  for (const [args, reason] of [
+    [['review', 'adversary-diff', 'nope', 'HEAD'], /`nope` does not resolve to a commit/],
+    [['review', 'adversary-diff', '--output=/tmp/x', 'HEAD'], /refuses `--output=\/tmp\/x`/],
+    [['review', 'adversary-diff', 'HEAD'], /usage: esq review adversary-diff/],
+  ]) {
+    assert.throws(() => esq(...args), (error) => {
+      assert.equal(error.status, 2);
+      assert.match(String(error.stderr ?? ''), reason);
+      return true;
+    }, `expected a refusal for ${args.join(' ')}`);
+  }
+  const cli = JSON.parse(esq('review', 'adversary-diff', head, moved));
+  assert.equal(typeof cli.bytes, 'number');
+  assert.ok(cli.file.startsWith(git(root, 'rev-parse', '--absolute-git-dir')));
+  assert.equal(git(root, 'status', '--porcelain'), '');
   await rm(root, { recursive: true, force: true });
 });
 

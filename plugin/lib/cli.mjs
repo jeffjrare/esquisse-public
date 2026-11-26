@@ -4715,6 +4715,75 @@ async function rangeReviewScope(root, spec) {
   });
 }
 
+// `esq review adversary-diff <base> <head>` — the delta a second model family reviews, filtered and capped.
+//
+// WHY IT EXISTS. With `ESQ_CODEX=on` / `ESQ_GEMINI=on`, `/esq:review` attaches the range's diff to a
+// read-only provider call. What it sends must be the reviewable change and nothing else: every byte
+// goes to another vendor, is billed against the user's plan, and (for Gemini) rides in one `-p` argv
+// string. So the filter, the byte count and the cap live here as tested structure rather than as a
+// pathspec the model retypes on every run. Claude's own review keeps reading the unfiltered diff:
+// this only narrows what the provider sees, never what the review reads.
+//
+// Each class goes because a provider reading it spends the bound on text no defect lives in:
+const ADVERSARY_EXCLUDED = [
+  // test fixtures and snapshots: recorded data, judged by the tests that read it, not reviewed as code;
+  ':(exclude,glob)**/fixtures/**', ':(exclude,glob)**/__snapshots__/**', ':(exclude,glob)**/*.snap',
+  // lockfiles: resolver output, thousands of lines a model cannot verify against a registry offline;
+  ':(exclude,glob)**/*.lock', ':(exclude,glob)**/package-lock.json', ':(exclude,glob)**/pnpm-lock.yaml', ':(exclude,glob)**/go.sum',
+  // generated output: a build's product, whose defects live in its source. `build/` only at the root,
+  // because a directory of that name deeper down is often source (this plugin's own `skills/build/`);
+  ':(exclude,glob)**/dist/**', ':(exclude,glob)build/**', ':(exclude,glob)**/*.min.*', ':(exclude,glob)**/*.map',
+  // historical docs: dated records and the lessons ledger, appended, never behavior.
+  ':(exclude,glob)docs/preparation/**', ':(exclude,glob)docs/baselines/**', ':(literal,exclude)docs/LESSONS.md',
+];
+
+// Codex reads stdin, so its cap is the bound B-203 fixed. Gemini's prompt is one argv string, and Linux's
+// MAX_ARG_STRLEN is 131,072 bytes for it: 120,000 leaves the instruction room under that ceiling.
+const ADVERSARY_LIMITS = Object.freeze({ codex: 200_000, gemini: 120_000 });
+
+export async function reviewAdversaryDiff(root, base, head) {
+  for (const ref of [base, head]) {
+    if (typeof ref !== 'string' || ref === '') throw new Error('usage: esq review adversary-diff <base> <head>');
+    if (ref.startsWith('-')) throw new Error(`esq review adversary-diff refuses \`${ref}\`: a ref never starts with -`);
+  }
+  const repository = gitTry(root, ['rev-parse', '--show-toplevel']);
+  if (!repository) throw new Error('esq review adversary-diff: git could not be read here');
+  const resolve = (ref) => {
+    const commit = gitTry(repository, ['rev-parse', '--verify', '--quiet', '--end-of-options', `${ref}^{commit}`]);
+    if (!commit) throw new Error(`esq review adversary-diff: \`${ref}\` does not resolve to a commit in this repository`);
+    return commit;
+  };
+  const from = resolve(base);
+  const to = resolve(head);
+  const run = (options, pathspecs) => {
+    try {
+      return execFileSync('git', ['-C', repository, 'diff', ...options, from, to, '--', '.', ...pathspecs], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 256 * 1024 * 1024 });
+    } catch { return null; }
+  };
+  const text = run([], [...REVIEW_EXCLUDED, ...ADVERSARY_EXCLUDED]);
+  const reviewed = run(['--name-only', '-z'], REVIEW_EXCLUDED);
+  const kept = run(['--name-only', '-z'], [...REVIEW_EXCLUDED, ...ADVERSARY_EXCLUDED]);
+  if (text === null || reviewed === null || kept === null) throw new Error(`esq review adversary-diff: git could not diff ${from.slice(0, 7)} against ${to.slice(0, 7)}`);
+  const names = (out) => out.split(FIELD_NUL).filter(Boolean);
+  const keptNames = new Set(names(kept));
+  const excluded = names(reviewed).filter((name) => !keptNames.has(name));
+
+  const bytes = Buffer.byteLength(text);
+  const fits = { codex: bytes <= ADVERSARY_LIMITS.codex, gemini: bytes <= ADVERSARY_LIMITS.gemini };
+  const atHead = gitTry(repository, ['rev-parse', 'HEAD']) === to;
+  let file = null;
+  if (bytes > 0 && (fits.codex || fits.gemini)) {
+    const gitDir = gitTry(repository, ['rev-parse', '--absolute-git-dir']);
+    if (!gitDir) throw new Error('esq review adversary-diff: the git dir could not be resolved');
+    file = path.join(gitDir, 'esq', `adversary-${from.slice(0, 7)}-${to.slice(0, 7)}.diff`);
+    await mkdir(path.dirname(file), { recursive: true });
+    const temporary = `${file}.${process.pid}.tmp`;
+    await writeFile(temporary, text, 'utf8');
+    await rename(temporary, file);
+  }
+  return { base: from, head: to, bytes, limits: { ...ADVERSARY_LIMITS }, fits, atHead, file, excluded };
+}
+
 // ── docs/LESSONS.md: what a closed defect or a verified fact leaves for the next cycle ──────────
 // One writer, `esq lessons add`, and three read-only answers. The model chose that an entry is worth
 // writing and every word of it; the CLI checks that its evidence resolves, derives its ID from that
@@ -6807,6 +6876,13 @@ export async function main(args) {
     if (flags.includes('--full')) throw new Error('esq review scope --full narrows a plan\'s own history; a named range is already the whole scope');
     return output(await reviewScopeRange(root, target));
   }
+  // Read-only on the tree: the filtered, capped diff a Codex/Gemini review is sent, written under the
+  // git dir when it is non-empty and fits a provider's cap. Exit 2 on a ref that does not resolve.
+  if (group === 'review' && action === 'adversary-diff') {
+    const [base, head, ...extra] = rest;
+    if (!base || !head || extra.length > 0) throw new Error('usage: esq review adversary-diff <base> <head>');
+    return output(await reviewAdversaryDiff(root, base, head));
+  }
   // Read-only, opens two files at most, writes none, and always exits 0 when a referent resolves: the
   // standards a run arbitrates a stated constraint against. Prose by default, because the reader is a
   // run that is about to decide and needs the clauses in hand; `--json` is the same resolution with
@@ -7012,5 +7088,5 @@ export async function main(args) {
     process.stdout.write(renderTelemetrySummary(summary));
     return;
   }
-  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text> --concern <concern> --layer <app|infra>|backlog set-pri <B-NNN> <pri>|backlog set-concern <B-NNN>[,<B-NNN>…] <concern>|backlog set-layer <B-NNN>[,<B-NNN>…] <app|infra|none>|backlog set-type <B-NNN>[,<B-NNN>…] <bug|debt|idea|improvement|todo>|backlog distribution [backlog] (open rows by concern × layer and type, and whether the head of the queue is short on user value; read-only)|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank --order [<B-NNN…>] --lens (the head; the rest by the roadmap tiers)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match [--all] <path…>|--paths <file>|- (the expertise modules those paths touch, each with its file and age; --all every module, with the stack packages that show it in use)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|stack (the reference stack of the user: $ESQ_STACK, else ${XDG_CONFIG_HOME:-~/.config}/esq/stack.md, its text and findings; read-only)|intake inventory (the imported spec docs under docs/ esq does not own: headings, codes defined and cited, links, and whether intake is pending; read-only)|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
+  throw new Error('usage: esq <state [--rows [B-NNN,…]]|next-phase <plan> [--context|--preflight]|branch check <plan> [--at <full-commit>]|branch resolve <slug>|brief depth <plan-or-fixes-brief> (the corrective generation, and whether another round may be opened)|brief plan <fixes-brief> (the plan a corrective brief corrects, validated against its Source:)|brief pending (the briefs under docs/plans that no plan has consumed yet)|backlog reserve-id|backlog reserve-block [worktree-path]|backlog set-status <B-NNN> <status> [--by <slug>|--reason <text>] [--resolution <text>]|backlog add --type <type> --summary <text> --source <text> --concern <concern> --layer <app|infra>|backlog set-pri <B-NNN> <pri>|backlog set-concern <B-NNN>[,<B-NNN>…] <concern>|backlog set-layer <B-NNN>[,<B-NNN>…] <app|infra|none>|backlog set-type <B-NNN>[,<B-NNN>…] <bug|debt|idea|improvement|todo>|backlog distribution [backlog] (open rows by concern × layer and type, and whether the head of the queue is short on user value; read-only)|backlog rank --order <B-NNN…> (the whole open sequence)|backlog rank --order [<B-NNN…>] --lens (the head; the rest by the roadmap tiers)|backlog rank <B-NNN> --after|--before <B-NNN>|--last (one placement)|decisions add <json|-> (one entry or an array: slug, title, scope, topic, context, decision, reason, tradeoff, consequences, alternatives, [date], [fondement])|lessons add <json|-> (one lesson {kind, cue, paths, body, source, fix, confidence, [checkable], [date]} or fact {kind, cue, paths, body, commit, [date]})|lessons match <path…>|--paths <file>|- (the matched cues, at most 6)|lessons show <L-id…>|expertise match [--all] <path…>|--paths <file>|- (the expertise modules those paths touch, each with its file and age; --all every module, with the stack packages that show it in use)|plan append-log|plan resolve-block <plan> [--confirm <json>]|plan probe <plan> [--paths <file>|-] (which phase of the plan touches each path)|plan record-verification <plan> --confirm <json>|plan set-reviewed <plan> <full-commit>|plan abandon <plan> --reason <text>|gate verify [--unit] <plan-path> [--workers-moved]|review scope <plan-or-range> [--full] (a plan, or `<A>..<B>` for a change with no plan)|review adversary-diff <base> <head> (the filtered, capped diff an opted-in Codex/Gemini review is sent, written under the git dir)|apply route <do-string>… (which of apply, relay or stop a chosen decision earns)|projections|projection outline <spec|arch> [--paths <file>|-] [--upto <commit>] (the heading tree, the cost of each subtree, and the freshness)|projection read <spec|arch> [<id>…] (the chosen sections, history comments stripped)|standards [--json] (the standards referent a stated constraint is arbitrated against — a project docs/STANDARDS.md resolved over the plugin default)|evidence [--json]|merge begin <branch> [--into <dest>]|merge scan|merge seal|merge abort|merge land --plan <plan-path>|stack (the reference stack of the user: $ESQ_STACK, else ${XDG_CONFIG_HOME:-~/.config}/esq/stack.md, its text and findings; read-only)|intake inventory (the imported spec docs under docs/ esq does not own: headings, codes defined and cited, links, and whether intake is pending; read-only)|validate|telemetry summary [--all] [--since <YYYY-MM-DD>] [--json] [--rows] [file…]>');
 }
