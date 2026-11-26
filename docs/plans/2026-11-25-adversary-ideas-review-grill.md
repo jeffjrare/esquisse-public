@@ -318,3 +318,39 @@ engineering calls.
 **For Phase 2:** 1. Review's lifecycle loads ${CLAUDE_SKILL_DIR}/../plan/references/{adversary,codex-adversary,gemini-adversary}.md like ideas does (plugin/skills/ideas/references/adversary.md is the model to copy: call table with <call>/<schema>/<bound>/<effort>/<slug>, Merge, Record). Review passes <effort> medium, which codex-adversary.md now honours over ESQ_CODEX_EFFORT.
 2. The attached-file forms are in place: Codex pipes { heredoc; cat file; } into stdin, Gemini appends cat file inside p=$(…); gemini-adversary.md already states the 131,072-byte MAX_ARG_STRLEN reason for the 120,000 cap.
 3. A sibling must cite plan's sections by § number, never a quoted heading (check 1); add the review shapes to tests/hooks/hooks.test.mjs beside the ideas ones (the `sibling` const).
+
+### Phase 2 — completed 2026-11-25
+
+**Plan committed at:** 43c1439
+
+**Commits:** 3796c36, 7cf09a9
+
+**Verified:** 7cf09a9ecd8a00a550ed693438decd18832f131e
+- `node --test 'tests/cli/review-scope.test.mjs'`
+- `./plugin/bin/esq review adversary-diff HEAD~1 HEAD`
+- `./scripts/check-structure.sh`
+- `node --test 'tests/hooks/hooks.test.mjs'`
+- `node --test --test-timeout=30000 tests/cli/*.test.mjs`
+
+**What got built:** A new read-only verb `esq review adversary-diff <base> <head>` returns the range's diff with fixtures, snapshots, lockfiles, generated output and historical docs filtered out. It reports the byte count, the 200,000 (Codex) and 120,000 (Gemini) caps and fits, atHead and the excluded paths, and writes the diff under <git-dir>/esq/. /esq:review now runs an opt-in blind Codex/Gemini review of that delta (review-findings.schema.json, review/references/adversary.md): ≤5 min in the background, Codex effort medium, at most 8 defects judged through its own bar and tiers, recorded in the tail commit's second -m or under <git-dir>/esq/.
+
+**Verification:**
+- (auto) node --test tests/cli/review-scope.test.mjs — 33 pass, 0 fail, including the three new adversary-diff tests (exclusions with a nested build/ kept, both caps at the byte boundary with a multibyte line, no file when over both or empty, ref refusal exit 2, atHead false, clean tree, review scope unchanged); each new assertion was red once against a mutated source (filter dropped; .length instead of byteLength), source restored
+- (auto) ./plugin/bin/esq review adversary-diff HEAD~1 HEAD — JSON with bytes 27009, limits.codex 200000, limits.gemini 120000
+- (auto) ./scripts/check-structure.sh — structure clean, review's ../plan/references loads resolved
+- (auto) node --test tests/hooks/hooks.test.mjs — 44 pass, with the review Codex (attached-file group, effort medium) and Gemini (cat file inside p) shapes undenied and the rename into the cache denied
+- (extra, blast radius: plugin/lib/cli.mjs and its usage string) node --test --test-timeout=30000 tests/cli/*.test.mjs — 457 pass, 0 fail, 13 s
+
+**Decided for you:**
+- architecture: adversary-diff excludes build/ only at the repository root (dist/ anywhere): a nested build/ is often source, and **/build/** would have hidden this plugin's own plugin/skills/build from every review adversary — undo: change ':(exclude,glob)build/**' to ':(exclude,glob)**/build/**' in ADVERSARY_EXCLUDED, plugin/lib/cli.mjs
+
+**Surprises / decisions made during execution:** - The answer's `excluded` is the list of paths the adversary filter removed beyond REVIEW_EXCLUDED, computed as two `git diff --name-only -z` reads. fits is the cap alone (an empty diff fits). The skill reads bytes 0 first, per the not-run table in review/references/adversary.md.
+- Refs pass through `rev-parse --verify --quiet --end-of-options <ref>^{commit}` after the `-` refusal, so a ref never reaches git as an option.
+- The test fixture's plan() helper leaves its log entry uncommitted. The review-scope-unchanged assertion therefore commits it first and brackets only the verb call.
+- The CLI product suite ran here (cli.mjs is the CLI's shared core and its usage string changed). The full ./scripts/audit.sh is still Phase 3's.
+
+**Backlog candidates:** None.
+
+**For Phase 3:** 1. Grill's lifecycle copies plugin/skills/review/references/adversary.md's shape (call table, Merge, Record, zone-3 line) and loads the kit over ${CLAUDE_SKILL_DIR}/../plan/references. Grill attaches no file and passes <effort> medium, <bound> 300.
+2. The hooks test now has review shapes beside the ideas ones (reviewRefs const). Add the grill shapes the same way, over skills/grill/../plan/references.
+3. CLAUDE.md, skill-authoring and the README now name /esq:plan, /esq:ideas and /esq:review. Phase 3 adds grill to each, and the README /esq:review row and opt-in paragraph already state review's caps and medium effort.
