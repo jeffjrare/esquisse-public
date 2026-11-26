@@ -16,7 +16,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 2
 QUIET=false
 [[ "${1:-}" == "--quiet" ]] && QUIET=true
 fails=0
-SCRATCH=$(mktemp -d)
+SCRATCH=$(mktemp -d) || exit 1
 trap 'rm -rf "$SCRATCH"' EXIT
 
 pass() { [[ "$QUIET" == true ]] || printf '  ✓ %s\n' "$1"; }
@@ -34,7 +34,7 @@ out=$(scripts/check-plugin.sh "$SCRATCH/plugin" 2>&1); rc=$?
 [[ "$rc" -ne 0 && "$out" == *'backlog can be invoked implicitly'* ]] \
   && pass 'mutating skill without invocation guard fails' \
   || fail "invocation-guard fault was missed: $out"
-[[ "$rc" -ne 0 && "$out" == *'does not register PreToolUse, PostToolUse, Stop, SubagentStop and SessionEnd'* ]] \
+[[ "$rc" -ne 0 && "$out" == *'does not register SessionStart, PreToolUse, PostToolUse, Stop, SubagentStop and SessionEnd'* ]] \
   && pass 'hooks.json without the SessionEnd registration fails' \
   || fail "missing SessionEnd registration was missed: $out"
 cp plugin/skills/backlog/SKILL.md "$SCRATCH/plugin/skills/backlog/SKILL.md"

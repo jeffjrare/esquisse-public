@@ -21,7 +21,7 @@ fail() { printf '  \033[31m✗\033[0m %s\n' "$1"; fails=$((fails + 1)); }
 command -v git  >/dev/null 2>&1 || { printf 'FATAL: git is required\n' >&2; exit 2; }
 command -v node >/dev/null 2>&1 || { printf 'FATAL: node is required\n' >&2; exit 2; }
 
-SCRATCH="$(mktemp -d)"
+SCRATCH="$(mktemp -d)" || exit 1
 trap 'rm -rf "$SCRATCH"' EXIT
 
 export GIT_AUTHOR_NAME="update fixture" GIT_AUTHOR_EMAIL="fixture@invalid"

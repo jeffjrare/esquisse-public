@@ -72,7 +72,8 @@ fail() { printf '  \033[31m✗\033[0m %s\n' "$1"; fails=$((fails + 1)); }
 [[ -x "$RELEASE" ]] || { printf 'FATAL: %s is missing or not executable\n' "$RELEASE" >&2; exit 2; }
 command -v git >/dev/null 2>&1 || { printf 'FATAL: git is required\n' >&2; exit 2; }
 
-SCRATCH="$(mktemp -d)"
+SCRATCH="$(mktemp -d)" || exit 1
+export STUB_SCRATCH="$SCRATCH"
 trap 'rm -rf "$SCRATCH"' EXIT
 
 export GIT_AUTHOR_NAME="release fixture" GIT_AUTHOR_EMAIL="fixture@invalid"
@@ -104,6 +105,8 @@ case "${1:-} ${2:-}" in
     ver=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).version)' "$STUB_REPO/plugin/.claude-plugin/plugin.json") || exit 1
     sha=$(git -C "$STUB_REPO" rev-parse HEAD) || exit 1
     dest="$CLAUDE_CONFIG_DIR/plugins/cache/esquisse/esq/$ver"
+    # Never remove anything outside this suite's own scratch directory.
+    [[ -n "${STUB_SCRATCH:-}" && "$dest" == "$STUB_SCRATCH"/* ]] || { echo "stub: refusing $dest" >&2; exit 1; }
     rm -rf "$dest"; mkdir -p "$dest"
     cp -r "$STUB_REPO/plugin/." "$dest/" || exit 1
     # STUB_STALE mimes an install that returned 0 while landing something other

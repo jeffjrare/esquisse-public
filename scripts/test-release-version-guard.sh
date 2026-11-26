@@ -36,7 +36,7 @@ fail() { printf '  \033[31m✗\033[0m %s\n' "$1"; fails=$((fails + 1)); }
 
 [[ -x "$CHECK" ]] || { printf 'FATAL: %s is missing or not executable\n' "$CHECK" >&2; exit 2; }
 
-SCRATCH="$(mktemp -d)"
+SCRATCH="$(mktemp -d)" || exit 1
 trap 'rm -rf "$SCRATCH"' EXIT
 
 export GIT_AUTHOR_NAME="release guard fixture" GIT_AUTHOR_EMAIL="fixture@invalid"

@@ -50,7 +50,7 @@ fail() { printf '  \033[31m✗\033[0m %s\n' "$1"; fails=$((fails + 1)); }
 
 [[ -x "$CHECK" ]] || { printf 'FATAL: %s is missing or not executable\n' "$CHECK" >&2; exit 2; }
 
-SCRATCH="$(mktemp -d)"
+SCRATCH="$(mktemp -d)" || exit 1
 trap 'rm -rf "$SCRATCH"' EXIT
 
 # Runs the runner, asserts the exit code AND that the output carries the

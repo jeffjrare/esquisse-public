@@ -123,8 +123,14 @@ test('bash mutations of the installed cache are denied, reads and dev-tree edits
   assert.ok(grillGemini.includes(`${grillRefs}/grill-probe.schema.json`) && grillGemini.includes(`${grillRefs}/agy-readonly.json`));
   assert.equal(bash(grillGemini), null);
   assert.equal(bash(`${grillGemini} && mv "$d/gemini-grill-x-probe.json" "${grillRefs}/grill-probe.schema.json"`)?.hookSpecificOutput.permissionDecision, 'deny');
+  // A model may hoist the kit path into a variable first; reading through it beside the .git cleanup is no edit.
+  const hoisted = ideasCodex.replace(`"${sibling}/idea-slate.schema.json"`, '"$refs/idea-slate.schema.json"');
+  assert.equal(bash(`refs=${refs} && ${hoisted}`), null);
   const carried = [
+    `refs=${refs} && rm -f "$refs/idea-slate.schema.json"`,
+    `export refs=${refs}; k="$refs/../.."; rm -rf "\${k}/skills"`,
     'd=/config/plugins/cache/esquisse/esq/1.0 && rm -rf "$d/skills"',
+    'find /config/plugins/cache/esquisse/esq/1.0/skills -name "*.md" -delete',
     'for f in /config/plugins/cache/esquisse/esq/1.0/skills/*; do rm "$f"; done',
     'ls /config/plugins/cache/esquisse/esq/1.0 | xargs rm'
   ];

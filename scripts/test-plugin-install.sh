@@ -33,7 +33,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 2
 
 QUIET=false
 [[ "${1:-}" == "--quiet" ]] && QUIET=true
-SANDBOX=$(mktemp -d)
+SANDBOX=$(mktemp -d) || exit 1
 trap 'rm -rf "$SANDBOX"' EXIT
 CLAUDE_BOUND=60
 
