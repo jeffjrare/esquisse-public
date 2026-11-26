@@ -288,3 +288,33 @@ engineering calls.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-11-25
+
+**Plan committed at:** 0f6a933
+
+**Commits:** d448583, f859320, 9441ee0
+
+**Verified:** 9441ee0e207d7ebef4aa1f358b6e3b10d3c5db30
+- `./scripts/check-structure.sh`
+- `node -e 'for (const f of process.argv.slice(1)) JSON.parse(require("fs").readFileSync(f, "utf8"))' plugin/skills/plan/references/idea-slate.schema.json plugin/skills/plan/references/counter-plan.schema.json plugin/skills/plan/references/premortem.schema.json plugin/skills/plan/references/agy-readonly.json`
+- `node --test 'tests/hooks/hooks.test.mjs'`
+- `git grep -n 'counter-plan.schema.json\|premortem.schema.json' -- plugin/skills/plan/references/codex-adversary.md`
+
+**What got built:** The provider kit in plan/references is parameterized for sibling commands (one Codex command over <call>/<schema>/<bound>/<effort>, an attached-file rule in both invocation references, a 'what a sibling reuses' paragraph), check-structure resolves ../<skill>/references/ paths, and /esq:ideas runs an opt-in blind Codex/Gemini slate (idea-slate.schema.json, ideas/references/adversary.md) merged before its four cuts.
+
+**Verification:**
+- (auto) ./scripts/check-structure.sh — structure clean, exit 0 (a temporary corpus naming ../plan/references/nope.md was red, exit 1, before commit f859320)
+- (auto) node -e JSON.parse over idea-slate, counter-plan, premortem schemas and agy-readonly.json — exit 0
+- (auto) node --test tests/hooks/hooks.test.mjs — 44 pass, 0 fail, including the ideas Codex and Gemini shapes over skills/ideas/../plan/references undenied and the sibling-path rename denied
+- (auto) git grep counter-plan.schema.json|premortem.schema.json in codex-adversary.md — lines 25 and 26 match
+
+**Surprises / decisions made during execution:** - plan/references/adversary.md § 1 and § 2 now say 'its reference's command with <call> counter/premortem' instead of 'counter-plan command'/'pre-mortem command', since codex-adversary.md no longer has per-call headings; plan/SKILL.md needed no edit.
+- The Codex attached-file form pipes a `{ cat <<'PROMPT' …; cat <file>; }` group into the same command's stdin rather than a process substitution, so it stays one plain pipeline.
+- The CLI suite was not run: this phase touched no plugin/bin or plugin/lib file. The full ./scripts/audit.sh is Phase 3's.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. Review's lifecycle loads ${CLAUDE_SKILL_DIR}/../plan/references/{adversary,codex-adversary,gemini-adversary}.md like ideas does (plugin/skills/ideas/references/adversary.md is the model to copy: call table with <call>/<schema>/<bound>/<effort>/<slug>, Merge, Record). Review passes <effort> medium, which codex-adversary.md now honours over ESQ_CODEX_EFFORT.
+2. The attached-file forms are in place: Codex pipes { heredoc; cat file; } into stdin, Gemini appends cat file inside p=$(…); gemini-adversary.md already states the 131,072-byte MAX_ARG_STRLEN reason for the 120,000 cap.
+3. A sibling must cite plan's sections by § number, never a quoted heading (check 1); add the review shapes to tests/hooks/hooks.test.mjs beside the ideas ones (the `sibling` const).
