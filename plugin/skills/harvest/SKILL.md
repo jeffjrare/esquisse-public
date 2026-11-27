@@ -2,12 +2,13 @@
 description: Build the decisions registry from codebase archaeology plus targeted questions. Writes docs/DECISIONS.md.
 name: harvest
 argument-hint: "[target] [options]"
-disable-model-invocation: true
 allowed-tools: Bash(esq *)
 model: opus
 effort: medium
 ---
 Invocation input (may be empty): `$ARGUMENTS`. When present, `$0` is the first positional argument and `$1` the second.
+
+**No mandate, no run.** Model invocation of this skill is legitimate only when the user asked for it in this conversation, in their own words naming this command, or when a `/esq:advance` they invoked delegates an intake to it, and only in the session talking to that user: harvest puts its questions to the user, so a subagent has nobody to ask. Invoked without that explicit request — off a description match, on your own initiative, or delegated to a subagent — do not guess: stop and print the exact invocation for the user to run.
 
 You are building a decisions registry for an existing project. You don't have the full history of why things were done — part of it is in the code, part is in the user's head. Your job is to recover as much as possible from artifacts first, then ask only what you can't infer.
 
@@ -28,7 +29,7 @@ Archaeology is five sub-passes over the whole repo before a single question is a
 ## Preflight
 
 1. **In one turn:** `esq intake inventory`, `CLAUDE.md` and `README.md` at project root if present. `esq` comes from `PATH`; if that call answers "command not found", run `"$CLAUDE_PLUGIN_ROOT/bin/esq"`. When the answer carries `file`, it spilled: read its `ranges` together in the next turn.
-2. **`pending: true` → this run is an intake.** The docs folder holds specs esq has not adopted and there is no esq registry. Announce the intake bound as the second line instead of the one below:
+2. **`pending: true` → this run is an intake.** The docs folder holds specs esq has not adopted and there is no esq registry. **So is a run whose `$0` names one of the inventory's `files` while `reason` says only that the folder is below the floor:** the user naming the document (a product owner's brief for a project with no code yet) is the mandate the floor stands in for; that document leads the reading. Announce the intake bound as the second line instead of the one below:
    > `Intake: <totals.files> imported docs (<totals.kb> KB). Bound: no subagents, at most 320 KB of imported docs read, one question round (at most 3 calls × 4 questions).`
 
    Run steps 4–5, then make the named load of `${CLAUDE_SKILL_DIR}/references/intake.md` and follow it in place of steps 3 and 6 and Phases 1–4 below; the Constraints at the end of this file still hold, amended there. **`pending: false` → harvest runs exactly as below**, whatever else the inventory says.

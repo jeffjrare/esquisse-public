@@ -122,12 +122,12 @@ First matching rule wins. Plan rules use the settled healthy, non-abandoned plan
    - covered, `unit.promised` nonempty → `/esq:backlog <first id> done` **if delivered**; otherwise `/esq:plan implement <id>: <summary>`; land refuses until disposed.
    - covered, nothing owed → `/esq:land <plan-path>`: verifies the whole unit and lands on origin. Stale arch/spec stays optional advice.
 5. **Unresolved brief, no remaining plan action** → corrective: `/esq:fix <brief-path>` for safe fixes first, then `/esq:plan` for unplanned 🟡; grill: `/esq:plan <brief-path>`. Preserve a remaining 🔴 as a user ask; consumed briefs do not restart planning.
-6. **No plan/brief action, `intake.pending`** → `/esq:harvest`, naming `intake.files` and `intake.kb`: it adopts the imported specs (an overview, one question round, decisions and one backlog row per module), and its `→ Next` orders them. This wins over a roadmap: a hand-written `ROADMAP.md` with no `## Now` is one of the imports.
+6. **No plan/brief action, `intake.pending`** → `/esq:advance`, naming `intake.files` and `intake.kb`: it adopts the imported specs through `/esq:harvest` (an overview, one question round, decisions and one backlog row per module), orders them and works the top. This wins over a roadmap: a hand-written `ROADMAP.md` with no `## Now` is one of the imports.
 7. **No plan/brief action, roadmap exists** → use the entry the user is discussing (argument or conversation, resolved through `roadmap.entries` by slug or covered reference), otherwise the top Now entry: Open item → `/esq:work B-N`; epic → `/esq:epic <slug>`. Name slug/whyNow. A blocked entry targets its known blocker; an empty head or unknown target/facts → `/esq:roadmap` exposes the queue. For a discussed Now entry with eligible Open work, offer `→ Or: /esq:advance <slug>` (only that entry; builds, reviews and lands what it plans, never pushes), even for one item. Never offer advance for an entry outside Now or widen a failed lookup. With no particular entry selected, **at least two still-Open items in Now** → offer `→ Or: /esq:advance`; an explicit whole-Now request also keeps this bare command. Never invent the count; advance retains its existing dependency and plan checks.
 8. **No plan, brief or roadmap action** → `/esq:grill` to start an initiative; offer `→ Or: /esq:roadmap plan` to derive backlog order first.
 
 Allowed secondary lines after Next:
-- `intake.pending` while a plan action won → `→ Also: /esq:harvest` (<files> imported specs, <kb> KB).
+- `intake.pending` while a plan action won → `→ Also: /esq:advance` (<files> imported specs, <kb> KB, adopted first).
 - Stale architecture → `→ Also: /esq:arch`.
 - Known Needs-decision count >0 → `→ Also: /esq:backlog` (M items); skip on backlog.error.
 - One closure candidate → `→ Also: /esq:backlog B-N done` (if delivered, still Planned on a complete plan).

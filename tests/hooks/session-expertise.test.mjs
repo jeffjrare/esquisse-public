@@ -123,7 +123,7 @@ test('pending intake adds one line of at most 200 characters, naming no file, be
   // A foreign DECISIONS.md (not esq's table) is a collision, still pending.
   await imported(root, { registry: '# Decisions D1..D9\n\n## D1 — zz-secret-decision\n' });
   const [line, ...rest] = (await run(root, dir)).hookSpecificOutput.additionalContext.split('\n');
-  assert.match(line, /^docs\/ holds 4 spec documents \(\d+ KB\) esq has not adopted — \/esq:harvest reconciles them into decisions and backlog rows\.$/);
+  assert.match(line, /^docs\/ holds 4 spec documents \(\d+ KB\) esq has not adopted — \/esq:advance adopts them into decisions and backlog rows, then works the top\.$/);
   assert.equal(line, intakeLine(4, Number(/\((\d+) KB\)/.exec(line)[1])));
   assert.ok(line.length <= INTAKE_LINE_MAX, `${line.length} characters`);
   for (const fragment of ['zz-', 'M1', 'DECISIONS', 'Pricing', root]) assert.ok(!line.includes(fragment), fragment);

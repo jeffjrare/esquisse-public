@@ -1,6 +1,6 @@
 # Intake — adopting an imported spec folder
 
-Loaded by `/esq:harvest` when `esq intake inventory` answered `pending: true`: `docs/` holds Markdown that esq does not own
+Loaded by `/esq:harvest` when `esq intake inventory` answered `pending: true`, or when the user named one of its files below the floor: `docs/` holds Markdown that esq does not own
 (briefs, a decision list, a module list, a roadmap of prompts written elsewhere) and there is no esq registry. This
 procedure replaces harvest's archaeology, interrogation and write phases. One reading, one question round, one commit. The
 user never acts as the router between their own documents.
@@ -88,7 +88,7 @@ reported as superseded once `/esq:roadmap plan` has run, and nothing here writes
 The headline (decisions written with their IDs, rows filed with their IDs, the commit), then what needs the user (the gates
 left open, the docs left unread), then the undo (`git revert <commit>`). End with:
 
-> `→ Next: /esq:roadmap plan`
+> `→ Next: /esq:advance` — it orders the new rows and works the top of the queue. Delegated by `/esq:advance`, end on the report: that run continues.
 
 The elapsed time comes last, on its own line, as harvest's write phase says.
 

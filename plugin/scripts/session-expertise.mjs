@@ -33,7 +33,7 @@ export const INTAKE_LINE_MAX = 200;
 export const INTAKE_PEEK = 4096;
 
 export function intakeLine(files, kb) {
-  return `docs/ holds ${files} spec documents (${kb} KB) esq has not adopted — /esq:harvest reconciles them into decisions and backlog rows.`;
+  return `docs/ holds ${files} spec documents (${kb} KB) esq has not adopted — /esq:advance adopts them into decisions and backlog rows, then works the top.`;
 }
 
 // The intake line, or null. Its own failure never costs the expertise lines.

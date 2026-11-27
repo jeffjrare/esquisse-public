@@ -61,6 +61,45 @@ version later, run `/plugin marketplace update esquisse`, then restart.
 Want to hack on esquisse itself? Clone the repository and see
 [docs/MAINTAINING.md](docs/MAINTAINING.md).
 
+## Starting a new project
+
+An empty repository and a brief from your product owner is enough. You never pick
+between `harvest`, `roadmap`, `grill` and `ui`: `/esq:advance` takes the brief and
+chooses the path itself.
+
+1. **Once per machine, write down your stack.** Your runtime, data store, auth,
+   hosting, conventions, and the repository that shows how, go in
+   `~/.config/esq/stack.md` (see *Reference stack*). Without it, esq picks the
+   technology itself or asks you; with it, the first plan scaffolds your stack and
+   never asks about a choice the file covers.
+2. **Create the repository and commit the brief:**
+
+   ```text
+   git init my-product && cd my-product
+   mkdir docs && cp ~/Downloads/brief.md docs/
+   git add docs && git commit -m "docs: product brief"
+   ```
+
+3. **Run one command:**
+
+   ```text
+   /esq:advance docs/brief.md
+   ```
+
+   It adopts the brief (`/esq:harvest`: an overview, one round of questions on the
+   contradictions and gates that block the first slice, one backlog row per module),
+   derives the roadmap (`/esq:roadmap plan`, user value first), then works its `Now`
+   items. A module that needs your intent gets a grill in the same session, followed by
+   two rendered design directions (`/esq:ui --greenfield`) to pick from before any
+   screen is coded. Each plan it writes is built, reviewed and merged locally; the first
+   one lays down the skeleton your stack names.
+4. **After the first merge, run `/esq:arch` and `/esq:spec`.** They write `CLAUDE.md`,
+   `docs/ARCHITECTURE.md` and `docs/SPEC.md` from the code that now exists. Before
+   that there is nothing for them to read.
+
+From then on, `/esq:advance` again works the next `Now` items. A brief split over
+several files works the same way: put them all in `docs/` and run `/esq:advance`.
+
 ## Your first feature
 
 Run these in your project, clearing context between steps. Use the plan path that
@@ -192,9 +231,10 @@ with no plan. Anything that needs a plan, a grill or a screen direction hands on
 **New to a codebase?** `/esq:status` orients you without changing anything.
 `/esq:spec`, `/esq:arch` and `/esq:harvest` write a product spec, an architecture
 map and a decision record on demand; none is a required setup step. Imported a folder of
-specs written elsewhere into `docs/`? `/esq:harvest` reads it once, prints what you are building
+specs written elsewhere into `docs/`? `/esq:advance` hands it to `/esq:harvest`, which reads it once, prints what you are building
 and the contradictions it found, asks one round of questions, and turns it into decisions and one
-backlog row per module; `/esq:roadmap plan` orders them next.
+backlog row per module; `/esq:advance` then orders them and works the top. Run alone,
+`/esq:harvest` does the same adoption and stops there.
 
 ## Commands
 
@@ -211,12 +251,12 @@ backlog row per module; `/esq:roadmap plan` orders them next.
 | `/esq:backlog [text-or-IDs]` | Capture, list, prioritize and update tasks, each classified by type, concern and layer (`app`/`infra`) when it is filed; `publish` exports them | `docs/BACKLOG.md`; `publish` writes a CSV, and a Google Sheet when a connector is available |
 | `/esq:sweep` | Reconcile backlog items against evidence of delivery | Backlog closures; questions only for unresolved cases |
 | `/esq:roadmap [plan-or-edit]` | Show and refresh the queue; `plan` derives its order under your recorded criterion (lens) and shows what the open work is made of | `docs/ROADMAP.md`; backlog concern, layer, priority and rank updates when ordering; a concern × layer and type table above the order, and a rebalance proposal when the head of the queue is short on user value |
-| `/esq:advance [Now-entry-or-B-NNN]` | Work the roadmap's `Now` items, or any one backlog item by its ID, render UI directions, then ask you once what only you can settle | Inline fixes, plans, rendered directions; grills you accept; each plan it wrote built, reviewed and landed locally; never pushes. In a project whose `docs/` holds imported specs esq has not adopted, it stops first and names `/esq:harvest` |
+| `/esq:advance [Now-entry-or-B-NNN-or-docs/<brief>.md]` | The one entry point: set up a new project from its brief, then work the roadmap's `Now` items, or any one backlog item by its ID, render UI directions, and ask you once what only you can settle | For a project esq has not set up (imported specs in `docs/`, or the brief you name), the `/esq:harvest` intake and a first roadmap before the walk; inline fixes, plans, rendered directions; grills you accept, each followed by its UI render; each plan it wrote built, reviewed and landed locally; never pushes |
 | `/esq:autopilot <plan>` | Build remaining phases sequentially, one worker per phase | Code and execution logs |
 | `/esq:converge <plan-or-fixes-brief>` | Run review → fix, then plan → build → review any 🟡 left, or resume an existing brief | Readiness report, and a lesson for a 🟡 its corrective round closed whose contrast recurs; no merge |
 | `/esq:epic [new title-or-slug]` | Group a theme spanning several plans and backlog items | `docs/epics/<slug>.md` |
 | `/esq:worktree [name-or-action]` | Create, list, remove or merge linked worktrees | Separate working directories and reserved backlog ID blocks |
-| `/esq:status` | Orient without changing anything | Plan, backlog, pending briefs, roadmap, whether the spec and architecture still describe the code (the verdict `/esq:land` uses), and next action — `/esq:harvest` when `docs/` holds imported specs esq has not adopted and no plan is under way |
+| `/esq:status` | Orient without changing anything | Plan, backlog, pending briefs, roadmap, whether the spec and architecture still describe the code (the verdict `/esq:land` uses), and next action — `/esq:advance` when `docs/` holds imported specs esq has not adopted and no plan is under way |
 | `/esq:harvest` | Recover decisions from the code, history and discussion; adopt a folder of imported specs in one pass | `docs/DECISIONS.md`; for imported specs, also an overview, the contradictions settled in one question round, and a backlog row per module and per blocking gate |
 | `/esq:spec` | Describe the product's live features and business rules | `docs/SPEC.md`, free of dated history comments; what a refresh changed goes in its commit message |
 | `/esq:arch` | Refresh architecture and project instructions from the code | `CLAUDE.md`, project skills and `docs/ARCHITECTURE.md` |
@@ -254,7 +294,7 @@ the stack uses (`payments-stripe.md` for a project depending on `stripe`), and t
 `package.json`, gets the fixed pointer alone, and adding modules to the catalog leaves that
 note unchanged. Only npm manifests are read today. When `docs/` holds at least three Markdown
 files (20 KB) esq does not own and no esq decision registry, the note opens with one more line:
-how many and how large, and that `/esq:harvest` adopts them.
+how many and how large, and that `/esq:advance` adopts them.
 
 - **A project skill wins.** Where your project carries its own skill on the same topic
   and the two disagree, Claude follows the project's.
@@ -427,7 +467,8 @@ only operates on planned work.
   not close its items by itself: `/esq:sweep` closes one only with evidence of its
   whole outcome.
 - `/esq:advance` works the roadmap's `Now` items — or, given `B-NNN`, that one backlog item,
-  wherever it sits — one worker per item, at most one
+  wherever it sits; in a project esq has not set up, it first adopts the imported specs or
+  the brief you name and derives the roadmap (see *Starting a new project*) — one worker per item, at most one
   new plan per entry, at most one UI render (skipped when an item beside it needs a
   grill, which may settle the screen question). Once that work
   is done it asks you in one round what only you can settle: grill ambiguous items now
