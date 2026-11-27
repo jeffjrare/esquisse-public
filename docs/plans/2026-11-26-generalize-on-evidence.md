@@ -4,6 +4,8 @@
 
 **Origin:** main
 
+**Reviewed at:** 3f6aa5ef217c6e576d6fac45ef552e3ea6dffe30
+
 ## Context
 esq's rules push only one way. `/esq:plan`'s priorities line forbids "abstraction, configuration, extension points … without a current requirement", line 31 says "Right-sizing trims generality, never design", and its right-size pass cuts "a future uncommitted use case: single-use abstractions, … speculative extension points and restructuring that unblocks nothing" (`plugin/skills/plan/SKILL.md:29`, `:31`, `:310-315`). `/esq:review`'s bar drops neatness and consistency findings and excludes "speculative extensibility" and "consider extracting" without a concrete defect (`plugin/skills/review/SKILL.md:84-88`), and its quality pass admits only the four kinds listed at `:147-152`. Nothing ever names the case where generalizing *is* the requirement, and nothing makes either command look for the existing copies of what a change adds, so plans and reviews of every product built with esq, esq included, let copies multiply. This week's proof is in this repository: one wait rule had to be fixed in three adversary references (862bf54), then again in the three `SKILL.md` bodies those edits missed (a451d92).
 
