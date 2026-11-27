@@ -102,6 +102,13 @@ None.
 
 **For Phase 2:** 1. Call forms: node <refs>/adversary.mjs launch <provider> <slug> <call> <schema> <bound> [--effort e] [--attach f] <<PROMPT; wait <slug> <call> <providers…> [--bound s]; read <slug> <call> <providers…>. 2. Gates must be exported as ESQ_CODEX=on / ESQ_GEMINI=on in the env the script sees (the probe must set ESQ_GEMINI=on). 3. read reports model per provider; lifecycle record blocks should use it instead of the model variable.
 
+### Phase 1 — reverified 2026-11-27
+
+**Reverified by:** adversary-one-script-fixes item 5
+
+**Verified:** 4b3cba4088328871fbff4214ca4cccb4e56824f4
+- `node --test tests/cli/adversary.test.mjs`
+
 ### Phase 2 — completed 2026-11-26
 
 **Plan committed at:** d44706a
