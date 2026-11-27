@@ -1586,3 +1586,24 @@ test('a capability inventory row added after verification keeps the proof; any o
   assert.equal(edited.decision, 'run');
   assert.match(edited.reason, /changed above its ## Execution log/);
 });
+
+test('a dated amendment note beside an unchanged step keeps the proof; a changed step still stales it', async (t) => {
+  const root = await repo();
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await writeFile(path.join(root, 'src/report.txt'), 'ready\n');
+  const file = await plan(root, [[reportStep(reportCheck)]]);
+  await logPhase(root, file, 1, [reportCheck]);
+  const text = await readFile(file, 'utf8');
+  const note = `  - *Amendment 2026-11-27 (Phase 1 build):* on the Origin this same command reds 2 tests in 1 suite; this unit adds none.`;
+  await writeFile(file, text.replace(`  - ${reportStep(reportCheck)}\n`, `  - ${reportStep(reportCheck)}\n  ${note}\n`));
+  commit(root, 'plan(a-plan): record the Origin reading');
+  const noted = await gateVerify(root, file, { unit: true });
+  assert.equal(noted.commands[0].decision, 'reuse');
+
+  const edited = (await readFile(file, 'utf8')).replace(reportCriterion, 'src/report.txt holds no TODO and no FIXME');
+  await writeFile(file, edited);
+  commit(root, 'plan(a-plan): change the criterion');
+  const stale = await gateVerify(root, file, { unit: true });
+  assert.equal(stale.commands[0].decision, 'run');
+  assert.match(stale.commands[0].reason, /changed above its ## Execution log/);
+});

@@ -381,7 +381,7 @@ One round. This is one decision, and it is squarely theirs: what the product sho
 
 **If the session ends before they pick, nothing is lost and nothing needs re-running** — the brief and the published page already hold both directions with their evidence, and the pick is one line in `## Resolved decisions`, editable by hand or settled in a one-sentence follow-up. Say this when you ask. Never re-run this command to collect the answer.
 
-When the answer comes back, edit the brief — `## Task`, `## In scope`, and the `Direction:` line in `## Resolved decisions` — and commit it as `brief: <slug> — direction <A|B>`.
+When the answer comes back, edit the brief — `## Task`, `## In scope`, and the `Direction:` line in `## Resolved decisions` — and commit it as `brief: <slug> — direction <A|B>`. **Every later edit this session makes to the brief or its `.ui/` sources** (a follow-up correction, a re-rendered direction) is committed in the same turn, `brief(ui): <slug> — <what changed>`: an uncommitted edit is a dirty tree some later landing has to explain.
 
 ## Report and stop
 

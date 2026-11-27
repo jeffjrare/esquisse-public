@@ -43,7 +43,7 @@ description: Rules for the esq CLI and hooks — read before editing plugin/bin,
   deleted from the caller's hands.
 - **Every fact a landing reads is a read-only CLI answer, and each harmless list is defined once and deliberately different:**
   `PROVENANCE_HARMLESS` (projection freshness and review `coverage`) and the gate's command-owned lifecycle list (which admits
-  `docs/DECISIONS.md` and, inside the plan section, leaves out exactly `**Reviewed at:**` and `**Abandoned:**`). Never merge
+  `docs/DECISIONS.md` and, inside the plan section, leaves out exactly `**Reviewed at:**`, `**Abandoned:**` and a dated `*Amendment <date> …:*` note beside a step). Never merge
   them and never widen either for convenience — a path added to a harmless list is verification `/esq:land` silently skips.
   `tests/cli/landing.test.mjs` and `gate.test.mjs` pin the invalidations; extend them with the list.
 - **Node built-ins only; `git` is the one external process** — the CLI is dependency-free by contract; the

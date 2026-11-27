@@ -182,7 +182,8 @@ export function parseOrigin(text) { return headerField(text, 'Origin'); }
 // The third header field, and one of the two a command other than `/esq:plan` writes: the full commit a
 // clean `/esq:review` or `/esq:converge` completion covered, recorded through `esq plan set-reviewed`.
 // It is bookkeeping about the plan, never a requirement of it — which is why `esq gate verify` leaves
-// this line and the `**Abandoned:**` marker out of the plan-section comparison and nothing else.
+// this line, the `**Abandoned:**` marker and a dated amendment note (`AMENDMENT_LINE`) out of the plan-section
+// comparison and nothing else.
 export function parseReviewedAt(text) { return headerField(text, 'Reviewed at'); }
 
 export const REVIEWED_AT_LINE = /^\*\*Reviewed at:\*\*/;
@@ -195,6 +196,13 @@ export const REVIEWED_AT_LINE = /^\*\*Reviewed at:\*\*/;
 // `headerField`, whose value pattern stops at a backtick a reason may carry. A line with no date, or
 // no reason after the dash, is not abandonment: `null`, exactly as if the line were absent.
 export const ABANDONED_LINE = /^\*\*Abandoned:\*\*/;
+
+// A dated amendment note beside a step — `- *Amendment 2026-11-26 (Phase 1 build):* …` or `*Amended …*` — is
+// the evidence of a correction or an Origin reading, never an obligation: the step line it annotates carries
+// the command and the criterion, so a corrected command still changes the section and still stales its
+// proofs. Left out of the plan-section comparison so writing the note does not throw away the passes the
+// same run just recorded (measured 2026-11-27: 23 commands re-run at landing across three units).
+export const AMENDMENT_LINE = /^\s*(?:[-*]\s+)?\*Amend(?:ment|ed) \d{4}-\d{2}-\d{2}\b[^*\n]*\*/;
 
 export function parseAbandoned(text) {
   for (const line of text.split('\n')) {

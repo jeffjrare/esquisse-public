@@ -270,6 +270,13 @@ test('a unit whose review brief was emptied reads corrected, and one never revie
   await write(root, 'docs/plans/2026-09-20-stem.assets/confirmed-state.png', 'png bytes');
   commit(root, 'plan(stem): confirm phase 1 manual verification');
   assert.equal((await branchCheck(root, file)).coverage.verdict, 'covered');
+  // So is a direction source `/esq:ui` commits beside its brief; a file loose in docs/plans is not.
+  await write(root, 'docs/plans/2026-09-20-stem.ui/a.html', '<p>direction A</p>');
+  commit(root, 'brief: stem — direction source');
+  assert.equal((await branchCheck(root, file)).coverage.verdict, 'covered');
+  await write(root, 'docs/plans/2026-09-20-stem.html', '<p>loose</p>');
+  commit(root, 'docs: a loose page');
+  assert.equal((await branchCheck(root, file)).coverage.verdict, 'stale');
 });
 
 test('recording a review never stales verification, and a requirement edit above the log still does', async () => {

@@ -5,7 +5,7 @@ import { appendFile, mkdir, open, readdir, readFile, rename, stat, unlink, write
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ABANDONED_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseSections, parseVerified, pathAlternatives, readText, splitTableRow, stripComments, tableAt, phaseExpertise, touchedPaths, touchesPath } from './markdown.mjs';
+import { ABANDONED_LINE, AMENDMENT_LINE, REVIEWED_AT_LINE, atomicWrite, autoSteps, declaredInputs, extractAutoCommand, formatRow, nextPhase, parseBranch, parseAbandoned, parseOrigin, parsePlan, parseReviewedAt, parseSections, parseVerified, pathAlternatives, readText, splitTableRow, stripComments, tableAt, phaseExpertise, touchedPaths, touchesPath } from './markdown.mjs';
 import { canonicalPlanSlug, telemetryOptedOut } from '../scripts/hook-io.mjs';
 import { expertiseMatch } from './expertise.mjs';
 import { intakeInventory, scanDocs } from './intake.mjs';
@@ -3357,6 +3357,7 @@ function planSection(text, { inventory = true } = {}) {
   for (const [position, line] of section.entries()) {
     if (/^#{1,2} /.test(line)) skipping = !inventory && line.trim() === CAPABILITY_INVENTORY;
     if (skipping) continue;
+    if (AMENDMENT_LINE.test(line)) continue;
     if ((header < 0 || position < header) && (REVIEWED_AT_LINE.test(line) || ABANDONED_LINE.test(line))) {
       if (kept.length > 0 && kept.at(-1) === '') kept.pop();
       continue;
@@ -3719,7 +3720,8 @@ export async function gateVerify(root, planPath, { workersMoved = false, phase =
 // but `setReviewed`, which records the second commit and nothing else.
 //
 // One harmless list serves both, and it is deliberately short: the two projections themselves and
-// `CLAUDE.md`, the plan and brief Markdown under `docs/plans/`, and the backlog. A refresh or a
+// `CLAUDE.md`, the plan and brief Markdown under `docs/plans/` with their `.assets/` captures and `.ui/`
+// direction sources, and the backlog. A refresh or a
 // bookkeeping commit touches only those, so a same-day spec and arch refresh prove each other fresh
 // in either order. Anything else — code, `docs/DECISIONS.md`, and every byte under `.claude/skills/`,
 // `SKILL.md` included — invalidates. What it cannot do is certify prose: a hand edit to a projection
@@ -3728,10 +3730,12 @@ export async function gateVerify(root, planPath, { workersMoved = false, phase =
 // evidence about the change, never part of it.
 const PROVENANCE_HARMLESS = new Set(['docs/SPEC.md', 'CLAUDE.md', 'docs/ARCHITECTURE.md', 'docs/BACKLOG.md', 'docs/LESSONS.md']);
 
-// esquisse's own bookkeeping under docs/plans: plans and briefs, and the evidence captures a manual
-// confirmation commits beside its plan in `<plan-stem>.assets/`. Any other file there is a real artifact.
+// esquisse's own bookkeeping under docs/plans: plans and briefs, the evidence captures a manual
+// confirmation commits beside its plan in `<plan-stem>.assets/`, and the rendered direction sources
+// `/esq:ui` commits beside its brief in `<stem>.ui/` — the brief's own companion, read by the build
+// exactly as the brief is, so it is bookkeeping on the same terms. Any other file there is a real artifact.
 function planBookkeeping(changed) {
-  return changed.startsWith('docs/plans/') && (changed.endsWith('.md') || /^docs\/plans\/[^/]+\.assets\//.test(changed));
+  return changed.startsWith('docs/plans/') && (changed.endsWith('.md') || /^docs\/plans\/[^/]+\.(?:assets|ui)\//.test(changed));
 }
 
 function provenanceHarmless(changed) {

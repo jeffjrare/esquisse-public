@@ -222,7 +222,7 @@ If the apply agent could not apply or verify the change, do not resume — repor
 **An unclassifiable pick is repaired on confirmation, never relayed as a command.** On `route: stop`, follow the repair procedure above in this run: an approved repair that routes `apply` is applied and resumed like a chosen spawnable option; one that routes `relay` stops as a relayed option does. A pause, or a failed repair, stops the run with the chosen option quoted in zone 2. **This run keeps no history:** it writes no brief, so a pause or an unapplied approval lives only in this report; only an applied repair survives, as its commit.
 
 <!-- orch-shared:runs-long:start -->
-**A subagent that runs long is not a gate.** You have no timeout and never invent one. Wait, and record the elapsed time.
+**A subagent that runs long is not a gate.** You have no timeout and never invent one. Wait, and record the elapsed time. A wait you write yourself on a process or a resource (a suite, memory, a port) always carries a deadline, and never matches by `pgrep -f`, which finds its own command line and never ends.
 <!-- orch-shared:runs-long:end -->
 
 <!-- orch-shared:elapsed-span:start -->
