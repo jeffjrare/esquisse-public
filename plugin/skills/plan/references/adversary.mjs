@@ -236,7 +236,7 @@ export async function launch(provider, slug, call, schema, bound, { effort = nul
   const terminate = () => { killGroup('SIGTERM'); setTimeout(() => killGroup('SIGKILL'), KILL_GRACE_MS).unref(); };
   let timerFired = false;
   const timer = timeoutBin ? null : setTimeout(() => { timerFired = true; terminate(); }, seconds * 1000);
-  const forward = () => { stopped = true; terminate(); };
+  const forward = () => { stopped = true; if (timer) clearTimeout(timer); terminate(); };
   const signals = ['SIGTERM', 'SIGINT', 'SIGHUP'];
   for (const signal of signals) process.on(signal, forward);
 
@@ -254,7 +254,7 @@ export async function launch(provider, slug, call, schema, bound, { effort = nul
   // A child ended by a signal reports it as 128 + its number, as a shell would (timeout's own
   // --kill-after SIGKILL reaches itself too, its process group's leader: 137).
   const bySignal = code.signal ? 128 + (os.constants.signals[code.signal] ?? 0) : 128;
-  const exit = timerFired ? 124 : code.spawnError ? 127 : code.status ?? bySignal;
+  const exit = timerFired && !stopped ? 124 : code.spawnError ? 127 : code.status ?? bySignal;
   // timeout exits 137 when the provider ignored SIGTERM and --kill-after had to SIGKILL it.
   const timedOut = !stopped && (exit === 124 || (exit === 137 && Date.now() - startedMs >= seconds * 1000));
   Object.assign(meta, { stage: 'done', exitCode: exit, timedOut, stopped, endedAt: new Date().toISOString() });
