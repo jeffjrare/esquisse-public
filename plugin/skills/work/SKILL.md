@@ -94,7 +94,7 @@ Gather:
 2. **Prior art in the workflow.** Glob `docs/plans/*.md`:
    - Is there an **active plan** whose scope already covers this item (especially one where the item is already `Status: Planned`)? Then the answer is `/esq:build`, not a new plan.
    - Is there a **`*-fixes.brief.md`** that still lists this item? If the item's `Source` is `fix: <slug>` and that brief exists, the item may already be triaged as 🟢/🟡/🔴 there — read it and honor that triage.
-   - Is there a **brief** already written for this item — by `/esq:grill`, or by `/esq:ui`, which writes the same shape? Then it's ready to plan, not to grill or render again.
+   - Is there a **brief** already written for this item — by `/esq:grill`, or by `/esq:ui`, which writes the same shape? Then it's ready to plan, not to grill or render again — unless it is a grill brief whose screens were never rendered (gate 5).
 3. **The epic, if tagged.** If the `Epic` cell is filled, read `docs/epics/<slug>.md` for the theme's scope and status — it tells you whether this item is one slice of in-flight work or the start of something.
 4. **`docs/DECISIONS.md`** if present, but only when the item plausibly collides with a recorded decision. A conflict with a standing decision is a routing signal (it pushes toward `/esq:grill`, because the user has to re-open the call).
 
@@ -110,7 +110,7 @@ Evaluate in this order and take the **first** match. Ordering matters: the gates
 2. **Status is `Done` or `Dropped`** → say so and stop. Offer `/esq:backlog B-N reopen` if they meant to revive it.
 3. **Status is `Planned`, and a plan covering it exists** → verdict `/esq:build <plan-path>`. Name the phase it lands in if the plan makes that clear.
 4. **A `*-fixes.brief.md` lists this item as 🟢** → verdict `/esq:fix <brief-path>`. The triage is already done; re-planning it would be duplicated work.
-5. **A brief already exists for this item** (from `/esq:grill` or `/esq:ui`) → verdict `/esq:plan <brief-path>`. The ambiguity was already killed. Unless a plan beside that brief already carries its slug — the brief was planned, and a planned brief is never re-planned: the verdict is `/esq:build <plan-path>`. (`esq brief pending` is what answers which briefs still owe a plan.)
+5. **A brief already exists for this item** (from `/esq:grill` or `/esq:ui`) → verdict `/esq:plan <brief-path>`. The ambiguity was already killed. **A grill brief carrying `## User-facing flow` and no `Direction:` line is not ready yet:** the render its grill named was never made, and planning it now lets the first keystroke pick the interface. Verdict `/esq:ui --greenfield <brief-path>` when the repo has no UI code, `/esq:ui <brief-path>` when the flow adds or moves controls on screens that exist. Unless a plan beside that brief already carries its slug — the brief was planned, and a planned brief is never re-planned: the verdict is `/esq:build <plan-path>`. (`esq brief pending` is what answers which briefs still owe a plan.)
 
 **Sizing — when no gate fires.**
 

@@ -91,8 +91,9 @@ chooses the path itself.
    derives the roadmap (`/esq:roadmap plan`, user value first), then works its `Now`
    items. A module that needs your intent gets a grill in the same session, followed by
    two rendered design directions (`/esq:ui --greenfield`) to pick from before any
-   screen is coded. Each plan it writes is built, reviewed and merged locally; the first
-   one lays down the skeleton your stack names.
+   screen is coded; a brief whose screens were never rendered is rendered before it is
+   planned, even in a later run. Each plan it writes is built, reviewed and merged
+   locally; the first one lays down the skeleton your stack names.
 4. **After the first merge, run `/esq:arch` and `/esq:spec`.** They write `CLAUDE.md`,
    `docs/ARCHITECTURE.md` and `docs/SPEC.md` from the code that now exists. Before
    that there is nothing for them to read.
