@@ -214,7 +214,7 @@ test('a wait sent before its launch has written anything waits for it', async ()
   const waiter = spawn(process.execPath, [SCRIPT, 'wait', 's', 'race', 'codex', '--bound', '10'], { cwd: t.root, env: t.env });
   let out = '';
   waiter.stdout.on('data', chunk => { out += chunk; });
-  const finished = new Promise(resolve => waiter.on('exit', status => resolve({ status, exitSeen: fs.existsSync(path.join(t.esq, 'codex-s-race.exit')) })));
+  const finished = new Promise(resolve => waiter.on('close', status => resolve({ status, exitSeen: fs.existsSync(path.join(t.esq, 'codex-s-race.exit')) })));
   await new Promise(resolve => setTimeout(resolve, 800));
   t.run(['launch', 'codex', 's', 'race', 'review-findings.schema.json', '30']);
   const { status, exitSeen } = await finished;
