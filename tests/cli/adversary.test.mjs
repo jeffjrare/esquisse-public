@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -175,10 +175,11 @@ test('wait exits 0 once every marker exists and 124 when one is missing', () => 
   t.run(['launch', 'codex', 's', 'review', 'review-findings.schema.json', '30']);
   const done = t.run(['wait', 's', 'review', 'codex', '--bound', '1']);
   assert.equal(done.status, 0, done.stderr);
-  assert.deepEqual(JSON.parse(done.stdout), { done: ['codex'], pending: [], exit: 0 });
+  assert.deepEqual(JSON.parse(done.stdout), { done: ['codex'], pending: [], never: [], exit: 0 });
   // A provider never launched is not waited for.
-  const unlaunched = t.run(['wait', 's', 'review', 'codex', 'gemini', '--bound', '1']);
+  const unlaunched = t.run(['wait', 's', 'review', 'codex', 'gemini', '--bound', '5']);
   assert.equal(unlaunched.status, 0, unlaunched.stderr);
+  assert.deepEqual(JSON.parse(unlaunched.stdout).never, ['gemini']);
   // One launched whose .exit is not written yet is.
   fs.writeFileSync(path.join(t.esq, 'gemini-s-review.meta.json'), JSON.stringify({ model: 'm', stage: 'running' }));
   const missing = t.run(['wait', 's', 'review', 'codex', 'gemini', '--bound', '1']);
@@ -201,4 +202,18 @@ test('the precondition checks the agy the launch was given, not the ambient one'
   const result = await launch('gemini', 's', 'envcheck', 'review-findings.schema.json', 30,
     { cwd: t.root, env: { ...t.env, FAKE_NOFLAG: '--mode' }, prompt: 'x' });
   assert.deepEqual(result, { provider: 'gemini', status: 'refused', reason: 'agy --help lists no --mode', exit: 3 });
+});
+
+test('a wait sent before its launch has written anything waits for it', async () => {
+  const t = setup();
+  const waiter = spawn(process.execPath, [SCRIPT, 'wait', 's', 'race', 'codex', '--bound', '10'], { cwd: t.root, env: t.env });
+  let out = '';
+  waiter.stdout.on('data', chunk => { out += chunk; });
+  const finished = new Promise(resolve => waiter.on('exit', status => resolve({ status, exitSeen: fs.existsSync(path.join(t.esq, 'codex-s-race.exit')) })));
+  await new Promise(resolve => setTimeout(resolve, 800));
+  t.run(['launch', 'codex', 's', 'race', 'review-findings.schema.json', '30']);
+  const { status, exitSeen } = await finished;
+  assert.equal(status, 0);
+  assert.equal(exitSeen, true);
+  assert.deepEqual(JSON.parse(out).done, ['codex']);
 });

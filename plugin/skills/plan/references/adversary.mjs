@@ -21,6 +21,8 @@ const NAME = /^[a-z0-9][a-z0-9-]*$/;
 // agy takes the prompt as one argv string; Linux caps one at 131,072 bytes (MAX_ARG_STRLEN).
 const ARG_MAX = 120000;
 const KILL_GRACE_MS = 5000;
+// A wait sent right after a background launch can poll before the launch writes its meta.
+const STARTUP_GRACE_MS = 3000;
 
 export class Refusal extends Error {}
 
@@ -279,17 +281,24 @@ export async function wait(slug, call, providers, { bound = 170, cwd = process.c
   const seconds = Number(bound);
   if (!(seconds > 0)) refuse(`--bound must be a positive number of seconds (got ${JSON.stringify(bound)})`);
   const { dir } = resolveRepo(cwd);
-  const deadline = Date.now() + seconds * 1000;
-  // A provider never launched (its launch refused before writing anything) has nothing to wait for.
-  const pending = () => providers.filter(p => {
+  const started = Date.now();
+  const deadline = started + seconds * 1000;
+  // Launched and not returned: pending. No meta yet: pending through the startup grace, then never
+  // launched (its launch refused before writing anything), so nothing is waited for in vain.
+  const state = p => {
     const files = filesFor(dir, p, slug, call);
-    return fs.existsSync(files.meta) && !fs.existsSync(files.exit);
-  });
+    if (fs.existsSync(files.exit)) return 'done';
+    if (fs.existsSync(files.meta)) return 'pending';
+    return Date.now() - started < STARTUP_GRACE_MS ? 'pending' : 'never';
+  };
+  const pending = () => providers.filter(p => state(p) === 'pending');
   while (pending().length && Date.now() < deadline) {
     await new Promise(resolve => setTimeout(resolve, Math.min(pollMs, Math.max(1, deadline - Date.now()))));
   }
-  const left = pending();
-  return { done: providers.filter(p => !left.includes(p)), pending: left, exit: left.length ? 124 : 0 };
+  const states = Object.fromEntries(providers.map(p => [p, state(p)]));
+  const pick = value => providers.filter(p => states[p] === value);
+  const left = pick('pending');
+  return { done: pick('done'), pending: left, never: pick('never'), exit: left.length ? 124 : 0 };
 }
 
 // --- command line
