@@ -30,3 +30,10 @@ Intake's FORMAT_OWNED recognized docs/DECISIONS.md by any `| # |` header and doc
 - **Confidence:** medium <!-- L-01e9c39011 -->
 - **Date:** 2026-11-22 <!-- L-01e9c39011 -->
 The Gemini command was written without a workspace pin, while every Codex call pins its workspace with -C to the repository top level. Gemini takes its cwd as its workspace, so a session launched in a monorepo subdirectory gave it a tree without docs/plans. The fix prefixed the command with a cd to git rev-parse --show-toplevel. It recurs whenever another external CLI call is added to a skill: check how that CLI picks its workspace and pin it to the repository root. <!-- L-01e9c39011 -->
+
+## L-e3c5119a95 · lesson — Bounding a detached child with a timer in the parent: a SIGKILL of the parent leaves the child unbounded
+- **Paths:** `plugin/skills/plan/references/adversary.mjs` <!-- L-e3c5119a95 -->
+- **Evidence:** `docs/plans/2026-11-26-adversary-one-script-fixes.brief.md@952d87b3317da7e527d68ba869944065d35ed396:8` · fix `646234d10e9821b0353178d7c404af0d44d69adb` <!-- L-e3c5119a95 -->
+- **Confidence:** high <!-- L-e3c5119a95 -->
+- **Date:** 2026-11-27 <!-- L-e3c5119a95 -->
+adversary.mjs spawned the provider detached in its own process group and enforced the bound with a setTimeout in the script; a harness stop that SIGKILLs the script cannot be forwarded, so Codex or Gemini kept running with no bound. The fix spawns the provider under GNU timeout --kill-after, which owns the bound in a process the parent's death does not reach. It recurs for any long-running child a script detaches. <!-- L-e3c5119a95 -->
