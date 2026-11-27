@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { errReason, validate } from '../../plugin/skills/plan/references/adversary.mjs';
+import { errReason, launch, validate } from '../../plugin/skills/plan/references/adversary.mjs';
 
 const SCRIPT = fileURLToPath(new URL('../../plugin/skills/plan/references/adversary.mjs', import.meta.url));
 const REFS = path.dirname(SCRIPT);
@@ -194,4 +194,11 @@ test('the schema check and the .err reason cover what the shipped schemas and CL
   assert.equal(validate(schema, { findings: [], extra: 1 }), '$.extra is not allowed');
   assert.equal(errReason('working\nERROR: limit\ntokens used\n48,118\n'), 'ERROR: limit');
   assert.equal(errReason('one\nlast line\n'), 'last line');
+});
+
+test('the precondition checks the agy the launch was given, not the ambient one', async () => {
+  const t = setup();
+  const result = await launch('gemini', 's', 'envcheck', 'review-findings.schema.json', 30,
+    { cwd: t.root, env: { ...t.env, FAKE_NOFLAG: '--mode' }, prompt: 'x' });
+  assert.deepEqual(result, { provider: 'gemini', status: 'refused', reason: 'agy --help lists no --mode', exit: 3 });
 });

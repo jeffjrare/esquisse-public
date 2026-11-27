@@ -52,7 +52,7 @@ export const PROVIDERS = {
     // that fails closed, and never --dangerously-skip-permissions. Its workspace is its cwd, so it
     // runs from the toplevel (L-01e9c39011).
     prepare({ top, schema, prompt, effort, env, files }) {
-      const help = spawnSync('agy', ['--help'], { encoding: 'utf8' });
+      const help = spawnSync('agy', ['--help'], { encoding: 'utf8', env });
       if (help.error) return { refused: 'agy is not on PATH' };
       const text = `${help.stdout || ''}${help.stderr || ''}`;
       for (const flag of ['--settings', '--json-schema', '--mode']) {
@@ -61,7 +61,7 @@ export const PROVIDERS = {
       let model = env.ESQ_GEMINI_MODEL || '';
       if (model && !model.startsWith('gemini-')) return { refused: `ESQ_GEMINI_MODEL=${model} is not a gemini-* model` };
       let listed = null;
-      const list = () => listed ??= (spawnSync('agy', ['models'], { encoding: 'utf8' }).stdout || '')
+      const list = () => listed ??= (spawnSync('agy', ['models'], { encoding: 'utf8', env }).stdout || '')
         .split('\n').map(line => line.trim().split(/\s+/)[0]).filter(Boolean);
       if (!model) model = list().find(id => id.startsWith('gemini-')) || '';
       if (!model) return { refused: 'agy models lists no gemini-* model' };
