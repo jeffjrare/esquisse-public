@@ -314,7 +314,7 @@ Cut work whose only justification is an unrecorded future use case: single-use
 abstractions, unused configuration, speculative extension points and restructuring
 that unblocks nothing in this plan and serves no named evidence. Keep a task only for a
 concrete requirement or risk. **Generalize on evidence, never on speculation:** an
-extraction is a current requirement when the task names one of (a) a copy of logic the
+extraction is a current requirement when the plan's task for it names one of (a) a copy of logic the
 code already repeats that must change with it (one rule, one reason to change; a
 lookalike is not one, nor are copies the code already syncs by its own mechanism, a
 marked shared block or a generated file); (b) a next consumer already recorded in what
