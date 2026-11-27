@@ -272,7 +272,11 @@ export async function wait(slug, call, providers, { bound = 170, cwd = process.c
   if (!(seconds > 0)) refuse(`--bound must be a positive number of seconds (got ${JSON.stringify(bound)})`);
   const { dir } = resolveRepo(cwd);
   const deadline = Date.now() + seconds * 1000;
-  const pending = () => providers.filter(p => !fs.existsSync(filesFor(dir, p, slug, call).exit));
+  // A provider never launched (its launch refused before writing anything) has nothing to wait for.
+  const pending = () => providers.filter(p => {
+    const files = filesFor(dir, p, slug, call);
+    return fs.existsSync(files.meta) && !fs.existsSync(files.exit);
+  });
   while (pending().length && Date.now() < deadline) {
     await new Promise(resolve => setTimeout(resolve, Math.min(pollMs, Math.max(1, deadline - Date.now()))));
   }
