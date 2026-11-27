@@ -16,7 +16,7 @@ Every `/esq:plan`, `/esq:ideas`, `/esq:review` and `/esq:grill` run with a gate 
 - A run with a gate on calls each provider in one line per call, the prompt on stdin, and reads one normalized result per provider; the model never renders `codex exec`/`agy` argv or parses an envelope or `.err` file.
 - The calls keep every current guarantee: the gates, blind prompts, bounds, `codex -s read-only`, agy's plan mode with `agy-readonly.json` and its capability precondition, the `gemini-*` model rule, the review/grill `-medium` variant, the record format, outputs only under `<git-dir>/esq/`.
 - The `protect-installed` hook lets the one-line form through, and the script refuses before touching the filesystem when it cannot resolve the git directory or is given a slug or call that could leave it.
-- Fake `codex`/`agy` tests prove launch, marker, read, schema validation, model variant, attached file, refusal and timeout; a real agy call proves Gemini still cannot write or run a command.
+- Fake `codex`/`agy` tests prove launch, marker, read, schema validation, model variant, attached file, refusal and timeout; a real agy call proves Gemini still cannot write or run a command. *(Amended 2026-11-27, user: the real-agy probe is no longer a landing gate; it passed 5/5 through the script at 6c98d03 and stays a hand-run instrument, `scripts/probe-gemini-readonly.sh`.)*
 - A rule about calling, waiting or reading lives in one file.
 
 ## Approaches considered
@@ -67,7 +67,7 @@ adversary.mjs read   <slug> <call> <provider>…                                
   - Task 2.3: refactor(probe): probe-gemini-readonly.sh runs the script. The call goes through `adversary.mjs launch gemini` (absolute schema, from the scratch repo, `ESQ_GEMINI=on` in its env); a refused precondition (`meta.stage`) stays exit 2; checks 3–4 run whenever a call was spawned; checks 2 and 5 read the envelope it leaves. `probe-codex-plan.sh`'s header and `skill-authoring`'s provider-kit sentence name the script.
 - **Verification:**
   - `(auto)` `git grep -nE 'codex-adversary\.md|gemini-adversary\.md|codex exec|agy -p' -- plugin .claude scripts ':!plugin/skills/plan/references/adversary.mjs' ':!scripts/probe-codex-plan.sh'` — no match: no skill, doc or probe names a retired reference or renders a provider command outside the script (`probe-codex-plan.sh` runs the real `codex` through `/esq:plan` itself and names it only to find it)
-  - `(auto)` `scripts/probe-gemini-readonly.sh` — exits 0 with five PASS lines: through the script, agy read and answered and could neither write nor run a command (one agy call, ≤300 s, the user's own Google account); exit 2 or 1 leaves this phase unverified
+  - *Amended 2026-11-27, user decision in conversation: the step `scripts/probe-gemini-readonly.sh` (exit 0 with five PASS lines) is removed from this phase's verification. It passed 5/5 through the script at 6c98d03 (Phase 2 log); at landing it came back inconclusive three times because Gemini recognized the probe and declined to attempt the command, with no write and no command each time (checks 3–4 PASS). The probe stays a hand-run instrument; the Gemini argv it proves is pinned by `tests/cli/adversary.test.mjs`.*
   - `(auto)` `./scripts/audit.sh` — Clean: every `.md` and `.mjs` reference a skill names resolves, the plugin validates, and the product suites (the adversary and hook suites included) pass
 
 ## Risks
