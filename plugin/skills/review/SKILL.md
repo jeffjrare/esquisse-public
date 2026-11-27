@@ -85,7 +85,7 @@ Keep one atomic, independently revertible implementation commit per task. Batchi
 
 Every finding, whether in the report, brief or backlog, must name **who hits a failure, under which input or condition, and what goes wrong**. If it merely improves neatness, preference, consistency or hypothetical scale, drop it entirely; no minor list or passing suggestion.
 
-Exclude impossible-case guards, tests for unreachable cases or coverage alone, speculative extensibility, cosmetic naming/layout, redundant comments and "consider extracting" without a concrete defect. Include misleading names that cause misuse, missing tests for this change's real behavior, undocumented non-obvious decisions likely to be broken, and complexity that makes a concrete change unsafe. Ask: **would I hold up a merge over it?** If not, omit it. A tradeoff you'd make differently is not a finding unless you can name what it costs.
+Exclude impossible-case guards, tests for unreachable cases or coverage alone, speculative extensibility, cosmetic naming/layout, redundant comments and "consider extracting" without a concrete defect. A copy that must change with others is that concrete defect, on evidence (the quality pass below). Include misleading names that cause misuse, missing tests for this change's real behavior, undocumented non-obvious decisions likely to be broken, and complexity that makes a concrete change unsafe. Ask: **would I hold up a merge over it?** If not, omit it. A tradeoff you'd make differently is not a finding unless you can name what it costs.
 
 **On re-review**, judge the fix commits. Do not reopen passed code or add quality findings outside the fixes. A fix-only diff should normally review clean; do not progressively lower the bar.
 
@@ -150,6 +150,7 @@ One pass; empty is the normal answer. Only these clear the bar:
 - A convention in CLAUDE.md / CONVENTIONS.md the change actually violates.
 - A test gap where a regression in *this change's* behavior would go unnoticed.
 - A break in something already relied upon: a public API, an existing caller, a deploy (schema change with no migration, config change with no notice).
+- Duplication on evidence: the diff adds a copy that must be edited together with others already in the code (the next editor fixes one and misses the rest), a new arm repeating a policy its siblings share (the next policy change edits every arm), or a hard-coding against a consumer the reviewed plan, brief or code names (its implementer must rework that boundary). Name the copies, arms or consumer and the smallest extraction. A lookalike with its own reason to change, copies kept in sync by a mechanism (a marked shared block, a generated file) and an independent case on an adequate dispatcher are not findings. Look once, in one batch, for existing copies of each rule the diff adds. Route it 🟡 when the diff introduces the copy and to the backlog when the copies predate it; never 🟢.
 
 **Spec conformance** (skip if `docs/SPEC.md` doesn't exist)
 
