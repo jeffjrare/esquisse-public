@@ -1,10 +1,8 @@
 <!-- loaded-at: preflight step 8, only when a provider's gate printed `on` and its filtered diff is sendable -->
 ## A blind review from another model family
 
-Loaded with `${CLAUDE_SKILL_DIR}/../plan/references/adversary.md` (the gate rule, the shared shape of every call,
-*Untrusted data*, § 4's block format and § 5's failure line) and the invocation reference of each provider whose gate
-printed `on` and whose call goes out (`${CLAUDE_SKILL_DIR}/../plan/references/codex-adversary.md`,
-`${CLAUDE_SKILL_DIR}/../plan/references/gemini-adversary.md`). This file replaces that file's § 1–3 for `/esq:review`.
+Loaded with `${CLAUDE_SKILL_DIR}/../plan/references/adversary.md` (the gate rule, *Providers*, *The script*,
+*Untrusted data*, § 4's block format and § 5's failure line). This file replaces that file's § 1–3 for `/esq:review`.
 
 ### What is sent, and when nothing is
 
@@ -31,8 +29,9 @@ target line. With both gates on and both sendable, both go out in that response 
 |---|---|---|---|---|
 | `review` | `review-findings.schema.json` | `300` | `medium` | `review-<the plan slug, or the range head's short hash>` |
 
-`<refs>` is `${CLAUDE_SKILL_DIR}/../plan/references`. The attached file is the answer's `file`, through each invocation
-reference's attached-file form. Gemini takes `<effort>` as its model's variant, per its invocation reference.
+`<refs>` is `${CLAUDE_SKILL_DIR}/../plan/references`, and each call is
+`node "<refs>/adversary.mjs" launch <provider> <slug> review review-findings.schema.json 300 --effort medium --attach <the answer's file>`
+with the prompt on stdin.
 
 The prompt, in the product's working language, names both full commit IDs (`base`, `head`) and asks only for defects
 the attached diff introduces inside that range, checked against the repository as it is at `head`. It states that the
@@ -47,9 +46,8 @@ is blind.
 Claude's own findings are drafted first, privately, before any provider answer is opened, so `new` is judged against
 something that already exists. A completion notice that arrives earlier only says the answer is ready.
 
-Then read each provider's answer **only if its output exists and parses** (Gemini: the envelope's `structured_output`,
-per its invocation reference). One that has not returned is waited for now, per *Waiting for a call* in
-`${CLAUDE_SKILL_DIR}/../plan/references/adversary.md`: the draft is done, so the wait is only the provider's remaining
+Then `read` each provider (*The script* in `${CLAUDE_SKILL_DIR}/../plan/references/adversary.md`); only an `ok` answer is judged. One still
+`running` is waited for now with `wait`: the draft is done, so the wait is only the provider's remaining
 time, never more than its bound since launch, and no run under `/esq:converge` leaves a call spending.
 
 Each provider's first 8 findings are judged; the rest are ignored. Each one is checked against the code at `head` and
@@ -65,7 +63,7 @@ One § 4 block per provider whose gate printed `on`, a not-run one included, so 
 denominator:
 
 ```
-Adversary (<provider> <its model variable's value, or "config">):
+Adversary (<provider> <the model `read` named>):
 review: <a>/<j> accepted (<u> new) | not run — <reason> | not returned
 F1 accepted new|had <🟢|🟡|🔴|backlog> — <one clause>
 F2 rejected — <one clause>

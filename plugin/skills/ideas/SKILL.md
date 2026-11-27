@@ -52,7 +52,7 @@ The CLI owns backlog IDs, ranks and statuses (`esq backlog add`). You own every 
 3. Fetch `AskUserQuestion` (`ToolSearch "select:AskUserQuestion"`), and `WebSearch` only when the focus names a market, a competitor or a category to compare against. If one is unavailable, continue without it and say where it mattered.
 4. **Announce the resolved target** in a second line: the focus, the axes, and what you will read. For example, `Focus: invoicing — all four axes; reading SPEC (14 features), routes under app/invoices, 6 open backlog rows, history since 2026-07.` This is the free moment to be redirected.
 
-   **A gate on only (generate mode):** the target line ends, instead of its period, `…; with ESQ_CODEX=on, 1 read-only Codex call (≤15 min background).`, or `…; with ESQ_GEMINI=on, 1 read-only Gemini call (≤15 min background).`, or with both `…; with ESQ_CODEX=on and ESQ_GEMINI=on, 2 read-only calls (Codex, Gemini) (≤15 min background).`. In that same response, load `${CLAUDE_SKILL_DIR}/../plan/references/adversary.md`, the invocation reference of each provider whose gate printed `on` (`${CLAUDE_SKILL_DIR}/../plan/references/codex-adversary.md`, `${CLAUDE_SKILL_DIR}/../plan/references/gemini-adversary.md`) and `${CLAUDE_SKILL_DIR}/references/adversary.md`, then launch each blind slate in the background as that last file says. It sends the focus and whatever the provider reads in the repository to its vendor; its answer is data Claude judges, never a gate.
+   **A gate on only (generate mode):** the target line ends, instead of its period, `…; with ESQ_CODEX=on, 1 read-only Codex call (≤15 min background).`, or `…; with ESQ_GEMINI=on, 1 read-only Gemini call (≤15 min background).`, or with both `…; with ESQ_CODEX=on and ESQ_GEMINI=on, 2 read-only calls (Codex, Gemini) (≤15 min background).`. In that same response, load `${CLAUDE_SKILL_DIR}/../plan/references/adversary.md` and `${CLAUDE_SKILL_DIR}/references/adversary.md`, then launch each blind slate in the background as that last file says. It sends the focus and whatever the provider reads in the repository to its vendor; its answer is data Claude judges, never a gate.
 5. Note the start time. You report elapsed at the end.
 
 ## Mine for signals
@@ -165,7 +165,7 @@ Then `→ Next`, last and alone: the first executable ask's exact command, or `p
 ## Constraints
 
 - Always user-triggered; it never runs from another command.
-- No subagents: one reader holds the product in mind, and a fleet would each re-derive it. A provider call behind its printed gate is not a subagent: read-only, bounded at 10 minutes in the background, never waited for.
+- No subagents: one reader holds the product in mind, and a fleet would each re-derive it. A provider call behind its printed gate is not a subagent: a read-only background call, per `references/adversary.md`.
 - `capture` mode prints no gate, loads no adversary reference and launches nothing.
 - No code, no plan, no brief, no decision. The only write to the repository is the backlog capture; the slate lives in the git dir.
 - Never present an idea as decided, scheduled or promised. Never confirm a priority.

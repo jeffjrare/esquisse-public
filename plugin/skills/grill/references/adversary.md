@@ -1,10 +1,8 @@
 <!-- loaded-at: preflight step 8, only when a provider's gate printed `on` -->
 ## A blind assumption pass from another model family
 
-Loaded with `${CLAUDE_SKILL_DIR}/../plan/references/adversary.md` (the gate rule, the shared shape of every call,
-*Untrusted data*, § 4's block format and § 5's failure line) and the invocation reference of each provider whose gate
-printed `on` (`${CLAUDE_SKILL_DIR}/../plan/references/codex-adversary.md`,
-`${CLAUDE_SKILL_DIR}/../plan/references/gemini-adversary.md`). This file replaces that file's § 1–3 for `/esq:grill`.
+Loaded with `${CLAUDE_SKILL_DIR}/../plan/references/adversary.md` (the gate rule, *Providers*, *The script*,
+*Untrusted data*, § 4's block format and § 5's failure line). This file replaces that file's § 1–3 for `/esq:grill`.
 
 ### The call
 
@@ -15,8 +13,9 @@ line; with both gates on, both go out in that response and run at the same time.
 |---|---|---|---|---|
 | `probe` | `grill-probe.schema.json` | `300` | `medium` | `grill-<the brief's slug>` |
 
-`<refs>` is `${CLAUDE_SKILL_DIR}/../plan/references`. No file is attached. Gemini takes `<effort>` as its model's
-variant, per its invocation reference.
+`<refs>` is `${CLAUDE_SKILL_DIR}/../plan/references`, and each call is
+`node "<refs>/adversary.mjs" launch <provider> <slug> probe grill-probe.schema.json 300 --effort medium` with the prompt
+on stdin and no file attached.
 
 The prompt, in the product's working language, is the user's task text verbatim, then the instruction: read this
 repository and name **at most 8** hidden assumptions, edge cases or contradictions with the code that would change what
@@ -31,10 +30,9 @@ Claude's own question set for the round is drafted first, privately, before any 
 judged against something that already exists. A completion notice that arrives earlier only says the answer is ready.
 
 The merge point is the first that exists: **before round 1** when the answer has returned by then; else **before the
-next round** that is held anyway; else **before the brief is written**. Read each provider's answer **only if its
-output exists and parses** (Gemini: the envelope's `structured_output`, per its invocation reference). One that has not
-returned by brief time is waited for then, per *Waiting for a call* in
-`${CLAUDE_SKILL_DIR}/../plan/references/adversary.md`, never more than its bound since launch. No round is held to give
+next round** that is held anyway; else **before the brief is written**. `read` each provider (*The script* in
+`${CLAUDE_SKILL_DIR}/../plan/references/adversary.md`); only an `ok` answer is judged. One still `running` at brief time is waited for then
+with `wait`, never more than its bound since launch. No round is held to give
 it time.
 
 Each provider's first 8 findings are judged; the rest are ignored. Each is checked against the code it cites, and one
@@ -55,7 +53,7 @@ providers' findings that name the same point land once and are credited to both.
 One § 4 block per provider whose gate printed `on`:
 
 ```
-Adversary (<provider> <its model variable's value, or "config">):
+Adversary (<provider> <the model `read` named>):
 probe: <a>/<j> accepted (<u> new) | not run — <reason> | not returned
 F1 accepted new|had <resolved|deferred|asked> — <one clause>
 F2 rejected — <one clause>
