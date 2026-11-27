@@ -110,6 +110,15 @@ export function errReason(text) {
   return line.length > 300 ? `${line.slice(0, 297)}...` : line;
 }
 
+// GNU coreutils' timeout, under either name it ships as (macOS Homebrew: gtimeout), or null.
+function gnuTimeout(env) {
+  for (const name of ['timeout', 'gtimeout']) {
+    const result = spawnSync(name, ['--version'], { encoding: 'utf8', env });
+    if (!result.error && /GNU coreutils/.test(result.stdout || '')) return name;
+  }
+  return null;
+}
+
 function git(args, cwd) {
   const result = spawnSync('git', args, { cwd, encoding: 'utf8' });
   if (result.error || result.status !== 0) return null;
@@ -209,9 +218,13 @@ export async function launch(provider, slug, call, schema, bound, { effort = nul
 
   const errFd = fs.openSync(files.err, 'w');
   const outFd = plan.stdout ? fs.openSync(plan.stdout, 'w') : 'ignore';
-  // GNU timeout owns the bound, so it holds even if this script is killed outright (SIGKILL
-  // cannot be forwarded); it runs the provider in its own process group and exits 124 on expiry.
-  const child = spawn('timeout', [`--kill-after=${KILL_GRACE_MS / 1000}`, String(seconds), plan.command, ...plan.argv], {
+  // GNU timeout owns the bound when there is one, so it holds even if this script is killed
+  // outright (SIGKILL cannot be forwarded). Without it, the script's own timer bounds the call.
+  const timeoutBin = gnuTimeout(env);
+  const [command, args] = timeoutBin
+    ? [timeoutBin, [`--kill-after=${KILL_GRACE_MS / 1000}`, String(seconds), plan.command, ...plan.argv]]
+    : [plan.command, plan.argv];
+  const child = spawn(command, args, {
     cwd: plan.cwd, env, detached: true, stdio: [plan.input === null ? 'ignore' : 'pipe', outFd, errFd]
   });
   if (plan.input !== null) { child.stdin.on('error', () => {}); child.stdin.end(plan.input); }
@@ -219,6 +232,8 @@ export async function launch(provider, slug, call, schema, bound, { effort = nul
   let stopped = false;
   const killGroup = signal => { try { process.kill(-child.pid, signal); } catch { /* already gone */ } };
   const terminate = () => { killGroup('SIGTERM'); setTimeout(() => killGroup('SIGKILL'), KILL_GRACE_MS).unref(); };
+  let timerFired = false;
+  const timer = timeoutBin ? null : setTimeout(() => { timerFired = true; terminate(); }, seconds * 1000);
   const forward = () => { stopped = true; terminate(); };
   const signals = ['SIGTERM', 'SIGINT', 'SIGHUP'];
   for (const signal of signals) process.on(signal, forward);
@@ -227,13 +242,14 @@ export async function launch(provider, slug, call, schema, bound, { effort = nul
     child.on('error', error => resolve({ spawnError: error.message }));
     child.on('exit', (status, signal) => resolve({ status, signal }));
   });
+  if (timer) clearTimeout(timer);
   for (const signal of signals) process.off(signal, forward);
   fs.closeSync(errFd);
   if (typeof outFd === 'number') fs.closeSync(outFd);
-  if (code.spawnError) fs.appendFileSync(files.err, `error: ${plan.command} could not start: ${code.spawnError}\n`);
+  if (code.spawnError) fs.appendFileSync(files.err, `error: ${command} could not start: ${code.spawnError}\n`);
   // The envelope is kept whatever the exit: an ERROR envelope carries the reason.
   if (plan.stdout && fs.existsSync(plan.stdout)) fs.renameSync(plan.stdout, files.json);
-  const exit = code.spawnError ? 127 : code.status ?? 128;
+  const exit = timerFired ? 124 : code.spawnError ? 127 : code.status ?? 128;
   const timedOut = exit === 124 && !stopped;
   Object.assign(meta, { stage: 'done', exitCode: exit, timedOut, stopped, endedAt: new Date().toISOString() });
   writeJson(files.meta, meta);

@@ -217,3 +217,12 @@ test('a wait sent before its launch has written anything waits for it', async ()
   assert.equal(exitSeen, true);
   assert.deepEqual(JSON.parse(out).done, ['codex']);
 });
+
+test('without a GNU timeout the script bounds the call itself', () => {
+  const t = setup();
+  for (const name of ['timeout', 'gtimeout']) fs.writeFileSync(path.join(t.bin, name), '#!/bin/sh\necho "BusyBox v1"\nexit 125\n', { mode: 0o755 });
+  assert.equal(t.run(['launch', 'codex', 's', 'slow', 'review-findings.schema.json', '1'], { extra: { FAKE_MODE: 'sleep' } }).status, 0);
+  assert.equal(t.readOne('s', 'slow', 'codex').reason, 'timed out after 1 s');
+  assert.equal(t.run(['launch', 'codex', 's', 'quick', 'review-findings.schema.json', '30']).status, 0);
+  assert.equal(t.readOne('s', 'quick', 'codex').status, 'ok');
+});
