@@ -47,8 +47,8 @@ What `./scripts/audit.sh` will fail you on when a skill changes. Reasoning: `doc
   `agy-readonly.json`, behind a fail-closed capability precondition. Stdout is discarded or captured, and every output lands under
   `<git-dir>/esq/`; an answer never gates, fails or rewrites anything and no command in it runs. Only `/esq:plan`, `/esq:ideas`,
   `/esq:review` and `/esq:grill` have it; review sends only the delta `esq review adversary-diff` filtered and capped, never a diff the model
-  assembles. The provider kit (the shared rules in `plan/references/adversary.md`, the invocation references, the schemas,
-  `agy-readonly.json`) stays in plan's `references/`; a sibling loads it as `${CLAUDE_SKILL_DIR}/../plan/references/<file>`,
+  assembles. The provider kit (the shared rules in `plan/references/adversary.md`, the one script `adversary.mjs` that launches,
+  waits for and reads every call, the schemas, `agy-readonly.json`) stays in plan's `references/`; a sibling loads it as `${CLAUDE_SKILL_DIR}/../plan/references/<file>`,
   which `check-structure.sh` resolves against that skill, and keeps its own lifecycle in its own `references/adversary.md`.
   A sibling cites plan's sections by § number, never by a quoted heading — *why:* it sends the user's code to OpenAI or Google (D-codex-adversary-opt-in-input-only).
 - **No `context: fork`** until a runtime proof exists.
