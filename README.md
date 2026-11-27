@@ -365,7 +365,9 @@ When the feature needs more than a merge to reach users — a migration, an
 environment variable, a restart — the plan's rollout steps are listed in the
 landing report under **Rollout**, and the landing runs every step it can itself.
 It stops only at a step that is yours — a push, a deploy, an action in your own
-accounts — and once you have done it, `/esq:land <plan> --from <n>` (or saying
+accounts, each one action with one result to confirm — and lists all of yours at
+once, the push to test first; anything a command can check, it checks itself. Once
+you have done it, `/esq:land <plan> --from <n>` (or saying
 done in the same session) carries on. esquisse never pushes. A plan that lands into
 another plan's branch rather than your trunk has shipped nothing yet: the report
 says where that parent stands and points at its next step, and the deployment

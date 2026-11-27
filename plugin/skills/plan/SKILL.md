@@ -263,6 +263,11 @@ config, a restart, a backfill, a flag to flip, an install, a third-party setup.
 tag only what needs the user — publishing (push, deploy, release), their own accounts, or a result only their
 device shows (install, push, haptics, camera): write that one as the result to confirm, never as a build or
 sideload command, and keep it out of the phases' `(manual)` steps so no phase waits on it.
+A `(user)` step is one action and one result to confirm, doable from a phone in a minute — never a test
+plan, a second account, ssh, curl or a log read: those are esq's, written as commands.
+A result the user can only confirm once shipped never holds the push: it goes after the push step.
+Order the steps the way the user ships: test before production; a step that only protects production
+(a backup, a production migration) sits right before the production push, never ahead of the test push.
 Write every other step so esq can run and judge it: a command with its pass criterion,
 the evidence to write and where it is committed. Prefer a command to a browser check. -->
 - <step>
