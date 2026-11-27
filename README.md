@@ -99,7 +99,8 @@ the plan started from.
 until the scope is clear and writes a brief that `plan` picks up. Asking for it in
 the conversation ("grill B-12") is enough: Claude starts it for you. For a product with
 no UI yet, it suggests `/esq:ui --greenfield` to put rendered design directions on
-screen before any code.
+screen before any code; when the brief adds or moves controls on screens that exist,
+it suggests `/esq:ui` on them first, phone width included.
 
 **Out of ideas?** `/esq:ideas` reads what the product already is (the spec, its screens
 and routes, the backlog, the decisions, where the history churns) and proposes a short
@@ -139,7 +140,8 @@ you anything. A direction answers what the screen should feel like, not just
 the defects it counted: each carries its own signature and motion, built live on the page
 so you play the hover, the press and the transitions before choosing. It may break the
 app's own visual rules where only habit set them, and it ships only after it passes
-contrast, focus, 44 px targets (48 px when shipping Android), phone width, reduced motion,
+contrast, focus, 44 px targets (48 px when shipping Android), phone width (every control it
+adds or moves on a screen with a phone layout is captured at ~390 px), reduced motion,
 its empty, loading and error states, and each control's states, contrast and name. Each direction's own HTML (no embedded screenshots, one section per screen)
 is committed beside the brief, and that is what `/esq:build` reads when it builds the screen,
 so a mockup is never too big to read.

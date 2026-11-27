@@ -122,7 +122,7 @@ If you find during investigation that the task is much smaller than expected —
 
 ## Resolve blocking decisions
 
-If your recommendation depends on a choice the ask-altitude block below marks **theirs**, use `AskUserQuestion` to resolve it before writing the plan. Present each option with its tradeoff as the description. One question maximum, capability drops excepted: one each, in the same call.
+If your recommendation depends on a choice the ask-altitude block below marks **theirs**, use `AskUserQuestion` to resolve it before writing the plan. Present each option with its tradeoff as the description. **When an option moves an action off the screen where its inputs are set, or departs from the brief's `**Direction source:**`, its description is the main user's click path under it, beside the path under the direction already chosen** (`list: filter → Columns → Export (3 steps)` against `… → save a view → Analyse → Export (6 steps)`): a consequence told only in words is the one the user approves by mistake. One question maximum, capability drops excepted: one each, in the same call.
 
 Anything else, make the call and note the reasoning in the plan.
 

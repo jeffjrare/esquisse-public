@@ -127,6 +127,8 @@ From the start step, in order: run each esq step **once**, judged against its te
 
 ## Report and next action
 
+A question the user asks afterwards about what the landed feature does is answered from the unit's plan decisions and the code, read again, never from memory of the run.
+
 <!-- conclusion:start -->
 Conclude with three zones, no preamble:
 
