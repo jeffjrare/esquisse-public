@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-generalize-on-evidence | 2026-11-27 | arch | right-sizing | An extraction is a current requirement when the plan or review names a copy the code already repeats that must change with it, a next consumer already recorded (backlog row, roadmap item, epic), or a new arm on a structure that grows per addition; speculative abstraction is still cut. | Active |
 | D-adversary-reaches-ideas-review-grill | 2026-11-26 | arch | adversary | With ESQ_CODEX=on or ESQ_GEMINI=on, /esq:ideas, /esq:review and /esq:grill each run one blind, read-only background call per provider, loading plan/references' invocation, rules and schemas via ${CLAUDE_SKILL_DIR}/../plan/references and keeping their own lifecycle in their own references/adversary.md; review reads only esq review adversary-diff's filtered delta (200 KB Codex, 120 KB Gemini). | Active |
 | D-gemini-adversary-runs-through-agy | 2026-11-25 | arch | plan | With ESQ_GEMINI=on, /esq:plan calls agy -p --mode plan --settings <refs>/agy-readonly.json (deny write_file, command, mcp, read_url, execute_url) --json-schema --output-format json with a gemini-* model (ESQ_GEMINI_MODEL, else the first agy models lists), behind a fail-closed --help precondition; the gemini CLI transport is removed. | Active |
 | D-ui-sources-its-own-references | 2026-11-24 | ux | ui | /esq:ui names 2–3 territories from the product's domain on every run, and when the direction is the user's it finds, captures (≤3) and cites references outside software itself and explores a 4–6 take sketch sheet before developing two, under an announced ceiling of 16 captures. | Active |
@@ -5893,3 +5894,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gains an uncorrelated read where ideas, defects and hidden assumptions are found; accepts more code and task text sent to OpenAI or Google under the user's login, and the plan skill's directory hosting a shared kit.
 **Conséquences:** A new command adopting the adversary adds a lifecycle reference and a schema beside plan's, never a copy of the invocation. Each command's adversary is retired per provider when its first opted-in runs show no accepted finding the command lacked (measured, never a gate).
 **Alternatives rejetées:** A plugin-level plugin/adversary/ directory (no substitution for the path, and the probes, hook tests and recorded paths would all move for no user gain); copying the invocation into each skill (drifting copies, rejected already by D-gemini-adversary-opt-in-input-only); a git pathspec in skill prose for the review filter (paid again on every run, untested).
+
+## D-generalize-on-evidence — Plan and review generalize on evidence, never on speculation
+
+**Scope:** arch
+**Topic:** right-sizing
+**Date:** 2026-11-27
+**Statut:** Active
+**Fondement:** user — conversation 2026-11-26, "go pour fix 1" after the design audit
+
+**Contexte:** /esq:plan's right-size pass and /esq:review's bar pushed only against abstraction; nothing named when generalizing is the requirement, so copies that must change together multiplied (one wait rule fixed in three references, then in three SKILL.md bodies missed).
+**Décision:** An extraction is a current requirement when the plan or review names a copy the code already repeats that must change with it, a next consumer already recorded (backlog row, roadmap item, epic), or a new arm on a structure that grows per addition; speculative abstraction is still cut.
+**Raison:** Each trigger is a fact the run can cite, so the rule widens what counts as a requirement without readmitting guesses. The smallest extraction serving the named copies or consumer keeps it from turning into infrastructure for a guessed third case.
+**Tradeoff:** Gained: plans and reviews propose the extraction duplicated code needs. Accepted: a model judgment ("must change together") no check can verify, so over-extraction of lookalikes is watched in real runs.
+**Conséquences:** A later edit tightening the right-size pass or the review bar keeps the three evidence kinds; a lookalike or a copy already synced by a shared block or generated file is not evidence.
+**Alternatives rejetées:** A shared block holding one rule text (plan proposes, review reports: one text fits neither); a mechanical duplicate detector (judgment, and a guard policing prose is forbidden).
