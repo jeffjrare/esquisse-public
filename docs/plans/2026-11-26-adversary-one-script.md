@@ -4,7 +4,7 @@
 
 **Origin:** main
 
-**Reviewed at:** 1080acff451188e34fe30e2d5629537ae0fcada0
+**Reviewed at:** de39676ccd81d27f41dc1dc93dfe00795a492c42
 
 ## Context
 Every opt-in adversary call (plan counter-plan and pre-mortem, ideas slate, review, grill probe) has the model hand-render 15–25 lines of bash from `plugin/skills/plan/references/codex-adversary.md` and `gemini-adversary.md`, then hand-read the output (Codex JSON, the Gemini envelope, the `.err` last line), and each lifecycle file (`plan|ideas|review|grill/references/adversary.md`) restates launch, wait, read and stop. Three defects came from it this week in events-tracker and assets-prospection runs: a hoisted `refs=` got the ideas slate denied by `protect-installed`; a hand-merged `( … ) & ( … ) & wait` left Gemini with an empty `$d` writing `/gemini-….json.part`; and one wait-rule change was made in 3 references, then again in 3 `SKILL.md` bodies (862bf54, a451d92). `scripts/probe-gemini-readonly.sh` carries a fourth copy of Gemini's precondition and model step, and `ideas/SKILL.md:167` a stale fifth ("bounded at 10 minutes … never waited for"). This is `D-generalize-on-evidence` (a) and (c): copies edited together, and one more variant per provider.
