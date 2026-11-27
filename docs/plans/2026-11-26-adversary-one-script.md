@@ -101,3 +101,27 @@ None.
 **Backlog candidates:** None.
 
 **For Phase 2:** 1. Call forms: node <refs>/adversary.mjs launch <provider> <slug> <call> <schema> <bound> [--effort e] [--attach f] <<PROMPT; wait <slug> <call> <providers…> [--bound s]; read <slug> <call> <providers…>. 2. Gates must be exported as ESQ_CODEX=on / ESQ_GEMINI=on in the env the script sees (the probe must set ESQ_GEMINI=on). 3. read reports model per provider; lifecycle record blocks should use it instead of the model variable.
+
+### Phase 2 — completed 2026-11-26
+
+**Plan committed at:** d44706a
+
+**Commits:** fb6635f, 20b7f4a, 0b77bca, 6c98d03
+
+**Verified:** 6c98d03befa2e0e9e26273e7fa560af875f7f32d
+- `git grep -nE 'codex-adversary\.md|gemini-adversary\.md|codex exec|agy -p' -- plugin .claude scripts ':!plugin/skills/plan/references/adversary.mjs' ':!scripts/probe-codex-plan.sh'`
+- `scripts/probe-gemini-readonly.sh`
+- `./scripts/audit.sh`
+
+**What got built:** plan, ideas, review and grill launch, wait and read through adversary.mjs: plan's adversary.md holds the Providers table and the three one-line forms, each lifecycle keeps only its launch line, prompt, merge point and record, codex-adversary.md and gemini-adversary.md are gone, and probe-gemini-readonly.sh proves the script's own Gemini call read-only.
+
+**Verification:**
+- (auto) git grep for retired references and provider commands outside the script — no match (after repair 6c98d03)
+- (auto) scripts/probe-gemini-readonly.sh — exit 0, PASS 1-5 with real agy 1.5.18, gemini-4-neon-high, through adversary.mjs
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product), the adversary and hook suites included
+
+**Surprises / decisions made during execution:** Repair 1/3: the removal grep matched the Providers table and skill-authoring, which spelled the codex command while describing its read-only layer; both now name the layer (-s read-only, ephemeral) without the command (6c98d03).
+
+**Backlog candidates:** None.
+
+**For Phase 3:** Last phase. The first real Codex call through the script is observed on the next gated run; docs/ARCHITECTURE.md:19 and docs/SPEC.md still describe the retired references (/esq:arch, /esq:spec).
