@@ -27,7 +27,9 @@ on that, never a rival to it:
 - **Design is part of the feature.** Hierarchy, typography, interaction and
   feedback count as value. UI work is planned with its empty, loading, error and
   success states, and reviewed as part of the delivery. Right-sizing trims
-  generality, never design.
+  speculative generality, never design, and generalizes on evidence: a plan extracts
+  a copy that must change with others, or serves a next consumer already recorded,
+  and a review reports a change that adds such a copy.
 - **Deterministic where it can be.** A dependency-free CLI owns structure, IDs and
   invariants; the model spends tokens only on judgment.
 

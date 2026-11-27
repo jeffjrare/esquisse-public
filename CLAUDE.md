@@ -21,7 +21,7 @@ and every run buys that value at the lowest model cost that still delivers it. T
    - **What was the human's judgment silently supplying?** Automating a step inherits the written rule, not the unwritten one.
 3. **Deterministic where it can be, model where it must be.** The CLI owns structure, IDs, cells and invariants; the model owns
    judgment. Work a script could settle but left to the model is paid again on every run.
-4. **Design quality is part of the feature.** The right-sizing pass trims generality, never design.
+4. **Design quality is part of the feature.** The right-sizing pass trims speculative generality, never design, and generalizes on evidence: a copy that must change with others, or a next consumer already recorded; review reports a copy the change adds that must change with others.
 5. **A guard earns its place by catching a defect.** It verifies that *a reference resolves* or that *a parsed format is intact*,
    never that *a sentence is present*. There is no check of a check, and no policing of prose.
 
