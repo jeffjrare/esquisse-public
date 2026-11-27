@@ -89,7 +89,9 @@ Then review and land:
 /esq:land docs/plans/<date>-invoice-export.md
 ```
 
-`review` checks both that the goal was delivered and that the code is sound.
+`review` checks both that the goal was delivered and that the code is sound; a
+walk through the app counts as proof only when it starts where you do (signed in,
+your existing data, the link you actually click).
 `land` confirms the whole branch is ready, then merges it locally into the branch
 the plan started from.
 
@@ -366,8 +368,9 @@ environment variable, a restart — the plan's rollout steps are listed in the
 landing report under **Rollout**, and the landing runs every step it can itself.
 It stops only at a step that is yours — a push, a deploy, an action in your own
 accounts, each one action with one result to confirm — and lists all of yours at
-once, the push to test first; anything a command can check, it checks itself. Once
-you have done it, `/esq:land <plan> --from <n>` (or saying
+once, the push to test first; anything a command can check, it checks itself, and
+after a push it reads the deploy's verdict before asking you to look. Once you have
+done it, `/esq:land <plan> --from <n>` (or saying
 done in the same session) carries on. esquisse never pushes. A plan that lands into
 another plan's branch rather than your trunk has shipped nothing yet: the report
 says where that parent stands and points at its next step, and the deployment

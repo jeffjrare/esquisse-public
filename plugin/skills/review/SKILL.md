@@ -93,7 +93,7 @@ Exclude impossible-case guards, tests for unreachable cases or coverage alone, s
 
 ## The review
 
-**First: did the change deliver what the user needed?** Read the plan's `## Done looks like` and `## Goal`; judge the delivered outcome against the user's conditions, not merely the plan's tasks or tests.
+**First: did the change deliver what the user needed?** Read the plan's `## Done looks like` and `## Goal`; judge the delivered outcome against the user's conditions, not merely the plan's tasks or tests — in the user's own words where the plan quotes the row or brief it delivers. **A recorded walk proves a condition only from the user's own starting point:** one begun from a fresh fixture where the user meets existing records, signed out where they are signed in, a fresh install where they upgrade, or past the first hop of the link they click, is not evidence for that condition — a 🟡 for missing verification, observed from the right state when a driver can reach it.
 
 Evidence proves a condition only if its passing result is recorded (`**Verified:**` or `**Manual verification:** confirmed …` with evidence), it covers that condition, and changes since its `verified.at` or confirming phase have not invalidated it. Use the git history already read. A test's existence is not proof. Investigate missing proof: read the path and run its covering `(auto)` step once. A still-unproven, machine-observable condition earns a 🟡 for missing verification.
 

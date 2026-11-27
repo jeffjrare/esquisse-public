@@ -192,7 +192,8 @@ The observable conditions that would make the person who asked for this consider
 in their terms, not the implementation's. Not "the endpoint returns 200" but "a customer
 whose card fails gets told why, and can fix it without contacting support."
 If the work is genuinely invisible to users, state the condition that proves the *unblocked*
-work is now possible.
+work is now possible. Every choice the change puts in front of the user names what it then
+gives them; a choice that changes nothing they can see is a design gap to settle here.
 
 ## Approaches considered
 Start with the simplest viable use of existing code. Add an alternative only when it
@@ -263,9 +264,11 @@ config, a restart, a backfill, a flag to flip, an install, a third-party setup.
 tag only what needs the user — publishing (push, deploy, release), their own accounts, or a result only their
 device shows (install, push, haptics, camera): write that one as the result to confirm, never as a build or
 sideload command, and keep it out of the phases' `(manual)` steps so no phase waits on it.
-A `(user)` step is one action and one result to confirm, doable from a phone in a minute — never a test
-plan, a second account, ssh, curl or a log read: those are esq's, written as commands.
+A `(user)` step is one action and one result to confirm, doable from a phone in a minute, naming where to
+look (route, control) and what the unit leaves unchanged there — never a test plan, a second account, ssh, curl or a log read: those are esq's, written as commands.
 A result the user can only confirm once shipped never holds the push: it goes after the push step.
+After a push step to a branch CI deploys from, the next step is esq's: the deploy run green and the
+deployed version equal to the pushed commit, read before anything looks at the deployed app.
 Order the steps the way the user ships: test before production; a step that only protects production
 (a backup, a production migration) sits right before the production push, never ahead of the test push.
 Write every other step so esq can run and judge it: a command with its pass criterion,
