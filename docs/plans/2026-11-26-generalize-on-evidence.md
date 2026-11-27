@@ -57,3 +57,27 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-11-26
+
+**Plan committed at:** c23b047
+
+**Commits:** 7e03e25, 2ed3a11
+
+**Verified:** 2ed3a1111a1e2acd92fbc60b4b568b10e7bf14cf
+- `grep -L 'on evidence' plugin/skills/plan/SKILL.md plugin/skills/review/SKILL.md CLAUDE.md README.md`
+- `grep -c 'would I hold up a merge over it' plugin/skills/review/SKILL.md`
+- `./scripts/audit.sh`
+
+**What got built:** /esq:plan generalizes on evidence (a copy that must change with others, a recorded next consumer, a new arm repeating a shared policy) in the same paragraph as its speculative cut, and looks once for existing copies; /esq:review counts such a copy as a finding, routed yellow or backlog, never green. CLAUDE.md and the README state both halves.
+
+**Verification:**
+- (auto) grep -L on evidence over the four files — prints nothing, every file carries the rule (format only)
+- (auto) grep -c would I hold up a merge over it — 1, the merge test is unchanged
+- (auto) ./scripts/audit.sh — Clean, 7 checks (product)
+
+**Surprises / decisions made during execution:** None — phase executed as planned. Acceptance controls walked by reading: a shared-rule copy is extracted or reported; a lookalike, a marked shared block and an independent dispatcher case are not.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** Last phase. Behavior stays unproved until a real /esq:plan or /esq:review meets duplicated code; docs/SPEC.md still states only the cut (/esq:spec follow-up).
