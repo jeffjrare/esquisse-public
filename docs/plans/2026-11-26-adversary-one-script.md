@@ -79,3 +79,25 @@ None.
 
 ## Execution log
 <!-- Appended by /esq:build, one entry per phase executed. Do not edit manually. -->
+
+### Phase 1 — completed 2026-11-26
+
+**Plan committed at:** 81ca513
+
+**Commits:** d625b0e, 1e5a951, f947edc, cbaf11c
+
+**Verified:** cbaf11ce048406b875d7014cf866761627ceeb16
+- `node --test tests/cli/adversary.test.mjs`
+- `node --test tests/hooks/hooks.test.mjs`
+
+**What got built:** plugin/skills/plan/references/adversary.mjs launches (refusing before any write on gate, git dir, slug/call, schema or attach), waits for and reads Codex and Gemini calls with every current read-only layer, a .meta.json and an always-written .exit; read returns one schema-validated result per provider. The hook passes its one-line forms and check-structure resolves .mjs references.
+
+**Verification:**
+- (auto) node --test tests/cli/adversary.test.mjs — 9 pass (argv, effort, variant, attach, refusals, read reasons, schema, timeout, wait)
+- (auto) node --test tests/hooks/hooks.test.mjs — 44 pass, the one-line forms included and every existing denial still denying
+
+**Surprises / decisions made during execution:** Mutation-checked per the testing-pitfalls module: forcing workspace-write, skipping the gate and ignoring the timeout each turned its test red (3 of 9), restored; the old hook fails the new hook case (43/44). launch exits 3 on a refused provider precondition (not in the plan text) so a background notification tells it apart from a provider failure. Codex reasons pick the last ERROR line of .err, since its real last line is the token count.
+
+**Backlog candidates:** None.
+
+**For Phase 2:** 1. Call forms: node <refs>/adversary.mjs launch <provider> <slug> <call> <schema> <bound> [--effort e] [--attach f] <<PROMPT; wait <slug> <call> <providers…> [--bound s]; read <slug> <call> <providers…>. 2. Gates must be exported as ESQ_CODEX=on / ESQ_GEMINI=on in the env the script sees (the probe must set ESQ_GEMINI=on). 3. read reports model per provider; lifecycle record blocks should use it instead of the model variable.
