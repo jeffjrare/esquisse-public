@@ -235,6 +235,7 @@ test('without a GNU timeout the script bounds the call itself', () => {
 test('a provider ignoring SIGTERM past its bound still reads as timed out', () => {
   const t = setup();
   assert.equal(t.run(['launch', 'codex', 's', 'stubborn', 'review-findings.schema.json', '1'], { extra: { FAKE_MODE: 'stubborn' } }).status, 0);
-  assert.equal(fs.readFileSync(path.join(t.esq, 'codex-s-stubborn.exit'), 'utf8').trim(), '137');
+  // 137 under GNU timeout's --kill-after, 124 under the script's own timer: both are a timeout.
+  assert.ok(['124', '137'].includes(fs.readFileSync(path.join(t.esq, 'codex-s-stubborn.exit'), 'utf8').trim()));
   assert.equal(t.readOne('s', 'stubborn', 'codex').reason, 'timed out after 1 s');
 });
