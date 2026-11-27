@@ -13,6 +13,7 @@
 // nothing here runs a command an answer names. Node built-ins only.
 import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -221,6 +222,7 @@ export async function launch(provider, slug, call, schema, bound, { effort = nul
   // GNU timeout owns the bound when there is one, so it holds even if this script is killed
   // outright (SIGKILL cannot be forwarded). Without it, the script's own timer bounds the call.
   const timeoutBin = gnuTimeout(env);
+  const startedMs = Date.now();
   const [command, args] = timeoutBin
     ? [timeoutBin, [`--kill-after=${KILL_GRACE_MS / 1000}`, String(seconds), plan.command, ...plan.argv]]
     : [plan.command, plan.argv];
@@ -249,8 +251,12 @@ export async function launch(provider, slug, call, schema, bound, { effort = nul
   if (code.spawnError) fs.appendFileSync(files.err, `error: ${command} could not start: ${code.spawnError}\n`);
   // The envelope is kept whatever the exit: an ERROR envelope carries the reason.
   if (plan.stdout && fs.existsSync(plan.stdout)) fs.renameSync(plan.stdout, files.json);
-  const exit = timerFired ? 124 : code.spawnError ? 127 : code.status ?? 128;
-  const timedOut = exit === 124 && !stopped;
+  // A child ended by a signal reports it as 128 + its number, as a shell would (timeout's own
+  // --kill-after SIGKILL reaches itself too, its process group's leader: 137).
+  const bySignal = code.signal ? 128 + (os.constants.signals[code.signal] ?? 0) : 128;
+  const exit = timerFired ? 124 : code.spawnError ? 127 : code.status ?? bySignal;
+  // timeout exits 137 when the provider ignored SIGTERM and --kill-after had to SIGKILL it.
+  const timedOut = !stopped && (exit === 124 || (exit === 137 && Date.now() - startedMs >= seconds * 1000));
   Object.assign(meta, { stage: 'done', exitCode: exit, timedOut, stopped, endedAt: new Date().toISOString() });
   writeJson(files.meta, meta);
   fs.writeFileSync(files.exit, `${exit}\n`);

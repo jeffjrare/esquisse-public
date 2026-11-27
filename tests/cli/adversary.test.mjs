@@ -18,6 +18,7 @@ let input = ''; try { input = fs.readFileSync(0, 'utf8'); } catch {}
 fs.writeFileSync(process.env.FAKE_LOG + '/codex.json', JSON.stringify({ argv: a, cwd: process.cwd(), input }));
 const mode = process.env.FAKE_MODE || 'ok'; const out = a[a.indexOf('-o') + 1];
 if (mode === 'sleep') { setTimeout(() => {}, 20000); return; }
+if (mode === 'stubborn') { process.on('SIGTERM', () => {}); setTimeout(() => {}, 20000); return; }
 if (mode === 'limit') { process.stderr.write("ERROR: You've hit your usage limit.\\ntokens used\\n48,118\\n"); process.exit(1); }
 const answers = { ok: '{"findings":[]}', null: '{"findings":null}', item: '{"findings":[{}]}' };
 fs.writeFileSync(out, answers[mode]);
@@ -225,4 +226,11 @@ test('without a GNU timeout the script bounds the call itself', () => {
   assert.equal(t.readOne('s', 'slow', 'codex').reason, 'timed out after 1 s');
   assert.equal(t.run(['launch', 'codex', 's', 'quick', 'review-findings.schema.json', '30']).status, 0);
   assert.equal(t.readOne('s', 'quick', 'codex').status, 'ok');
+});
+
+test('a provider ignoring SIGTERM past its bound still reads as timed out', () => {
+  const t = setup();
+  assert.equal(t.run(['launch', 'codex', 's', 'stubborn', 'review-findings.schema.json', '1'], { extra: { FAKE_MODE: 'stubborn' } }).status, 0);
+  assert.equal(fs.readFileSync(path.join(t.esq, 'codex-s-stubborn.exit'), 'utf8').trim(), '137');
+  assert.equal(t.readOne('s', 'stubborn', 'codex').reason, 'timed out after 1 s');
 });
