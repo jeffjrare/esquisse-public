@@ -15,7 +15,7 @@ judge, never a verdict. It cannot fail, gate or rewrite the plan by itself, and 
 
 | Provider | Gate | Model | Read-only by | `--effort <e>` means |
 |---|---|---|---|---|
-| Codex | `ESQ_CODEX=on` | `ESQ_CODEX_MODEL`, else `~/.codex/config.toml` | `codex exec -s read-only --ephemeral`, its OS sandbox | `model_reasoning_effort=<e>`, in place of `ESQ_CODEX_EFFORT` |
+| Codex | `ESQ_CODEX=on` | `ESQ_CODEX_MODEL`, else `~/.codex/config.toml` | its OS sandbox (`-s read-only`), ephemeral | `model_reasoning_effort=<e>`, in place of `ESQ_CODEX_EFFORT` |
 | Gemini | `ESQ_GEMINI=on` | `ESQ_GEMINI_MODEL` (must start `gemini-`), else the first `gemini-*` `agy models` lists | `agy --mode plan --settings agy-readonly.json` (deny writes, shell, MCP, URLs), skipped unless `agy --help` lists `--settings`, `--json-schema` and `--mode`; never `--dangerously-skip-permissions` | the model's `-<e>` variant when `agy models` lists it, else the model unchanged |
 
 Opting in sends the prompt, any attached file and whatever the provider reads in the repository to its vendor (OpenAI,

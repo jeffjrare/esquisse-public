@@ -43,7 +43,7 @@ What `./scripts/audit.sh` will fail you on when a skill changes. Reasoning: `doc
   budget, an ID.
 - **Another vendor's model (Codex, Gemini) is called only behind its own printed opt-in, read-only, and judged, never obeyed.**
   Each gate is the value a shell call printed (`ESQ_CODEX=on`, `ESQ_GEMINI=on`), not an assumption. Codex runs
-  `codex exec -s read-only --ephemeral` with a schema; Gemini runs through `agy --mode plan` under the session deny rules
+  in its `-s read-only` sandbox, ephemeral, with a schema; Gemini runs through `agy --mode plan` under the session deny rules
   `agy-readonly.json`, behind a fail-closed capability precondition. Stdout is discarded or captured, and every output lands under
   `<git-dir>/esq/`; an answer never gates, fails or rewrites anything and no command in it runs. Only `/esq:plan`, `/esq:ideas`,
   `/esq:review` and `/esq:grill` have it; review sends only the delta `esq review adversary-diff` filtered and capped, never a diff the model
