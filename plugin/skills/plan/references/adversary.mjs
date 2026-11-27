@@ -93,7 +93,12 @@ export const PROVIDERS = {
 // --- Helpers
 function readText(file) { try { return fs.readFileSync(file, 'utf8'); } catch { return null; } }
 
-function writeJson(file, value) { fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`); }
+// Through a temp file and a rename, so a concurrent `read` never parses a half-written meta.
+function writeJson(file, value) {
+  const temp = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(temp, `${JSON.stringify(value, null, 2)}\n`);
+  fs.renameSync(temp, file);
+}
 
 // The `.err` reason: the last line naming an error, else the last non-empty line.
 export function errReason(text) {
@@ -247,7 +252,8 @@ export function read(slug, call, providers, { cwd = process.cwd() } = {}) {
     const files = filesFor(dir, provider, slug, call);
     const metaText = readText(files.meta);
     if (metaText === null) return { provider, status: 'not-run', reason: 'never launched' };
-    const meta = JSON.parse(metaText);
+    let meta;
+    try { meta = JSON.parse(metaText); } catch { return { provider, status: 'running' }; }
     const base = { provider, model: meta.model };
     if (readText(files.exit) === null) return { ...base, status: 'running' };
     const notRun = reason => ({ ...base, status: 'not-run', reason });

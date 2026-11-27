@@ -157,6 +157,9 @@ test('read names why a call returned nothing usable', () => {
   // A launched call whose .exit is not written yet is running.
   fs.writeFileSync(path.join(t.esq, 'codex-s-pending.meta.json'), JSON.stringify({ model: 'config', stage: 'running' }));
   assert.equal(t.readOne('s', 'pending', 'codex').status, 'running');
+  // A meta caught mid-write reads as running, never as a crash.
+  fs.writeFileSync(path.join(t.esq, 'codex-s-torn.meta.json'), '{"mod');
+  assert.equal(t.readOne('s', 'torn', 'codex').status, 'running');
 });
 
 test('a call past its bound is stopped, marked 124 and read as timed out', () => {
