@@ -182,7 +182,7 @@ Last line: `→ Next` with the first executable ask verbatim, or `pick an option
 
 `TaskUpdate`: `"Quality & conventions"` `completed`, `"Generate report"` `in_progress` (then `completed` after writing). Output findings in this exact structure — **verdict and action items first**.
 
-**A gate on only:** your own findings are drafted first; then each returned provider review is judged into them, a call not returned is stopped, and every verdict is credited, per *Merge* in `${CLAUDE_SKILL_DIR}/references/adversary.md`. Zone 3 gains its one line per provider, and its blocks are recorded as that file's *Record* says.
+**A gate on only:** your own findings are drafted first; then each returned provider review is judged into them, a call not returned is waited for within its bound, and every verdict is credited, per *Merge* in `${CLAUDE_SKILL_DIR}/references/adversary.md`. Zone 3 gains its one line per provider, and its blocks are recorded as that file's *Record* says.
 
 Rank action items by consequence, worst first. **🟢 means a defect with a mechanical fix — not a change that is merely safe to make.** A polish item is not a small 🟢, it is nothing.
 

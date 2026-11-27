@@ -14,7 +14,7 @@ line; with both gates on, both go out in that response and run at the same time.
 
 | `<call>` | `<schema>` | `<bound>` | `<effort>` | `<slug>` |
 |---|---|---|---|---|
-| `slate` | `idea-slate.schema.json` | `600` | none: the user's `ESQ_CODEX_EFFORT` applies | `ideas-<the slate's focus slug, or whole>` |
+| `slate` | `idea-slate.schema.json` | `900` | none: the user's `ESQ_CODEX_EFFORT` applies | `ideas-<the slate's focus slug, or whole>` |
 
 `<refs>` is `${CLAUDE_SKILL_DIR}/../plan/references`. No file is attached.
 

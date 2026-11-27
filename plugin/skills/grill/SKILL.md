@@ -104,7 +104,7 @@ Run the interrogation in rounds:
    <!-- shared:escape-hatch:end -->
 2. After each round, fold the answers into your understanding. New answers often open new branches — ask those in the next round.
 3. Keep going until the remaining unknowns are *planning* decisions (approach, architecture) rather than *scoping* decisions. Those belong to `/esq:plan`, not here.
-   **A gate on only:** your own question set is drafted first; then each returned provider pass is judged into it before round 1, else before the next round held anyway, else before the brief is written. An accepted finding is sorted under *Whose question is it* like your own and takes a question slot only for a missing authority; a call not returned at brief time is stopped. All of it per *Merge* in `${CLAUDE_SKILL_DIR}/references/adversary.md`.
+   **A gate on only:** your own question set is drafted first; then each returned provider pass is judged into it before round 1, else before the next round held anyway, else before the brief is written. An accepted finding is sorted under *Whose question is it* like your own and takes a question slot only for a missing authority; a call not returned at brief time is waited for then, within its bound. All of it per *Merge* in `${CLAUDE_SKILL_DIR}/references/adversary.md`.
 4. Write the brief as soon as the useful outcome and scope are clear. Zero questions is a valid result; no minimum number of rounds or confirmation of delegated choices. Keep genuinely missing product authority visible.
 
 If `AskUserQuestion` is unavailable, present each round as a numbered list in plain text with your recommended answer for each, and wait for the user's replies before continuing.
