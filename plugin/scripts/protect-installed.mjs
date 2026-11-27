@@ -12,7 +12,12 @@ function contains(parent, candidate) {
   return relative === '' || (!relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative));
 }
 
-const MUTATION = /\bsed\s+(-\S+\s+)*-i|\btee\b|>>|\brm\b|\brmdir\b|\bunlink\b|\bshred\b|\s-delete\b|\bmv\b|\bcp\b|\bchmod\b|\btruncate\b|\bln\b/;
+// A mutating command is a whole shell word: `rm` in `rm-old-cache` (a slug) is not one.
+const WORD = name => `(?<![\\w-])${name}(?![\\w-])`;
+const MUTATION = new RegExp([
+  String.raw`\bsed\s+(-\S+\s+)*-i`, '>>', String.raw`\s-delete\b`,
+  ...['tee', 'rm', 'rmdir', 'unlink', 'shred', 'mv', 'cp', 'chmod', 'truncate', 'ln'].map(WORD)
+].join('|'));
 
 function deny() {
   return {

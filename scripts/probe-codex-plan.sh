@@ -6,7 +6,7 @@
 # A research instrument, never a gate: it is not wired into audit.sh, --lab or
 # anything a skill reads, because every run spends Claude and Codex money. Re-run
 # it by hand after an edit to plugin/skills/plan/references/adversary.md or
-# codex-adversary.md.
+# adversary.mjs.
 #
 # What it proves, one PASS/FAIL line each, exit 0 only when all five pass:
 #   1. the counter-plan call is launched before the pre-mortem call;

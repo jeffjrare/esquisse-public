@@ -5,6 +5,7 @@
 
 | # | Date | Scope | Topic | Décision | Statut |
 |---|------|-------|-------|----------|--------|
+| D-adversary-runs-through-one-script | 2026-11-27 | arch | adversary | plugin/skills/plan/references/adversary.mjs owns launch (refusals before any write, argv and read-only layers, model and effort, guarded cleanup, .meta.json and .exit), wait and read (one normalized, schema-validated JSON per provider); lifecycle files keep only their parameters, prompt, merge point and record. | Active |
 | D-generalize-on-evidence | 2026-11-27 | arch | right-sizing | An extraction is a current requirement when the plan or review names a copy the code already repeats that must change with it, a next consumer already recorded (backlog row, roadmap item, epic), or a new arm on a structure that grows per addition; speculative abstraction is still cut. | Active |
 | D-adversary-reaches-ideas-review-grill | 2026-11-26 | arch | adversary | With ESQ_CODEX=on or ESQ_GEMINI=on, /esq:ideas, /esq:review and /esq:grill each run one blind, read-only background call per provider, loading plan/references' invocation, rules and schemas via ${CLAUDE_SKILL_DIR}/../plan/references and keeping their own lifecycle in their own references/adversary.md; review reads only esq review adversary-diff's filtered delta (200 KB Codex, 120 KB Gemini). | Active |
 | D-gemini-adversary-runs-through-agy | 2026-11-25 | arch | plan | With ESQ_GEMINI=on, /esq:plan calls agy -p --mode plan --settings <refs>/agy-readonly.json (deny write_file, command, mcp, read_url, execute_url) --json-schema --output-format json with a gemini-* model (ESQ_GEMINI_MODEL, else the first agy models lists), behind a fail-closed --help precondition; the gemini CLI transport is removed. | Active |
@@ -5909,3 +5910,18 @@ One question is absent from the capture and is not a gap in it: `deliveryAfterMs
 **Tradeoff:** Gained: plans and reviews propose the extraction duplicated code needs. Accepted: a model judgment ("must change together") no check can verify, so over-extraction of lookalikes is watched in real runs.
 **Conséquences:** A later edit tightening the right-size pass or the review bar keeps the three evidence kinds; a lookalike or a copy already synced by a shared block or generated file is not evidence.
 **Alternatives rejetées:** A shared block holding one rule text (plan proposes, review reports: one text fits neither); a mechanical duplicate detector (judgment, and a guard policing prose is forbidden).
+
+## D-adversary-runs-through-one-script — The Codex/Gemini adversary runs through one shipped Node script beside plan's references
+
+**Scope:** arch
+**Topic:** adversary
+**Date:** 2026-11-27
+**Statut:** Active
+**Fondement:** user — conversation 2026-11-26, "go pour fix 2" after the design audit
+
+**Contexte:** Every adversary call had the model hand-render provider bash and hand-read envelopes, and four lifecycle files restated launch, wait and read; three defects in one week came from it.
+**Décision:** plugin/skills/plan/references/adversary.mjs owns launch (refusals before any write, argv and read-only layers, model and effort, guarded cleanup, .meta.json and .exit), wait and read (one normalized, schema-validated JSON per provider); lifecycle files keep only their parameters, prompt, merge point and record.
+**Raison:** The call, wait and read are deterministic, so leaving them to the model paid for them and their mistakes on every run. A dependency-free Node script beside the references uses argv arrays with no shell interpolation and keeps the provider calls out of the git-only CLI, in plan's references where the plugin-runtime rule places them.
+**Tradeoff:** Gained: one tested place per rule, a provider added as one case, no improvised shell. Accepted: a script outside the CLI's harness, proved by its own suite with fake binaries and a real-agy probe.
+**Conséquences:** A change to how a provider is called, waited for or read is made in adversary.mjs and its suite, never in a lifecycle file; a new provider is a case in the script and a row in the Providers table.
+**Alternatives rejetées:** A bash script (JSON and schema checks would need node anyway, and shell quoting caused this week's defects); an esq CLI verb (the CLI is git-only by contract and providers are reached from a skill, never the CLI). Both providers' blind counter-plans proposed the Node script.
