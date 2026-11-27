@@ -231,7 +231,9 @@ export async function launch(provider, slug, call, schema, bound, { effort = nul
   Object.assign(meta, { stage: 'done', exitCode: exit, timedOut, stopped, endedAt: new Date().toISOString() });
   writeJson(files.meta, meta);
   fs.writeFileSync(files.exit, `${exit}\n`);
-  return { provider, status: 'done', exit };
+  // The call ran: its own status is .exit and `read`; the script's exit stays 0, so 2 and 3 keep
+  // meaning the script's refusal and a refused precondition.
+  return { provider, status: 'done', providerExit: exit, exit: 0 };
 }
 
 // --- read

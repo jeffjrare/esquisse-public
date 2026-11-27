@@ -30,6 +30,7 @@ fs.writeFileSync(process.env.FAKE_LOG + '/agy.json', JSON.stringify({ argv: a, c
 const mode = process.env.FAKE_MODE || 'ok';
 if (mode === 'sleep') { setTimeout(() => {}, 20000); return; }
 if (mode === 'error') { console.log('{"status":"ERROR","error":{"message":"quota exceeded"}}'); process.exit(1); }
+if (mode === 'exit2') { console.log(JSON.stringify({ status: 'SUCCESS', structured_output: { findings: [] } })); process.exit(2); }
 console.log(JSON.stringify({ status: 'SUCCESS', structured_output: { findings: [] } }));
 `;
 
@@ -144,6 +145,9 @@ test('read names why a call returned nothing usable', () => {
   assert.equal(t.readOne('s', 'review', 'codex').reason, "ERROR: You've hit your usage limit.");
   t.run(['launch', 'gemini', 's', 'review', 'review-findings.schema.json', '30'], { extra: { FAKE_MODE: 'error' } });
   assert.equal(t.readOne('s', 'review', 'gemini').reason, 'quota exceeded');
+  // A provider exiting 2 or 3 never reads as the script's own refusal.
+  assert.equal(t.run(['launch', 'gemini', 's', 'two', 'review-findings.schema.json', '30'], { extra: { FAKE_MODE: 'exit2' } }).status, 0);
+  assert.equal(fs.readFileSync(path.join(t.esq, 'gemini-s-two.exit'), 'utf8').trim(), '2');
   t.run(['launch', 'codex', 's', 'review', 'review-findings.schema.json', '30'], { extra: { FAKE_MODE: 'null' } });
   assert.equal(t.readOne('s', 'review', 'codex').reason, 'the answer does not match its schema: $.findings is not array');
   t.run(['launch', 'codex', 's', 'review', 'review-findings.schema.json', '30'], { extra: { FAKE_MODE: 'item' } });
@@ -158,7 +162,7 @@ test('read names why a call returned nothing usable', () => {
 test('a call past its bound is stopped, marked 124 and read as timed out', () => {
   const t = setup();
   const launched = t.run(['launch', 'codex', 's', 'slow', 'review-findings.schema.json', '1'], { extra: { FAKE_MODE: 'sleep' } });
-  assert.equal(launched.status, 124);
+  assert.equal(launched.status, 0, launched.stderr);
   assert.equal(fs.readFileSync(path.join(t.esq, 'codex-s-slow.exit'), 'utf8').trim(), '124');
   assert.equal(t.readOne('s', 'slow', 'codex').reason, 'timed out after 1 s');
 });

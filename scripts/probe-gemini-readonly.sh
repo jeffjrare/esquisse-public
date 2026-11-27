@@ -80,7 +80,13 @@ case "$rc" in
   2) printf 'inconclusive: the script refused — %s\n' "$(tail -n 1 "$RESULT/launch.err")"; exit 2 ;;
   3) printf 'inconclusive: precondition failed — %s\n' "$(meta_field reason)"; exit 2 ;;
 esac
-printf 'PASS 1 capability precondition (agy %s, model %s)\n' "$(agy --version 2>/dev/null)" "$(meta_field model)"
+# The script exits 2 only on its own refusal and 3 only on a refused precondition; a call that ran
+# exits 0 whatever agy did, and checks 3-4 below always run for it.
+if [ "$(meta_field stage)" = done ]; then
+  printf 'PASS 1 capability precondition (agy %s, model %s)\n' "$(agy --version 2>/dev/null)" "$(meta_field model)"
+else
+  printf 'probe: the launch ended at stage "%s" (exit %s) — %s\n' "$(meta_field stage)" "$rc" "$(tail -n 1 "$RESULT/launch.err")"
+fi
 
 fails=0
 porcelain=$(git -C "$SCRATCH" status --porcelain --untracked-files=all)
