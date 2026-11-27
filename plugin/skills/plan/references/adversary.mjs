@@ -202,16 +202,16 @@ export async function launch(provider, slug, call, schema, bound, { effort = nul
 
   const errFd = fs.openSync(files.err, 'w');
   const outFd = plan.stdout ? fs.openSync(plan.stdout, 'w') : 'ignore';
-  const child = spawn(plan.command, plan.argv, {
+  // GNU timeout owns the bound, so it holds even if this script is killed outright (SIGKILL
+  // cannot be forwarded); it runs the provider in its own process group and exits 124 on expiry.
+  const child = spawn('timeout', [`--kill-after=${KILL_GRACE_MS / 1000}`, String(seconds), plan.command, ...plan.argv], {
     cwd: plan.cwd, env, detached: true, stdio: [plan.input === null ? 'ignore' : 'pipe', outFd, errFd]
   });
   if (plan.input !== null) { child.stdin.on('error', () => {}); child.stdin.end(plan.input); }
 
-  let timedOut = false;
   let stopped = false;
   const killGroup = signal => { try { process.kill(-child.pid, signal); } catch { /* already gone */ } };
   const terminate = () => { killGroup('SIGTERM'); setTimeout(() => killGroup('SIGKILL'), KILL_GRACE_MS).unref(); };
-  const timer = setTimeout(() => { timedOut = true; terminate(); }, seconds * 1000);
   const forward = () => { stopped = true; terminate(); };
   const signals = ['SIGTERM', 'SIGINT', 'SIGHUP'];
   for (const signal of signals) process.on(signal, forward);
@@ -220,14 +220,14 @@ export async function launch(provider, slug, call, schema, bound, { effort = nul
     child.on('error', error => resolve({ spawnError: error.message }));
     child.on('exit', (status, signal) => resolve({ status, signal }));
   });
-  clearTimeout(timer);
   for (const signal of signals) process.off(signal, forward);
   fs.closeSync(errFd);
   if (typeof outFd === 'number') fs.closeSync(outFd);
   if (code.spawnError) fs.appendFileSync(files.err, `error: ${plan.command} could not start: ${code.spawnError}\n`);
   // The envelope is kept whatever the exit: an ERROR envelope carries the reason.
   if (plan.stdout && fs.existsSync(plan.stdout)) fs.renameSync(plan.stdout, files.json);
-  const exit = timedOut ? 124 : code.spawnError ? 127 : code.status ?? 128;
+  const exit = code.spawnError ? 127 : code.status ?? 128;
+  const timedOut = exit === 124 && !stopped;
   Object.assign(meta, { stage: 'done', exitCode: exit, timedOut, stopped, endedAt: new Date().toISOString() });
   writeJson(files.meta, meta);
   fs.writeFileSync(files.exit, `${exit}\n`);
