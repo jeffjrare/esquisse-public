@@ -181,6 +181,10 @@ test('wait exits 0 once every marker exists and 124 when one is missing', () => 
   const unlaunched = t.run(['wait', 's', 'review', 'codex', 'gemini', '--bound', '5']);
   assert.equal(unlaunched.status, 0, unlaunched.stderr);
   assert.deepEqual(JSON.parse(unlaunched.stdout).never, ['gemini']);
+  // A bound shorter than the startup grace still settles a never-launched provider.
+  const short = t.run(['wait', 's', 'review', 'gemini', '--bound', '1']);
+  assert.equal(short.status, 0, short.stderr);
+  assert.deepEqual(JSON.parse(short.stdout).never, ['gemini']);
   // One launched whose .exit is not written yet is.
   fs.writeFileSync(path.join(t.esq, 'gemini-s-review.meta.json'), JSON.stringify({ model: 'm', stage: 'running' }));
   const missing = t.run(['wait', 's', 'review', 'codex', 'gemini', '--bound', '1']);

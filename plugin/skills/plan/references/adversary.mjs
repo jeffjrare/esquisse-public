@@ -311,7 +311,7 @@ export async function wait(slug, call, providers, { bound = 170, cwd = process.c
     const files = filesFor(dir, p, slug, call);
     if (fs.existsSync(files.exit)) return 'done';
     if (fs.existsSync(files.meta)) return 'pending';
-    return Date.now() - started < STARTUP_GRACE_MS ? 'pending' : 'never';
+    return Date.now() < Math.min(deadline, started + STARTUP_GRACE_MS) ? 'pending' : 'never';
   };
   const pending = () => providers.filter(p => state(p) === 'pending');
   while (pending().length && Date.now() < deadline) {
