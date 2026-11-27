@@ -132,6 +132,12 @@ test('bash mutations of the installed cache are denied, reads and dev-tree edits
   // A model may hoist the kit path into a variable first; reading through it beside the .git cleanup is no edit.
   const hoisted = ideasCodex.replace(`"${sibling}/idea-slate.schema.json"`, '"$refs/idea-slate.schema.json"');
   assert.equal(bash(`refs=${refs} && ${hoisted}`), null);
+  // The one-line adversary forms pass: a slug holding a mutation word, a prompt body naming rm and >>,
+  // and the wait and read calls; the prompt's lines never carry the plugin path.
+  const script = '/config/plugins/cache/esquisse/esq/1.0/skills/plan/references/adversary.mjs';
+  assert.equal(bash(`node "${script}" launch gemini rm-old-cache review review-findings.schema.json 300 --effort medium --attach "/work/app/.git/esq/a.diff" <<'PROMPT'\nDo not rm -f anything or append >> to a file.\nPROMPT`), null);
+  assert.equal(bash(`node "${script}" wait rm-old-cache review codex gemini && node "${script}" read rm-old-cache review codex gemini`), null);
+  assert.equal(bash(`node "${script}" launch codex s review x.json 30 <<'PROMPT'\nhi\nPROMPT\nrm -rf "${script}"`)?.hookSpecificOutput.permissionDecision, 'deny');
   const carried = [
     `refs=${refs} && rm -f "$refs/idea-slate.schema.json"`,
     `export refs=${refs}; k="$refs/../.."; rm -rf "\${k}/skills"`,
