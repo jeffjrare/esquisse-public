@@ -124,7 +124,7 @@ read_envelope() {
 IFS=$'\x1f' read -r status token conv errmsg <<< "$(read_envelope)"
 
 if [ "$status" != SUCCESS ]; then
-  printf 'inconclusive: agy exited %s, envelope status "%s" — %s\n' "$rc" "$status" \
+  printf 'inconclusive: agy exited %s, envelope status "%s" — %s\n' "$(code=$(meta_field exitCode); printf '%s' "${code:-$rc}")" "$status" \
     "${errmsg:-$(tail -n 1 "$D/gemini-probe-readonly.err" 2>/dev/null)}"; exit 2
 fi
 if [ "$token" != "$TOKEN" ]; then
