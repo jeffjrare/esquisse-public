@@ -32,8 +32,7 @@ target line. With both gates on and both sendable, both go out in that response 
 | `review` | `review-findings.schema.json` | `300` | `medium` | `review-<the plan slug, or the range head's short hash>` |
 
 `<refs>` is `${CLAUDE_SKILL_DIR}/../plan/references`. The attached file is the answer's `file`, through each invocation
-reference's attached-file form. Gemini takes no effort flag: its effort is the model `ESQ_GEMINI_MODEL` names, and a
-`-high` variant that overruns the 5 minutes is recorded `not returned`.
+reference's attached-file form. Gemini takes `<effort>` as its model's variant, per its invocation reference.
 
 The prompt, in the product's working language, names both full commit IDs (`base`, `head`) and asks only for defects
 the attached diff introduces inside that range, checked against the repository as it is at `head`. It states that the
@@ -49,9 +48,9 @@ Claude's own findings are drafted first, privately, before any provider answer i
 something that already exists. A completion notice that arrives earlier only says the answer is ready.
 
 Then read each provider's answer **only if its output exists and parses** (Gemini: the envelope's `structured_output`,
-per its invocation reference). One that has not returned is stopped now (`TaskStop` on its background task; its
-`timeout` bounds it otherwise) and recorded `not returned`, so no run under `/esq:converge` leaves a call spending.
-Nothing waits for it.
+per its invocation reference). One that has not returned is waited for now, per *Waiting for a call* in
+`${CLAUDE_SKILL_DIR}/../plan/references/adversary.md`: the draft is done, so the wait is only the provider's remaining
+time, never more than its bound since launch, and no run under `/esq:converge` leaves a call spending.
 
 Each provider's first 8 findings are judged; the rest are ignored. Each one is checked against the code at `head` and
 goes through **The bar** and the tiers exactly as Claude's own: accepted, it takes its tier (🟢, 🟡, 🔴, or a backlog row

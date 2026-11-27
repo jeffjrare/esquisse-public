@@ -74,7 +74,7 @@ Stop at the bound and report what remains uncovered. Announce the resolved targe
 
     This is the free moment to be redirected — the target is on screen before anything has been spent on it.
 
-    **A gate on only:** the target line ends, instead of its period, `…; with ESQ_CODEX=on, 2 read-only Codex calls (≤15 min background, ≤10 min foreground).`, or `…; with ESQ_GEMINI=on, 2 read-only Gemini calls (≤15 min background, ≤10 min foreground).`, or with both `…; with ESQ_CODEX=on and ESQ_GEMINI=on, 4 read-only calls (Codex, Gemini) (≤15 min background, ≤10 min foreground).`. In this same response, load `${CLAUDE_SKILL_DIR}/references/adversary.md` plus the invocation reference of each provider whose gate printed `on` (`${CLAUDE_SKILL_DIR}/references/codex-adversary.md`, `${CLAUDE_SKILL_DIR}/references/gemini-adversary.md`), then launch each blind counter-plan in the background, per § 1 of the first.
+    **A gate on only:** the target line ends, instead of its period, `…; with ESQ_CODEX=on, 2 read-only Codex calls (≤15 min background, ≤10 min waited for).`, or `…; with ESQ_GEMINI=on, 2 read-only Gemini calls (≤15 min background, ≤10 min waited for).`, or with both `…; with ESQ_CODEX=on and ESQ_GEMINI=on, 4 read-only calls (Codex, Gemini) (≤15 min background, ≤10 min waited for).`. In this same response, load `${CLAUDE_SKILL_DIR}/references/adversary.md` plus the invocation reference of each provider whose gate printed `on` (`${CLAUDE_SKILL_DIR}/references/codex-adversary.md`, `${CLAUDE_SKILL_DIR}/references/gemini-adversary.md`), then launch each blind counter-plan in the background, per § 1 of the first.
 
 <!-- shared:batch-independent:start -->
 **Batch independent, read-only calls in one turn.** A call that consumes another's result waits for it. Serialize Git mutations, writes to the same file, and reads of a file another call writes; never run them concurrently. Group ordered shell operations with `&&` in one call so failure stops the chain.
@@ -385,7 +385,7 @@ registry migration.
 
 After writing the plan file and updating DECISIONS.md (if applicable):
 
-0. **A gate on only:** run the pre-mortem of each provider whose gate printed `on` (both in one foreground call when both are on), judge it and make the accepted plan edits before anything is staged, per § 2–3 of `${CLAUDE_SKILL_DIR}/references/adversary.md`, with the commands from each provider's invocation reference. Its § 4 `Adversary` blocks become step 3's commit body, and their count lines join step 4's report.
+0. **A gate on only:** run the pre-mortem of each provider whose gate printed `on` (both in the background in one response when both are on, then waited for), judge it and make the accepted plan edits before anything is staged, per § 2–3 of `${CLAUDE_SKILL_DIR}/references/adversary.md`, with the commands from each provider's invocation reference. Its § 4 `Adversary` blocks become step 3's commit body, and their count lines join step 4's report.
 1. **Cut the shipping unit, and fill both fields from it**, here and not earlier.
    `git branch --show-current`, run once: that is `**Origin:**`. Then `git switch -c esq/<slug>`
    from it, and that name is `**Branch:**`. Write both into the plan file's header before staging. A Git state is named only from the output of a command that ran: empty output means

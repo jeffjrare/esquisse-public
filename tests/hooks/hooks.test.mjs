@@ -123,6 +123,12 @@ test('bash mutations of the installed cache are denied, reads and dev-tree edits
   assert.ok(grillGemini.includes(`${grillRefs}/grill-probe.schema.json`) && grillGemini.includes(`${grillRefs}/agy-readonly.json`));
   assert.equal(bash(grillGemini), null);
   assert.equal(bash(`${grillGemini} && mv "$d/gemini-grill-x-probe.json" "${grillRefs}/grill-probe.schema.json"`)?.hookSpecificOutput.permissionDecision, 'deny');
+  // The current template clears every file of its call under a guarded `${d:?}` and ends by writing its `.exit` marker.
+  const marked = 'd="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "${d:?}/codex-ideas-whole-slate".* && \\\n'
+    + `timeout 600 codex exec -s read-only -C "$(git rev-parse --show-toplevel)" --ephemeral \\\n`
+    + `  --output-schema "${sibling}/idea-slate.schema.json" -o "$d/codex-ideas-whole-slate.json" - \\\n`
+    + '  >/dev/null 2>"$d/codex-ideas-whole-slate.err" <<\'PROMPT\'\nfocus\nPROMPT\necho "$?" >"${d:?}/codex-ideas-whole-slate.exit"';
+  assert.equal(bash(marked), null);
   // A model may hoist the kit path into a variable first; reading through it beside the .git cleanup is no edit.
   const hoisted = ideasCodex.replace(`"${sibling}/idea-slate.schema.json"`, '"$refs/idea-slate.schema.json"');
   assert.equal(bash(`refs=${refs} && ${hoisted}`), null);

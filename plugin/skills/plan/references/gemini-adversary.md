@@ -31,11 +31,11 @@ read half-written.
 
 The calling lifecycle names `<call>`, its `<schema>` (a file beside this one) and its `<bound>` in seconds. For
 `/esq:plan`, `<call>` is `counter` or `premortem`, `<schema>` its schema (`counter-plan.schema.json`,
-`premortem.schema.json`) and `<bound>` its timeout (`900` for the background counter-plan, `570` for the foreground
-pre-mortem):
+`premortem.schema.json`) and `<bound>` its timeout (`900` for the counter-plan, `570` for the waited-for
+pre-mortem; both run in the background):
 
 ```bash
-cd "$(git rev-parse --show-toplevel)" && d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/gemini-<slug>-<call>".* && \
+cd "$(git rev-parse --show-toplevel)" && d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "${d:?}/gemini-<slug>-<call>".* && \
 e="$d/gemini-<slug>-<call>.err" && \
 { command -v agy >/dev/null || { echo 'agy is not on PATH' >"$e"; false; }; } && \
 h="$(agy --help 2>&1)" && \
@@ -54,7 +54,18 @@ timeout <bound> agy -p "$p" --mode plan --settings "<refs>/agy-readonly.json" \
   --json-schema "<refs>/<schema>" --output-format json --model "$m" \
   >"$d/gemini-<slug>-<call>.json.part" 2>"$e" && \
 mv "$d/gemini-<slug>-<call>.json.part" "$d/gemini-<slug>-<call>.json"
+echo "$?" >"${d:?}/gemini-<slug>-<call>.exit"
 ```
+
+**A lifecycle that names an `<effort>`** (`/esq:review`, `/esq:grill`) picks the model's variant at that effort: right
+after the line that resolves `$m`, the command carries
+
+```bash
+{ v="${m%-*}-<effort>"; agy models 2>/dev/null | awk '{ print $1 }' | grep -qxF -- "$v" && m="$v"; true; } && \
+```
+
+so `gemini-4-neon-high` runs as `gemini-4-neon-medium` when `agy models` lists it, and a model with no such variant runs
+unchanged. The record names the id that ran.
 
 **A prompt with an attached file.** When the lifecycle attaches a file, `p` is the heredoc followed by that file, the rest of the command unchanged:
 
@@ -69,7 +80,8 @@ The provider is never pointed at the path instead: `<git-dir>/esq/` can lie outs
 `command(*)` deny stops it running `git` itself. A `-p` argument is one `argv` string, so the lifecycle caps the file
 below Linux's 131,072-byte `MAX_ARG_STRLEN`.
 
-Its output is `<d>/gemini-<slug>-<call>.json`. When it is absent (the precondition failed, the model was refused, or the
+Its output is `<d>/gemini-<slug>-<call>.json`, and its `.exit` marker is what *Waiting for a call* watches. When the
+output is absent (the precondition failed, the model was refused, or the
 call exited non-zero or timed out), the reason is the `.err` file's last line.
 
 ### Reading the answer

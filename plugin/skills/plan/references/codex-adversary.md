@@ -23,24 +23,25 @@ two calls are:
 | `<call>` | `<schema>` | `<bound>` | Where it runs |
 |---|---|---|---|
 | `counter` | `counter-plan.schema.json` | `900` | background |
-| `premortem` | `premortem.schema.json` | `570` | foreground |
+| `premortem` | `premortem.schema.json` | `570` | background, waited for |
 
 ```bash
-d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/codex-<slug>-<call>.json" && \
+d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "${d:?}/codex-<slug>-<call>".* && \
 timeout <bound> codex exec -s read-only -C "$(git rev-parse --show-toplevel)" --ephemeral <flags> \
   --output-schema "<refs>/<schema>" -o "$d/codex-<slug>-<call>.json" - \
   >/dev/null 2>"$d/codex-<slug>-<call>.err" <<'PROMPT'
 <the prompt>
 PROMPT
+echo "$?" >"${d:?}/codex-<slug>-<call>.exit"
 ```
 
-Its output is `<d>/codex-<slug>-<call>.json`.
+Its output is `<d>/codex-<slug>-<call>.json`; its `.exit` marker is what *Waiting for a call* watches.
 
 **A prompt with an attached file.** When the lifecycle attaches a file, stdin is the heredoc followed by that file, and
 the same command reads it from a group instead of the heredoc:
 
 ```bash
-d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "$d/codex-<slug>-<call>.json" && \
+d="$(git rev-parse --absolute-git-dir)/esq" && mkdir -p "$d" && rm -f "${d:?}/codex-<slug>-<call>".* && \
 { cat <<'PROMPT'
 <the prompt>
 PROMPT
@@ -48,6 +49,7 @@ cat "<file>"; } | \
 timeout <bound> codex exec -s read-only -C "$(git rev-parse --show-toplevel)" --ephemeral <flags> \
   --output-schema "<refs>/<schema>" -o "$d/codex-<slug>-<call>.json" - \
   >/dev/null 2>"$d/codex-<slug>-<call>.err"
+echo "$?" >"${d:?}/codex-<slug>-<call>.exit"
 ```
 
 The provider is never pointed at the path instead: it may lie outside the workspace it reads.

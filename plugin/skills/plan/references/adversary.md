@@ -3,7 +3,7 @@
 
 **A sibling command reuses this file.** `/esq:ideas`, and any other command that gains an adversary, loads this file and
 the provider invocation references from `${CLAUDE_SKILL_DIR}/../plan/references/`. It reuses the gate rule below, the
-*Shared shape of every call*, *Untrusted data*, § 4's block format and § 5's failure line. Its own
+*Shared shape of every call*, *Waiting for a call*, *Untrusted data*, § 4's block format and § 5's failure line. Its own
 `references/adversary.md` replaces § 1–3: when it launches, its prompt, its `<call>`/`<schema>`/`<bound>`, where the answer
 merges and where it is recorded. Nothing a sibling adds ever stops it either.
 
@@ -25,6 +25,23 @@ against the one its call names.
 `<d>` is `$(git rev-parse --absolute-git-dir)/esq`, created with `mkdir -p` in the same call, so nothing a provider
 writes lands in the working tree. Every call runs read-only from the repository root, the prompt on stdin, stdout
 discarded or captured to a file under `<d>` and stderr to a file under `<d>`, so the transcript never enters this context.
+Each call is its own Bash call, run exactly as its reference writes it: two commands are never merged into one shell
+line, because a prefix hoisted before `( … ) &` runs inside the first job only and leaves the second with an empty `$d`.
+
+**Waiting for a call.** Every command ends by writing its exit status to `<d>/<provider>-<slug>-<call>.exit`, so whether
+a call has returned is a file, never a guess. At a merge point, a launched call without its marker is **waited for, not
+stopped**: its tokens are already spent, and only its answer pays them back. The wait is one foreground Bash call over
+every marker still missing:
+
+```bash
+d="$(git rev-parse --absolute-git-dir)/esq" && timeout 170 bash -c 'for f; do until [ -e "$f" ]; do sleep 5; done; done' _ \
+  "$d/codex-<slug>-<call>.exit" "$d/gemini-<slug>-<call>.exit"
+```
+
+repeated while a marker is missing (exit 124). 170 s stays under the 180 s after which Claude Code moves a foreground
+call to the background (measured 2026-11-26, Claude Code 2.1.332). The command's own `timeout <bound>` guarantees the
+marker comes: a call that overran wrote `124` and is `not run — timed out`. Only a call whose marker is still missing once
+its bound has passed since launch is stopped (`TaskStop` on its background task) and recorded `not returned`.
 
 ### 1. Counter-plan — blind, in the background
 
@@ -41,12 +58,11 @@ receives it.
 At `## Approaches considered`, read each provider's counter-plan output **only if it exists and is non-empty**; if the
 background task has not finished, go on without it. Nothing waits for it.
 
-### 2. Pre-mortem — the written plan, in the foreground
+### 2. Pre-mortem — the written plan, waited for
 
-After the plan is written and read once (§ Right-size), before "Commit and stop" step 1, one foreground call,
-made with the Bash tool's `timeout: 600000` — its 120000 ms default would cut the `timeout 570` run at 2 minutes —
-using the provider's command with `<call>` `premortem`. With both gates on, both pre-mortems run in that **one** foreground call, at
-the same time, so the announced bound is unchanged: `( <codex pre-mortem> ) & ( <gemini pre-mortem> ) & wait`.
+After the plan is written and read once (§ Right-size), before "Commit and stop" step 1, each provider's command with
+`<call>` `premortem` goes out as one Bash call with `run_in_background: true`. With both gates on, both go out in the same
+response and run at the same time, so the announced bound is unchanged. Then wait for them per *Waiting for a call*.
 
 The prompt names the plan path and asks for **at most 8** findings: why this plan, executed as written, would fail
 its `## Done looks like`. Each finding's `kind` is `missing-task`, `criterion-does-not-prove`,

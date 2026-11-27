@@ -32,8 +32,9 @@ Claude's own candidate pool is written first, privately, before any provider ans
 against something that already exists. A completion notice that arrives earlier only says the answer is ready.
 
 Then read each provider's answer **only if its output exists and parses** (Gemini: the envelope's `structured_output`,
-per its invocation reference). One that has not returned is stopped now (`TaskStop` on its background task; its
-`timeout` bounds it otherwise) and recorded `not returned`. Nothing waits for it.
+per its invocation reference). One that has not returned is waited for now, per *Waiting for a call* in
+`${CLAUDE_SKILL_DIR}/../plan/references/adversary.md`: the pool is written, so the wait is only the provider's remaining
+time, never more than its bound since launch.
 
 Each provider's first 10 ideas join the candidate pool **before** the cut and go through the same four cuts as
 Claude's own. A `signal` naming a path that does not exist (checked with one `git ls-files`/`test -e` call for all of
