@@ -422,7 +422,8 @@ After writing the plan file and updating DECISIONS.md (if applicable):
      repository, or branch not observed) and that `/esq:build` will therefore treat the plan as legacy: it refuses
      nothing, and it never lands.
    - One-sentence summary of the recommendation
-   - With a gate on: the `Codex:` and `Gemini:` count lines from step 0, one per provider whose gate printed `on`
+   - With a gate on: the `Codex:` and `Gemini:` count lines from step 0, one per provider whose gate printed `on`, each
+     followed by its verdict lines (`adversary.md` § 4)
    - Suggested next step. **A plan with 2+ phases has two ways to execute, and the user picks — name both:**
      - Always: "Review the plan in your editor. When ready, `/clear` and run `/esq:build <plan-path>` to execute Phase 1."
      - When the plan has 2 or more phases, add: "Or `/esq:autopilot <plan-path>` to run all <N> phases unattended — it stops at the first gate that needs you. Cap the first run (`/esq:autopilot <plan-path> 2`) if you'd rather watch a couple land first."

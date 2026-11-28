@@ -105,7 +105,9 @@ F1 accepted|rejected <kind> — <one clause>
 ```
 
 "Commit and stop" step 4's report gains one line per such provider with the same counts:
-`<Provider>: counter-plan <verdict>; pre-mortem <accepted>/<judged> accepted.`
+`<Provider>: counter-plan <verdict>; pre-mortem <accepted>/<judged> accepted.`, followed by that block's `counter-plan:`
+and `F<n>` lines copied as committed, each indented two spaces: the user sees every verdict and its reason, not only
+the count.
 
 ### 5. Failure is one line, never a stop
 

@@ -550,7 +550,8 @@ honor it, the worker runs on your session's model.
   repository settles becomes a resolved decision in the brief, and only a choice that is
   genuinely yours becomes a question, within the usual 4 per round; the verdicts are
   recorded in the brief's commit. Claude judges every answer against the
-  code; none ever blocks the plan, the review or the grill. **Opting in sends the goal text (for `/esq:ideas`, the focus;
+  code; none ever blocks the plan, the review or the grill. The command's final report shows each
+  provider's count followed by every finding's verdict, accepted or rejected, with its one-clause reason. **Opting in sends the goal text (for `/esq:ideas`, the focus;
   for `/esq:review`, the filtered diff; for `/esq:grill`, your task text) and whatever the model reads in your repository to its vendor under your own account:
   OpenAI for Codex, Google for Gemini.** For Gemini, install `agy` and sign in with your Google account; a Google AI
   subscription covers it, and the models offered depend on your plan (`agy models` lists

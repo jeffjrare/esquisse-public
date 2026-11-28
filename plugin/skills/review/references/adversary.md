@@ -76,4 +76,5 @@ clean plan review whose field was already current with no backlog rows) writes t
 `<git-dir>/esq/adversary-review-<head short hash>.md` instead.
 
 Zone 3 gains one line per such provider: `○ Codex  <a>/<j> accepted (<u> new)`, `○ Codex  not returned`, or
-`○ Codex  not run — <reason>` (`Gemini` likewise).
+`○ Codex  not run — <reason>` (`Gemini` likewise); a count line is followed by its block's `F<n>` lines, indented
+two spaces.

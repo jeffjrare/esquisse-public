@@ -62,4 +62,5 @@ F2 rejected — <one clause>
 
 The blocks are the brief commit's second `-m`, never the brief, so `/esq:plan` pays nothing to read rejected findings.
 The report's elapsed line is preceded by one line per such provider: `Codex: <a>/<j> accepted (<u> new)`,
-`Codex: not returned`, or `Codex: not run — <reason>` (`Gemini:` likewise).
+`Codex: not returned`, or `Codex: not run — <reason>` (`Gemini:` likewise); a count line is followed by its block's `F<n>`
+lines, indented two spaces.

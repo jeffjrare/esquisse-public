@@ -54,4 +54,4 @@ I2 cut <ungrounded|already in the backlog|decided against|not valuable|duplicate
 ```
 
 Zone 3 gains one line per such provider: `○ Codex  <k> of <n> kept (<u> new)`, or `○ Codex  not run — <reason>`
-(`Gemini` likewise).
+(`Gemini` likewise); a count line is followed by its block's `I<n>` lines, indented two spaces.
