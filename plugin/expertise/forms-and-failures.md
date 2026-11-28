@@ -5,7 +5,7 @@ description: Forms and what a screen shows when a request fails. Use before writ
 
 # Forms and failures: every request ends in something visible
 
-**As of:** 2026-10-25
+**As of:** 2026-11-27
 
 **Paths:** `forms/`, `*Form.*`, `*-form.*`, `schemas/`, `*Dialog.*`, `api-client.*`, `http.*`
 
@@ -29,6 +29,9 @@ A form is where a user hands the product their work. Each rule below exists beca
 
 - **A failure never clears what the user typed.** *Why:* the form state is the only copy of their work; resetting it on error (or remounting the form because a parent re-keyed it) makes them retype everything, and many won't. *Check:* fill every field, make the request fail, confirm every field still holds its value.
 - **Unsaved changes are shown, and save is disabled while nothing changed.** *Why:* without a dirty indicator the user cannot tell whether leaving loses work; an always-enabled save sends no-op writes and hides whether the last save took. Compare against the last saved values, not against "touched": typing and erasing returns to clean. Warn before navigating away from a dirty form (route guard plus `beforeunload`). *Check:* edit a field, see the indicator and an enabled save; restore the original value, see both go back.
+- **Paste is never blocked**, on any field, codes and passwords included. *Why:* a password manager and a copied code are how people fill them; a blocked paste makes them retype, or leave ([Vercel web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines) `AGENTS.md`, checked 2026-11-27).
+- **Text fields on phones are at least 16 px.** *Why:* iOS Safari zooms into a smaller field on focus and leaves the page zoomed after. *Check:* focus each field at 390 px; the page does not zoom.
+- **Where the user is lives in the URL.** Filters, the open tab, the page of a list and an expanded panel are query parameters, so Back, a refresh and a shared link return to the same view (same source). *Check:* set a filter, reload, see it kept.
 - **Create and edit are built from the same field components.** *Why:* two implementations of one field drift: a validation rule or an option list fixed in one is still broken in the other, and an edit screen redesigned on its own has lost capabilities the create screen kept. *Check:* each field the edit screen shows is imported from the same component the create screen uses.
 
 ## Validation

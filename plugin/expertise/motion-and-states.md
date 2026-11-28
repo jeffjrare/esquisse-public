@@ -1,11 +1,11 @@
 ---
 name: motion-and-states
-description: Motion and component states of a web UI: duration and easing tokens, the native CSS primitives with their browser support, when a script library earns its place, the state matrix every control owes, and the mobile patterns (safe areas, dynamic viewport, virtual keyboard, coarse pointers, sheets, haptics). Use before animating anything, styling a button, nav, sheet, drawer or toast, or shipping a screen for phones.
+description: Motion and component states of a web UI: whether it moves at all, duration and easing tokens, sticky bars, the native CSS primitives with their browser support, when a script library earns its place, the state matrix every control owes, and the mobile patterns (safe areas, dynamic viewport, virtual keyboard, coarse pointers, sheets, haptics). Use before animating anything, styling a button, nav, sheet, drawer or toast, or shipping a screen for phones.
 ---
 
 # Motion and states: a control that answers
 
-**As of:** 2026-11-22
+**As of:** 2026-11-27
 
 **Paths:** `components/`, `*.css`, `animations/`, `motion/`, `*Button.*`, `*Sheet.*`, `*Drawer.*`, `*Nav*`, `*Toast*`
 
@@ -17,10 +17,25 @@ description: Motion and component states of a web UI: duration and easing tokens
 
 Motion is feedback and orientation: it says what happened and where something went. A control with no visible answer to a press feels broken however it looks. Each rule names the move, why it pays, and how to see it.
 
+## Whether it moves at all
+
+How often a person triggers a motion decides whether it earns one ([emilkowalski/skills](https://github.com/emilkowalski/skills) `review-animations/STANDARDS.md`, checked 2026-11-27):
+
+| Triggered | Motion |
+|---|---|
+| Hundreds of times a day, or from the keyboard (a shortcut, a command palette, list navigation by arrow keys) | none |
+| Tens of times a day (hover, switching tabs) | a colour or opacity change at most |
+| Occasionally (a dialog, a sheet, a toast) | the standard enter and exit below |
+| Rarely (first use, a success worth marking) | the one moment that may delight |
+
+*Why:* an animation seen a hundred times a day makes the tool feel slow, whatever its curve. *Check:* every animated element on the screen maps to one row, and none sits in the first.
+
 ## Duration and easing
 
-- **Two duration bands, as tokens.** Small, local feedback (a press, a toggle, a hover) 100–200 ms; a surface entering or leaving (a sheet, a dialog, a page) 250–400 ms; nothing the user waits on beyond 500 ms. Material 3's tokens are a usable ladder: short 50–200, medium 250–400, long 450–600 ms ([@material/web](https://github.com/material-components/material-web) 2.5.0 tokens v0.192, checked 2026-11-22). *Check:* grep the stylesheet for literal `ms` values outside the token file.
-- **Enter decelerates, exit accelerates, and exit is shorter.** Entering ends slowly so the eye lands (`cubic-bezier(0.05, 0.7, 0.1, 1)`, M3 emphasized-decelerate); leaving starts slowly and gets out of the way (`cubic-bezier(0.3, 0, 0.8, 0.15)`, emphasized-accelerate) in about two thirds of the enter time. One standard curve (`cubic-bezier(0.2, 0, 0, 1)`) serves the rest. *Why:* symmetric ease-in-out on everything is the default nobody chose.
+- **Duration by element, as tokens.** A press 100–160 ms; a tooltip or small popover 125–200 ms; a dropdown or select 150–250 ms; a dialog, drawer or sheet 200–500 ms ([emilkowalski/skills](https://github.com/emilkowalski/skills), checked 2026-11-27). Everything else stays under 300 ms, and nothing the user waits on beyond 500 ms. Material 3's tokens are a usable ladder: short 50–200, medium 250–400, long 450–600 ms ([@material/web](https://github.com/material-components/material-web) 2.5.0 tokens v0.192, checked 2026-11-22). *Check:* grep the stylesheet for literal `ms` values outside the token file.
+- **Ease out on enter and exit, never ease in.** A curve that starts slow delays the very moment the eye is watching, so an `ease-out` at 200 ms feels faster than an `ease-in` at the same length. Use a strong ease-out (`cubic-bezier(0.23, 1, 0.32, 1)`) for anything appearing or leaving, an ease-in-out (`cubic-bezier(0.77, 0, 0.175, 1)`) for something moving across the screen, and make the exit about two thirds of the enter ([emilkowalski/skills](https://github.com/emilkowalski/skills), checked 2026-11-27). *Why:* symmetric ease-in-out on everything is the default nobody chose. *Check:* grep for `ease-in` and `ease-in-out` on an enter or exit.
+- **Nothing appears from nothing.** Enter from `scale(0.95–0.97)` with `opacity: 0`, never `scale(0)`. A popover grows from its trigger (`transform-origin` at the anchor); a dialog stays centred. A press is `scale(0.97)` on `:active`.
+- **Transitions for anything triggered quickly, keyframes for what plays once.** A transition retargets mid-flight when the state flips back; a keyframe animation restarts from zero, so a toggle pressed twice or toasts stacking jump.
 - **Springs in CSS through `linear()`.** A spring or bounce sampled into `linear()` stops points runs without a library; `linear()` easing is Baseline widely available (newly since 2023-12-11). Generate the points with a tool, keep the overshoot small on UI chrome.
 - **Animate `transform` and `opacity`; never `width`, `height`, `top` or `margin`.** *Why:* those trigger layout each frame and shift the content around them. *Check:* the performance panel shows no layout during the transition.
 
@@ -55,6 +70,13 @@ Every interactive element shows each state it can be in, by a change in a painte
 | error | the field's border plus a message beside it (`esq:forms-and-failures` owns the message) | rely on red alone |
 
 - **Exempt:** a link inline in running text needs only hover/focus underline; a purely decorative element is not interactive and owes nothing. Nothing else is exempt. *Check:* force `:hover`, `:active` and `:focus-visible` in devtools on each control and compare computed styles against rest; press must differ from hover.
+
+## The screen belongs to the content
+
+- **Fixed and sticky bars stay under 12% of the viewport height**, in one row, never stacked (announcement, header and sub-navigation together); extra items go in a menu or a drawer. A legally required notice (cookie consent) is a small non-modal bar under 15% of the viewport with a labelled dismiss ([Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance) `guides/user-experience/content-first-noise-reduction.md`, checked 2026-11-27).
+- **No modal, interstitial or promotion on load.** A blocking dialog is for a consequential action (deleting, paying, leaving unsaved work); everything else is inline, a sheet or a popover.
+
+*Check:* at 390 px, add up the fixed bars' heights in the capture; above 12% of the viewport is the finding.
 
 ## Mobile patterns
 
